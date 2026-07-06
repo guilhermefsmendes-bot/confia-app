@@ -35,6 +35,7 @@ jobs:
       - name: Build Android AAB
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew bundleRelease
 
       - name: Upload AAB

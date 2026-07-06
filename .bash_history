@@ -54,3 +54,11 @@ rm -rf .local/state/gh
 nano .gitignore
 git reset --soft HEAD~1
 rm -rf .config .local
+git add .
+git commit -m "clean project (remove secrets)"
+git push
+gh auth setup-git
+gh auth login
+git push
+cat package.json
+nano .github/workflows/android-build.yml

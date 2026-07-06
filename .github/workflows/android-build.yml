@@ -2,7 +2,8 @@ name: Build Android AAB
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build:
@@ -31,15 +32,20 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
- - name: Decode keystore
+
+      - name: Decode keystore
         run: |
           echo "${{ secrets.KEYSTORE }}" | base64 -d > android/app/confia-upload-key.jks
 
-      - name: Create gradle properties
+      - name: Create key.properties
         run: |
-          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
-          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
-          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+          cat > android/key.properties <<EOF
+          storeFile=app/confia-upload-key.jks
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
       - name: Build Android AAB
         run: |
           cd android

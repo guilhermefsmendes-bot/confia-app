@@ -1,0 +1,6 @@
+{
+  "name": "Confia",
+  "description": "Uma aplicação compassiva e interativa de apoio a pessoas com ansiedade, oferecendo um amigo evolutivo, exercícios de respiração guiada, objetivos terapêuticos diários, partilha comunitária e acompanhamento de progresso.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

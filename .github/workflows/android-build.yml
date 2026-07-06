@@ -36,7 +36,7 @@ jobs:
       - name: Decode keystore
         run: |
           echo "${{ secrets.KEYSTORE }}" | base64 -d > android/app/confia-upload-key.jks
-
+          
       - name: Create key.properties
         run: |
           cat > android/key.properties <<EOF

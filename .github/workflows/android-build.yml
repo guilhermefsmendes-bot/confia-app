@@ -46,6 +46,10 @@ jobs:
           keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
 
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/confia-upload-key.jks
+
       - name: Build Android AAB
         run: |
           cd android

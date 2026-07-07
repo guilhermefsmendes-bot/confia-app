@@ -21,3 +21,4 @@ keystore.base64
 .npm/
 .gemini/extensions/vertex
 .gemini/history/code-oss-for-cloud-shell
+.bash_history

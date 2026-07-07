@@ -62,3 +62,62 @@ gh auth login
 git push
 cat package.json
 nano .github/workflows/android-build.yml
+git add .
+git commit -m "fix android workflow"
+git push
+keytool -genkeypair -v -keystore confia-upload-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias confia
+cat android/app/build.gradle
+cat android/gradle.properties
+ls -l confia-upload-key.jks
+base64 -w 0 confia-upload-key.jks > keystore.base64
+cat keystore.base64
+cat android/build.gradle
+ls android/app
+cat keystore.base64
+wc -c keystore.base64
+head -c 100 keystore.base64
+cat keystore.base64
+tail -c 20 keystore.base64
+pwd
+ls
+cat keystore.base64 | wc -c
+base64 -d keystore.base64 > teste.jks
+cat keystore.base64
+cat android/app/build.gradle
+git status
+grep -n "signingConfig\|buildTypes" android/app/build.gradle
+nl -ba android/app/build.gradle | sed -n '15,40p'
+git remote -v
+cat .github/workflows/*.yml
+git show origin/main:android/app/build.gradle
+git --no-pager show origin/main:android/app/build.gradle
+find ~ -name build.gradle
+pwd
+ls -la
+git rev-parse HEAD
+ls -la android/app
+find android/app/build -name build.gradle -o -name "*.gradle"
+rm -rf android/.gradle android/build android/app/build
+ls -la android
+npx cap sync android
+cd android
+./gradlew bundleRelease
+echo $ANDROID_HOME
+ls /opt/android-sdk
+ls -la
+grep -R "confia-upload\|storePassword\|keyPassword\|KEYSTORE" -n ~ 2>/dev/null
+history | grep keytool
+history | grep pass
+history | sed -n '60,75p'
+cd ~
+keytool -list -v -keystore confia-upload-key.jks
+keytool -list -keystore ~/confia-upload-key.jks -alias confia
+cat ~/keystore.base64
+nano android/app/build.gradle
+cd ~/android/app
+rm build.gradle
+nano build.gradle
+cd ~
+npx cap sync android
+grep applicationId android/app/build.gradle
+grep namespace android/app/build.gradle

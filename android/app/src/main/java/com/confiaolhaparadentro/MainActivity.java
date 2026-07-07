@@ -1,4 +1,4 @@
-package com.guilherme.confia;
+package com.confiaolhaparadentro;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -15,3 +15,7 @@ coverage/
 keystore.base64
 *.jks
 keystore.base64
+.gemini/
+.codeoss/
+.gradle/
+.npm/

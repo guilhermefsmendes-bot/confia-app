@@ -19,3 +19,5 @@ keystore.base64
 .codeoss/
 .gradle/
 .npm/
+.gemini/extensions/vertex
+.gemini/history/code-oss-for-cloud-shell

@@ -8,8 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -35,22 +36,13 @@ jobs:
 
       - name: Decode keystore
         run: |
-          echo "${{ secrets.KEYSTORE }}" | base64 -d > android/app/confia-upload-key.jks
-          
-      - name: Create key.properties
-        run: |
-          cat > android/key.properties <<EOF
-          storeFile=app/confia-upload-key.jks
-          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          EOF
-
-      - name: Decode keystore
-        run: |
-          echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/confia-upload-key.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/confia-upload-key.jks
 
       - name: Build Android AAB
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd android
           chmod +x gradlew

@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.guilherme.confia',
+  appId: 'com.confiaolhaparadentro',
   appName: 'Confia',
   webDir: 'dist'
 };

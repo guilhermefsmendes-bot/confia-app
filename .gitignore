@@ -22,3 +22,5 @@ keystore.base64
 .gemini/extensions/vertex
 .gemini/history/code-oss-for-cloud-shell
 .bash_history
+.cache/
+.rustup/

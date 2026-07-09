@@ -29,12 +29,12 @@ import { ProgressoDashboard } from './components/ProgressoDashboard';
 import { FocoMente } from './components/FocoMente';
 
 const STORAGE_KEYS = {
-  AVATAR: 'confia_avatar_v1',
-  OBJECTIVES: 'confia_objectives_v1',
-  RATINGS: 'confia_ratings_v1',
-  POSTS: 'confia_posts_v1',
-  DAILY_PET_COUNT: 'confia_daily_pet_count_v1',
-  LAST_PET_DATE: 'confia_last_pet_date_v1'
+  AVATAR: 'confia_avatar_v2',
+  OBJECTIVES: 'confia_objectives_v2',
+  RATINGS: 'confia_ratings_v2',
+  POSTS: 'confia_posts_v2',
+  DAILY_PET_COUNT: 'confia_daily_pet_count_v2',
+  LAST_PET_DATE: 'confia_last_pet_date_v2'
 };
 
 // Past few days logs so the progress graph is instantly drawn on first load

@@ -69,7 +69,7 @@ export default function App() {
   const [ratings, setRatings] = useState<DailyRating[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RATINGS);
     if (saved) return JSON.parse(saved);
-    return PRE_LOGGED_RATINGS;
+    return [];
   });
 
   const [posts, setPosts] = useState<SharePost[]>(() => {

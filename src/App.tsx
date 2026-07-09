@@ -24,7 +24,7 @@ import { Avatar } from './components/Avatar';
 import { TriageModal } from './components/TriageModal';
 import { AbracoTimer } from './components/AbracoTimer';
 import { ObjectivosList } from './components/ObjectivosList';
-import { PartilhaFeed } from './components/PartilhaFeed';
+import { ImpulsoSOS } from './components/ImpulsoSOS';
 import { ProgressoDashboard } from './components/ProgressoDashboard';
 import { FocoMente } from './components/FocoMente';
 
@@ -538,20 +538,17 @@ export default function App() {
           )}
 
           {currentTab === 3 && (
-            /* TAB 4: PARTILHA */
-            <motion.div
-              key="share-tab"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              <PartilhaFeed
-                posts={posts}
-                onAddPost={handleAddPost}
-                onLikePost={handleLikePost}
-              />
-            </motion.div>
-          )}
+  /* TAB 4: IMPULSO SOS */
+  <motion.div
+    key="impulso-tab"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+  >
+    <ImpulsoSOS onAddXp={addXp} />
+  </motion.div>
+)}
+
 
           {currentTab === 4 && (
             /* TAB 5: PROGRESSO */
@@ -622,7 +619,7 @@ export default function App() {
             { label: 'Principal', icon: '🏡', index: 0 },
             { label: 'Abraço', icon: '🫂', index: 1 },
             { label: 'Objetivos', icon: '🎯', index: 2 },
-            { label: 'Partilha', icon: '🤝', index: 3 },
+            { label: 'Impulso', icon: '🆘', index: 3 },
             { label: 'Progresso', icon: '📈', index: 4 }
           ].map(tab => (
             <button

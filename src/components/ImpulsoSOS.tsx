@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { triggerOptions, saveEpisode } from './Impulso';
 
 interface ImpulsoSOSProps {
   onAddXp: (amount: number) => void;
@@ -66,20 +67,22 @@ export const ImpulsoSOS: React.FC<ImpulsoSOSProps> = ({ onAddXp }) => {
             🆘
           </div>
 
-          <h2 className="text-xl font-black text-[#4E3B36]">
-            Impulso SOS
-          </h2>
+          <h2 className="text-2xl font-black text-[#4E3B36] text-center">
+  ⚡ Impulso
+</h2>
 
-          <p className="text-sm text-slate-600">
-            Estás com vontade de consultar?
-            Vamos perceber o que está a acontecer antes de agir.
-          </p>
+<p className="text-sm text-slate-600 text-center leading-relaxed">
+  Este momento não te define.
+  <br /><br />
+  Antes de procurares uma resposta,
+  vamos atravessar este impulso juntos.
+</p>
 
           <button
             onClick={() => setStarted(true)}
             className="w-full py-4 bg-[#E5A88B] text-white rounded-2xl font-black"
           >
-            Começar SOS
+            🆘 COMEÇAR SOS
           </button>
 
         </div>

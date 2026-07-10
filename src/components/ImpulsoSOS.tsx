@@ -1,177 +1,302 @@
-import React, { useState } from 'react';
-import { triggerOptions, saveEpisode } from './Impulso';
+import React, { useState, useEffect } from "react";
+import { saveEpisode } from "./Impulso";
 
 interface ImpulsoSOSProps {
   onAddXp: (amount: number) => void;
 }
 
+type Trigger =
+  | "🌐 Vi algo na Internet"
+  | "🧠 Senti um sintoma"
+  | "💬 Alguém falou de doenças"
+  | "📱 Recebi uma mensagem"
+  | "❓ Não sei";
+
+type Emotion =
+  | "😨 Medo"
+  | "😟 Ansiedade"
+  | "😔 Tristeza"
+  | "😣 Frustração"
+  | "🤯 Confusão";
+
+type Thought =
+  | "Tenho uma doença grave."
+  | "Preciso confirmar."
+  | "Isto nunca me aconteceu."
+  | "Vou perder o controlo."
+  | "Não sei.";
+
+const triggers: Trigger[] = [
+  "🌐 Vi algo na Internet",
+  "🧠 Senti um sintoma",
+  "💬 Alguém falou de doenças",
+  "📱 Recebi uma mensagem",
+  "❓ Não sei",
+];
+
+const emotions: Emotion[] = [
+  "😨 Medo",
+  "😟 Ansiedade",
+  "😔 Tristeza",
+  "😣 Frustração",
+  "🤯 Confusão",
+];
+
+const thoughts: Thought[] = [
+  "Tenho uma doença grave.",
+  "Preciso confirmar.",
+  "Isto nunca me aconteceu.",
+  "Vou perder o controlo.",
+  "Não sei.",
+];
+
 export const ImpulsoSOS: React.FC<ImpulsoSOSProps> = ({ onAddXp }) => {
   const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
-  const [trigger, setTrigger] = useState('');
   const [intensity, setIntensity] = useState(5);
+  const [finalIntensity, setFinalIntensity] = useState(5);
+  
+  // Estados de seleção
+  const [trigger, setTrigger] = useState<Trigger | null>(null);
+  const [emotion, setEmotion] = useState<Emotion | null>(null);
+  const [thought, setThought] = useState<Thought | null>(null);
+  
   const [completed, setCompleted] = useState(false);
 
-  const triggers = [
-    '🧠 Ansiedade',
-    '🌐 Vi algo na Internet',
-    '❤️ Medo de estar doente',
-    '📱 Recebi uma mensagem',
-    '❓ Não sei'
-  ];
+  // Estados do Cronómetro (180 segundos = 3 minutos)
+  const [timeLeft, setTimeLeft] = useState(180);
+  const [timerRunning, setTimerRunning] = useState(false);
 
-  const finishImpulse = () => {
-    setCompleted(true);
-    onAddXp(20);
+  // Atualizado para 7 passos no total
+  const totalSteps = 7;
+  const progress = Math.round((step / totalSteps) * 100);
+
+  // Lógica do efeito do Cronómetro
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timerRunning && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setTimerRunning(false);
+    }
+    return () => clearInterval(interval);
+  }, [timerRunning, timeLeft]);
+
+  // Formatar segundos em MM:SS
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // Função para gerar a frase terapêutica com base nas escolhas do utilizador
+  const getJustificationPhrase = () => {
+    // Remove os emojis do texto para a frase soar mais natural
+    const tGatilho = trigger ? trigger.replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim() : "uma incerteza";
+    const tEmocao = emotion ? emotion.replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim().toLowerCase() : "apreensão";
+    const tPensamento = thought ? thought.replace(/\.$/, '') : "precisa de confirmar algo";
+
+    return `Notei que quando ocorreu "${tGatilho}", a sua mente reagiu com ${tEmocao} sob o pensamento de que "${tPensamento}". Lembre-se de que isto é apenas um momento de forte apreensão do seu sistema de alerta, e não um facto real. O seu corpo está apenas a tentar proteger-se. Respire e acolha este sinal de forma positiva: ele mostra o quanto se importa consigo, mas agora está em segurança.`;
+  };
+
+  const finishSOS = () => {
+    saveEpisode({
+      createdAt: new Date().toISOString(),
+      initialIntensity: intensity,
+      finalIntensity,
+      completed: true,
+      xpEarned: 30,
+    });
+
+    onAddXp(30);
+    setCompleted(true);
+  };
+
+  const nextStep = () => {
+    if (step < totalSteps) {
+      setStep(step + 1);
+    } else {
+      finishSOS();
+    }
+  };
+
+  const prevStep = () => {
+    if (step > 0) {
+      setStep(step - 1);
+    }
+  };
+
+  // 1. Ecrã de Conclusão (Sucesso)
   if (completed) {
     return (
-      <div className="bg-white rounded-[32px] p-6 shadow-sm text-center space-y-5">
-        <div className="text-5xl">🎉</div>
+      <div style={{ padding: "20px", textAlign: "center", fontFamily: "sans-serif" }}>
+        <h2>🎉 Concluído com Sucesso!</h2>
+        <p>Parabéns por acolher a sua mente e gerir o seu impulso. Ganhou 30 XP!</p>
+      </div>
+    );
+  }
 
-        <h2 className="text-xl font-black text-[#4E3B36]">
-          Excelente!
-        </h2>
-
-        <p className="text-sm text-slate-600">
-          Conseguistes ultrapassar este impulso sem deixar que ele controlasse a tua decisão.
-        </p>
-
-        <div className="bg-[#FFF0E8] rounded-2xl p-4 text-[#C97B5E] font-bold">
-          +20 XP conquistados
-        </div>
-
-        <button
-          onClick={() => {
-            setCompleted(false);
-            setStarted(false);
-            setStep(0);
-            setTrigger('');
-          }}
-          className="w-full py-3 bg-[#E5A88B] text-white rounded-xl font-bold"
+  // 2. Ecrã Inicial (Passo 0)
+  if (!started) {
+    return (
+      <div style={{ padding: "20px", textAlign: "center", fontFamily: "sans-serif" }}>
+        <h2>Instante SOS 🚨</h2>
+        <p>Sente um impulso ou ansiedade? Vamos focar-nos e gerir isto juntos.</p>
+        <button 
+          onClick={() => { setStarted(true); setStep(1); }}
+          style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", marginTop: "15px", background: "#0d6efd", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold" }}
         >
-          Novo momento
+          Começar Exercício
         </button>
       </div>
     );
   }
 
+  // 3. Layout Principal do Exercício
   return (
-    <div className="space-y-5">
+    <div style={{ padding: "20px", maxWidth: "450px", margin: "0 auto", fontFamily: "sans-serif" }}>
+      {/* Barra de Progresso */}
+      <div style={{ background: "#eee", borderRadius: "5px", height: "10px", width: "100%" }}>
+        <div style={{ background: "#4CAF50", height: "10px", borderRadius: "5px", width: `${progress}%`, transition: "width 0.3s" }}></div>
+      </div>
+      <p style={{ textAlign: "right", fontSize: "12px", color: "#666", margin: "5px 0 20px 0" }}>Progresso: {progress}%</p>
 
-      {!started && (
-        <div className="bg-white rounded-[32px] p-6 shadow-sm text-center space-y-5">
-
-          <div className="text-5xl">
-            🆘
+      {/* Conteúdo Dinâmico dos Passos */}
+      <div style={{ margin: "20px 0", minHeight: "260px" }}>
+        {step === 1 && (
+          <div>
+            <h3>Passo 1: Qual é a intensidade atual do seu impulso? (1 a 10)</h3>
+            <input 
+              type="range" min="1" max="10" 
+              value={intensity} 
+              onChange={(e) => setIntensity(Number(e.target.value))} 
+              style={{ width: "100%" }}
+            />
+            <p style={{ textAlign: "center", fontWeight: "bold", fontSize: "24px", color: "#0d6efd" }}>{intensity}</p>
           </div>
+        )}
 
-          <h2 className="text-2xl font-black text-[#4E3B36] text-center">
-  ⚡ Impulso
-</h2>
-
-<p className="text-sm text-slate-600 text-center leading-relaxed">
-  Este momento não te define.
-  <br /><br />
-  Antes de procurares uma resposta,
-  vamos atravessar este impulso juntos.
-</p>
-
-          <button
-            onClick={() => setStarted(true)}
-            className="w-full py-4 bg-[#E5A88B] text-white rounded-2xl font-black"
-          >
-            🆘 COMEÇAR SOS
-          </button>
-
-        </div>
-      )}
-
-
-      {started && step === 0 && (
-        <div className="bg-white rounded-[32px] p-6 shadow-sm space-y-5">
-
-          <h3 className="font-black text-[#4E3B36]">
-            Qual a intensidade deste impulso?
-          </h3>
-
-          <div className="text-center text-3xl font-black text-[#C97B5E]">
-            {intensity}/10
+        {step === 2 && (
+          <div>
+            <h3>Passo 2: O que despoletou este impulso?</h3>
+            {triggers.map((t) => (
+              <button 
+                key={t} 
+                onClick={() => setTrigger(t)}
+                style={{ display: "block", width: "100%", margin: "8px 0", padding: "10px", background: trigger === t ? "#d1e7dd" : "#f8f9fa", border: trigger === t ? "1px solid #198754" : "1px solid #ccc", borderRadius: "4px", textAlign: "left", cursor: "pointer" }}
+              >
+                {t}
+              </button>
+            ))}
           </div>
+        )}
 
-          <input
-            type="range"
-            min="0"
-            max="10"
-            value={intensity}
-            onChange={(e) => setIntensity(Number(e.target.value))}
-            className="w-full"
-          />
-
-          <button
-            onClick={() => setStep(1)}
-            className="w-full py-3 bg-[#E5A88B] text-white rounded-xl font-bold"
-          >
-            Continuar
-          </button>
-
-        </div>
-      )}
-
-
-      {started && step === 1 && (
-        <div className="bg-white rounded-[32px] p-6 shadow-sm space-y-4">
-
-          <h3 className="font-black text-[#4E3B36]">
-            O que desencadeou este impulso?
-          </h3>
-
-          {triggers.map(item => (
-            <button
-              key={item}
-              onClick={() => {
-                setTrigger(item);
-                setStep(2);
-              }}
-              className="w-full p-4 bg-[#FAF5F0] rounded-xl text-left font-bold"
-            >
-              {item}
-            </button>
-          ))}
-
-        </div>
-      )}
-
-
-      {started && step === 2 && (
-        <div className="bg-white rounded-[32px] p-6 shadow-sm space-y-5">
-
-          <h3 className="font-black text-[#4E3B36]">
-            O teu cérebro está a tentar obter segurança.
-          </h3>
-
-          <p className="text-sm text-slate-600">
-            A consulta pode aliviar durante alguns minutos,
-            mas muitas vezes mantém o ciclo da ansiedade.
-          </p>
-
-          <div className="bg-[#FFF0E8] rounded-2xl p-4 text-sm">
-            Gatilho identificado:
-            <br />
-            <strong>{trigger}</strong>
+        {step === 3 && (
+          <div>
+            <h3>Passo 3: Que emoção está a acompanhar este impulso?</h3>
+            {emotions.map((e) => (
+              <button 
+                key={e} 
+                onClick={() => setEmotion(e)}
+                style={{ display: "block", width: "100%", margin: "8px 0", padding: "10px", background: emotion === e ? "#d1e7dd" : "#f8f9fa", border: emotion === e ? "1px solid #198754" : "1px solid #ccc", borderRadius: "4px", textAlign: "left", cursor: "pointer" }}
+              >
+                {e}
+              </button>
+            ))}
           </div>
+        )}
 
-          <button
-            onClick={finishImpulse}
-            className="w-full py-4 bg-[#E5A88B] text-white rounded-xl font-black"
-          >
-            Consegui esperar e controlar o impulso
-          </button>
+        {step === 4 && (
+          <div>
+            <h3>Passo 4: Qual é o pensamento principal na sua mente?</h3>
+            {thoughts.map((t) => (
+              <button 
+                key={t} 
+                onClick={() => setThought(t)}
+                style={{ display: "block", width: "100%", margin: "8px 0", padding: "10px", background: thought === t ? "#d1e7dd" : "#f8f9fa", border: thought === t ? "1px solid #198754" : "1px solid #ccc", borderRadius: "4px", textAlign: "left", cursor: "pointer" }}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        )}
 
-        </div>
-      )}
+        {step === 5 && (
+          <div style={{ textAlign: "center", lineHeight: "1.8" }}>
+            <h3>Passo 5: Vamos respirar um pouco 🧘</h3>
+            <p><strong>Inspire</strong> profundamente pelo nariz (4s)...</p>
+            <p><strong>Retenha</strong> o ar nos pulmões (4s)...</p>
+            <p><strong>Expire</strong> lentamente pela boca (4s).</p>
+            <p style={{ fontStyle: "italic", marginTop: "20px", color: "#666" }}>Faça isto mais duas vezes antes de avançar.</p>
+          </div>
+        )}
 
+        {step === 6 && (
+          <div style={{ textAlign: "center", lineHeight: "1.5" }}>
+            <h3>Passo 6: Âncora de Gratidão (3 Minutos) 📝</h3>
+            
+            {/* Caixa de Texto Dinâmica */}
+            <div style={{ fontSize: "14px", color: "#2c3e50", backgroundColor: "#eef2f7", padding: "15px", borderRadius: "6px", textAlign: "left", borderLeft: "4px solid #0d6efd", marginBottom: "15px" }}>
+              {getJustificationPhrase()}
+            </div>
+
+            <p style={{ fontSize: "15px" }}>
+              Pegue agora numa <strong>folha de papel e caneta</strong>. Escreva um pensamento detalhado de agradecimento sobre algo positivo que o eleve genuinamente (ex: um momento especial com o seu filho, um abraço caloroso, ou algo bom do seu dia).
+            </p>
+
+            {/* Secção do Cronómetro */}
+            <div style={{ margin: "20px 0" }}>
+              <div style={{ fontSize: "36px", fontWeight: "bold", fontFamily: "monospace", color: timeLeft < 30 ? "#dc3545" : "#333" }}>
+                {formatTime(timeLeft)}
+              </div>
+              <button 
+                onClick={() => setTimerRunning(!timerRunning)}
+                style={{ marginTop: "10px", padding: "8px 16px", background: timerRunning ? "#ffc107" : "#198754", color: timerRunning ? "#000" : "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
+              >
+                {timerRunning ? "Pausa" : "Iniciar Tempo"}
+              </button>
+              <button 
+                onClick={() => { setTimerRunning(false); setTimeLeft(180); }}
+                style={{ marginLeft: "10px", padding: "8px 16px", background: "#6c757d", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              >
+                Reiniciar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 7 && (
+          <div>
+            <h3>Passo 7: Como avalia a sua intensidade agora após o exercício?</h3>
+            <input 
+              type="range" min="1" max="10" 
+              value={finalIntensity} 
+              onChange={(e) => setFinalIntensity(Number(e.target.value))} 
+              style={{ width: "100%" }}
+            />
+            <p style={{ textAlign: "center", fontWeight: "bold", fontSize: "24px", color: "#198754" }}>{finalIntensity}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Botões de Navegação (Rodapé) */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "30px", borderTop: "1px solid #eee", paddingTop: "15px" }}>
+        <button 
+          onClick={prevStep} 
+          disabled={step === 1} 
+          style={{ padding: "10px 20px", cursor: "pointer", background: "#fff", border: "1px solid #ccc", borderRadius: "4px" }}
+        >
+          Voltar
+        </button>
+        <button 
+          onClick={nextStep} 
+          style={{ padding: "10px 20px", background: "#0d6efd", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
+        >
+          {step === totalSteps ? "Terminar" : "Avançar"}
+        </button>
+      </div>
     </div>
   );
 };

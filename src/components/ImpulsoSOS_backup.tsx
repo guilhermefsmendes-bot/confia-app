@@ -91,35 +91,105 @@ export const ImpulsoSOS: React.FC<ImpulsoSOSProps> = ({ onAddXp }) => {
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
-const getJustificationPhrase = () => {
-    const tGatilho = trigger ? trigger.replace(/^[^w]*/, "") : "um gatilho inesperado";
-    const tEmocao = emotion ? emotion.toLowerCase() : "apreensão";
-    const tPensamento = thought ? thought.replace(/\.$/, "") : "precisa de confirmar algo";
+
+  // Função para gerar a frase terapêutica com base nas escolhas do utilizador
+  const getJustificationPhrase = () => {
+const getPsychoeducationMessage = () => {
+  let message = "";
+
+  // GATILHO
+  switch (trigger) {
+    case "🌐 Vi algo na Internet":
+      message +=
+        "Indicou que o impulso surgiu depois de ver informação na Internet. Quando estamos ansiosos, é muito comum procurar respostas online. Embora isso possa trazer algum alívio imediato, também aumenta a probabilidade de encontrar informação preocupante.\n\n";
+      break;
+
+    case "🧠 Senti um sintoma":
+      message +=
+        "Indicou que tudo começou após sentir um sintoma físico. Quando existe ansiedade, o cérebro tende a interpretar sensações normais do corpo como sinais de perigo.\n\n";
+      break;
+
+    case "💬 Alguém falou de doenças":
+      message +=
+        "Uma conversa sobre doenças pode ativar imediatamente preocupações relacionadas com a nossa própria saúde.\n\n";
+      break;
+
+    case "📱 Recebi uma mensagem":
+      message +=
+        "Algumas mensagens despertam preocupações e fazem o cérebro imaginar cenários negativos antes mesmo de existirem provas.\n\n";
+      break;
+
+    default:
+      message +=
+        "Nem sempre conseguimos identificar o que desencadeou o impulso. Isso é perfeitamente normal.\n\n";
+  }
+
+  // EMOÇÃO
+  switch (emotion) {
+    case "😨 Medo":
+      message +=
+        "O medo é uma resposta natural do cérebro perante aquilo que interpreta como um perigo.\n\n";
+      break;
+
+    case "😟 Ansiedade":
+      message +=
+        "A ansiedade prepara-nos para lidar com ameaças, mas por vezes ativa-se mesmo quando não existe um perigo real.\n\n";
+      break;
+
+    case "😔 Tristeza":
+      message +=
+        "Quando estamos tristes, é natural procurarmos algo que nos devolva rapidamente uma sensação de segurança.\n\n";
+      break;
+
+    case "😣 Frustração":
+      message +=
+        "A frustração leva frequentemente à procura de respostas imediatas para aliviar o desconforto.\n\n";
+      break;
+
+    case "🤯 Confusão":
+      message +=
+        "Quando existe confusão, é natural procurar certezas. O problema é que essa procura pode alimentar ainda mais a ansiedade.\n\n";
+      break;
+  }
+
+  // PENSAMENTO
+  switch (thought) {
+    case "Tenho uma doença grave.":
+      message +=
+        "O pensamento 'Tenho uma doença grave' é muito frequente na ansiedade relacionada com a saúde. O facto de surgir não significa que seja verdadeiro.\n\n";
+      break;
+
+    case "Preciso confirmar.":
+      message +=
+        "A necessidade de confirmar repetidamente costuma trazer apenas um alívio temporário e acaba por reforçar novamente a ansiedade.\n\n";
+      break;
+
+    case "Isto nunca me aconteceu.":
+      message +=
+        "Situações novas podem parecer mais perigosas do que realmente são, sobretudo quando estamos ansiosos.\n\n";
+      break;
+
+    case "Vou perder o controlo.":
+      message +=
+        "Sentir que vai perder o controlo é uma experiência comum durante momentos de ansiedade intensa. Felizmente, essa sensação tende a diminuir à medida que a ansiedade baixa.\n\n";
+      break;
+
+    default:
+      message +=
+        "Nem sempre conseguimos identificar claramente o pensamento principal. Isso também faz parte da ansiedade.\n\n";
+  }
+
+  message +=
+    "Neste momento, o objetivo não é eliminar imediatamente a ansiedade. O objetivo é ensinar o cérebro que consegue tolerar esta sensação sem recorrer à pesquisa ou à procura constante de garantias.";
+
+  return message;
+};
+    // Remove os emojis do texto para a frase soar mais natural
+    const tGatilho = trigger ? trigger.replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim() : "uma incerteza";
+    const tEmocao = emotion ? emotion.replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDFFF]/g, '').trim().toLowerCase() : "apreensão";
+    const tPensamento = thought ? thought.replace(/\.$/, '') : "precisa de confirmar algo";
 
     return `Notei que quando ocorreu "${tGatilho}", a sua mente reagiu com ${tEmocao} sob o pensamento de que "${tPensamento}". Lembre-se de que isto é apenas um momento de forte apreensão do seu sistema de alerta, e não um facto real. O seu corpo está apenas a tentar proteger-se. Respire e acolha este sinal de forma positiva: ele mostra o quanto se importa consigo, mas agora está em segurança.`;
-  };
-
-  const getPsychoeducationMessage = () => {
-    let message = "";
-
-    switch (trigger) {
-      case "🌐 Vi algo na Internet":
-        message += "Indicou que o impulso surgiu depois de ver informação na Internet. Quando estamos ansiosos, é muito comum procurar respostas online. Embora isso possa trazer algum alívio imediato, também aumenta a probabilidade de encontrar informação preocupante.\n\n";
-        break;
-
-      case "🧠 Senti um sintoma":
-        message += "Indicou que tudo começou após sentir um sintoma físico. Quando existe ansiedade com a saúde, o nosso corpo fica hipervigilante, transformando pequenas sensações normais em sinais de perigo.\n\n";
-        break;
-
-      case "💬 Alguém falou de doenças":
-        message += "Indicou que o gatilho foi ouvir conversas sobre saúde ou doenças. O nosso cérebro associa imediatamente essas histórias ao nosso próprio bem-estar, ativando o sistema de alerta.\n\n";
-        break;
-
-      default:
-        message += "Nem sempre conseguimos identificar o que desencadeou o impulso. Isso é perfeitamente normal.\n\n";
-    }
-
-    return message;
   };
 
   const finishSOS = () => {
@@ -228,86 +298,25 @@ const getJustificationPhrase = () => {
             ))}
           </div>
         )}
-{step === 4 && (
-        <div>
-          <h3>Passo 4: Qual é o pensamento principal na sua mente?</h3>
-          {thoughts.map((t) => (
-            <button
-              key={t}
-              onClick={() => {
-                setThought(t);
-                setStep(5); // <-- Adicionado para avançar para o Passo 5!
-              }}
-              style={{
-                display: "block",
-                width: "100%",
-                margin: "8px 0",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid #E8DDD2",
-                background: "#FFFFFF",
-                cursor: "pointer",
-                fontSize: "16px",
-                textAlign: "left"
-              }}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      )}
+
+        {step === 4 && (
+          <div>
+            <h3>Passo 4: Qual é o pensamento principal na sua mente?</h3>
+            {thoughts.map((t) => (
+              <button 
+                key={t} 
+                onClick={() => setThought(t)}
+                style={{ display: "block", width: "100%", margin: "8px 0", padding: "10px", background: thought === t ? "#d1e7dd" : "#f8f9fa", border: thought === t ? "1px solid #198754" : "1px solid #ccc", borderRadius: "4px", textAlign: "left", cursor: "pointer" }}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        )}
 {step === 5 && (
   <div style={{ lineHeight: "1.8" }}>
     <h3>🧠 Passo 5: Compreender o que está a acontecer</h3>
-<div
-  style={{
-    background: "#FFFFFF",
-    border: "1px solid #E8DDD2",
-    borderRadius: "10px",
-    padding: "18px",
-    marginTop: "18px",
-    marginBottom: "20px",
-  }}
->
 
-
-
-  <h4
-    style={{
-      textAlign: "center",
-      color: "#8B5E3C",
-      marginTop: 0,
-      marginBottom: "20px",
-    }}
-  >
-    ✅ O que identificámos até agora
-  </h4>
-
-  <div style={{ marginBottom: "15px" }}>
-    <strong>📍 Gatilho</strong>
-    <div style={{ marginTop: "6px", fontSize: "17px" }}>
-      {trigger}
-    </div>
-  </div>
-
-  <hr />
-
-  <div style={{ margin: "15px 0" }}>
-    <strong>❤️ Emoção</strong>
-    <div style={{ marginTop: "6px", fontSize: "17px" }}>
-      {emotion}
-    </div>
-  </div>
-
-  <hr />
-
-  <div style={{ marginTop: "15px" }}>
-    <strong>💭 Pensamento</strong>
-    <div style={{ marginTop: "6px", fontSize: "17px" }}>
-      {thought}
-    </div>
-  </div>
-</div>
     <div
       style={{
         background: "#FFF8F2",

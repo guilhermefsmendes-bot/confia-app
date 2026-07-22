@@ -3,19 +3,17 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   Heart,
   Sun,
-  Moon,
+  Compass,ArrowUp,
   Sparkles,
-  Compass,
+ Moon,
   Users,
-  TrendingUp,
-  Award,
   AlertCircle,
   Brain,
   CheckCircle2,
   Calendar,
   Gift
 } from 'lucide-react';
-
+import { useTranslation } from "react-i18next";
 import { AvatarState, Objective, DailyRating, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 
@@ -27,15 +25,22 @@ import { ObjectivosList } from './components/ObjectivosList';
 import { ImpulsoSOS } from './components/ImpulsoSOS';
 import { ProgressoDashboard } from './components/ProgressoDashboard';
 import { FocoMente } from './components/FocoMente';
-
+import { StopMode } from './components/StopMode';
 const STORAGE_KEYS = {
   AVATAR: 'confia_avatar_v2',
   OBJECTIVES: 'confia_objectives_v2',
+OBJECTIVES_HISTORY: 'confia_objectives_history_v1',
   RATINGS: 'confia_ratings_v2',
+  PET_COUNT: 'confia_pet_count_v2',
   POSTS: 'confia_posts_v2',
-  DAILY_PET_COUNT: 'confia_daily_pet_count_v2',
-  LAST_PET_DATE: 'confia_last_pet_date_v2'
+  LAST_PET_DATE: 'confia_last_pet_date_v2',
+LAST_IMPULSE_USE: 'confia_last_impulse_use_v1',
+IMPULSE_COUNT: 'confia_impulse_count_v1',
+
 };
+
+// Past few days logs so the progress graph is instantly drawn on first load
+
 
 // Past few days logs so the progress graph is instantly drawn on first load
 const PRE_LOGGED_RATINGS: DailyRating[] = [
@@ -46,6 +51,7 @@ const PRE_LOGGED_RATINGS: DailyRating[] = [
 ];
 
 export default function App() {
+const { t, i18n } = useTranslation();
   // Global App States
   const [avatar, setAvatar] = useState<AvatarState>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AVATAR);
@@ -54,22 +60,49 @@ export default function App() {
       level: 1,
       xp: 15,
       maxXp: 100,
-      name: 'Paz',
-      evolutionStage: 'Ovo da Serenidade',
+      name: t("avatarName"),
+evolutionStage: t("avatarEvolutionStage"),
+      
       points: 10
     };
   });
+const [objectivesHistory, setObjectivesHistory] = useState<
+  { date: string; completed: number }[]
+>(() => {
+  const saved = localStorage.getItem(STORAGE_KEYS.OBJECTIVES_HISTORY);
+  return saved ? JSON.parse(saved) : [];
+});
+const [objectives, setObjectives] = useState<Objective[]>(() => {
+  const today = new Date().toISOString().split("T")[0];
 
-  const [objectives, setObjectives] = useState<Objective[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.OBJECTIVES);
-    if (saved) return JSON.parse(saved);
-    return INITIAL_OBJECTIVES;
-  });
+  const saved = localStorage.getItem(STORAGE_KEYS.OBJECTIVES);
 
+  if (saved) {
+    const parsed = JSON.parse(saved);
+
+    // Dados já guardados no novo formato diário
+    if (parsed.date === today && parsed.items) {
+      return parsed.items;
+    }
+
+    // Compatibilidade com dados antigos (sem data)
+    const oldItems = Array.isArray(parsed) ? parsed : parsed.items;
+
+    if (oldItems) {
+      return oldItems.map((obj: Objective) => ({
+        ...obj,
+        completed: false
+      }));
+    }
+  }
+
+  return INITIAL_OBJECTIVES;
+});
+ const completedObjectivesCount = objectives.filter(o => o.completed).length;
   const [ratings, setRatings] = useState<DailyRating[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RATINGS);
     if (saved) return JSON.parse(saved);
-    return [];
+   return [];
   });
 
   const [posts, setPosts] = useState<SharePost[]>(() => {
@@ -83,7 +116,23 @@ export default function App() {
   const [levelUpOpen, setLevelUpOpen] = useState(false);
   const [prevLevel, setPrevLevel] = useState(avatar.level);
   const [showSplash, setShowSplash] = useState(true);
+const [showStopMode, setShowStopMode] = useState(false);
+  // Open STOP mode from Android widget/deep link
+  useEffect(() => {
+    const handleStopLink = () => {
+      if (window.location.hash === "#stop") {
+        setShowStopMode(true);
+      }
+    };
 
+    handleStopLink();
+
+    window.addEventListener("hashchange", handleStopLink);
+
+    return () => {
+      window.removeEventListener("hashchange", handleStopLink);
+    };
+  }, []);
   // Automatically dismiss splash screen after 2.8 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -97,16 +146,29 @@ export default function App() {
   const [afternoonRating, setAfternoonRating] = useState<number>(5);
   const [todayLogged, setTodayLogged] = useState(false);
   const [noteText, setNoteText] = useState('');
-
+const [selectedDate, setSelectedDate] = useState(
+  new Date().toISOString().split('T')[0]
+);
   // Save states to localStorage on changes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.AVATAR, JSON.stringify(avatar));
   }, [avatar]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.OBJECTIVES, JSON.stringify(objectives));
+   localStorage.setItem(
+  STORAGE_KEYS.OBJECTIVES,
+  JSON.stringify({
+    date: new Date().toISOString().split("T")[0],
+    items: objectives
+  })
+);
   }, [objectives]);
-
+useEffect(() => {
+localStorage.setItem(
+  STORAGE_KEYS.OBJECTIVES_HISTORY,
+  JSON.stringify(objectivesHistory)
+);
+}, [objectivesHistory]);
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.RATINGS, JSON.stringify(ratings));
   }, [ratings]);
@@ -115,26 +177,29 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
   }, [posts]);
 
-  // Check if today is already logged on load/ratings change
-  useEffect(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const loggedToday = ratings.find(r => r.date === todayStr);
-    if (loggedToday) {
-      setTodayLogged(true);
-      if (loggedToday.morning !== null) setMorningRating(loggedToday.morning);
-      if (loggedToday.afternoon !== null) setAfternoonRating(loggedToday.afternoon);
-      if (loggedToday.note) setNoteText(loggedToday.note);
-    } else {
-      setTodayLogged(false);
-    }
-  }, [ratings]);
 
+// Check if selected date is already logged
+useEffect(() => {
+  const loggedDay = ratings.find(r => r.date === selectedDate);
+
+  if (loggedDay) {
+    setTodayLogged(true);
+    setMorningRating(loggedDay.morning);
+    setAfternoonRating(loggedDay.afternoon);
+    setNoteText(loggedDay.note || "");
+  } else {
+    setTodayLogged(false);
+    setMorningRating(5);
+    setAfternoonRating(5);
+    setNoteText("");
+  }
+}, [ratings, selectedDate]);
   // Handle XP increments and level ups
   const addXp = (amount: number) => {
     setAvatar(prev => {
       let nextXp = prev.xp + amount;
       let nextLevel = prev.level;
-      let nextMaxXp = prev.maxXp;
+   let nextMaxXp = prev.maxXp;
       let nextPoints = prev.points + Math.round(amount / 2);
 
       while (nextXp >= nextMaxXp) {
@@ -160,7 +225,7 @@ export default function App() {
   const handlePetAvatar = () => {
     const todayStr = new Date().toISOString().split('T')[0];
     const lastPetDate = localStorage.getItem(STORAGE_KEYS.LAST_PET_DATE);
-    const petCountStr = localStorage.getItem(STORAGE_KEYS.DAILY_PET_COUNT);
+    const petCountStr = localStorage.getItem(STORAGE_KEYS.PET_COUNT);
     let petCount = petCountStr ? parseInt(petCountStr, 10) : 0;
 
     if (lastPetDate !== todayStr) {
@@ -169,8 +234,8 @@ export default function App() {
     }
 
     if (petCount < 5) {
-      addXp(5); // +5 XP for the first 5 pets of the day
-      localStorage.setItem(STORAGE_KEYS.DAILY_PET_COUNT, (petCount + 1).toString());
+     addXp(5); // +5 XP for the first 5 pets of the day
+      localStorage.setItem(STORAGE_KEYS.PET_COUNT, (petCount + 1).toString());
     } else {
       // Award only points beyond limit
       setAvatar(prev => ({ ...prev, points: prev.points + 1 }));
@@ -181,15 +246,14 @@ export default function App() {
   const handleSaveRatings = () => {
     const todayStr = new Date().toISOString().split('T')[0];
     const nextRatings = [...ratings];
-    const existingIdx = nextRatings.findIndex(r => r.date === todayStr);
+const existingIdx = nextRatings.findIndex(r => r.date === todayStr);
 
-    const newRating: DailyRating = {
-      date: todayStr,
-      morning: morningRating,
-      afternoon: afternoonRating,
-      note: noteText.trim() || undefined
-    };
-
+const newRating: DailyRating = {
+  date: todayStr,
+  morning: morningRating,
+  afternoon: afternoonRating,
+  note: noteText.trim() || undefined
+};
     if (existingIdx >= 0) {
       nextRatings[existingIdx] = newRating;
     } else {
@@ -203,25 +267,64 @@ export default function App() {
   };
 
   // Toggle single objective completion
+  // Toggle single objective completion
   const handleToggleObjective = (id: string) => {
-    setObjectives(prev =>
-      prev.map(obj => {
+    setObjectives(prev => {
+      const updatedObjectives = prev.map(obj => {
         if (obj.id === id) {
           const nextCompleted = !obj.completed;
+
           if (nextCompleted) {
             // Reward XP on check
             addXp(obj.xpReward);
           } else {
-            // Deduct points/XP if unchecked (optional/safe)
-            setAvatar(a => ({ ...a, points: Math.max(0, a.points - Math.round(obj.xpReward / 2)) }));
+            // Deduct points/XP if unchecked
+            setAvatar(a => ({
+              ...a,
+              points: Math.max(
+                0,
+                a.points - Math.round(obj.xpReward / 2)
+              )
+            }));
           }
+
           return { ...obj, completed: nextCompleted };
         }
-        return obj;
-      })
-    );
-  };
 
+        return obj;
+      });
+
+      // Save today's completed objectives count
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      const completedCount = updatedObjectives.filter(
+        obj => obj.completed
+      ).length;
+
+      setObjectivesHistory(prevHistory => {
+        const existing = prevHistory.findIndex(
+          item => item.date === todayStr
+        );
+
+        const updatedHistory = [...prevHistory];
+
+        const entry = {
+          date: todayStr,
+          completed: completedCount
+        };
+
+        if (existing >= 0) {
+          updatedHistory[existing] = entry;
+        } else {
+          updatedHistory.push(entry);
+        }
+
+        return updatedHistory;
+      });
+
+      return updatedObjectives;
+    });
+  };
   // Create objective
   const handleAddCustomObjective = (text: string, category: 'corporeo' | 'mental' | 'social' | 'nutricao') => {
     const newObj: Objective = {
@@ -247,7 +350,7 @@ export default function App() {
       userName: `Guardião Anon_${Math.floor(100 + Math.random() * 900)}`,
       feeling,
       message,
-      timestamp: 'Agora mesmo',
+     timestamp: t("justNow"),
       likes: 0,
       likedByUser: false
     };
@@ -273,79 +376,54 @@ export default function App() {
   };
 
   // Visual text helper for slider values (0-10)
-  const getRatingLabel = (val: number) => {
-    if (val <= 2) return { text: 'Muita Agitação', emoji: '🥺', color: 'text-[#C97B5E]' };
-    if (val <= 4) return { text: 'Inquieto', emoji: '😐', color: 'text-[#C97B5E]' };
-    if (val <= 6) return { text: 'Estável / Neutro', emoji: '🙂', color: 'text-[#8B5C4D]' };
-    if (val <= 8) return { text: 'Calmo', emoji: '🌿', color: 'text-[#8B5C4D]' };
-    return { text: 'Em Plena Paz', emoji: '🥰', color: 'text-[#734A3F]' };
+const getRatingLabel = (val: number) => {
+    if (val <= 2) return { text: t("moodVeryAgitated"), emoji: '🥺', color: 'text-[#C97B5E]' };
+    if (val <= 4) return { text: t("moodRestless"), emoji: '😐', color: 'text-[#C97B5E]' };
+    if (val <= 6) return { text: t("moodStable"), emoji: '🙂', color: 'text-[#8B5C4D]' };
+    if (val <= 8) return { text: t("moodCalm"), emoji: '🌿', color: 'text-[#8B5C4D]' };
+    return { text: t("moodVeryCalm"), emoji: '✨', color: 'text-[#8B5C4D]' };
   };
 
-  const completedObjectivesCount = objectives.filter(o => o.completed).length;
-
-  return (
+return (
     <div className="min-h-screen bg-[#FAF5F0] flex flex-col antialiased text-[#4E3B36]">
       {/* Splash Welcome Screen Overlay */}
       <AnimatePresence>
         {showSplash && (
-          <motion.div
-            key="splash-screen"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.5, ease: 'easeInOut' } }}
-            className="fixed inset-0 z-[999] bg-white flex flex-col items-center justify-center p-6 cursor-pointer"
-            onClick={() => setShowSplash(false)}
-          >
-            <div className="flex flex-col items-center space-y-6 max-w-sm text-center">
-              {/* Pulsing app icon */}
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: [0.8, 1.05, 1], opacity: 1 }}
-                transition={{ duration: 1.2, ease: "easeOut" }}
-                className="flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-tr from-[#E5A88B] via-[#F5D6C6] to-[#FFF0E8] shadow-xl border border-[#E5A88B]/20 relative"
-              >
-                {/* Rippling glow ring */}
-                <motion.div
-                  animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
-                  transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                  className="absolute inset-0 rounded-full border-2 border-[#E5A88B]/30"
-                />
-                <span className="text-4xl filter drop-shadow select-none">🌿</span>
-              </motion.div>
+<motion.div
+  key="splash-screen"
+  initial={{ opacity: 1 }}
+  exit={{ opacity: 0, transition: { duration: 0.5, ease: "easeInOut" } }}
+  className="fixed inset-0 z-[999] bg-white flex flex-col items-center justify-center p-6 cursor-pointer"
+  onClick={() => setShowSplash(false)}
+>
+  <div className="flex flex-col items-center space-y-6 max-w-sm text-center">
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: [0.8, 1.05, 1], opacity: 1 }}
+      transition={{ duration: 1.2, ease: "easeOut" }}
+      className="flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-tr from-[#E5A88B] via-[#F5D6C6] to-[#FFF0E8] shadow-xl border border-[#E5A88B]/20 relative"
+    >
+      <motion.div
+        animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+        transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+        className="absolute inset-0 rounded-full border-2 border-[#E5A88B]/30"
+      />
+      <span className="text-4xl filter drop-shadow select-none">🌿</span>
+    </motion.div>
 
-              <div className="space-y-2">
-                <motion.h2 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.8 }}
-                  className="text-2xl font-black text-[#4E3B36] font-display tracking-tight"
-                >
-                  Confia
-                </motion.h2>
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7, duration: 0.8 }}
-                  className="text-[#C97B5E] text-xs font-extrabold tracking-[0.2em] uppercase font-display"
-                >
-                  Olá, bem-vindo!
-                </motion.p>
-              </div>
-
-              {/* Subtitle / instruction */}
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.6 }}
-                transition={{ delay: 1.4, duration: 0.8 }}
-                className="text-[10px] text-slate-400 font-semibold absolute bottom-12 cursor-pointer uppercase tracking-widest font-display"
-              >
-                Toca no ecrã para saltar
-              </motion.p>
-            </div>
-          </motion.div>
-        )}
+    <motion.h2
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4, duration: 0.8 }}
+      className="text-2xl font-black text-[#4E3B36] font-display tracking-tight"
+    >
+      Confia
+    </motion.h2>
+  </div>
+</motion.div>
+)}
       </AnimatePresence>
-
-      {/* App Top Brand Header */}
+  {/* App Top Brand Header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5A88B]/15 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xl">🌿</span>
@@ -357,15 +435,15 @@ export default function App() {
           {/* Level badge quick indicator */}
           <div className="flex items-center gap-1.5 bg-[#E5A88B]/10 text-[#C97B5E] px-3 py-1.5 rounded-xl border border-[#E5A88B]/25 text-xs font-black font-mono">
             <Sparkles size={13} className="text-[#E5A88B] animate-pulse" />
-            Nível {avatar.level}
+            {t("level")} {avatar.level}
           </div>
         </div>
       </header>
 
       {/* Main Content Stage */}
       <main className="flex-1 pb-24 px-4 max-w-lg mx-auto w-full pt-4">
-        <AnimatePresence mode="wait">
-          {currentTab === 0 && (
+<AnimatePresence mode="wait">
+  {currentTab === 0 && (
             /* TAB 1: MENU PRINCIPAL */
             <motion.div
               key="main-menu"
@@ -379,21 +457,25 @@ export default function App() {
                 {/* Logo da App */}
                 <div className="flex flex-col items-center justify-center pt-2 pb-1 text-center space-y-2 border-b border-slate-50 pb-4">
                   <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-[#E5A88B] via-[#F5D6C6] to-[#FFF0E8] shadow-md border border-[#E5A88B]/20">
-                    <span className="text-xl filter drop-shadow">🌿</span>
+                   <span className="text-xl filter drop-shadow">🌿</span>
                   </div>
                   <div className="space-y-0.5">
                     <h2 className="text-base font-black tracking-tight text-[#4E3B36] font-display">
                       Confia
                     </h2>
                     <p className="text-[9px] text-[#C97B5E] font-extrabold uppercase tracking-widest font-display">
-                      O teu refúgio de serenidade
+                     {t("tagline")}
                     </p>
                   </div>
                 </div>
-
+<div className="flex justify-center gap-2 py-2">
+  <button onClick={() => i18n.changeLanguage("pt")}>🇵🇹</button>
+  <button onClick={() => i18n.changeLanguage("en")}>🇬🇧</button>
+  <button onClick={() => i18n.changeLanguage("es")}>🇪🇸</button>
+  <button onClick={() => i18n.changeLanguage("fr")}>🇫🇷</button>
+</div>
                 <Avatar avatar={avatar} onPet={handlePetAvatar} />
               </div>
-
               {/* Crisis Screening SOS Button */}
               <button
                 onClick={() => setTriageOpen(true)}
@@ -403,35 +485,54 @@ export default function App() {
                   <div className="p-3 bg-[#E5A88B] text-white rounded-2xl shadow-md shadow-[#E5A88B]/20 animate-pulse">
                     <Brain size={20} />
                   </div>
-                  <div className="text-left">
-                    <h3 className="text-sm font-black text-[#4E3B36] font-display">Sentes a ansiedade a subir?</h3>
-                    <p className="text-xs text-slate-500 mt-0.5 font-semibold">Toca para iniciar o apoio imediato de crise</p>
-                  </div>
-                </div>
-                <span className="text-xs font-black text-[#C97B5E] group-hover:translate-x-1 transition-transform font-display">
-                  SOS &rarr;
-                </span>
-              </button>
 
+                  <div className="text-left">
+                    <h3 className="text-sm font-black text-[#4E3B36] font-display">
+                      {t("crisisQuestion")}
+                    </h3>
+
+                    <p className="text-xs text-slate-500 mt-0.5 font-semibold">
+                      {t("crisisStartSupport")}
+                    </p>
+                  </div>
+
+                  <span className="text-xs font-black text-[#C97B5E] group-hover:translate-x-1 transition-transform font-display">
+                    SOS &rarr;
+                  </span>
+                </div>
+              </button>
               {/* Day Rating Panel */}
               <div className="bg-white border border-[#E5A88B]/15 rounded-[32px] p-6 shadow-sm space-y-5">
+<div className="space-y-2">
+  <label className="text-xs font-bold text-[#4E3B36]">
+   📅 {t("recordDate")}
+  </label>
+
+  <input
+    type="date"
+    value={selectedDate}
+    onChange={(e) => setSelectedDate(e.target.value)}
+    className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] font-bold text-[#4E3B36]"
+  />
+</div>
                 <div className="space-y-1">
-                  <h3 className="text-sm font-black text-[#4E3B36] flex items-center gap-1.5 font-display uppercase tracking-wider">
-                    <Calendar size={15} className="text-[#E5A88B]" /> Classificar o teu Dia
-                  </h3>
-                  <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-                    O teu bem-estar flutua. Regista a manhã e a tarde para analisar padrões no teu histórico.
-                  </p>
+<h3 className="text-sm font-black text-[#4E3B36] flex items-center gap-1.5 font-display uppercase tracking-wider">
+  <Calendar size={15} className="text-[#E5A88B]" /> {t("classifyDay")}
+</h3>
+
+<p className="text-xs text-slate-500 font-semibold leading-relaxed">
+  {t("wellbeingDescription")}
+</p>
                 </div>
 
                 {/* Morning Slider */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs font-bold text-[#4E3B36]">
                     <span className="flex items-center gap-1 text-[#C97B5E] font-display uppercase tracking-wider">
-                      <Sun size={15} /> Manhã: {morningRating} / 10
+                        <Sun size={15} /> {t("morning")}: {morningRating} / 10
                     </span>
                     <span className={`font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1 ${getRatingLabel(morningRating).color} font-display`}>
-                      <span>{getRatingLabel(morningRating).emoji}</span>
+                   <span>{getRatingLabel(morningRating).emoji}</span>
                       <span>{getRatingLabel(morningRating).text}</span>
                     </span>
                   </div>
@@ -445,8 +546,9 @@ export default function App() {
                     className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#E5A88B]"
                   />
                   <div className="flex justify-between text-[9px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
-                    <span>0 (Difícil)</span>
-                    <span>10 (Em Paz)</span>
+                    <span>0 ({t("difficult")})</span>
+<span>10 ({t("peaceful")})</span>
+                    
                   </div>
                 </div>
 
@@ -454,7 +556,7 @@ export default function App() {
                 <div className="space-y-2 pt-2 border-t border-slate-100">
                   <div className="flex items-center justify-between text-xs font-bold text-[#4E3B36]">
                     <span className="flex items-center gap-1 text-[#C97B5E] font-display uppercase tracking-wider">
-                      <Moon size={15} /> Tarde: {afternoonRating} / 10
+                      <Moon size={15} /> {t("afternoon")}: {afternoonRating} / 10
                     </span>
                     <span className={`font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1 ${getRatingLabel(afternoonRating).color} font-display`}>
                       <span>{getRatingLabel(afternoonRating).emoji}</span>
@@ -466,22 +568,24 @@ export default function App() {
                     min="0"
                     max="10"
                     step="1"
-                    value={afternoonRating}
+               value={afternoonRating}
                     onChange={(e) => setAfternoonRating(Number(e.target.value))}
                     className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#E5A88B]"
                   />
                   <div className="flex justify-between text-[9px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
-                    <span>0 (Difícil)</span>
-                    <span>10 (Em Paz)</span>
+<span>0 ({t("difficult")})</span>
+<span>10 ({t("peaceful")})</span>
                   </div>
                 </div>
 
                 {/* Diary commentary note */}
                 <div className="space-y-1.5 pt-2">
-                  <label className="text-xs font-bold text-[#4E3B36]">Nota ou sensação sobre o dia (Opcional):</label>
+                  <label className="text-xs font-bold text-[#4E3B36]">
+  {t("dailyNote")}
+</label>
                   <input
                     type="text"
-                    placeholder="Ex: 'Senti-me bem à tarde após alongar.'"
+                    placeholder={t("dailyNotePlaceholder")}
                     value={noteText}
                     onChange={(e) => setNoteText(e.target.value)}
                     maxLength={100}
@@ -492,16 +596,18 @@ export default function App() {
                 {/* Submit button */}
                 <button
                   onClick={handleSaveRatings}
-                  className="w-full py-4 bg-gradient-to-r from-[#E5A88B] to-[#D59375] hover:from-[#D59375] hover:to-[#C68060] text-white font-extrabold text-xs uppercase tracking-wider font-display rounded-2xl transition-all shadow-lg shadow-[#E5A88B]/25 flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-4 bg-gradient-to-r from-[#E5A88B] to-[#D59375] hover:from-[#D59375] hover:to-[#C68060] text-white font-extrabold text-xs uppercase tracking-wider font-display rounded-2xl transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <CheckCircle2 size={15} />
-                  {todayLogged ? 'Atualizar Registo de Hoje' : 'Gravar Registo Diário (+15 XP)'}
+                 {todayLogged
+  ? t("updateTodayRecord")
+  : t("saveDailyRecord")}
                 </button>
               </div>
 
               {/* Foco da Mente Menu */}
               <FocoMente onAddXp={addXp} />
-            </motion.div>
+         </motion.div>
           )}
 
           {currentTab === 1 && (
@@ -565,14 +671,14 @@ export default function App() {
                 completedObjectivesCount={completedObjectivesCount}
               />
             </motion.div>
-          )}
-        </AnimatePresence>
+    )}
+      </AnimatePresence>
       </main>
 
       {/* Triage / Screening Help Modal */}
       <TriageModal
         isOpen={triageOpen}
-        onClose={() => setTriageOpen(false)}
+      onClose={() => setTriageOpen(false)}
         onAddXp={addXp}
       />
 
@@ -589,38 +695,54 @@ export default function App() {
               <div className="w-16 h-16 bg-[#FFF0E8] rounded-full flex items-center justify-center mx-auto text-[#C97B5E] animate-bounce">
                 <Gift size={32} />
               </div>
-              <div className="space-y-1.5">
-                <h3 className="text-xl font-black text-[#4E3B36] font-display">Evolução do Companheiro!</h3>
-                <p className="text-xs text-slate-500 leading-relaxed font-semibold">
-                  Ao cuidares de ti, ajudas o teu guardião a ganhar energia. O teu Amigo evoluiu com sucesso!
-                </p>
-                <div className="py-2.5 px-4 bg-[#E5A88B]/15 text-[#C97B5E] border border-[#E5A88B]/30 rounded-2xl text-xs font-black font-display">
-                  Nível {prevLevel} Alcançado 🎉
-                </div>
-              </div>
-              <p className="text-[10px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
-                Ganhaste +30 Pontos de evolução extra de recompensa!
+<div className="space-y-1.5">
+<h3 className="text-xl font-black text-[#4E3B36] font-display">
+  {t("companionEvolution")}
+</h3>
+
+<p className="text-xs text-slate-500 leading-relaxed font-semibold">
+  {t("guardianEvolution")}
+</p>
+
+<div className="py-2.5 px-4 bg-[#E5A88B]/15 text-[#C97B5E] border border-[#E5A88B]/30 rounded-2xl text-xs font-black font-display">
+  {t("levelReached", { level: prevLevel })} 🎉
+</div>
+
+<p className="text-[10px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
+  {t("extraReward")}
+
               </p>
+</div>
               <button
-                onClick={() => setLevelUpOpen(false)}
+            onClick={() => setLevelUpOpen(false)}
                 className="w-full py-3 bg-[#E5A88B] hover:bg-[#D59375] text-white shadow-lg shadow-[#E5A88B]/25 font-black text-xs uppercase tracking-wider font-display rounded-xl cursor-pointer"
               >
-                Continuar a Caminhada
+{t("continueWalking")}
               </button>
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
 
+
+      </AnimatePresence>
+      {showStopMode && (
+        <StopMode
+          onStartImpulse={() => {
+            setShowStopMode(false);
+            setCurrentTab(4);
+          }}
+        />
+      )}
+      {/* Global Tab Navigation Footer */}
       {/* Global Tab Navigation Footer */}
       <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5A88B]/15 px-4 py-3.5">
         <div className="max-w-lg mx-auto flex items-center justify-between">
           {[
-            { label: 'Principal', icon: '🏡', index: 0 },
-            { label: 'Abraço', icon: '🫂', index: 1 },
-            { label: 'Objetivos', icon: '🎯', index: 2 },
-            { label: 'Impulso', icon: '🆘', index: 3 },
-            { label: 'Progresso', icon: '📈', index: 4 }
+           { label: t("home"), icon: '🏠', index: 0 },
+            { label: t("hug"), icon: '🫂', index: 1 },
+            { label: t("objectives"), icon: '🎯', index: 2 },
+            { label: t("impulse"), icon: '🆘', index: 3 },
+            { label: t("progress"), icon: '📈', index: 4 }
           ].map(tab => (
             <button
               key={tab.index}
@@ -629,19 +751,19 @@ export default function App() {
                 currentTab === tab.index ? 'text-[#C97B5E] font-black' : 'text-slate-400 hover:text-slate-600'
               }`}
             >
-              {/* Highlight bar above active tab icon */}
               {currentTab === tab.index && (
                 <motion.div
                   layoutId="active-bar"
                   className="absolute -top-3 w-10 h-1 rounded-full bg-[#E5A88B]"
                 />
               )}
+
               <span className="text-lg mb-0.5">{tab.icon}</span>
               <span className="text-[10px] tracking-tight">{tab.label}</span>
             </button>
           ))}
         </div>
-      </footer>
+      </footer>     
     </div>
   );
 }

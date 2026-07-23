@@ -1,0 +1,12 @@
+{
+  "appName": "Confia",
+  "welcome": "Bem-vindo",
+  "continue": "Continuar",
+  "cancel": "Cancelar",
+"classifyDay": "Classificar o teu Dia",
+"wellbeingDescription": "O teu bem-estar flutua. Regista a manhã e a tarde para analisar padrões no teu histórico.",
+  "settings": "Definições",
+"tagline": "O teu refúgio de serenidade","continueWalking": "Continuar a Caminhada",
+"level": "Nível",
+"morning": "Manhã"
+}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, Plus, Trash2, Heart, Award, Smile, Coffee, Users, Sparkles } from 'lucide-react';
 import { Objective } from '../types';
-
+import { useTranslation } from "react-i18next";
 interface ObjectivosListProps {
   objectives: Objective[];
   onToggleComplete: (id: string) => void;
@@ -11,11 +11,13 @@ interface ObjectivosListProps {
 }
 
 export const ObjectivosList: React.FC<ObjectivosListProps> = ({
+
   objectives,
   onToggleComplete,
   onAddCustomObjective,
   onDeleteObjective
 }) => {
+const { t } = useTranslation();
   const [newText, setNewText] = useState('');
   const [newCategory, setNewCategory] = useState<'corporeo' | 'mental' | 'social' | 'nutricao'>('mental');
   const [showForm, setShowForm] = useState(false);
@@ -35,21 +37,21 @@ export const ObjectivosList: React.FC<ObjectivosListProps> = ({
           bg: 'bg-[#E5A88B]/10 text-[#C97B5E] border-[#E5A88B]/20',
           badge: 'bg-[#E5A88B]/10 text-[#C97B5E] border border-[#E5A88B]/20',
           icon: <Heart size={14} />,
-          label: 'Físico'
+          label: t("physical")
         };
       case 'mental':
         return {
           bg: 'bg-[#F5D6C6]/20 text-[#A06050] border-[#F5D6C6]/30',
           badge: 'bg-[#F5D6C6]/20 text-[#A06050] border border-[#F5D6C6]/30',
           icon: <Smile size={14} />,
-          label: 'Mental'
+         label: t("mental")
         };
       case 'social':
         return {
           bg: 'bg-[#FFF0E8] text-[#8A5C50] border-[#FFF0E8]',
           badge: 'bg-[#FFF0E8] text-[#8A5C50] border border-[#E5A88B]/15',
           icon: <Users size={14} />,
-          label: 'Social'
+         label: t("social")
         };
       case 'nutricao':
       default:
@@ -57,7 +59,7 @@ export const ObjectivosList: React.FC<ObjectivosListProps> = ({
           bg: 'bg-[#FAF5F0] text-[#7A4E43] border-[#FAF5F0]',
           badge: 'bg-[#FAF5F0] text-[#7A4E43] border border-[#E5A88B]/15',
           icon: <Coffee size={14} />,
-          label: 'Nutrição'
+         label: t("nutrition")
         };
     }
   };
@@ -70,10 +72,10 @@ export const ObjectivosList: React.FC<ObjectivosListProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-black text-[#4E3B36] flex items-center gap-1.5 font-display">
-            <span className="text-[#E5A88B]">🎯</span> Pequenas Conquistas
+           <span className="text-[#E5A88B]">🎯</span> {t("smallAchievements")}
           </h2>
           <p className="text-xs text-slate-500 mt-1 font-medium">
-            Metas fáceis e realistas para hoje. Cada objetivo dá pontos ao teu Amigo!
+{t("goalsDescription")}
           </p>
         </div>
       </div>
@@ -81,12 +83,19 @@ export const ObjectivosList: React.FC<ObjectivosListProps> = ({
       {/* Progress Card */}
       <div className="bg-gradient-to-tr from-[#E5A88B]/10 to-[#FFF0E8]/5 p-5 rounded-[24px] border border-[#E5A88B]/25 flex items-center justify-between shadow-sm">
         <div className="space-y-1">
-          <span className="text-[10px] font-extrabold text-[#C97B5E] uppercase tracking-widest font-display">Metas Diárias</span>
+          <span className="text-[10px] font-extrabold text-[#C97B5E] uppercase tracking-widest font-display">{t("dailyGoalsTitle")}</span>
           <h3 className="text-sm font-black text-[#4E3B36]">
-            Concluíste {completedCount} de {objectives.length} objetivos
+          {t("completedGoals", {
+  completed: completedCount,
+  total: objectives.length,
+})}
           </h3>
         </div>
-        <div className="relative flex items-center justify-center w-12 h-12 bg-white rounded-full border border-[#E5A88B]/30 shadow-md">
+
+{t("completedGoals", {
+  completed: completedCount,
+  total: objectives.length,
+})}<div className="relative flex items-center justify-center w-12 h-12 bg-white rounded-full border border-[#E5A88B]/30 shadow-md">
           <Award size={20} className="text-[#C97B5E] animate-pulse" />
         </div>
       </div>
@@ -97,7 +106,7 @@ export const ObjectivosList: React.FC<ObjectivosListProps> = ({
           onClick={() => setShowForm(true)}
           className="w-full py-4 bg-white hover:bg-[#FFF0E8] text-[#C97B5E] border border-[#E5A88B]/25 border-dashed rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
         >
-          <Plus size={16} /> Adicionar Objetivo Personalizado
+          <Plus size={16} /> {t("addCustomGoal")}
         </button>
       ) : (
         <motion.form
@@ -107,10 +116,10 @@ export const ObjectivosList: React.FC<ObjectivosListProps> = ({
           className="bg-white border border-[#E5A88B]/15 rounded-[24px] p-5 space-y-4 shadow-xl shadow-amber-100/10"
         >
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#4E3B36]">O que queres alcançar hoje?</label>
+            <label className="text-xs font-bold text-[#4E3B36]">{t("whatToAchieveToday")}</label>
             <input
               type="text"
-              placeholder="Ex: Ler 2 páginas de um livro, regar as plantas..."
+             placeholder={t("goalPlaceholder")}
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
               className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] text-[#4E3B36]"
@@ -120,7 +129,7 @@ export const ObjectivosList: React.FC<ObjectivosListProps> = ({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#4E3B36]">Categoria do Objetivo</label>
+            <label className="text-xs font-bold text-[#4E3B36]">{t("goalCategory")}</label>
             <div className="grid grid-cols-4 gap-1.5">
               {(['mental', 'corporeo', 'social', 'nutricao'] as const).map(cat => {
                 const styles = getCategoryStyles(cat);
@@ -149,13 +158,13 @@ export const ObjectivosList: React.FC<ObjectivosListProps> = ({
               onClick={() => setShowForm(false)}
               className="flex-1 py-3 text-xs text-slate-500 hover:bg-slate-50 rounded-xl font-bold border border-slate-200/60 cursor-pointer"
             >
-              Cancelar
+              {t("cancel")}
             </button>
             <button
               type="submit"
               className="flex-1 py-3 text-xs bg-gradient-to-r from-[#E5A88B] to-[#D59375] hover:from-[#D59375] hover:to-[#C68060] text-white rounded-xl font-bold flex items-center justify-center gap-1 shadow-md shadow-[#E5A88B]/20 cursor-pointer"
             >
-              Gravar Objetivo
+              {t("saveGoal")}
             </button>
           </div>
         </motion.form>
@@ -192,7 +201,7 @@ export const ObjectivosList: React.FC<ObjectivosListProps> = ({
                     <p className={`text-xs font-bold leading-relaxed ${
                       objective.completed ? 'line-through text-slate-400 font-medium' : 'text-slate-400'
                     }`}>
-                      {objective.text}
+                     {t(objective.text)}
                     </p>
                     <div className="flex items-center gap-2">
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider flex items-center gap-0.5 ${catStyles.badge}`}>
@@ -210,7 +219,7 @@ export const ObjectivosList: React.FC<ObjectivosListProps> = ({
                   <button
                     onClick={() => onDeleteObjective(objective.id)}
                     className="p-1.5 text-slate-300 hover:text-red-400 hover:bg-red-50/50 rounded-lg transition-colors shrink-0 cursor-pointer"
-                    title="Remover"
+                   title={t("remove")}
                   >
                     <Trash2 size={13} />
                   </button>

@@ -14,15 +14,18 @@ import {
   Gift
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
+import i18n from "./i18n";
+import { initLanguage } from "./i18n/language";
 import { AvatarState, Objective, DailyRating, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 
 // Component imports
-import { Avatar } from './components/Avatar';
+
 import { TriageModal } from './components/TriageModal';
 import { AbracoTimer } from './components/AbracoTimer';
 import { ObjectivosList } from './components/ObjectivosList';
 import { ImpulsoSOS } from './components/ImpulsoSOS';
+import { Avatar } from './components/Avatar';
 import { ProgressoDashboard } from './components/ProgressoDashboard';
 import { FocoMente } from './components/FocoMente';
 import { StopMode } from './components/StopMode';
@@ -51,6 +54,17 @@ const PRE_LOGGED_RATINGS: DailyRating[] = [
 ];
 
 export default function App() {
+ const changeAppLanguage = (lang: string) => {
+    localStorage.setItem("confia_language", lang);
+    i18n.changeLanguage(lang);
+  };
+
+  useEffect(() => {
+    initLanguage();
+  }, []);
+  useEffect(() => {
+    initLanguage();
+  }, []);
 const { t, i18n } = useTranslation();
   // Global App States
   const [avatar, setAvatar] = useState<AvatarState>(() => {
@@ -114,6 +128,8 @@ const [objectives, setObjectives] = useState<Objective[]>(() => {
   const [currentTab, setCurrentTab] = useState<number>(0);
   const [triageOpen, setTriageOpen] = useState(false);
   const [levelUpOpen, setLevelUpOpen] = useState(false);
+const [avatarCelebrating, setAvatarCelebrating] = useState(false);
+const [avatarMemoryMessage, setAvatarMemoryMessage] = useState("");
   const [prevLevel, setPrevLevel] = useState(avatar.level);
   const [showSplash, setShowSplash] = useState(true);
 const [showStopMode, setShowStopMode] = useState(false);
@@ -194,6 +210,35 @@ useEffect(() => {
     setNoteText("");
   }
 }, [ratings, selectedDate]);
+useEffect(() => {
+  const today = ratings.find(r => r.date === selectedDate);
+
+  if (!today) {
+    setAvatarMemoryMessage("");
+    return;
+  }
+
+  const previous = ratings
+    .filter(r => r.date < selectedDate)
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+
+  if (!previous) {
+    setAvatarMemoryMessage("");
+    return;
+  }
+
+  const todayScore = ((today.morning ?? 5) + (today.afternoon ?? 5)) / 2;
+  const previousScore = ((previous.morning ?? 5) + (previous.afternoon ?? 5)) / 2;
+
+  if (todayScore - previousScore >= 2) {
+    setAvatarMemoryMessage(t("avatarImprovement"));
+  } else if (previousScore - todayScore >= 2) {
+    setAvatarMemoryMessage(t("avatarHardDay"));
+  } else {
+    setAvatarMemoryMessage("");
+  }
+
+}, [ratings, selectedDate]);
   // Handle XP increments and level ups
   const addXp = (amount: number) => {
     setAvatar(prev => {
@@ -207,8 +252,13 @@ useEffect(() => {
         nextLevel += 1;
         nextMaxXp = Math.round(nextMaxXp * 1.3);
         nextPoints += 30; // bonus points for level up
-        setPrevLevel(nextLevel);
-        setLevelUpOpen(true);
+setPrevLevel(nextLevel);
+setLevelUpOpen(true);
+setAvatarCelebrating(true);
+
+setTimeout(() => {
+  setAvatarCelebrating(false);
+}, 2500);
       }
 
       return {
@@ -469,13 +519,26 @@ return (
                   </div>
                 </div>
 <div className="flex justify-center gap-2 py-2">
-  <button onClick={() => i18n.changeLanguage("pt")}>🇵🇹</button>
-  <button onClick={() => i18n.changeLanguage("en")}>🇬🇧</button>
-  <button onClick={() => i18n.changeLanguage("es")}>🇪🇸</button>
-  <button onClick={() => i18n.changeLanguage("fr")}>🇫🇷</button>
+onClick={() => changeAppLanguage("pt")}
+onClick={() => changeAppLanguage("en")}
+onClick={() => changeAppLanguage("es")}
+onClick={() => changeAppLanguage("fr")}
 </div>
-                <Avatar avatar={avatar} onPet={handlePetAvatar} />
+
               </div>
+              {/* Interactive Companion */}
+              <Avatar
+                avatar={avatar}
+                onPet={handlePetAvatar}
+                celebrating={avatarCelebrating}
+ levelUpTrigger={avatarCelebrating}
+  moodRating={
+    afternoonRating !== undefined
+      ? Math.round((morningRating + afternoonRating) / 2)
+      : morningRating
+  }
+memoryMessage={avatarMemoryMessage}
+              />
               {/* Crisis Screening SOS Button */}
               <button
                 onClick={() => setTriageOpen(true)}
@@ -664,12 +727,13 @@ return (
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <ProgressoDashboard
-                ratings={ratings}
-                avatarLevel={avatar.level}
-                avatarXp={avatar.xp}
-                completedObjectivesCount={completedObjectivesCount}
-              />
+<ProgressoDashboard
+  ratings={ratings}
+  avatarLevel={avatar.level}
+  avatarXp={avatar.xp}
+  completedObjectivesCount={completedObjectivesCount}
+  objectivesHistory={objectivesHistory}
+/>
             </motion.div>
     )}
       </AnimatePresence>

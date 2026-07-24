@@ -1,73 +1,70 @@
 import { Objective, SharePost, TriageStep } from '../types';
 
-export const INITIAL_OBJECTIVES: Objective[] = [
-  {
-    id: 'obj-1',
-    text: 'Beber um copo de água calmamente, sentindo a frescura',
-    category: 'nutricao',
-    xpReward: 15,
-    completed: false
-  },
-  {
-    id: 'obj-2',
-    text: 'Fazer 1 minuto de respiração profunda lenta',
-    category: 'mental',
-    xpReward: 10,
-    completed: false
-  },
-  {
-    id: 'obj-3',
-    text: 'Escrever 3 coisas simples pelas quais és grato hoje',
-    category: 'mental',
-    xpReward: 20,
-    completed: false
-  },
-  {
-    id: 'obj-4',
-    text: 'Dar um passeio curto de 5 a 10 minutos lá fora',
-    category: 'corporeo',
-    xpReward: 25,
-    completed: false
-  },
-  {
-    id: 'obj-5',
-    text: 'Fazer um alongamento suave no pescoço e ombros',
-    category: 'corporeo',
-    xpReward: 15,
-    completed: false
-  },
-  {
-    id: 'obj-6',
-    text: 'Enviar uma mensagem curta de carinho a um amigo ou familiar',
-    category: 'social',
-    xpReward: 20,
-    completed: false
-  },
-  {
-    id: 'obj-7',
-    text: 'Lanchar uma fruta de forma consciente, sem distrações digitais',
-    category: 'nutricao',
-    xpReward: 15,
-    completed: false
-  }
+const OBJECTIVES_LIBRARY: Objective[] = [
+  { id: 'breathe3', text: 'dailyObjectives.breathe3', category: 'mental', xpReward: 10, completed: false },
+  { id: 'hugExercise', text: 'dailyObjectives.hugExercise', category: 'mental', xpReward: 15, completed: false },
+  { id: 'relaxShoulders', text: 'dailyObjectives.relaxShoulders', category: 'corporeo', xpReward: 10, completed: false },
+  { id: 'pausePhone', text: 'dailyObjectives.pausePhone', category: 'mental', xpReward: 10, completed: false },
+  { id: 'slowBreathing', text: 'dailyObjectives.slowBreathing', category: 'mental', xpReward: 10, completed: false },
+  { id: 'sosTechnique', text: 'dailyObjectives.sosTechnique', category: 'mental', xpReward: 20, completed: false },
+  { id: 'questionThought', text: 'dailyObjectives.questionThought', category: 'mental', xpReward: 15, completed: false },
+  { id: 'writeWorry', text: 'dailyObjectives.writeWorry', category: 'mental', xpReward: 10, completed: false },
+  { id: 'positiveReplace', text: 'dailyObjectives.positiveReplace', category: 'mental', xpReward: 15, completed: false },
+  { id: 'goodMoment', text: 'dailyObjectives.goodMoment', category: 'mental', xpReward: 10, completed: false },
+
+  { id: 'focusTask', text: 'dailyObjectives.focusTask', category: 'mental', xpReward: 15, completed: false },
+  { id: 'avoidSearch', text: 'dailyObjectives.avoidSearch', category: 'mental', xpReward: 15, completed: false },
+  { id: 'drinkWater', text: 'dailyObjectives.drinkWater', category: 'corporeo', xpReward: 10, completed: false },
+  { id: 'stretch', text: 'dailyObjectives.stretch', category: 'corporeo', xpReward: 15, completed: false },
+  { id: 'walk', text: 'dailyObjectives.walk', category: 'corporeo', xpReward: 15, completed: false },
+  { id: 'sunlight', text: 'dailyObjectives.sunlight', category: 'corporeo', xpReward: 10, completed: false },
+  { id: 'mindfulMeal', text: 'dailyObjectives.mindfulMeal', category: 'nutricao', xpReward: 10, completed: false },
+  { id: 'relaxFace', text: 'dailyObjectives.relaxFace', category: 'corporeo', xpReward: 10, completed: false },
+
+  { id: 'petCompanionGoal', text: 'dailyObjectives.petCompanionGoal', category: 'social', xpReward: 10, completed: false },
+  { id: 'messageSomeone', text: 'dailyObjectives.messageSomeone', category: 'social', xpReward: 15, completed: false },
+  { id: 'compliment', text: 'dailyObjectives.compliment', category: 'social', xpReward: 10, completed: false },
+  { id: 'familyMoment', text: 'dailyObjectives.familyMoment', category: 'social', xpReward: 15, completed: false },
+
+  { id: 'gratitude', text: 'dailyObjectives.gratitude', category: 'mental', xpReward: 10, completed: false },
+  { id: 'askHelp', text: 'dailyObjectives.askHelp', category: 'social', xpReward: 20, completed: false },
+  { id: 'avoidSomething', text: 'dailyObjectives.avoidSomething', category: 'mental', xpReward: 20, completed: false },
+  { id: 'organize', text: 'dailyObjectives.organize', category: 'vida', xpReward: 10, completed: false },
+  { id: 'learn', text: 'dailyObjectives.learn', category: 'vida', xpReward: 15, completed: false },
+  { id: 'healthyChoice', text: 'dailyObjectives.healthyChoice', category: 'vida', xpReward: 10, completed: false },
+  { id: 'smallVictory', text: 'dailyObjectives.smallVictory', category: 'mental', xpReward: 10, completed: false },
+  { id: 'dailyFeeling', text: 'dailyObjectives.dailyFeeling', category: 'mental', xpReward: 15, completed: false }
 ];
+const daySeed = Math.floor(Date.now() / 86400000);
+
+function seededRandom(seed: number) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+const dailyObjectives = [...OBJECTIVES_LIBRARY];
+
+dailyObjectives.sort((a, b) => {
+  const ra = seededRandom(
+    daySeed + a.id.split("").reduce((s, c) => s + c.charCodeAt(0), 0)
+  );
+
+  const rb = seededRandom(
+    daySeed + b.id.split("").reduce((s, c) => s + c.charCodeAt(0), 0)
+  );
+
+  return ra - rb;
+});
+export const INITIAL_OBJECTIVES: Objective[] = dailyObjectives.slice(0, 5);
 
 export const SOOTHING_PHRASES: string[] = [
-  "Inspira profundamente... Segura... Expira devagar. Estás aqui e agora.",
-  "Este momento de aperto vai passar. O teu corpo sabe como acalmar-se.",
-  "Não tens de resolver tudo agora. Foca-te apenas na tua próxima respiração.",
-  "Sente os teus pés bem assentes no chão. Tu és forte e capaz de ultrapassar isto.",
-  "Permite que os teus ombros relaxem. Deixa cair o peso que não é teu.",
-  "O teu valor não é definido pela quantidade de coisas que fazes hoje.",
-  "A ansiedade é apenas uma nuvem passageira no céu da tua mente.",
-  "Fizeste o melhor que podias hoje, e isso é o suficiente.",
-  "Respira paz... liberta a tensão... estás num espaço seguro.",
-  "Não há problema em dar um passo atrás para recuperar o fôlego.",
-  "O teu cérebro está apenas a tentar proteger-te, mas estás em segurança.",
-  "Um passo de cada vez, uma respiração de cada vez.",
-  "Sente o ar fresco a entrar... e o ar morno a sair. Estás vivo e presente.",
-  "É seguro desacelerar. O mundo pode esperar um bocadinho.",
-  "És muito mais forte do que a tempestade que sentes dentro de ti."
+  "hugPhrase1",
+  "hugPhrase2",
+  "hugPhrase3",
+  "hugPhrase4",
+  "hugPhrase5",
+  "hugPhrase8",
+  "hugPhrase9"
 ];
 
 export const INITIAL_POSTS: SharePost[] = [

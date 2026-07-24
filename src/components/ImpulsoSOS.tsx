@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { saveEpisode } from "./Impulso";
 import ProgressBar from "./ProgressBar";
-
+import { useTranslation } from "react-i18next";
 interface ImpulsoSOSProps {
   onAddXp: (amount: number) => void;
 }
@@ -27,36 +27,49 @@ type Thought =
   | "Vou perder o controlo."
   | "Não sei.";
 
-const triggers: Trigger[] = [
-  "🌐 Vi algo na Internet",
-  "🧠 Senti um sintoma",
-  "💬 Alguém falou de doenças",
-  "📱 Recebi uma mensagem",
-  "❓ Não sei",
-];
-
-const emotions: Emotion[] = [
-  "😨 Medo",
-  "😟 Ansiedade",
-  "😔 Tristeza",
-  "😣 Frustração",
-  "🤯 Confusão",
-];
-
-const thoughts: Thought[] = [
-  "Tenho uma doença grave.",
-  "Preciso confirmar.",
-  "Isto nunca me aconteceu.",
-  "Vou perder o controlo.",
-  "Não sei.",
-];
 
 export const ImpulsoSOS: React.FC<ImpulsoSOSProps> = ({ onAddXp }) => {
+const { t } = useTranslation();
+const triggers = [
+  t("triggerInternet"),
+  t("triggerSymptom"),
+  t("triggerDiseaseTalk"),
+  t("triggerMessage"),
+  t("triggerUnknown"),
+];
+
+const emotions = [
+  t("emotionFear"),
+  t("emotionAnxiety"),
+  t("emotionSadness"),
+  t("emotionFrustration"),
+  t("emotionConfusion"),
+];
+
+const thoughts = [
+  t("thoughtSeriousDisease"),
+  t("thoughtNeedConfirm"),
+  t("thoughtNeverHappened"),
+  t("thoughtLoseControl"),
+  t("thoughtDontKnow"),
+];
   const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
   const [intensity, setIntensity] = useState(5);
   const [finalIntensity, setFinalIntensity] = useState(5);
-  
+const lastUse = localStorage.getItem("confia_last_impulse_use_v1");
+
+const impulseCount = Number(
+  localStorage.getItem("confia_impulse_count_v1") || "0"
+);
+
+const daysWithoutUse =
+  lastUse !== null
+    ? Math.floor(
+        (Date.now() - new Date(lastUse).getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
+    : null;  
   // Estados de seleção
   const [trigger, setTrigger] = useState<Trigger | null>(null);
   const [emotion, setEmotion] = useState<Emotion | null>(null);
@@ -92,35 +105,33 @@ export const ImpulsoSOS: React.FC<ImpulsoSOSProps> = ({ onAddXp }) => {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 const getJustificationPhrase = () => {
-    const tGatilho = trigger ? trigger.replace(/^[^w]*/, "") : "um gatilho inesperado";
-    const tEmocao = emotion ? emotion.toLowerCase() : "apreensão";
-    const tPensamento = thought ? thought.replace(/\.$/, "") : "precisa de confirmar algo";
+  const tGatilho = trigger ? trigger.replace(/^[^w]*/, "") : t("unexpectedTrigger");
+  const tEmocao = emotion ? emotion.toLowerCase() : t("apprehension");
+  const tPensamento = thought ? thought.replace(/\.$/, "") : t("needsConfirmation");
 
-    return `Notei que quando ocorreu "${tGatilho}", a sua mente reagiu com ${tEmocao} sob o pensamento de que "${tPensamento}". Lembre-se de que isto é apenas um momento de forte apreensão do seu sistema de alerta, e não um facto real. O seu corpo está apenas a tentar proteger-se. Respire e acolha este sinal de forma positiva: ele mostra o quanto se importa consigo, mas agora está em segurança.`;
-  };
+  return t("justificationPhrase", {
+    trigger: tGatilho,
+    emotion: tEmocao,
+    thought: tPensamento
+  });
+};
 
-  const getPsychoeducationMessage = () => {
-    let message = "";
+const getPsychoeducationMessage = () => {
+  switch (trigger) {
+    case "🌐 Vi algo na Internet":
+      return t("psychoInternet");
 
-    switch (trigger) {
-      case "🌐 Vi algo na Internet":
-        message += "Indicou que o impulso surgiu depois de ver informação na Internet. Quando estamos ansiosos, é muito comum procurar respostas online. Embora isso possa trazer algum alívio imediato, também aumenta a probabilidade de encontrar informação preocupante.\n\n";
-        break;
+    case "🧠 Senti um sintoma":
+      return t("psychoSymptom");
 
-      case "🧠 Senti um sintoma":
-        message += "Indicou que tudo começou após sentir um sintoma físico. Quando existe ansiedade com a saúde, o nosso corpo fica hipervigilante, transformando pequenas sensações normais em sinais de perigo.\n\n";
-        break;
+    case "💬 Alguém falou de doenças":
+      return t("psychoDiseaseTalk");
 
-      case "💬 Alguém falou de doenças":
-        message += "Indicou que o gatilho foi ouvir conversas sobre saúde ou doenças. O nosso cérebro associa imediatamente essas histórias ao nosso próprio bem-estar, ativando o sistema de alerta.\n\n";
-        break;
+    default:
+      return t("psychoDefault");
+  }
+};
 
-      default:
-        message += "Nem sempre conseguimos identificar o que desencadeou o impulso. Isso é perfeitamente normal.\n\n";
-    }
-
-    return message;
-  };
 
   const finishSOS = () => {
     saveEpisode({
@@ -153,8 +164,8 @@ const getJustificationPhrase = () => {
   if (completed) {
     return (
       <div style={{ padding: "20px", textAlign: "center", fontFamily: "sans-serif" }}>
-        <h2>🎉 Concluído com Sucesso!</h2>
-        <p>Parabéns por acolher a sua mente e gerir o seu impulso. Ganhou 30 XP!</p>
+       <h2>{t("sosCompleted")}</h2>
+        <p>{t("impulseCongratulations")}</p>
       </div>
     );
   }
@@ -163,14 +174,53 @@ const getJustificationPhrase = () => {
   if (!started) {
     return (
       <div style={{ padding: "20px", textAlign: "center", fontFamily: "sans-serif" }}>
-        <h2>Instante SOS 🚨</h2>
-        <p>Sente um impulso ou ansiedade? Vamos focar-nos e gerir isto juntos.</p>
+        <h2>{t("sosMoment")}</h2>
+        <p>{t("sosDescription")}</p>
         <button 
-          onClick={() => { setStarted(true); setStep(1); }}
+onClick={() => {
+  localStorage.setItem(
+    "confia_last_impulse_use_v1",
+    new Date().toISOString()
+  );
+
+  const count = Number(
+    localStorage.getItem("confia_impulse_count_v1") || "0"
+  );
+
+  localStorage.setItem(
+    "confia_impulse_count_v1",
+    String(count + 1)
+  );
+
+  setStarted(true);
+  setStep(1);
+}}
           style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer", marginTop: "15px", background: "#0d6efd", color: "#fff", border: "none", borderRadius: "4px", fontWeight: "bold" }}
         >
-          Começar Exercício
+          {t("startExercise")}
         </button>
+<div
+  style={{
+    marginTop: "18px",
+    padding: "14px",
+    borderRadius: "12px",
+    background: "#F8F1EA",
+    border: "1px solid #E5A88B",
+    textAlign: "left"
+  }}
+>
+<strong>🛡️ {t("impulseHistoryTitle")}</strong>
+
+  <p style={{ marginTop: "10px" }}>
+    {lastUse
+     ? t("impulseLastUsed", { days: daysWithoutUse })
+     : t("impulseNeverUsed")}
+  </p>
+
+  <p>
+   {t("impulseTotalUses", { count: impulseCount })}
+  </p>
+</div>
       </div>
     );
   }
@@ -182,13 +232,13 @@ const getJustificationPhrase = () => {
       <div style={{ background: "#eee", borderRadius: "5px", height: "10px", width: "100%" }}>
         <div style={{ background: "#4CAF50", height: "10px", borderRadius: "5px", width: `${progress}%`, transition: "width 0.3s" }}></div>
       </div>
-      <p style={{ textAlign: "right", fontSize: "12px", color: "#666", margin: "5px 0 20px 0" }}>Progresso: {progress}%</p>
+      <p style={{ textAlign: "right", fontSize: "12px", color: "#666", margin: "5px 0 20px 0" }}>{t("progress")}: {progress}%</p>
 
       {/* Conteúdo Dinâmico dos Passos */}
       <div style={{ margin: "20px 0", minHeight: "260px" }}>
         {step === 1 && (
           <div>
-            <h3>Passo 1: Qual é a intensidade atual do seu impulso? (1 a 10)</h3>
+            <h3>{t("impulseStep1")}</h3>
             <input 
               type="range" min="1" max="10" 
               value={intensity} 
@@ -201,7 +251,7 @@ const getJustificationPhrase = () => {
 
         {step === 2 && (
           <div>
-            <h3>Passo 2: O que despoletou este impulso?</h3>
+           <h3>{t("impulseStep2")}</h3>
             {triggers.map((t) => (
               <button 
                 key={t} 
@@ -216,7 +266,7 @@ const getJustificationPhrase = () => {
 
         {step === 3 && (
           <div>
-            <h3>Passo 3: Que emoção está a acompanhar este impulso?</h3>
+           <h3>{t("impulseStep3")}</h3>
             {emotions.map((e) => (
               <button 
                 key={e} 
@@ -230,7 +280,7 @@ const getJustificationPhrase = () => {
         )}
 {step === 4 && (
         <div>
-          <h3>Passo 4: Qual é o pensamento principal na sua mente?</h3>
+         <h3>{t("impulseStep4")}</h3>
           {thoughts.map((t) => (
             <button
               key={t}
@@ -258,7 +308,7 @@ const getJustificationPhrase = () => {
       )}
 {step === 5 && (
   <div style={{ lineHeight: "1.8" }}>
-    <h3>🧠 Passo 5: Compreender o que está a acontecer</h3>
+   <h3>🧠 {t("impulseStep5")}</h3>
 <div
   style={{
     background: "#FFFFFF",
@@ -280,11 +330,11 @@ const getJustificationPhrase = () => {
       marginBottom: "20px",
     }}
   >
-    ✅ O que identificámos até agora
+   {t("identifiedSoFar")}
   </h4>
 
   <div style={{ marginBottom: "15px" }}>
-    <strong>📍 Gatilho</strong>
+   <strong>📍 {t("trigger")}</strong>
     <div style={{ marginTop: "6px", fontSize: "17px" }}>
       {trigger}
     </div>
@@ -293,7 +343,7 @@ const getJustificationPhrase = () => {
   <hr />
 
   <div style={{ margin: "15px 0" }}>
-    <strong>❤️ Emoção</strong>
+   <strong>❤️ {t("emotion")}</strong>
     <div style={{ marginTop: "6px", fontSize: "17px" }}>
       {emotion}
     </div>
@@ -302,7 +352,7 @@ const getJustificationPhrase = () => {
   <hr />
 
   <div style={{ marginTop: "15px" }}>
-    <strong>💭 Pensamento</strong>
+   <strong>💭 {t("thought")}</strong>
     <div style={{ marginTop: "6px", fontSize: "17px" }}>
       {thought}
     </div>
@@ -344,7 +394,7 @@ const getJustificationPhrase = () => {
             color: "#8B5E3C",
           }}
         >
-          Como funciona o ciclo da ansiedade
+         {t("anxietyCycle")}
         </h4>
 
         <div
@@ -356,23 +406,23 @@ const getJustificationPhrase = () => {
             fontSize: "16px",
           }}
         >
-          😟 Ansiedade
+         😟 {t("cycleAnxiety")}
           <br />
           ↓
           <br />
-          🔍 Pesquisa / Consulta
+          🔍 {t("cycleSearch")}
           <br />
           ↓
           <br />
-          😌 Alívio temporário
+         😌 {t("cycleTemporaryRelief")}
           <br />
           ↓
           <br />
-          ❓ Novas dúvidas
+          ❓ {t("cycleNewDoubts")}
           <br />
           ↓
           <br />
-          😟 Mais ansiedade
+          😟 {t("cycleMoreAnxiety")}
         </div>
 
         <p
@@ -383,9 +433,7 @@ const getJustificationPhrase = () => {
             fontStyle: "italic",
           }}
         >
-          Cada vez que interrompe este ciclo, está a ensinar o seu cérebro que
-          consegue lidar com a ansiedade sem recorrer à procura constante de
-          garantias.
+         {t("cycleExplanation")}
         </p>
       </div>
     </div>
@@ -393,17 +441,17 @@ const getJustificationPhrase = () => {
 )}
         {step === 6 && (
           <div style={{ textAlign: "center", lineHeight: "1.8" }}>
-            <h3>Passo 6: Vamos respirar um pouco 🧘</h3>
-            <p><strong>Inspire</strong> profundamente pelo nariz (4s)...</p>
-            <p><strong>Retenha</strong> o ar nos pulmões (4s)...</p>
-            <p><strong>Expire</strong> lentamente pela boca (4s).</p>
-            <p style={{ fontStyle: "italic", marginTop: "20px", color: "#666" }}>Faça isto mais duas vezes antes de avançar.</p>
+           <h3>{t("impulseStep6")}</h3>
+            <strong>{t("inhale")}</strong> {t("inhaleDescription")}
+           <strong>{t("holdBreath")}</strong> {t("holdBreathDescription")}
+           <strong>{t("exhale")}</strong> {t("exhaleDescription")}
+            <p style={{ fontStyle: "italic", marginTop: "20px", color: "#666" }}>{t("repeatBreathing")}</p>
           </div>
         )}
 
         {step === 7 && (
           <div style={{ textAlign: "center", lineHeight: "1.5" }}>
-            <h3>Passo 7: Âncora de Gratidão (3 Minutos) 📝</h3>
+           <h3>{t("impulseStep7")}</h3>
             
             {/* Caixa de Texto Dinâmica */}
             <div style={{ fontSize: "14px", color: "#2c3e50", backgroundColor: "#eef2f7", padding: "15px", borderRadius: "6px", textAlign: "left", borderLeft: "4px solid #0d6efd", marginBottom: "15px" }}>
@@ -411,7 +459,7 @@ const getJustificationPhrase = () => {
             </div>
 
             <p style={{ fontSize: "15px" }}>
-              Pegue agora numa <strong>folha de papel e caneta</strong>. Escreva um pensamento detalhado de agradecimento sobre algo positivo que o eleve genuinamente (ex: um momento especial com o seu filho, um abraço caloroso, ou algo bom do seu dia).
+             {t("gratitudeExercise")}
             </p>
 
             {/* Secção do Cronómetro */}
@@ -423,13 +471,13 @@ const getJustificationPhrase = () => {
                 onClick={() => setTimerRunning(!timerRunning)}
                 style={{ marginTop: "10px", padding: "8px 16px", background: timerRunning ? "#ffc107" : "#198754", color: timerRunning ? "#000" : "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
               >
-                {timerRunning ? "Pausa" : "Iniciar Tempo"}
+               {timerRunning ? t("pause") : t("startTimer")}
               </button>
               <button 
                 onClick={() => { setTimerRunning(false); setTimeLeft(180); }}
                 style={{ marginLeft: "10px", padding: "8px 16px", background: "#6c757d", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}
               >
-                Reiniciar
+               {t("reset")}
               </button>
             </div>
           </div>
@@ -437,7 +485,7 @@ const getJustificationPhrase = () => {
 
         {step === 8 && (
           <div>
-            <h3>Passo 8: Como avalia a sua intensidade agora após o exercício?</h3>
+           <h3>{t("impulseStep8")}</h3>
             <input 
               type="range" min="1" max="10" 
               value={finalIntensity} 
@@ -456,13 +504,13 @@ const getJustificationPhrase = () => {
           disabled={step === 1} 
           style={{ padding: "10px 20px", cursor: "pointer", background: "#fff", border: "1px solid #ccc", borderRadius: "4px" }}
         >
-          Voltar
+          {t("back")}
         </button>
         <button 
           onClick={nextStep} 
           style={{ padding: "10px 20px", background: "#0d6efd", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold" }}
         >
-          {step === totalSteps ? "Terminar" : "Avançar"}
+         {step === totalSteps ? t("finish") : t("next")}
         </button>
       </div>
     </div>

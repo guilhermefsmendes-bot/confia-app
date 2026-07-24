@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { X, ArrowRight, CheckCircle, Eye, Hand, Ear, Sparkles, Smile, Wind, Droplets, Sun, Globe } from 'lucide-react';
 
 interface TriageModalProps {
@@ -11,6 +12,7 @@ interface TriageModalProps {
 type BranchType = 'initial' | 'terra' | 'vento' | 'agua' | 'sol';
 
 export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAddXp }) => {
+const { t } = useTranslation();
   const [currentBranch, setCurrentBranch] = useState<BranchType>('initial');
   const [branchStep, setBranchStep] = useState(0); // 0 = intro/interactive, 1 = affirmation/closing
   const [selectedPhysicalSymptom, setSelectedPhysicalSymptom] = useState<string | null>(null);
@@ -121,8 +123,8 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                 🌿
               </span>
               <div>
-                <h2 className="text-sm font-black text-[#4E3B36] font-display">Menu de Apoio Natural</h2>
-                <p className="text-[9px] text-[#C97B5E] font-extrabold tracking-widest uppercase font-display">Resgate Guiado para a Ansiedade</p>
+                <h2 className="text-sm font-black text-[#4E3B36] font-display">{t("naturalSupportMenu")}</h2>
+                <p className="text-[9px] text-[#C97B5E] font-extrabold tracking-widest uppercase font-display">{t("guidedAnxietyRescue")}</p>
               </div>
             </div>
             <button
@@ -153,23 +155,23 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                   <div className="w-16 h-16 bg-[#E5A88B]/15 text-[#C97B5E] rounded-full flex items-center justify-center shadow-sm">
                     <CheckCircle size={36} className="animate-bounce" />
                   </div>
-                  <h3 className="text-lg font-black text-[#4E3B36] font-display">Humor Restabelecido!</h3>
+                  <h3 className="text-lg font-black text-[#4E3B36] font-display">{t("moodRestored")}</h3>
                   <p className="text-xs text-slate-500 max-w-xs leading-relaxed font-semibold">
-                    A ansiedade é uma reação natural que diminui quando nos conectamos com elementos simples e orgânicos. Fizeste um excelente trabalho a acalmar o teu corpo hoje.
+                   {t("groundingSuccessMessage")}
                   </p>
                   <div className="bg-[#E5A88B]/10 border border-[#E5A88B]/20 rounded-[24px] p-5 w-full text-left">
                     <h4 className="text-xs font-black text-[#C97B5E] uppercase tracking-wider mb-1 flex items-center gap-1.5 font-display">
-                      <Sparkles size={14} /> Evolução Amigo
+                     <Sparkles size={14} /> {t("companionEvolution")}
                     </h4>
                     <p className="text-xs text-[#4E3B36] leading-relaxed font-semibold">
-                      O teu amigo sentiu o teu esforço de conexão e ganhou <strong className="text-[#C97B5E]">+25 XP</strong> de evolução!
+                     {t("friendConnectionReward")} <strong className="text-[#C97B5E]">+25 XP</strong> {t("evolutionProgress")}
                     </p>
                   </div>
                   <button
                     onClick={handleReset}
                     className="w-full py-4 bg-[#C97B5E] hover:bg-[#B56A4F] text-white rounded-2xl font-black text-xs uppercase tracking-wider font-display transition-all shadow-lg shadow-[#C97B5E]/20 cursor-pointer"
                   >
-                    Voltar ao Menu Principal
+                   {t("backToMainMenu")}
                   </button>
                 </motion.div>
               ) : currentBranch === 'initial' ? (
@@ -182,13 +184,13 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                 >
                   <div className="space-y-1">
                     <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-1 rounded-lg font-display">
-                      Fase de Escolha
+                     {t("choicePhase")}
                     </span>
                     <h3 className="text-base font-black text-[#4E3B36] font-display">
-                      Sentes a ansiedade a subir?
+                     {t("crisisQuestion")}
                     </h3>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-                      Não lutes contra a sensação. Vamos escolher um caminho natural e orgânico para te ancorar suavemente ao presente:
+                     {t("choiceDescription")}
                     </p>
                   </div>
 
@@ -202,8 +204,8 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                         <Globe size={18} />
                       </span>
                       <div>
-                        <h4 className="text-xs font-black text-[#4E3B36]">🌿 Conexão com a Terra</h4>
-                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Ancoragem sensorial 5-3-1 focada em elementos naturais ao teu redor.</p>
+                        <h4 className="text-xs font-black text-[#4E3B36]">{t("groundConnection")}</h4>
+                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{t("groundingDescription")}</p>
                       </div>
                     </button>
 
@@ -215,8 +217,8 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                         <Wind size={18} />
                       </span>
                       <div>
-                        <h4 className="text-xs font-black text-[#4E3B36]">💨 O Sopro do Vento</h4>
-                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Respiração quadrada rítmica para oxigenar e abrandar os batimentos cardíacos.</p>
+                        <h4 className="text-xs font-black text-[#4E3B36]">{t("windBreath")}</h4>
+                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{t("boxBreathingDescription")}.</p>
                       </div>
                     </button>
 
@@ -228,8 +230,8 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                         <Droplets size={18} />
                       </span>
                       <div>
-                        <h4 className="text-xs font-black text-[#4E3B36]">💧 O Fluxo da Água Fria</h4>
-                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Ativação do reflexo vagal com o poder calmante fisiológico do frio.</p>
+                        <h4 className="text-xs font-black text-[#4E3B36]">{t("coldWaterFlow")}</h4>
+                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{t("coldWaterDescription")}</p>
                       </div>
                     </button>
 
@@ -241,8 +243,8 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                         <Sun size={18} />
                       </span>
                       <div>
-                        <h4 className="text-xs font-black text-[#4E3B36]">🌞 O Calor do Sol</h4>
-                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Relaxamento muscular progressivo simulando o calor reconfortante da luz solar.</p>
+                        <h4 className="text-xs font-black text-[#4E3B36]">{t("sunWarmth")}</h4>
+                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{t("sunRelaxationDescription")}</p>
                       </div>
                     </button>
                   </div>
@@ -254,22 +256,22 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                     <div className="space-y-4">
                       <div className="space-y-1">
                         <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-0.5 rounded-lg font-display">
-                          🌿 Passo 1 de 2
+                      🌿 {t("step")} 1 {t("of")} 2
                         </span>
-                        <h3 className="text-base font-black text-[#4E3B36] font-display">Ancoragem à Terra</h3>
+                        <h3 className="text-base font-black text-[#4E3B36] font-display">{t("earthGrounding")}</h3>
                         <p className="text-xs text-slate-500 font-medium">
-                          A ansiedade cria pensamentos rápidos. Vamos forçar a mente a conectar-se com o espaço físico real e natural ao teu redor:
+                         {t("earthDescription")}
                         </p>
                       </div>
 
                       <div className="bg-[#FAF5F0] border border-[#E5A88B]/15 rounded-2xl p-4.5 space-y-3">
                         <div className="space-y-1">
                           <label className="text-xs font-bold text-[#4E3B36] flex items-center gap-1.5">
-                            <Eye size={13} className="text-[#C97B5E]" /> 1. Vês algo verde ou orgânico à tua volta?
+                           <Eye size={13} className="text-[#C97B5E]" /> 1. {t("earthSeeQuestion")}
                           </label>
                           <input
                             type="text"
-                            placeholder="Ex: Uma planta, a luz do sol, o céu, uma flor..."
+                           placeholder={t("earthExample")}
                             value={terraSee}
                             onChange={(e) => setTerraSee(e.target.value)}
                             className="w-full px-3 py-2 text-xs border border-slate-200/80 rounded-xl bg-white focus:outline-none focus:border-[#E5A88B] text-[#4E3B36]"
@@ -278,11 +280,11 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
 
                         <div className="space-y-1">
                           <label className="text-xs font-bold text-[#4E3B36] flex items-center gap-1.5">
-                            <Hand size={13} className="text-[#C97B5E]" /> 2. Toca numa textura natural que consigas alcançar
+                           <Hand size={13} className="text-[#C97B5E]" /> 2. {t("earthTouchQuestion")}
                           </label>
                           <input
                             type="text"
-                            placeholder="Ex: Mesa de madeira, tecido da tua roupa, a tua pele..."
+                           placeholder={t("touchExample")}
                             value={terraTouch}
                             onChange={(e) => setTerraTouch(e.target.value)}
                             className="w-full px-3 py-2 text-xs border border-slate-200/80 rounded-xl bg-white focus:outline-none focus:border-[#E5A88B] text-[#4E3B36]"
@@ -291,11 +293,11 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
 
                         <div className="space-y-1">
                           <label className="text-xs font-bold text-[#4E3B36] flex items-center gap-1.5">
-                            <Ear size={13} className="text-[#C97B5E]" /> 3. Tenta focar-te e ouvir um som no ambiente
+                           <Ear size={13} className="text-[#C97B5E]" /> 3. {t("earthHearQuestion")}
                           </label>
                           <input
                             type="text"
-                            placeholder="Ex: Vento lá fora, o teu batimento, respiração, silêncio..."
+                           placeholder={t("soundExample")}
                             value={terraHear}
                             onChange={(e) => setTerraHear(e.target.value)}
                             className="w-full px-3 py-2 text-xs border border-slate-200/80 rounded-xl bg-white focus:outline-none focus:border-[#E5A88B] text-[#4E3B36]"
@@ -307,17 +309,17 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                     <div className="space-y-4">
                       <div className="space-y-1">
                         <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-0.5 rounded-lg font-display">
-                          🌿 Passo 2 de 2
+                         🌿 {t("step")} 2 {t("of")} 2
                         </span>
-                        <h3 className="text-base font-black text-[#4E3B36] font-display">Firmeza de Raízes</h3>
+                        <h3 className="text-base font-black text-[#4E3B36] font-display">{t("rootStrength")}</h3>
                       </div>
 
                       <div className="bg-[#FFF0E8]/50 border border-[#E5A88B]/20 rounded-[24px] p-5 text-center space-y-3 shadow-inner">
                         <p className="text-sm font-semibold italic text-[#4E3B36] leading-relaxed">
-                          "Imagina o teu corpo como uma árvore forte, com raízes invisíveis e profundas ancoradas no chão. O vento sopra com força nas tuas folhas, mas o teu tronco mantém-se inabalável e firme. Deixa o vento passar... estás seguro."
+                         {t("treeGroundingText")}
                         </p>
                         <span className="inline-block text-[10px] font-bold text-[#C97B5E] bg-white px-3 py-1 rounded-full border border-[#E5A88B]/15">
-                          Sente os pés bem assentes no chão
+                         {t("feetGrounded")}
                         </span>
                       </div>
                     </div>
@@ -330,11 +332,11 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                     <div className="flex flex-col items-center space-y-4">
                       <div className="text-center space-y-1">
                         <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-0.5 rounded-lg font-display">
-                          💨 Passo 1 de 2
+                         💨 {t("step")} 1 {t("of")} 2
                         </span>
-                        <h3 className="text-base font-black text-[#4E3B36] font-display">Respiração Quadrada da Brisa</h3>
+                        <h3 className="text-base font-black text-[#4E3B36] font-display">{t("breezeBreathing")}</h3>
                         <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed font-semibold">
-                          Vamos imitar o ritmo sereno e contínuo do vento para restaurar o equilíbrio interno. Foca-te no círculo abaixo:
+                         {t("windBreathingIntro")}
                         </p>
                       </div>
 
@@ -355,7 +357,11 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                         {/* Interactive Circle */}
                         <div className="z-10 w-28 h-28 bg-white border-4 border-[#E5A88B] rounded-full flex flex-col items-center justify-center text-center shadow-md">
                           <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C97B5E] font-display">
-                            {breathState}
+{breathState === "Inalar" && t("inhale")}
+{breathState === "Segurar" && t("hold")}
+{breathState === "Exalar" && t("exhale")}
+{breathState === "Pausar Vazio" && t("pauseEmpty")}                           
+
                           </span>
                           <span className="text-2xl font-mono font-black text-[#4E3B36]">
                             {breathCounter}s
@@ -364,27 +370,27 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                       </div>
 
                       <p className="text-[11px] font-bold text-center text-slate-500 max-w-xs leading-relaxed">
-                        {breathState === 'Inalar' && 'Puxa o ar lentamente pelo nariz imaginando uma brisa fresca...'}
-                        {breathState === 'Segurar' && 'Mantém a frescura no teu peito, relaxa os ombros...'}
-                        {breathState === 'Exalar' && 'Liberta o ar morno e toda a tensão pela boca...'}
-                        {breathState === 'Pausar Vazio' && 'Aguarda um pouco sem ar, descontraindo a mente...'}
+{breathState === 'Inalar' && t("windInhale")}
+{breathState === 'Segurar' && t("windHold")}
+{breathState === 'Exalar' && t("windExhale")}
+                       {breathState === 'Pausar Vazio' && t("holdBreathMessage")}
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       <div className="space-y-1">
                         <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-0.5 rounded-lg font-display">
-                          💨 Passo 2 de 2
+                          💨 {t("step")} 2 {t("of")} 2
                         </span>
-                        <h3 className="text-base font-black text-[#4E3B36] font-display">Suspiro Libertador</h3>
+                        <h3 className="text-base font-black text-[#4E3B36] font-display">{t("liberatingSigh")}</h3>
                       </div>
 
                       <div className="bg-[#FFF0E8]/50 border border-[#E5A88B]/20 rounded-[24px] p-5 text-center space-y-3.5 shadow-inner">
                         <p className="text-sm font-semibold italic text-[#4E3B36] leading-relaxed">
-                          "O oxigénio é o remédio natural mais rápido do corpo. Com esta respiração rítmica, deste indicação direta ao teu coração de que não há perigo. Tu comandas o teu ritmo."
+                         {t("breathingExplanation")}
                         </p>
                         <div className="p-3 bg-white border border-[#E5A88B]/15 rounded-xl text-[10px] text-slate-500 font-bold leading-relaxed">
-                          Faz um último suspiro longo e barulhento pela boca... Solta tudo!
+                         {t("sighInstruction")}
                         </div>
                       </div>
                     </div>
@@ -397,11 +403,11 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                     <div className="space-y-4">
                       <div className="space-y-1">
                         <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-0.5 rounded-lg font-display">
-                          💧 Passo 1 de 2
+                          💨 {t("step")} 1 {t("of")} 2
                         </span>
-                        <h3 className="text-base font-black text-[#4E3B36] font-display">O Poder Fisiológico da Água</h3>
+                        <h3 className="text-base font-black text-[#4E3B36] font-display">{t("waterPower")}</h3>
                         <p className="text-xs text-slate-500 font-medium">
-                          A água fria desencadeia o "Reflexo de Mergulho", ativando de forma automática os nervos reguladores que abrandam a frequência cardíaca. Tenta cumprir um destes gestos simples:
+                         {t("waterExplanation")}
                         </p>
                       </div>
 
@@ -416,7 +422,7 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-lg">💧</span>
-                            <span className="text-xs font-bold">Molhei o rosto ou pulsos com água fria</span>
+                            <span className="text-xs font-bold">{t("coldWaterActionFace")}</span>
                           </div>
                           <span className={`w-5 h-5 rounded-md border flex items-center justify-center text-xs font-bold ${
                             waterSplashed ? 'bg-[#C97B5E] border-[#C97B5E] text-white' : 'border-slate-300'
@@ -435,7 +441,7 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-lg">🥤</span>
-                            <span className="text-xs font-bold">Bebi um copo de água fria devagar</span>
+                            <span className="text-xs font-bold">{t("coldWaterActionDrink")}</span>
                           </div>
                           <span className={`w-5 h-5 rounded-md border flex items-center justify-center text-xs font-bold ${
                             waterSip ? 'bg-[#C97B5E] border-[#C97B5E] text-white' : 'border-slate-300'
@@ -446,24 +452,24 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                       </div>
 
                       <p className="text-[10px] text-[#C97B5E] text-center font-bold">
-                        Dica: Sentir o frio do gelo ou lavar as mãos também ajuda imenso!
+                       {t("waterTip")}
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       <div className="space-y-1">
                         <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-0.5 rounded-lg font-display">
-                          💧 Passo 2 de 2
+                          💨 {t("step")} 2 {t("of")} 2
                         </span>
-                        <h3 className="text-base font-black text-[#4E3B36] font-display">Seguir o Fluxo</h3>
+                        <h3 className="text-base font-black text-[#4E3B36] font-display">{t("followFlow")}</h3>
                       </div>
 
                       <div className="bg-[#FFF0E8]/50 border border-[#E5A88B]/20 rounded-[24px] p-5 text-center space-y-3 shadow-inner">
                         <p className="text-sm font-semibold italic text-[#4E3B36] leading-relaxed">
-                          "A ansiedade funciona como um rio agitado. Não tentes travar o fluxo ou nadar contra a corrente, pois cansas-te. Limita-te a flutuar e a deixar que a corrente passe de largo. Logo a água voltará a ficar calma."
+                         {t("riverMetaphor")}
                         </p>
                         <span className="inline-block text-[10px] font-bold text-[#C97B5E] bg-white px-3 py-1 rounded-full border border-[#E5A88B]/15">
-                          Aceita o momento presente
+                         {t("acceptPresent")}
                         </span>
                       </div>
                     </div>
@@ -476,11 +482,11 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                     <div className="space-y-4">
                       <div className="space-y-1">
                         <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-0.5 rounded-lg font-display">
-                          🌞 Passo 1 de 2
+                         💨 {t("step")} 1 {t("of")} 2
                         </span>
-                        <h3 className="text-base font-black text-[#4E3B36] font-display">Aquecer e Derreter a Tensão</h3>
+                        <h3 className="text-base font-black text-[#4E3B36] font-display">{t("warmRelease")}</h3>
                         <p className="text-xs text-slate-500 font-medium">
-                          A tensão física acumula-se sem darmos conta. Imagina uma luz solar morna a tocar no teu corpo e relaxa estas três áreas principais:
+                         {t("sunExplanation")}
                         </p>
                       </div>
 
@@ -489,15 +495,15 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                           solStep === 1 ? 'border-[#E5A88B] bg-[#FFF0E8]/25' : 'border-slate-100 bg-[#FAF5F0]'
                         }`}>
                           <div className="space-y-0.5">
-                            <span className="text-[10px] font-bold text-[#C97B5E] uppercase tracking-wider">Zona 1: Maxilar</span>
-                            <p className="text-xs font-bold text-[#4E3B36]">Entreabre os dentes e relaxa a boca.</p>
+                            <span className="text-[10px] font-bold text-[#C97B5E] uppercase tracking-wider">{t("zoneJaw")}</span>
+                            <p className="text-xs font-bold text-[#4E3B36]">{t("jawInstruction")}</p>
                           </div>
                           {solStep === 1 ? (
                             <button
                               onClick={() => setSolStep(2)}
                               className="text-[10px] font-extrabold bg-[#E5A88B] text-white px-3 py-1.5 rounded-lg font-display cursor-pointer"
                             >
-                              Feito &rarr;
+                             {t("done")} &rarr;
                             </button>
                           ) : (
                             <span className="text-xs text-[#C97B5E]">✓</span>
@@ -508,15 +514,15 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                           solStep === 2 ? 'border-[#E5A88B] bg-[#FFF0E8]/25' : 'border-slate-100 bg-[#FAF5F0]'
                         }`}>
                           <div className="space-y-0.5">
-                            <span className="text-[10px] font-bold text-[#C97B5E] uppercase tracking-wider">Zona 2: Ombros</span>
-                            <p className="text-xs font-bold text-[#4E3B36]">Deixa cair os ombros longe das orelhas.</p>
+                            <span className="text-[10px] font-bold text-[#C97B5E] uppercase tracking-wider">{t("zoneShoulders")}</span>
+                            <p className="text-xs font-bold text-[#4E3B36]">{t("shouldersInstruction")}</p>
                           </div>
                           {solStep === 2 ? (
                             <button
                               onClick={() => setSolStep(3)}
                               className="text-[10px] font-extrabold bg-[#E5A88B] text-white px-3 py-1.5 rounded-lg font-display cursor-pointer"
                             >
-                              Feito &rarr;
+                             {t("done")} &rarr;
                             </button>
                           ) : solStep > 2 ? (
                             <span className="text-xs text-[#C97B5E]">✓</span>
@@ -529,15 +535,15 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                           solStep === 3 ? 'border-[#E5A88B] bg-[#FFF0E8]/25' : 'border-slate-100 bg-[#FAF5F0]'
                         }`}>
                           <div className="space-y-0.5">
-                            <span className="text-[10px] font-bold text-[#C97B5E] uppercase tracking-wider">Zona 3: Mãos</span>
-                            <p className="text-xs font-bold text-[#4E3B36]">Abre os dedos e deita-os sobre a perna.</p>
+                            <span className="text-[10px] font-bold text-[#C97B5E] uppercase tracking-wider">{t("zoneHands")}</span>
+                            <p className="text-xs font-bold text-[#4E3B36]">{t("handsInstruction")}</p>
                           </div>
                           {solStep === 3 ? (
                             <button
                               onClick={() => setSolStep(4)}
                               className="text-[10px] font-extrabold bg-[#E5A88B] text-white px-3 py-1.5 rounded-lg font-display cursor-pointer"
                             >
-                              Feito
+                             {t("done")}
                             </button>
                           ) : solStep > 3 ? (
                             <span className="text-xs text-[#C97B5E]">✓</span>
@@ -551,17 +557,17 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                     <div className="space-y-4">
                       <div className="space-y-1">
                         <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-0.5 rounded-lg font-display">
-                          🌞 Passo 2 de 2
+                         💨 {t("step")} 2 {t("of")} 2
                         </span>
-                        <h3 className="text-base font-black text-[#4E3B36] font-display">Leveza e Presença</h3>
+                        <h3 className="text-base font-black text-[#4E3B36] font-display">{t("lightnessPresence")}</h3>
                       </div>
 
                       <div className="bg-[#FFF0E8]/50 border border-[#E5A88B]/20 rounded-[24px] p-5 text-center space-y-3 shadow-inner">
                         <p className="text-sm font-semibold italic text-[#4E3B36] leading-relaxed">
-                          "Imagina que todo o teu corpo está a receber o calor suave de um dia de primavera. A tensão escorre como neve a derreter ao sol. Estás aqui, vivo, seguro, e em total calma."
+                         {t("warmthMetaphor")}
                         </p>
                         <span className="inline-block text-[10px] font-bold text-[#C97B5E] bg-white px-3 py-1 rounded-full border border-[#E5A88B]/15">
-                          Sente o calor no teu peito
+                         {t("feelChestWarmth")}
                         </span>
                       </div>
                     </div>
@@ -578,7 +584,7 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                 onClick={handleBackStep}
                 className="px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-[#4E3B36] transition-colors cursor-pointer"
               >
-                {currentBranch === 'initial' ? 'Cancelar' : 'Anterior'}
+               {currentBranch === 'initial' ? t("cancel") : t("previous")}
               </button>
 
               {currentBranch !== 'initial' && (
@@ -597,7 +603,7 @@ export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAdd
                       : 'bg-[#C97B5E] hover:bg-[#B56A4F] text-white shadow-md shadow-[#C97B5E]/15'
                   }`}
                 >
-                  {branchStep === 1 ? 'Concluir' : 'Seguinte'}
+                {branchStep === 1 ? t("complete") : t("next")}
                   <ArrowRight size={14} />
                 </button>
               )}

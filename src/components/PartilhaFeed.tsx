@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Share2, Heart, MessageSquarePlus, Smile, RefreshCw, Send, CheckCircle } from 'lucide-react';
 import { SharePost } from '../types';
-
+import { useTranslation } from "react-i18next";
 interface PartilhaFeedProps {
   posts: SharePost[];
   onAddPost: (feeling: string, message: string) => void;
@@ -19,6 +19,7 @@ const FEELINGS_LIST = [
 ];
 
 export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({ posts, onAddPost, onLikePost }) => {
+const { t } = useTranslation();
   const [selectedFeeling, setSelectedFeeling] = useState('Calmo');
   const [message, setMessage] = useState('');
   const [showCompose, setShowCompose] = useState(false);
@@ -66,7 +67,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({ posts, onAddPost, on
             className="p-3.5 bg-[#FFF0E8] border border-[#E5A88B]/25 rounded-2xl flex items-center gap-2 text-[#C97B5E] text-xs font-bold shadow-sm"
           >
             <CheckCircle size={16} className="text-[#C97B5E] shrink-0" />
-            <span>Obrigado por partilhar! A sua mensagem foi enviada para o painel de partilha.</span>
+            <span>{t("shareSuccess")}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -82,8 +83,8 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({ posts, onAddPost, on
               <MessageSquarePlus size={18} />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-[#4E3B36]">Como te sentes agora?</h3>
-              <p className="text-[10px] text-[#C97B5E] font-semibold mt-0.5">Partilha de forma livre e segura</p>
+              <h3 className="text-xs font-bold text-[#4E3B36]">{t("howDoYouFeel")}</h3>
+              <p className="text-[10px] text-[#C97B5E] font-semibold mt-0.5">{t("safeSharing")}</p>
             </div>
           </div>
           <span className="text-[11px] font-bold text-[#C97B5E] group-hover:translate-x-1 transition-transform">
@@ -124,7 +125,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({ posts, onAddPost, on
           {/* Text Area */}
           <div className="space-y-1.5">
             <textarea
-              placeholder="Descreve as tuas sensações ou vitórias hoje de forma reconfortante... Ex: 'Hoje senti os meus batimentos subir, mas lembrei-me de fechar os olhos e contar até 10...'"
+             placeholder={t("sharePlaceholder")}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               maxLength={220}
@@ -144,7 +145,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({ posts, onAddPost, on
               onClick={() => setShowCompose(false)}
               className="flex-1 py-3 text-xs text-slate-500 hover:bg-slate-50 rounded-xl font-bold border border-slate-200/60 cursor-pointer"
             >
-              Cancelar
+             {t("cancel")}
             </button>
             <button
               type="submit"

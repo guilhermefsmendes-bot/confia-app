@@ -1,39 +1,84 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from 'motion/react';
 import { ShieldCheck, Flame, Heart, Sparkles, MessageCircleCode } from 'lucide-react';
 import { AvatarState } from '../types';
-
 interface AvatarProps {
   avatar: AvatarState;
   onPet: () => void;
+  celebrating?: boolean;
+  levelUpTrigger?: boolean;
+  moodRating?: number;
+  memoryMessage?: string;
 }
+export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet, celebrating, levelUpTrigger, moodRating, memoryMessage }) => {
 
+const getRandomMessage = () => {
+  const messages = t("avatarMessages", { returnObjects: true }) as string[];
+  return messages[Math.floor(Math.random() * messages.length)];
+};
+
+const [message, setMessage] = useState("");
+const { t, i18n } = useTranslation();
 const AFFIRMATIONS = [
-  "Estou muito orgulhoso do teu progresso hoje! 🌸",
-  "Respira fundo comigo... Está tudo bem. 🌿",
-  "Cada pequeno passo que dás é uma grande vitória! ✨",
-  "Lembra-te de beber água e esticar os ombros hoje. 💧",
-  "Fico tão feliz quando cuidamos um do outro! 🥰",
-  "A ansiedade é apenas uma nuvem, tu és o céu inteiro. ☁️",
-  "Não te cobres tanto. Estás a fazer o teu melhor. ☀️",
-  "Que bom que estás aqui a cuidar da tua mente! 🧘‍♂️"
+  t("affirmation1"),
+  t("affirmation2"),
+  t("affirmation3"),
+  t("affirmation4"),
+  t("affirmation5"),
+  t("affirmation6"),
+  t("affirmation7"),
+  t("affirmation8"),
 ];
-
-export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
   const [bubbleText, setBubbleText] = useState<string>("");
   const [showBubble, setShowBubble] = useState(false);
+useEffect(() => {
+  if (levelUpTrigger) {
+setBubbleText(t("levelUpMessage"));
+    setShowBubble(true);
+
+    const timer = setTimeout(() => {
+      setShowBubble(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }
+}, [levelUpTrigger]);
   const [isJumping, setIsJumping] = useState(false);
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
 
-  // Show a welcome message on mount
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setBubbleText(`Olá! Eu sou o teu companheiro de calma. Vamos respirar juntos? 💚`);
-      setShowBubble(true);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+// Show a welcome message on mount
+useEffect(() => {
+  const timer = setTimeout(() => {
 
+    const showRandomMessage = Math.random() < 0.2;
+if (moodRating !== undefined && moodRating <= 3) {
+  setBubbleText(t("avatarLowMood"));
+} else if (moodRating !== undefined && moodRating >= 8) {
+  setBubbleText(t("avatarHighMood"));
+} else if (stage === 1) {
+  setBubbleText(t("avatarStageMessage1"));
+} else if (stage >= 10) {
+  setBubbleText(t("avatarStageMessage10"));
+} else if (stage >= 5) {
+  setBubbleText(t("avatarStageMessage5"));
+} else {
+  const showRandomMessage = Math.random() < 0.2;
+
+  if (showRandomMessage) {
+    const messages = t("avatarMessages", { returnObjects: true }) as string[];
+    const randomIdx = Math.floor(Math.random() * messages.length);
+    setBubbleText(messages[randomIdx]);
+  } else {
+setBubbleText(memoryMessage || t("avatarWelcome"));
+  }
+}
+    setShowBubble(true);
+
+  }, 1000);
+
+  return () => clearTimeout(timer);
+}, [i18n.language]);
   const handleInteraction = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isJumping) return;
     setIsJumping(true);
@@ -46,11 +91,11 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
     const newHeart = { id: Date.now(), x, y };
     setHearts(prev => [...prev, newHeart]);
 
-    // Choose random affirmative speech bubble
-    const randomIdx = Math.floor(Math.random() * AFFIRMATIONS.length);
-    setBubbleText(AFFIRMATIONS[randomIdx]);
-    setShowBubble(true);
-
+// Choose random companion message
+const messages = t("avatarMessages", { returnObjects: true }) as string[];
+const randomIdx = Math.floor(Math.random() * messages.length);
+setBubbleText(messages[randomIdx]);
+setShowBubble(true);
     setTimeout(() => {
       setIsJumping(false);
     }, 800);
@@ -65,38 +110,39 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
   const getStageDetails = (level: number) => {
     if (level === 1) {
       return {
-        name: "Ovo da Serenidade",
+      name: t("stage1Name"),
         color: "from-teal-100 to-emerald-200",
         borderColor: "border-teal-300",
-        desc: "Um pequeno ovo luminoso que absorve a tua calma para chocar."
+       desc: t("stage1Desc")
       };
     } else if (level === 2) {
       return {
-        name: "Bebé Calmo",
+       name: t("stage2Name"),
+
         color: "from-emerald-200 to-green-300",
         borderColor: "border-emerald-300",
-        desc: "Ainda pequenino, adora respirações profundas e água fresca."
+       desc: t("stage2Desc")
       };
     } else if (level === 3) {
       return {
-        name: "Criança Curiosa",
+       name: t("stage3Name"),
         color: "from-emerald-200 to-cyan-300",
         borderColor: "border-cyan-300",
-        desc: "Cresceu asas de luz e adora explorar sentimentos calmos."
+       desc: t("stage3Desc")
       };
     } else if (level === 4) {
       return {
-        name: "Jovem Guardião",
+       name: t("stage4Name"),
         color: "from-sky-200 to-indigo-200",
         borderColor: "border-sky-300",
-        desc: "Com orelhas mágicas e cauda fofa, protege-te de pensamentos agitados."
+       desc: t("stage4Desc")
       };
     } else {
       return {
-        name: "Sábio da Paz",
+       name: t("stage5Name"),
         color: "from-indigo-200 via-purple-200 to-pink-200",
         borderColor: "border-purple-300",
-        desc: "Um guardião celestial meditando numa nuvem de tranquilidade."
+       desc: t("stage5Desc")
       };
     }
   };
@@ -105,12 +151,18 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
 
   // SVG representation based on level
   const renderAvatarSVG = () => {
-    const isLevel1 = avatar.level === 1;
-    const isLevel2 = avatar.level === 2;
-    const isLevel3 = avatar.level === 3;
-    const isLevel4 = avatar.level === 4;
-    const isLevel5 = avatar.level >= 5;
+const stage = Math.min(10, avatar.level);
 
+const isLevel1 = stage === 1;
+const isLevel2 = stage === 2;
+const isLevel3 = stage === 3;
+const isLevel4 = stage === 4;
+const isLevel5 = stage === 5;
+const isLevel6 = stage === 6;
+const isLevel7 = stage === 7;
+const isLevel8 = stage === 8;
+const isLevel9 = stage === 9;
+const isLevel10 = stage === 10;
     return (
       <svg
         viewBox="0 0 200 200"
@@ -148,20 +200,20 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
                 <stop offset="100%" stopColor="#6366f1" />
               </>
             )}
-            {isLevel5 && (
-              <>
-                <stop offset="0%" stopColor="#818cf8" />
-                <stop offset="50%" stopColor="#c084fc" />
-                <stop offset="100%" stopColor="#f472b6" />
-              </>
-            )}
+{(isLevel5 || isLevel6 || isLevel7 || isLevel8 || isLevel9 || isLevel10) && (
+  <>
+    <stop offset="0%" stopColor="#818cf8" />
+    <stop offset="50%" stopColor="#c084fc" />
+    <stop offset="100%" stopColor="#f472b6" />
+  </>
+)}
           </linearGradient>
         </defs>
 
         <circle cx="100" cy="110" r="80" fill="url(#glow)" />
+{/* Level 5+ Cloud Base */}
+{(isLevel5 || isLevel6 || isLevel7 || isLevel8 || isLevel9 || isLevel10) && (
 
-        {/* Level 5 Cloud Base */}
-        {isLevel5 && (
           <motion.g
             animate={{
               y: [0, 4, 0],
@@ -241,20 +293,88 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
         )}
 
         {/* Core Body Container - with breathing motion */}
+{celebrating && (
+  <motion.circle
+    cx="100"
+    cy="110"
+    r="90"
+    fill="none"
+    stroke="#fef08a"
+    strokeWidth="4"
+    animate={{
+      opacity: [0, 1, 0],
+      scale: [0.8, 1.2, 0.8],
+    }}
+    transition={{
+      duration: 1,
+      repeat: Infinity,
+    }}
+  />
+)}
+{celebrating && (
+  <motion.circle
+    cx="100"
+    cy="110"
+    r="90"
+    fill="none"
+    stroke="#fef08a"
+    strokeWidth="4"
+    animate={{
+      opacity: [0, 1, 0],
+      scale: [0.8, 1.2, 0.8],
+    }}
+    transition={{
+      duration: 1,
+      repeat: Infinity,
+    }}
+  />
+)}
+
+{celebrating && (
+  <>
+    <motion.text
+      x="55"
+      y="45"
+      fontSize="18"
+    >
+      ⭐
+    </motion.text>
+  </>
+)}
         <motion.g
-          animate={{
-            scaleY: [1, 1.04, 1],
-            scaleX: [1, 0.98, 1],
-            y: [0, -4, 0],
-          }}
-          transition={{
+animate={{
+  scaleY: celebrating ? [1, 1.15, 1] : [1, 1.04, 1],
+  scaleX: celebrating ? [1, 1.08, 1] : [1, 0.98, 1],
+  y: celebrating ? [0, -20, 0] : [0, -4, 0],
+}}          transition={{
             duration: 6, // ultra-slow breathing rhythm
             repeat: Infinity,
             ease: "easeInOut",
           }}
           style={{ transformOrigin: "100px 140px" }}
         >
+
+          {/* Level 6+ Backpack */}
+          {(isLevel6 || isLevel7 || isLevel8 || isLevel9 || isLevel10) && (
+            <g>
+              <path
+                d="M55 95 Q45 110 55 150 Q100 165 145 150 Q155 110 145 95"
+                fill="#92400e"
+                stroke="#451a03"
+                strokeWidth="3"
+              />
+              <path
+                d="M65 100 Q100 85 135 100"
+                fill="none"
+                stroke="#fbbf24"
+                strokeWidth="4"
+              />
+            </g>
+          )}
+
           {/* Main Body Shapes */}
+          {/* Main Body Shapes */}
+
           {isLevel1 ? (
             /* LEVEL 1: EGG */
             <g>
@@ -298,7 +418,7 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
             /* LEVELS 2, 3, 4, 5: CREATURE BODY */
             <g>
               {/* Ears for levels 4 & 5 */}
-              {(isLevel4 || isLevel5) && (
+{(isLevel4 || isLevel5 || isLevel6 || isLevel7 || isLevel8 || isLevel9 || isLevel10) && (
                 <g>
                   {/* Left Long Ear */}
                   <path
@@ -384,7 +504,7 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
                 </g>
               )}
 
-              {isLevel5 && (
+{(isLevel5 || isLevel6 || isLevel7 || isLevel8 || isLevel9 || isLevel10) && (
                 /* Level 5 Angelic Halo */
                 <ellipse
                   cx="100"
@@ -398,6 +518,72 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
                 />
               )}
 
+              {/* Level 7+ Star */}
+              {(isLevel7 || isLevel8 || isLevel9 || isLevel10) && (
+                <g>
+                  <path
+                    d="M100 45 L104 57 L117 57 L107 65 L111 78 L100 70 L89 78 L93 65 L83 57 L96 57 Z"
+                    fill="#facc15"
+                    stroke="#ca8a04"
+                    strokeWidth="2"
+                  />
+                </g>
+              )}
+              {/* Level 8+ Butterfly */}
+              {(isLevel8 || isLevel9 || isLevel10) && (
+                <g>
+                  <ellipse
+                    cx="150"
+                    cy="70"
+                    rx="10"
+                    ry="16"
+                    fill="#c084fc"
+                    stroke="#7e22ce"
+                    strokeWidth="2"
+                  />
+                  <ellipse
+                    cx="165"
+                    cy="70"
+                    rx="10"
+                    ry="16"
+                    fill="#f9a8d4"
+                    stroke="#be185d"
+                    strokeWidth="2"
+                  />
+                  <circle
+                    cx="157"
+                    cy="70"
+                    r="3"
+                    fill="#1f2937"
+                  />
+                </g>
+              )}
+    {/* Level 9+ Aura */}
+              {(isLevel9 || isLevel10) && (
+                <circle
+                  cx="100"
+                  cy="110"
+                  r="88"
+                  fill="none"
+                  stroke="#fef08a"
+                  strokeWidth="4"
+                  opacity="0.5"
+                />
+              )}
+   {/* Level 10 Crown */}
+              {isLevel10 && (
+                <g>
+                  <path
+                    d="M75 45 L85 25 L100 40 L115 25 L125 45 Z"
+                    fill="#facc15"
+                    stroke="#ca8a04"
+                    strokeWidth="3"
+                  />
+                  <circle cx="85" cy="32" r="3" fill="#ef4444" />
+                  <circle cx="100" cy="40" r="3" fill="#3b82f6" />
+                  <circle cx="115" cy="32" r="3" fill="#22c55e" />
+                </g>
+              )}
               {/* Eyes with blinking action */}
               <g>
                 {/* Left Eye */}
@@ -548,24 +734,24 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
       {/* Click instructions */}
       <p className="text-xs text-slate-500 mt-1 mb-4 flex items-center gap-1 bg-white px-3 py-1.5 rounded-full border border-[#E5A88B]/15 shadow-sm shadow-[#E5A88B]/5">
         <Sparkles size={12} className="text-[#E5A88B] animate-pulse" />
-        Toca no teu companheiro para lhe dar carinho (+1 Ponto)
+       {t("petCompanion")}
       </p>
 
       {/* Status Details */}
       <div className="w-full max-w-sm bg-white rounded-[24px] p-5 border border-[#E5A88B]/15 shadow-xl shadow-[#E5A88B]/5">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h3 className="font-bold text-[#4E3B36] text-base">{avatar.name}</h3>
+          <h3 className="font-bold text-[#4E3B36] text-base">{t("avatarName")}</h3>
             <p className="text-xs font-semibold text-[#C97B5E] flex items-center gap-1 mt-0.5">
-              <ShieldCheck size={13} /> Estágio: {stage.name}
+             <ShieldCheck size={13} /> {t("stage")}: {stage.name}
             </p>
           </div>
           <div className="flex flex-col items-end">
             <span className="text-xs font-mono font-bold text-[#C97B5E] bg-[#E5A88B]/10 px-2.5 py-1 rounded-xl">
-              Nível {avatar.level}
+             {t("level")} {avatar.level}
             </span>
             <span className="text-[10px] font-mono text-slate-400 mt-1 flex items-center gap-0.5">
-              <Flame size={10} className="text-[#C97B5E]" /> {avatar.points} Pontos
+             <Flame size={10} className="text-[#C97B5E]" /> {avatar.points} {t("points")}
             </span>
           </div>
         </div>
@@ -577,7 +763,7 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet }) => {
         {/* Progress bar */}
         <div>
           <div className="flex justify-between text-[11px] font-mono font-medium text-slate-400 mb-1">
-            <span>XP do Nível: {avatar.xp} / {avatar.maxXp}</span>
+           <span>XP {t("level")}: {avatar.xp} / {avatar.maxXp}</span>
             <span>{Math.round(levelUpProgress)}%</span>
           </div>
           <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-[2px]">

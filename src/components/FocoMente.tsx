@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Sparkles, 
@@ -35,70 +36,59 @@ interface FocusActivity {
   tip: string;
 }
 
-const ACTIVITIES: FocusActivity[] = [
+const ACTIVITIES = (t: any): FocusActivity[] => [
   {
     id: 'ler',
-    title: 'Ler um Livro ou Artigo',
-    emoji: '📚',
-    icon: <BookOpen size={18} />,
-    description: 'Desliga as notificações e foca-te nas palavras de um texto físico ou digital.',
-    exerciseTitle: 'Leitura Focada de 10 Minutos',
-    exerciseDesc: 'Escolhe um capítulo ou texto que te interesse. Lê sem pressa, prestando atenção à forma como os teus olhos acompanham cada frase. Se a tua mente dispersar, volta suavemente ao texto.',
-    tip: 'Lê de preferência em papel para reduzir o estímulo das luzes azuis e ecrãs.'
+title: t("readBookTitle"),
+description: t("readBookDesc"),
+exerciseTitle: t("readBookExercise"),
+exerciseDesc: t("readBookExerciseDesc"),
+tip: t("readBookTip")
   },
   {
     id: 'escrever',
-    title: 'Escrita Livre / Diário',
-    emoji: '✍️',
-    icon: <PenTool size={18} />,
-    description: 'Liberta pensamentos acumulados transcrevendo-os livremente para o papel.',
-    exerciseTitle: 'Fluxo de Consciência',
-    exerciseDesc: 'Escreve tudo o que te vier à cabeça sem julgar, corrigir erros ou apagar. Pode ser uma lista de gratidão, as tuas preocupações atuais, ou apenas descrever o teu quarto.',
-    tip: 'A escrita manual ajuda a abrandar a velocidade do pensamento ansioso.'
+title: t("writeTitle"),
+description: t("writeDesc"),
+exerciseTitle: t("writeExercise"),
+exerciseDesc: t("writeExerciseDesc"),
+tip: t("writeTip")
   },
   {
     id: 'desenhar',
-    title: 'Desenhar ou Colorir',
-    emoji: '🎨',
-    icon: <Palette size={18} />,
-    description: 'Usa formas, traços e cores para ancorar a tua atenção através da criatividade.',
-    exerciseTitle: 'Rabiscos Conscientes',
-    exerciseDesc: 'Pega num papel e caneta. Desenha formas geométricas repetidas, mandalas, ou tenta fazer um esboço de um objeto simples que esteja mesmo à tua frente (ex: uma caneca ou planta).',
-    tip: 'Foca-te na sensação física do contacto do lápis com o papel.'
+title: t("drawTitle"),
+description: t("drawDesc"),
+exerciseTitle: t("drawExercise"),
+exerciseDesc: t("drawExerciseDesc"),
+tip: t("drawTip")
   },
   {
     id: 'organizar',
-    title: 'Organizar Espaço ou Ficheiros',
-    emoji: '📂',
-    icon: <FolderSync size={18} />,
-    description: 'Arrumar o exterior ajuda a trazer uma sensação instantânea de ordem interna.',
-    exerciseTitle: 'Arrumação Seletiva de 10 Minutos',
-    exerciseDesc: 'Escolhe um canto pequeno: organiza os ícones do teu ambiente de trabalho, limpa a tua pasta de transferências, apaga e-mails antigos, ou arruma a gaveta onde tens as canetas.',
-    tip: 'Começa por um espaço pequeno. Pequenas ações criam grande paz mental.'
+title: t("organizeTitle"),
+description: t("organizeDesc"),
+exerciseTitle: t("organizeExercise"),
+exerciseDesc: t("organizeExerciseDesc"),
+tip: t("organizeTip")
   },
   {
     id: 'artesanato',
-    title: 'Trabalhos Manuais / Origami',
-    emoji: '✂️',
-    icon: <Scissors size={18} />,
-    description: 'Sincroniza o cérebro com tarefas motoras finas e precisas.',
-    exerciseTitle: 'Criação Manual Direcionada',
-    exerciseDesc: 'Experimenta fazer um barquinho ou avião de papel simples, amarra pequenos nós, ou limpa minuciosamente um objeto pequeno. Sente a textura de cada dobra e a precisão do movimento.',
-    tip: 'O toque físico e o esforço de precisão cortam o ciclo de ruminação mental.'
+title: t("craftTitle"),
+description: t("craftDesc"),
+exerciseTitle: t("craftExercise"),
+exerciseDesc: t("craftExerciseDesc"),
+tip: t("craftTip")
   },
   {
     id: 'plantas',
-    title: 'Jardinagem ou Cuidado Ativo',
-    emoji: '🌱',
-    icon: <Sprout size={18} />,
-    description: 'Interage com elementos naturais e seres vivos para desacelerar o ritmo.',
-    exerciseTitle: 'Atenção às Plantas',
-    exerciseDesc: 'Regula ou rega as tuas plantas, limpa o pó das folhas de uma planta doméstica com cuidado, ou separa sementes. Se não tiveres plantas, observa uma árvore pela janela prestando atenção aos detalhes.',
-    tip: 'A biofilia (conexão com a natureza) reduz comprovadamente os níveis de cortisol.'
+title: t("plantsTitle"),
+description: t("plantsDesc"),
+exerciseTitle: t("plantsExercise"),
+exerciseDesc: t("plantsExerciseDesc"),
+tip: t("plantsTip")
   }
 ];
 
 export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
+const { t } = useTranslation();
   const [step, setStep] = useState<StepType>('choice');
   const [selectedActivity, setSelectedActivity] = useState<FocusActivity | null>(null);
 
@@ -150,7 +140,7 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
     if (step === 'proposal') {
       setStep('choice');
     } else if (step === 'timer') {
-      if (confirm('Tens a certeza que queres interromper o teu exercício de foco?')) {
+     if (confirm(t("confirmInterruptFocus"))) {
         setIsActive(false);
         setStep('choice');
       }
@@ -174,10 +164,10 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h3 className="text-sm font-black text-[#4E3B36] flex items-center gap-1.5 font-display uppercase tracking-wider">
-            <Sparkles size={15} className="text-[#E5A88B]" /> Foco da Mente
+           <Sparkles size={15} className="text-[#E5A88B]" /> {t("mindFocus")}
           </h3>
           <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-            Sugerimos ferramentas de foco positivo para ocupar e acalmar os teus pensamentos.
+           {t("focusSuggestion")}
           </p>
         </div>
       </div>
@@ -192,11 +182,11 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
             className="space-y-3"
           >
             <p className="text-xs font-bold text-[#4E3B36] bg-[#FFF0E8]/50 px-3.5 py-2 rounded-xl border border-[#E5A88B]/10">
-              🤔 Escolhe uma atividade que gostas de fazer para te ajudar a focar:
+             🤔 {t("chooseFocusActivity")}
             </p>
 
             <div className="grid grid-cols-1 gap-2">
-              {ACTIVITIES.map(act => (
+             {ACTIVITIES(t).map(act => (
                 <button
                   key={act.id}
                   onClick={() => handleSelectActivity(act)}
@@ -234,7 +224,7 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{selectedActivity.emoji}</span>
                 <div>
-                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-[#C97B5E] font-display">Exercício Recomendado</h4>
+                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-[#C97B5E] font-display">{t("recommendedExercise")}</h4>
                   <h3 className="text-sm font-black text-[#4E3B36] font-display">{selectedActivity.exerciseTitle}</h3>
                 </div>
               </div>
@@ -246,7 +236,7 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
               <div className="flex items-start gap-2 pt-2 border-t border-[#E5A88B]/10 text-[10px] font-semibold text-slate-500">
                 <Lightbulb size={13} className="text-[#C97B5E] shrink-0 mt-0.5 animate-pulse" />
                 <p className="leading-relaxed">
-                  <strong>Dica de Sucesso:</strong> {selectedActivity.tip}
+                 <strong>{t("successTip")}:</strong>
                 </p>
               </div>
             </div>
@@ -256,13 +246,13 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
                 onClick={handleGoBack}
                 className="px-4 py-3 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-xl text-xs font-bold transition-all cursor-pointer"
               >
-                Voltar
+                {t("back")}
               </button>
               <button
                 onClick={handleStartTimer}
                 className="flex-1 py-3 bg-[#C97B5E] hover:bg-[#B56A4F] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider font-display transition-all shadow-md shadow-[#C97B5E]/15 flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <Clock size={14} /> Começar Exercício (10 Min)
+               <Clock size={14} /> {t("startExerciseTimed")}
               </button>
             </div>
           </motion.div>
@@ -278,10 +268,10 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
           >
             <div className="space-y-1">
               <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-0.5 rounded-lg font-display">
-                Foco Ativo: {selectedActivity.title}
+               {t("activeFocus")}: {selectedActivity.title}
               </span>
               <h4 className="text-xs font-bold text-[#4E3B36] max-w-xs leading-relaxed">
-                Deixa o telemóvel de lado e foca-te completamente no exercício.
+               {t("putPhoneAway")}
               </h4>
             </div>
 
@@ -314,7 +304,7 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
                   {formatTime(timeLeft)}
                 </span>
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 font-display">
-                  {isActive ? 'A focar...' : 'Pausado'}
+                 {isActive ? t("focusing") : t("paused")}
                 </span>
               </div>
             </div>
@@ -324,7 +314,7 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
               <button
                 onClick={handleResetTimer}
                 className="p-3 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-xl border border-slate-100 transition-all cursor-pointer"
-                title="Reiniciar"
+               title={t("restart")}
               >
                 <RotateCcw size={15} />
               </button>
@@ -339,7 +329,7 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
               >
                 {isActive ? (
                   <>
-                    <Pause size={14} /> Pausar
+                   <Pause size={14} /> {t("pause")}
                   </>
                 ) : (
                   <>
@@ -352,9 +342,9 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
               <button
                 onClick={handleFinishExercise}
                 className="px-3 py-3 bg-[#E5A88B]/10 hover:bg-[#E5A88B]/20 text-[#C97B5E] border border-[#E5A88B]/20 rounded-xl text-[10px] font-black uppercase tracking-wider font-display transition-all cursor-pointer"
-                title="Concluir exercício mais cedo para testar"
+               title={t("finishEarly")}
               >
-                Concluir Já
+               {t("finishNow")}
               </button>
             </div>
 
@@ -362,7 +352,7 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
               onClick={handleGoBack}
               className="text-[10px] font-bold text-slate-400 hover:text-slate-600 cursor-pointer"
             >
-              &larr; Abandonar Exercício
+              &larr; {t("abandonExercise")}
             </button>
           </motion.div>
         )}
@@ -380,18 +370,18 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-sm font-black text-[#4E3B36] font-display">Excelente Foco!</h3>
+              <h3 className="text-sm font-black text-[#4E3B36] font-display">{t("excellentFocus")}</h3>
               <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto font-semibold">
-                Dedicar tempo ativamente a uma atividade que gostas desvia a energia da ansiedade e expande o teu bem-estar.
+               {t("focusBenefit")}
               </p>
             </div>
 
             <div className="bg-[#FFF0E8]/80 border border-[#E5A88B]/20 rounded-2xl p-4 text-left">
               <h4 className="text-[10px] font-black text-[#C97B5E] uppercase tracking-wider mb-1 flex items-center gap-1.5 font-display">
-                <Sparkles size={13} /> Companheiro Fortalecido!
+               <Sparkles size={13} /> {t("companionStrengthened")}
               </h4>
               <p className="text-xs text-[#4E3B36] leading-relaxed font-semibold">
-                A tua mente esteve ativamente em foco positivo. O teu amigo ganhou <strong className="text-[#C97B5E]">+40 XP</strong> de evolução e progresso!
+              {t("mindFocusCompleted")} <strong className="text-[#C97B5E]">+40 XP</strong> {t("evolutionProgress")}
               </p>
             </div>
 
@@ -399,7 +389,7 @@ export const FocoMente: React.FC<FocoMenteProps> = ({ onAddXp }) => {
               onClick={() => setStep('choice')}
               className="w-full py-3 bg-[#C97B5E] hover:bg-[#B56A4F] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider font-display transition-all shadow-md cursor-pointer"
             >
-              Focar Noutra Atividade
+              {t("focusAnother")}
             </button>
           </motion.div>
         )}

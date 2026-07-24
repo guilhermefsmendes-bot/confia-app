@@ -9,32 +9,32 @@ export interface TriggerOption {
 export const triggerOptions: TriggerOption[] = [
   {
     id: "anxiety",
-    label: "Ansiedade",
+   label: "anxiety",
     icon: "🧠",
   },
   {
     id: "internet",
-    label: "Vi algo na Internet",
+   label: "triggerInternet",
     icon: "🌐",
   },
   {
     id: "symptom",
-    label: "Senti um sintoma",
+   label: "triggerSymptom",
     icon: "❤️",
   },
   {
     id: "conversation",
-    label: "Alguém falou de doenças",
+   label: "triggerDiseaseTalk",
     icon: "💬",
   },
   {
     id: "message",
-    label: "Recebi uma mensagem",
+   label: "triggerMessage",
     icon: "📱",
   },
   {
     id: "other",
-    label: "Outro / Não sei",
+   label: "triggerOther",
     icon: "❓",
   },
 ];

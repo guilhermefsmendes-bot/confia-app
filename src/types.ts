@@ -12,6 +12,7 @@ export interface Objective {
   text: string;
   category: 'corporeo' | 'mental' | 'social' | 'nutricao';
   xpReward: number;
+difficulty?: 'easy' | 'medium' | 'hard';
   completed: boolean;
   isCustom?: boolean;
 }

@@ -13,12 +13,7 @@ interface AvatarProps {
 }
 export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet, celebrating, levelUpTrigger, moodRating, memoryMessage }) => {
 
-const getRandomMessage = () => {
-  const messages = t("avatarMessages", { returnObjects: true }) as string[];
-  return messages[Math.floor(Math.random() * messages.length)];
-};
 
-const [message, setMessage] = useState("");
 const { t, i18n } = useTranslation();
 const AFFIRMATIONS = [
   t("affirmation1"),
@@ -49,9 +44,8 @@ setBubbleText(t("levelUpMessage"));
 
 // Show a welcome message on mount
 useEffect(() => {
-  const timer = setTimeout(() => {
+const timer = window.setTimeout(() => {
 
-    const showRandomMessage = Math.random() < 0.2;
 if (moodRating !== undefined && moodRating <= 3) {
   setBubbleText(t("avatarLowMood"));
 } else if (moodRating !== undefined && moodRating >= 8) {
@@ -63,22 +57,27 @@ if (moodRating !== undefined && moodRating <= 3) {
 } else if (stage >= 5) {
   setBubbleText(t("avatarStageMessage5"));
 } else {
-  const showRandomMessage = Math.random() < 0.2;
 
-  if (showRandomMessage) {
-    const messages = t("avatarMessages", { returnObjects: true }) as string[];
-    const randomIdx = Math.floor(Math.random() * messages.length);
-    setBubbleText(messages[randomIdx]);
-  } else {
-setBubbleText(memoryMessage || t("avatarWelcome"));
-  }
+const messages = t("avatarMessages", { returnObjects: true });
+
+if (
+  Array.isArray(messages) &&
+  messages.length > 0 &&
+  Math.random() < 0.2
+) {
+  const randomIdx = Math.floor(Math.random() * messages.length);
+  setBubbleText(messages[randomIdx]);
+} else {
+  setBubbleText(memoryMessage || t("avatarWelcome"));
+}
 }
     setShowBubble(true);
 
   }, 1000);
+return () => window.clearTimeout(timer);
+}, [i18n.language, moodRating, memoryMessage, avatar.level]);
 
-  return () => clearTimeout(timer);
-}, [i18n.language]);
+
   const handleInteraction = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isJumping) return;
     setIsJumping(true);
@@ -92,9 +91,7 @@ setBubbleText(memoryMessage || t("avatarWelcome"));
     setHearts(prev => [...prev, newHeart]);
 
 // Choose random companion message
-const messages = t("avatarMessages", { returnObjects: true }) as string[];
-const randomIdx = Math.floor(Math.random() * messages.length);
-setBubbleText(messages[randomIdx]);
+setBubbleText(getRandomMessage());
 setShowBubble(true);
     setTimeout(() => {
       setIsJumping(false);

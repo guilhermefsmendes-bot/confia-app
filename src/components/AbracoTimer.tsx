@@ -62,7 +62,25 @@ const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
     }, 5000);
 
     return () => clearInterval(breatheTimer);
-  }, [isActive]);
+}, [isActive]);
+
+// Stop audio if the app goes to the background or loses focus
+useEffect(() => {
+  const handleVisibilityChange = () => {
+    if (document.hidden && audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      setAudio(null);
+      setIsActive(false);
+    }
+  };
+
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+
+  return () => {
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+  };
+}, [audio]);
 
 const handleToggle = () => {
   if (!isActive) {

@@ -519,15 +519,13 @@ return (
                   </div>
                 </div>
 <div className="flex justify-center gap-2 py-2">
-onClick={() => changeAppLanguage("pt")}
-onClick={() => changeAppLanguage("en")}
-onClick={() => changeAppLanguage("es")}
-onClick={() => changeAppLanguage("fr")}
+  <button onClick={() => changeAppLanguage("pt")}>🇵🇹</button>
+  <button onClick={() => changeAppLanguage("en")}>🇬🇧</button>
+  <button onClick={() => changeAppLanguage("es")}>🇪🇸</button>
+  <button onClick={() => changeAppLanguage("fr")}>🇫🇷</button>
 </div>
 
-              </div>
-              {/* Interactive Companion */}
-              <Avatar
+<Avatar
                 avatar={avatar}
                 onPet={handlePetAvatar}
                 celebrating={avatarCelebrating}
@@ -667,10 +665,10 @@ memoryMessage={avatarMemoryMessage}
   : t("saveDailyRecord")}
                 </button>
               </div>
-
+</div>
               {/* Foco da Mente Menu */}
               <FocoMente onAddXp={addXp} />
-         </motion.div>
+            </motion.div>
           )}
 
           {currentTab === 1 && (
@@ -735,8 +733,8 @@ memoryMessage={avatarMemoryMessage}
   objectivesHistory={objectivesHistory}
 />
             </motion.div>
-    )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* Triage / Screening Help Modal */}

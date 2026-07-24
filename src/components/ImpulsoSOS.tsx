@@ -65,11 +65,15 @@ const impulseCount = Number(
 
 const daysWithoutUse =
   lastUse !== null
-    ? Math.floor(
-        (Date.now() - new Date(lastUse).getTime()) /
-          (1000 * 60 * 60 * 24)
+    ? Math.max(
+        1,
+        Math.floor(
+          (Date.now() - new Date(lastUse).getTime()) /
+            (1000 * 60 * 60 * 24)
+        )
       )
-    : null;  
+    : null;
+
   // Estados de seleção
   const [trigger, setTrigger] = useState<Trigger | null>(null);
   const [emotion, setEmotion] = useState<Emotion | null>(null);

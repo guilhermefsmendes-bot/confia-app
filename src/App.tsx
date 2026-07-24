@@ -95,9 +95,13 @@ const [objectives, setObjectives] = useState<Objective[]>(() => {
     const parsed = JSON.parse(saved);
 
     // Dados já guardados no novo formato diário
-    if (parsed.date === today && parsed.items) {
-      return parsed.items;
-    }
+if (parsed.date === today && parsed.items) {
+  return parsed.items.map((obj: Objective, index: number) => ({
+    ...INITIAL_OBJECTIVES[index],
+    completed: obj.completed,
+    isCustom: obj.isCustom,
+  }));
+}
 
     // Compatibilidade com dados antigos (sem data)
     const oldItems = Array.isArray(parsed) ? parsed : parsed.items;
@@ -293,28 +297,31 @@ setTimeout(() => {
   };
 
   // Log today mood ratings
-  const handleSaveRatings = () => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const nextRatings = [...ratings];
-const existingIdx = nextRatings.findIndex(r => r.date === todayStr);
+const handleSaveRatings = () => {
+  const nextRatings = [...ratings];
+  const existingIdx = nextRatings.findIndex(
+    r => r.date === selectedDate
+  );
 
-const newRating: DailyRating = {
-  date: todayStr,
-  morning: morningRating,
-  afternoon: afternoonRating,
-  note: noteText.trim() || undefined
-};
-    if (existingIdx >= 0) {
-      nextRatings[existingIdx] = newRating;
-    } else {
-      nextRatings.push(newRating);
-      // Give XP first time rating today
-      addXp(15);
-    }
-
-    setRatings(nextRatings);
-    setTodayLogged(true);
+  const newRating: DailyRating = {
+    date: selectedDate,
+    morning: morningRating,
+    afternoon: afternoonRating,
+    note: noteText.trim() || undefined
   };
+
+  if (existingIdx >= 0) {
+    nextRatings[existingIdx] = newRating;
+  } else {
+    nextRatings.push(newRating);
+
+    // Dá XP apenas quando é criado um novo registo
+    addXp(15);
+  }
+
+  setRatings(nextRatings);
+  setTodayLogged(true);
+};
 
   // Toggle single objective completion
   // Toggle single objective completion

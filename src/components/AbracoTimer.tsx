@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, RotateCcw, Heart, Sparkles, Smile, ShieldAlert } from 'lucide-react';
 import { SOOTHING_PHRASES } from '../data/initialData';
 import { useTranslation } from "react-i18next";
+import { App } from '@capacitor/app';
 interface AbracoTimerProps {
   onAddXp: (amount: number) => void;
-  isVisible: boolean;
+  onRegisterStop?: (stopFunction: () => void) => void;
 }
 
-export const AbracoTimer: React.FC<AbracoTimerProps> = ({ onAddXp, isVisible }) => {
+export const AbracoTimer: React.FC<AbracoTimerProps> = ({ onAddXp, onRegisterStop }) => {
 const { t } = useTranslation();
   const TOTAL_SECONDS = 300; // 5 minutes
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
@@ -17,15 +18,32 @@ const { t } = useTranslation();
   const [breatheState, setBreatheState] = useState<'Inalar' | 'Exalar'>('Inalar');
   const [completed, setCompleted] = useState(false);
 const [selectedSound, setSelectedSound] = useState("rain");
-const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-useEffect(() => {
-  if (!isVisible && audio) {
-    audio.pause();
-    audio.currentTime = 0;
-    setAudio(null);
-    setIsActive(false);
+const audioRef = useRef<HTMLAudioElement | null>(null);
+const stopAudio = () => {
+  if (audioRef.current) {
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    audioRef.current = null;
   }
-}, [isVisible]);
+
+  setIsActive(false);
+};
+useEffect(() => {
+  const listener = () => {
+    stopAudio();
+  };
+
+  window.addEventListener("stop-background-audio", listener);
+
+  return () => {
+    window.removeEventListener("stop-background-audio", listener);
+  };
+}, []);
+useEffect(() => {
+  if (onRegisterStop) {
+    onRegisterStop(stopAudio);
+  }
+}, []);
 
   // Phrase rotation timer (every 15 seconds)
   useEffect(() => {
@@ -47,12 +65,7 @@ useEffect(() => {
         setSecondsLeft(prev => prev - 1);
       }, 1000);
 } else if (secondsLeft === 0 && isActive) {
-      if (audio) {
-        audio.pause();
-        audio.currentTime = 0;
-        setAudio(null);
-      }
-
+stopAudio();
       setIsActive(false);
       setCompleted(true);
       onAddXp(30); // Great effort gets +30 XP!
@@ -73,23 +86,52 @@ useEffect(() => {
     return () => clearInterval(breatheTimer);
 }, [isActive]);
 
-// Stop audio if the app goes to the background or loses focus
+// Stop audio when app goes background
 useEffect(() => {
-  const handleVisibilityChange = () => {
-    if (document.hidden && audio) {
-      audio.pause();
-      audio.currentTime = 0;
-      setAudio(null);
-      setIsActive(false);
+
+  const stopSound = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+
+    setIsActive(false);
+  };
+
+
+  const listener = App.addListener(
+    "appStateChange",
+    ({ isActive }) => {
+      if (!isActive) {
+        stopSound();
+      }
+    }
+  );
+
+
+  const visibility = () => {
+    if (document.hidden) {
+      stopSound();
     }
   };
 
-  document.addEventListener("visibilitychange", handleVisibilityChange);
+
+  document.addEventListener(
+    "visibilitychange",
+    visibility
+  );
+
 
   return () => {
-    document.removeEventListener("visibilitychange", handleVisibilityChange);
+    listener.then(l => l.remove());
+    document.removeEventListener(
+      "visibilitychange",
+      visibility
+    );
   };
-}, [audio]);
+
+}, []);
 
 const handleToggle = () => {
   if (!isActive) {
@@ -97,24 +139,20 @@ const handleToggle = () => {
     sound.loop = true;
     sound.play();
 
-    setAudio(sound);
+audioRef.current = sound;
   } else {
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-    }
+if (audioRef.current) {
+  audioRef.current.pause();
+  audioRef.current.currentTime = 0;
+  audioRef.current = null;
+}
   }
 
   setIsActive(!isActive);
   setCompleted(false);
 };
 const handleReset = () => {
-  if (audio) {
-    audio.pause();
-    audio.currentTime = 0;
-    setAudio(null);
-  }
-
+stopAudio();
   setIsActive(false);
   setSecondsLeft(TOTAL_SECONDS);
   setPhraseIdx(0);

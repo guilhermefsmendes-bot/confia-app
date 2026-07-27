@@ -134,6 +134,10 @@ console.log("OBJECTIVOS:", objectives);
   });
 
   const [currentTab, setCurrentTab] = useState<number>(0);
+const stopAbracoRef = useRef<(() => void) | null>(null);
+const changeTab = (tab:number) => {
+  setCurrentTab(tab);
+};
   const [triageOpen, setTriageOpen] = useState(false);
   const [levelUpOpen, setLevelUpOpen] = useState(false);
 const [avatarCelebrating, setAvatarCelebrating] = useState(false);
@@ -703,9 +707,11 @@ memoryMessage={avatarMemoryMessage}
               exit={{ opacity: 0, y: -10 }}
             >
               <div className="bg-white border border-slate-100/80 rounded-[32px] p-6 shadow-sm">
-<AbracoTimer 
+<AbracoTimer
   onAddXp={addXp}
-  isVisible={currentTab === 1}
+  onRegisterStop={(fn) => {
+    stopAbracoRef.current = fn;
+  }}
 />
               </div>
             </motion.div>
@@ -834,7 +840,10 @@ memoryMessage={avatarMemoryMessage}
           ].map(tab => (
             <button
               key={tab.index}
-              onClick={() => setCurrentTab(tab.index)}
+onClick={() => {
+  window.dispatchEvent(new Event("stop-background-audio"));
+  setCurrentTab(tab.index);
+}}
               className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all relative cursor-pointer ${
                 currentTab === tab.index ? 'text-[#C97B5E] font-black' : 'text-slate-400 hover:text-slate-600'
               }`}

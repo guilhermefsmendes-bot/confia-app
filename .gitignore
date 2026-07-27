@@ -30,3 +30,5 @@ keystore.base64
 .codeoss/
 *.keystore
 *.lock
+.gradle/
+Android/Sdk/

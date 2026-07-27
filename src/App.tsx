@@ -28,6 +28,7 @@ import { ImpulsoSOS } from './components/ImpulsoSOS';
 import { Avatar } from './components/Avatar';
 import { ProgressoDashboard } from './components/ProgressoDashboard';
 import { FocoMente } from './components/FocoMente';
+import { Patterns } from './components/Patterns/Patterns';
 import { StopMode } from './components/StopMode';
 const STORAGE_KEYS = {
   AVATAR: 'confia_avatar_v2',
@@ -96,7 +97,9 @@ const [objectives, setObjectives] = useState<Objective[]>(() => {
 
     // Dados já guardados no novo formato diário
 if (parsed.date === today && parsed.items) {
-  return parsed.items.map((obj: Objective, index: number) => ({
+return parsed.items
+  .slice(0, INITIAL_OBJECTIVES.length)
+  .map((obj: Objective, index: number) => ({
     ...INITIAL_OBJECTIVES[index],
     completed: obj.completed,
     isCustom: obj.isCustom,
@@ -117,6 +120,7 @@ if (parsed.date === today && parsed.items) {
   return INITIAL_OBJECTIVES;
 });
  const completedObjectivesCount = objectives.filter(o => o.completed).length;
+console.log("OBJECTIVOS:", objectives);
   const [ratings, setRatings] = useState<DailyRating[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RATINGS);
     if (saved) return JSON.parse(saved);
@@ -458,14 +462,18 @@ return (
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: [0.8, 1.05, 1], opacity: 1 }}
       transition={{ duration: 1.2, ease: "easeOut" }}
-      className="flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-tr from-[#E5A88B] via-[#F5D6C6] to-[#FFF0E8] shadow-xl border border-[#E5A88B]/20 relative"
+className="flex items-center justify-center w-24 h-24 relative"
     >
       <motion.div
         animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
         transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
         className="absolute inset-0 rounded-full border-2 border-[#E5A88B]/30"
       />
-      <span className="text-4xl filter drop-shadow select-none">🌿</span>
+<img
+  src="/images/confia-icon.png"
+  alt="Confia"
+  className="w-16 h-16 rounded-2xl shadow-md"
+/>
     </motion.div>
 
     <motion.h2
@@ -483,7 +491,11 @@ return (
   {/* App Top Brand Header */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5A88B]/15 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xl">🌿</span>
+<img
+  src="/images/confia-icon.png"
+  alt="Confia"
+  className="w-10 h-10 rounded-2xl shadow-md"
+/>
           <h1 className="text-xl font-black tracking-tight bg-gradient-to-r from-[#E5A88B] to-[#C97B5E] bg-clip-text text-transparent font-display">
             Confia
           </h1>
@@ -513,8 +525,12 @@ return (
               <div className="bg-white border border-[#E5A88B]/15 rounded-[32px] p-6 shadow-sm space-y-4">
                 {/* Logo da App */}
                 <div className="flex flex-col items-center justify-center pt-2 pb-1 text-center space-y-2 border-b border-slate-50 pb-4">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-[#E5A88B] via-[#F5D6C6] to-[#FFF0E8] shadow-md border border-[#E5A88B]/20">
-                   <span className="text-xl filter drop-shadow">🌿</span>
+<div className="flex items-center justify-center w-12 h-12">
+<img
+  src="/images/confia-icon.png"
+  alt="Confia"
+  className="w-12 h-12 rounded-2xl shadow-md"
+/>
                   </div>
                   <div className="space-y-0.5">
                     <h2 className="text-base font-black tracking-tight text-[#4E3B36] font-display">
@@ -673,8 +689,8 @@ memoryMessage={avatarMemoryMessage}
                 </button>
               </div>
 </div>
-              {/* Foco da Mente Menu */}
-              <FocoMente onAddXp={addXp} />
+{/* Conhece os teus Padrões */}
+<Patterns />
             </motion.div>
           )}
 

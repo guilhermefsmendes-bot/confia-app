@@ -116,3 +116,5 @@ if ! shopt -oq posix; then
   fi
 fi
 source /google/devshell/bashrc.google
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools

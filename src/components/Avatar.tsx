@@ -700,16 +700,17 @@ animate={{
         className="relative cursor-pointer transition-transform hover:scale-105 active:scale-95 flex items-center justify-center p-4"
         style={{ touchAction: 'manipulation' }}
       >
-        <motion.div
-          animate={isJumping ? {
-            y: [-30, 0],
-            scaleY: [0.9, 1.1, 1],
-            scaleX: [1.1, 0.9, 1]
-          } : {}}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          {renderAvatarSVG()}
-        </motion.div>
+<motion.div
+  animate={isJumping ? {
+    y: [-30, 0],
+    scaleY: [0.9, 1.1, 1],
+    scaleX: [1.1, 0.9, 1]
+  } : {}}
+  transition={{ duration: 0.6, ease: "easeOut" }}
+  className="flex flex-col items-center"
+>
+  {renderAvatarSVG()}
+</motion.div>
 
         {/* Petting heart particles */}
         <AnimatePresence>

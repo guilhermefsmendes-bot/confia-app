@@ -24,3 +24,9 @@ keystore.base64
 .bash_history
 .cache/
 .rustup/
+.gradle/
+.android/
+.cache/
+.codeoss/
+*.keystore
+*.lock

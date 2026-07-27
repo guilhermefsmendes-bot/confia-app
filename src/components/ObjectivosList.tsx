@@ -92,10 +92,7 @@ const { t } = useTranslation();
           </h3>
         </div>
 
-{t("completedGoals", {
-  completed: completedCount,
-  total: objectives.length,
-})}<div className="relative flex items-center justify-center w-12 h-12 bg-white rounded-full border border-[#E5A88B]/30 shadow-md">
+<div className="relative flex items-center justify-center w-12 h-12 bg-white rounded-full border border-[#E5A88B]/30 shadow-md">
           <Award size={20} className="text-[#C97B5E] animate-pulse" />
         </div>
       </div>

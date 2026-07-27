@@ -93,7 +93,7 @@ const { t } = useTranslation();
   const [selectedActivity, setSelectedActivity] = useState<FocusActivity | null>(null);
 
   // Timer states (10 minutes = 600 seconds)
-  const [timeLeft, setTimeLeft] = useState<number>(600);
+  const [timeLeft, setTimeLeft] = useState<number>(180);
   const [isActive, setIsActive] = useState<boolean>(false);
 
   // Auto-run timer
@@ -116,7 +116,7 @@ const { t } = useTranslation();
   };
 
   const handleStartTimer = () => {
-    setTimeLeft(600); // 10 minutes
+    setTimeLeft(180); // 10 minutes
     setIsActive(true);
     setStep('timer');
   };
@@ -127,7 +127,7 @@ const { t } = useTranslation();
 
   const handleResetTimer = () => {
     setIsActive(false);
-    setTimeLeft(600);
+    setTimeLeft(180);
   };
 
   const handleFinishExercise = () => {
@@ -156,7 +156,7 @@ const { t } = useTranslation();
   };
 
   // Circular progress calculated for 10 minutes (600s)
-  const progressPercent = ((600 - timeLeft) / 600) * 100;
+  const progressPercent = ((180 - timeLeft) / 180) * 100;
 
   return (
     <div className="bg-white border border-[#E5A88B]/15 rounded-[32px] p-6 shadow-sm space-y-4">

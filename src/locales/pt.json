@@ -158,7 +158,7 @@
     "askHelp": "Pede ajuda se precisares",
     "avoidSomething": "Faz algo que tens evitado",
     "organize": "Organiza uma pequena coisa",
-    "learn": "Aprende algo novo durante 10 minutos",
+    "learn": "Aprende algo novo durante 3 minutos",
     "healthyChoice": "Faz uma escolha saudável",
     "smallVictory": "Celebra uma pequena vitória",
     "dailyFeeling": "Regista como te sentiste hoje"
@@ -270,7 +270,7 @@
   "jawInstruction": "Relaxa a mandíbula e deixa os dentes separados.",
   "zoneShoulders": "Zona 2: Ombros",
   "shouldersInstruction": "Deixa cair os ombros lentamente.",
-  "readBookExercise": "Leitura focada de 10 minutos",
+  "readBookExercise": "Leitura focada de 3 minutos",
   "readBookExerciseDesc": "Escolhe um capítulo ou texto que te interesse. Lê sem pressa e volta suavemente ao texto se a mente dispersar.",
   "readBookTip": "Foca-te nas palavras e no momento presente.",
   "writeExercise": "Fluxo de consciência",
@@ -279,7 +279,7 @@
   "drawExercise": "Rabiscos conscientes",
   "drawExerciseDesc": "Desenha formas simples ou padrões repetidos prestando atenção ao movimento.",
   "drawTip": "Observa o processo, não o resultado.",
-  "organizeExercise": "Arrumação seletiva de 10 minutos",
+  "organizeExercise": "Arrumação seletiva de 3 minutos",
   "organizeExerciseDesc": "Escolhe um pequeno espaço e organiza-o com calma.",
   "organizeTip": "Pequenas ações criam sensação de controlo.",
   "craftExercise": "Criação manual",
@@ -362,9 +362,179 @@
   "soundWhiteNoise": "Ruído branco",
   "stopBreathe": "Respira",
   "stopPause": "Pára um momento",
-  "stopQuestion": "O que precisas realmente agora?",
-  "stopTitle": "STOP",
-  "successTip": "Continua a cuidar de ti",
-  "abandonExercise": "Abandonar Exercício",
-  "focusAnother": "Focar Noutra Atividade"
+
+  "patterns": {
+"home": {
+  "title": "Conhece os teus Padrões",
+  "subtitle": "Descobre como o teu cérebro reage à ansiedade e acompanha a tua evolução.",
+
+  "assessment": {
+    "title": "A Minha Avaliação",
+    "description": "Descobre o teu perfil e acompanha a tua evolução."
+  },
+
+  "habits": {
+    "title": "Hábitos que Estou a Trabalhar",
+    "description": "Acompanha os hábitos que queres mudar."
+  },
+
+  "evolution": {
+    "title": "A Minha Evolução",
+    "description": "Observa o teu progresso ao longo do tempo."
+  },
+
+  "library": {
+    "title": "Biblioteca dos Padrões",
+    "description": "Aprende porque estes padrões acontecem."
+  },
+
+  "plan": {
+    "title": "Plano Personalizado",
+    "description": "Recebe objetivos adaptados ao teu perfil."
+  }
+},
+    "title": "Conhece os teus Padrões",
+    "subtitle": "Descobre os hábitos e rotinas que podem estar a alimentar a tua ansiedade.",
+    "startQuestionnaire": "Iniciar Questionário",
+    "lastEvaluation": "Última avaliação",
+    "retake": "Reavaliar",
+    "detox": "Desintoxicação",
+    "wellbeing": "Evolução do Bem-estar",
+    "noData": "Ainda não existem dados.",
+    "objective": "Objetivo da Semana",
+    "daysWithout": "Dias sem o hábito",
+    "progress": "Evolução",
+    "score": "Pontuação",
+    "profile": "Perfil",
+
+    "habits": {
+      "title": "Que comportamentos reconheces em ti?",
+      "subtitle": "Escolhe aqueles que sentes que utilizas para aliviar ansiedade ou desconforto.",
+      "symptomSearch": "Pesquisar sintomas ou procurar respostas na internet",
+      "socialMedia": "Passar demasiado tempo nas redes sociais",
+      "series": "Ver séries ou vídeos durante muito tempo para desligar",
+      "videoGames": "Jogar para evitar pensamentos desconfortáveis",
+      "shopping": "Comprar coisas para sentir alívio momentâneo",
+      "checkingMessages": "Verificar mensagens ou notificações repetidamente",
+      "food": "Comer mesmo sem fome por ansiedade",
+      "caffeine": "Consumir cafeína para lidar com o dia",
+      "avoidance": "Evitar situações que causam desconforto",
+      "reassurance": "Procurar constantemente confirmação de outras pessoas",
+      "other": "Outro comportamento",
+      "continue": "Criar o meu plano"
+    },
+
+    "dashboard": {
+      "title": "O teu plano de evolução",
+      "subtitle": "Observa os teus padrões e acompanha pequenas mudanças.",
+      "goal": "Objetivo atual",
+      "today": "Como correu hoje?",
+      "better": "Consegui reduzir este comportamento",
+      "same": "Manteve-se igual",
+      "harder": "Foi mais difícil hoje",
+      "days": "dias de evolução",
+      "evolution": "Evolução dos últimos dias",
+      "wellbeing": "Relação com o teu bem-estar",
+      "wellbeingMessage": "Vamos observar como estas mudanças se relacionam com a tua evolução.",
+      "betterDays": "Dias com melhoria:",
+      "otherDays": "Outros dias:"
+    },
+
+    "questionnaire": {
+      "title": "Conhece os teus padrões",
+      "progress": "Pergunta {{current}} de {{total}}"
+    },
+
+    "answers": {
+      "never": "Nunca",
+      "rarely": "Raramente",
+      "sometimes": "Às vezes",
+      "often": "Frequentemente",
+      "almostAlways": "Quase sempre"
+    },
+"questions": {
+  "q1": "Procuro frequentemente confirmação de outras pessoas para me sentir seguro.",
+  "q2": "Tenho dificuldade em confiar nas minhas próprias decisões sem pedir opinião.",
+  "q3": "Sinto necessidade de perguntar várias vezes se está tudo bem.",
+
+  "q4": "Pesquiso sintomas ou informações na internet para tentar reduzir a ansiedade.",
+  "q5": "Procuro respostas repetidamente mesmo depois de já ter encontrado uma explicação.",
+  "q6": "Sinto dificuldade em parar de pesquisar quando fico preocupado.",
+
+  "q7": "Presto muita atenção às sensações do meu corpo.",
+  "q8": "Interpreto pequenas alterações físicas como possíveis sinais de perigo.",
+  "q9": "Verifico frequentemente se existe algo errado com o meu corpo.",
+
+  "q10": "Sinto necessidade de fazer as coisas perfeitamente.",
+  "q11": "Fico incomodado quando cometo pequenos erros.",
+  "q12": "Adio tarefas por medo de não conseguir fazê-las bem.",
+
+  "q13": "Evito situações por receio de sentir ansiedade ou desconforto.",
+  "q14": "Deixo de fazer coisas importantes para evitar preocupações.",
+  "q15": "Sinto alívio imediato quando evito algo que me causa ansiedade.",
+
+  "q16": "Fico preso a pensamentos repetitivos sobre problemas ou possibilidades negativas.",
+  "q17": "Tenho dificuldade em desligar a mente quando estou preocupado.",
+  "q18": "Revejo mentalmente situações para tentar encontrar respostas.",
+
+  "q19": "Sinto necessidade de controlar todos os detalhes para ficar tranquilo.",
+  "q20": "Tenho dificuldade em aceitar que algumas coisas são imprevisíveis.",
+  "q21": "Fico ansioso quando não consigo garantir um determinado resultado.",
+
+  "q22": "Comparo frequentemente a minha vida ou o meu desempenho com o dos outros.",
+  "q23": "Sinto que os outros lidam melhor com situações difíceis do que eu.",
+  "q24": "As comparações fazem-me sentir menos confiante."
+  },
+
+  "profile": {
+    "reassurance": {
+      "name": "Procura de confirmação",
+      "description": "Tendes a procurar garantias externas para sentir segurança quando surge ansiedade.",
+      "strength": "Tens atenção aos detalhes e valorizas a segurança.",
+      "challenge": "Aprender a confiar mais na tua capacidade de lidar com a incerteza."
+    },
+    "search": {
+      "name": "Pesquisa de segurança",
+      "description": "A procura de respostas pode aliviar a ansiedade no momento, mas manter o ciclo de preocupação.",
+      "strength": "És curioso e procuras compreender o que acontece.",
+      "challenge": "Aprender a tolerar alguma incerteza sem procurar respostas imediatas."
+    },
+    "body": {
+      "name": "Hipervigilância corporal",
+      "description": "Estás muito atento às sensações do corpo e podes interpretá-las como sinais de perigo.",
+      "strength": "Tens consciência e atenção aos sinais do teu corpo.",
+      "challenge": "Aprender a observar sensações sem lhes atribuir sempre uma ameaça."
+    },
+    "perfectionism": {
+      "name": "Perfeccionismo",
+      "description": "Existe uma forte necessidade de fazer tudo corretamente e evitar erros.",
+      "strength": "Tens dedicação e vontade de fazer bem.",
+      "challenge": "Aceitar que erros e imperfeições fazem parte da aprendizagem."
+    },
+    "avoidance": {
+      "name": "Evitação",
+      "description": "Evitar situações pode trazer alívio imediato, mas reforçar o medo a longo prazo.",
+      "strength": "Procuras proteger-te quando algo parece difícil.",
+      "challenge": "Dar pequenos passos mesmo com algum desconforto."
+    },
+    "rumination": {
+      "name": "Ruminação",
+      "description": "A mente fica presa a analisar problemas e possibilidades.",
+      "strength": "Tens capacidade de reflexão e análise.",
+      "challenge": "Aprender a desligar e voltar ao momento presente."
+    },
+    "control": {
+      "name": "Necessidade de controlo",
+      "description": "Existe uma procura constante de garantir que tudo corre bem.",
+      "strength": "És responsável e organizado.",
+      "challenge": "Aceitar que alguma incerteza faz parte da vida."
+    },
+    "comparison": {
+      "name": "Comparação social",
+      "description": "Comparar-te com outros pode afetar a forma como avalias o teu próprio valor.",
+      "strength": "Observas e aprendes com quem te rodeia.",
+      "challenge": "Valorizar mais o teu próprio caminho."
+    }
+  }
+  }
 }

@@ -258,7 +258,7 @@
   "jawInstruction": "Relaja la mandíbula y deja los dientes separados.",
   "zoneShoulders": "Hombros",
   "shouldersInstruction": "Deja caer los hombros lejos de las orejas.",
-  "readBookExercise": "Lectura enfocada de 10 minutos",
+  "readBookExercise": "Lectura enfocada de 3 minutos",
   "readBookExerciseDesc": "Elige un capítulo o texto que te interese. Lee despacio y vuelve suavemente cuando tu mente se distraiga.",
   "readBookTip": "Concéntrate en las palabras y el presente.",
   "writeExercise": "Flujo de conciencia",
@@ -267,7 +267,7 @@
   "drawExercise": "Dibujo consciente",
   "drawExerciseDesc": "Dibuja formas simples prestando atención al movimiento.",
   "drawTip": "Concéntrate en el proceso.",
-  "organizeExercise": "Organización de 10 minutos",
+  "organizeExercise": "Organización de 3 minutos",
   "organizeExerciseDesc": "Elige un pequeño espacio y ordénalo con calma.",
   "organizeTip": "Pequeñas acciones generan control.",
   "craftExercise": "Actividad creativa",
@@ -359,4 +359,179 @@
   "relaxFace": "Relaja la mandíbula y el rostro",
   "abandonExercise": "Abandonar ejercicio",
   "focusAnother": "Centrarse en otra actividad"
+,
+"patterns": {
+"home": {
+  "title": "Conoce tus Patrones",
+  "subtitle": "Descubre cómo responde tu cerebro a la ansiedad y sigue tu evolución.",
+
+  "assessment": {
+    "title": "Mi Evaluación",
+    "description": "Descubre tu perfil y sigue tu progreso."
+  },
+
+  "habits": {
+    "title": "Hábitos en los que Estoy Trabajando",
+    "description": "Haz seguimiento de los hábitos que quieres cambiar."
+  },
+
+  "evolution": {
+    "title": "Mi Evolución",
+    "description": "Observa tu progreso con el tiempo."
+  },
+
+  "library": {
+    "title": "Biblioteca de Patrones",
+    "description": "Aprende por qué aparecen estos patrones."
+  },
+
+  "plan": {
+    "title": "Plan Personalizado",
+    "description": "Recibe objetivos adaptados a tu perfil."
+  }
+},
+  "title": "Conoce tus Patrones",
+  "subtitle": "Descubre hábitos y rutinas que pueden estar alimentando tu ansiedad.",
+  "startQuestionnaire": "Iniciar cuestionario",
+  "lastEvaluation": "Última evaluación",
+  "retake": "Volver a evaluar",
+  "detox": "Desintoxicación",
+  "wellbeing": "Evolución del bienestar",
+  "noData": "Todavía no hay datos.",
+  "objective": "Objetivo semanal",
+  "daysWithout": "Días sin el hábito",
+  "progress": "Evolución",
+  "score": "Puntuación",
+  "profile": "Perfil",
+  "start": "Empezar",
+  "habits": {
+    "title": "¿Qué comportamientos reconoces en ti?",
+    "subtitle": "Elige aquellos que utilizas para aliviar la ansiedad o el malestar.",
+    "symptomSearch": "Buscar síntomas o respuestas en internet",
+    "socialMedia": "Pasar demasiado tiempo en redes sociales",
+    "series": "Ver series o vídeos durante mucho tiempo para desconectar",
+    "videoGames": "Jugar para evitar pensamientos incómodos",
+    "shopping": "Comprar cosas para sentir alivio momentáneo",
+    "checkingMessages": "Revisar mensajes o notificaciones repetidamente",
+    "food": "Comer aunque no tengas hambre por ansiedad",
+    "caffeine": "Consumir cafeína para afrontar el día",
+    "avoidance": "Evitar situaciones que generan malestar",
+    "reassurance": "Buscar constantemente confirmación de otras personas",
+    "other": "Otro comportamiento",
+    "continue": "Crear mi plan"
+  },
+"dashboard": {
+  "title": "Tu plan de evolución",
+  "subtitle": "Observa tus patrones y acompaña pequeños cambios.",
+  "goal": "Objetivo actual",
+  "today": "¿Cómo fue hoy?",
+  "better": "Conseguí reducir este comportamiento",
+  "same": "Se mantuvo igual",
+  "harder": "Hoy fue más difícil",
+  "days": "días de evolución",
+  "evolution": "Evolución de los últimos días",
+  "wellbeing": "Relación con tu bienestar",
+  "wellbeingMessage": "Observemos cómo estos cambios se relacionan con tu evolución.",
+  "betterDays": "Días con mejora:",
+  "otherDays": "Otros días:"
+},
+
+"questionnaire": {
+  "title": "Conoce tus patrones",
+  "progress": "Pregunta {{current}} de {{total}}"
+},
+
+"answers": {
+  "never": "Nunca",
+  "rarely": "Rara vez",
+  "sometimes": "A veces",
+  "often": "Frecuentemente",
+  "almostAlways": "Casi siempre"
+},
+
+"questions": {
+  "q1": "Busco con frecuencia confirmación de otras personas para sentirme seguro.",
+  "q2": "Me cuesta confiar en mis propias decisiones sin pedir opinión.",
+  "q3": "Siento la necesidad de preguntar varias veces si todo está bien.",
+
+  "q4": "Busco síntomas o información en internet para reducir la ansiedad.",
+  "q5": "Busco respuestas repetidamente incluso después de encontrar una explicación.",
+  "q6": "Me cuesta dejar de buscar cuando empiezo a preocuparme.",
+
+  "q7": "Presto mucha atención a las sensaciones de mi cuerpo.",
+  "q8": "Interpreto pequeños cambios físicos como posibles señales de peligro.",
+  "q9": "Compruebo con frecuencia si algo está mal en mi cuerpo.",
+
+  "q10": "Siento la necesidad de hacer las cosas perfectamente.",
+  "q11": "Me incomodan los pequeños errores.",
+  "q12": "Retraso tareas por miedo a no hacerlas bien.",
+
+  "q13": "Evito situaciones por miedo a sentir ansiedad o malestar.",
+  "q14": "Dejo de hacer cosas importantes para evitar preocupaciones.",
+  "q15": "Siento alivio inmediato cuando evito algo que causa ansiedad.",
+
+  "q16": "Me quedo atrapado en pensamientos repetitivos sobre problemas o posibilidades negativas.",
+  "q17": "Me cuesta desconectar la mente cuando estoy preocupado.",
+  "q18": "Repaso mentalmente situaciones intentando encontrar respuestas.",
+
+  "q19": "Siento la necesidad de controlar todos los detalles para estar tranquilo.",
+  "q20": "Me cuesta aceptar que algunas cosas son imprevisibles.",
+  "q21": "Me pongo ansioso cuando no puedo garantizar un resultado.",
+
+  "q22": "Me comparo con frecuencia con otras personas.",
+  "q23": "Siento que otros afrontan mejor las situaciones difíciles que yo.",
+  "q24": "Las comparaciones hacen que tenga menos confianza."
+  },
+
+"profile": {
+  "reassurance": {
+    "name": "Búsqueda de confirmación",
+    "description": "Tiendes a buscar garantías externas para sentir seguridad cuando aparece la ansiedad.",
+    "strength": "Prestas atención a los detalles y valoras la seguridad.",
+    "challenge": "Aprender a confiar más en tu capacidad para afrontar la incertidumbre."
+  },
+  "search": {
+    "name": "Búsqueda de respuestas",
+    "description": "Buscar respuestas puede aliviar la ansiedad en el momento, pero mantener el ciclo de preocupación.",
+    "strength": "Eres curioso y buscas comprender lo que ocurre.",
+    "challenge": "Aprender a tolerar cierta incertidumbre sin buscar respuestas inmediatas."
+  },
+  "body": {
+    "name": "Hipervigilancia corporal",
+    "description": "Prestas mucha atención a las sensaciones del cuerpo y puedes interpretarlas como señales de peligro.",
+    "strength": "Tienes conciencia y atención a las señales de tu cuerpo.",
+    "challenge": "Aprender a observar las sensaciones sin interpretarlas siempre como una amenaza."
+  },
+  "perfectionism": {
+    "name": "Perfeccionismo",
+    "description": "Existe una fuerte necesidad de hacer todo correctamente y evitar errores.",
+    "strength": "Tienes dedicación y ganas de hacer las cosas bien.",
+    "challenge": "Aceptar que los errores y las imperfecciones forman parte del aprendizaje."
+  },
+  "avoidance": {
+    "name": "Evitación",
+    "description": "Evitar situaciones puede dar alivio inmediato, pero reforzar el miedo a largo plazo.",
+    "strength": "Intentas protegerte cuando algo parece difícil.",
+    "challenge": "Dar pequeños pasos aunque exista incomodidad."
+  },
+  "rumination": {
+    "name": "Rumiación",
+    "description": "La mente queda atrapada analizando problemas y posibilidades.",
+    "strength": "Tienes capacidad de reflexión y análisis.",
+    "challenge": "Aprender a desconectar y volver al momento presente."
+  },
+  "control": {
+    "name": "Necesidad de control",
+    "description": "Existe una búsqueda constante de garantizar que todo salga bien.",
+    "strength": "Eres responsable y organizado.",
+    "challenge": "Aceptar que cierta incertidumbre forma parte de la vida."
+  },
+  "comparison": {
+    "name": "Comparación social",
+    "description": "Compararte con otros puede afectar la forma en que valoras tu propio camino.",
+    "strength": "Observas y aprendes de quienes te rodean.",
+    "challenge": "Valorar más tu propio camino."
+  }
+}
+}
 }

@@ -5,9 +5,10 @@ import { SOOTHING_PHRASES } from '../data/initialData';
 import { useTranslation } from "react-i18next";
 interface AbracoTimerProps {
   onAddXp: (amount: number) => void;
+  isVisible: boolean;
 }
 
-export const AbracoTimer: React.FC<AbracoTimerProps> = ({ onAddXp }) => {
+export const AbracoTimer: React.FC<AbracoTimerProps> = ({ onAddXp, isVisible }) => {
 const { t } = useTranslation();
   const TOTAL_SECONDS = 300; // 5 minutes
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
@@ -17,6 +18,14 @@ const { t } = useTranslation();
   const [completed, setCompleted] = useState(false);
 const [selectedSound, setSelectedSound] = useState("rain");
 const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+useEffect(() => {
+  if (!isVisible && audio) {
+    audio.pause();
+    audio.currentTime = 0;
+    setAudio(null);
+    setIsActive(false);
+  }
+}, [isVisible]);
 
   // Phrase rotation timer (every 15 seconds)
   useEffect(() => {

@@ -703,7 +703,10 @@ memoryMessage={avatarMemoryMessage}
               exit={{ opacity: 0, y: -10 }}
             >
               <div className="bg-white border border-slate-100/80 rounded-[32px] p-6 shadow-sm">
-                <AbracoTimer onAddXp={addXp} />
+<AbracoTimer 
+  onAddXp={addXp}
+  isVisible={currentTab === 1}
+/>
               </div>
             </motion.div>
           )}

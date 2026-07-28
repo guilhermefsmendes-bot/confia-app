@@ -55,18 +55,16 @@ const PRE_LOGGED_RATINGS: DailyRating[] = [
 ];
 
 export default function App() {
- const changeAppLanguage = (lang: string) => {
+const { t, i18n } = useTranslation();
+
+const changeAppLanguage = (lang: string) => {
     localStorage.setItem("confia_language", lang);
     i18n.changeLanguage(lang);
-  };
+};
 
-  useEffect(() => {
+useEffect(() => {
     initLanguage();
-  }, []);
-  useEffect(() => {
-    initLanguage();
-  }, []);
-const { t, i18n } = useTranslation();
+}, []);
   // Global App States
   const [avatar, setAvatar] = useState<AvatarState>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AVATAR);

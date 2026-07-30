@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { savePatternProfile } from "./storage";
 
 interface HabitSelectionProps {
   onFinish: () => void;
+  onBack?: () => void;
 }
 
 const HABITS = [
@@ -16,99 +18,76 @@ const HABITS = [
   "caffeine",
   "avoidance",
   "reassurance",
-  "other"
+  "other",
 ];
 
 export const HabitSelection: React.FC<HabitSelectionProps> = ({
   onFinish,
+  onBack,
 }) => {
-
   const { t } = useTranslation();
 
   const [selected, setSelected] = useState<string[]>([]);
 
-
   const toggleHabit = (habit: string) => {
-
-    if (selected.includes(habit)) {
-
-      setSelected(
-        selected.filter((item) => item !== habit)
-      );
-
-    } else {
-
-      setSelected([
-        ...selected,
-        habit
-      ]);
-
-    }
-
+    setSelected((prev) =>
+      prev.includes(habit)
+        ? prev.filter((item) => item !== habit)
+        : [...prev, habit]
+    );
   };
 
+  const handleContinue = () => {
+    savePatternProfile({
+      habits: selected,
+    });
 
-  const saveHabits = () => {
-
-localStorage.setItem(
-  "confia_patterns_habits_v1",
-  JSON.stringify({
-    habits: selected,
-    startedAt: new Date().toISOString()
-  })
-);
     onFinish();
-
   };
-
 
   return (
+    <div className="bg-[#FFF8F5] rounded-2xl p-5">
 
-    <div className="bg-white rounded-3xl shadow-lg p-6">
+      <button
+        onClick={onBack}
+        className="text-sm text-[#7A5E57] mb-4"
+      >
+        ← {t("common.back")}
+      </button>
 
-      <h2 className="text-xl font-black text-[#4E3B36]">
-        {t("patterns.habits.title")}
+      <h2 className="text-xl font-black text-[#4E3B36] mb-2">
+t("patterns.home.habits.title")
       </h2>
 
-      <p className="mt-3 text-[#7A5E57]">
-        {t("patterns.habits.subtitle")}
+      <p className="text-sm text-[#7A5E57] mb-6">
+{t("patterns.home.habits.description")}
       </p>
 
-
-      <div className="mt-6 space-y-3">
+      <div className="space-y-3">
 
         {HABITS.map((habit) => (
-
           <button
             key={habit}
             onClick={() => toggleHabit(habit)}
-            className={`w-full p-4 rounded-xl text-left border ${
+            className={`w-full rounded-xl border p-4 text-left transition ${
               selected.includes(habit)
-              ? "bg-[#FFF1EA] border-[#C97B5E]"
-              : "bg-white border-[#E5D4CB]"
+                ? "bg-[#FFF3EE] border-[#7A5E57]"
+                : "bg-white border-gray-200"
             }`}
           >
-
-            {t(`patterns.habits.${habit}`)}
-
+t(`patterns.home.habits.${habit}`)
           </button>
-
         ))}
 
       </div>
 
-
       <button
-        disabled={selected.length === 0}
-        onClick={saveHabits}
-        className="mt-8 w-full bg-[#C97B5E] text-white py-4 rounded-2xl font-bold disabled:opacity-40"
+        onClick={handleContinue}
+        className="w-full mt-6 rounded-2xl bg-[#7A5E57] text-white p-4 font-bold"
       >
-        {t("patterns.habits.continue")}
-
+t("patterns.home.habits.continue")
       </button>
 
-
     </div>
-
   );
 };

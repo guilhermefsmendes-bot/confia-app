@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Heart,
@@ -18,6 +18,10 @@ import i18n from "./i18n";
 import { initLanguage } from "./i18n/language";
 import { AvatarState, Objective, DailyRating, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
+import PatternsNew from './components/PatternsNew/PatternsNew';
+import HabitAssessment from './components/PatternsNew/HabitAssessment';
+import HabitDailyCheck from './components/PatternsNew/HabitDailyCheck';
+import HabitEvolution from './components/PatternsNew/HabitEvolution';
 
 // Component imports
 
@@ -28,7 +32,6 @@ import { ImpulsoSOS } from './components/ImpulsoSOS';
 import { Avatar } from './components/Avatar';
 import { ProgressoDashboard } from './components/ProgressoDashboard';
 import { FocoMente } from './components/FocoMente';
-import { Patterns } from './components/Patterns/Patterns';
 import { StopMode } from './components/StopMode';
 const STORAGE_KEYS = {
   AVATAR: 'confia_avatar_v2',
@@ -66,6 +69,7 @@ useEffect(() => {
     initLanguage();
 }, []);
   // Global App States
+const [patternsPage, setPatternsPage] = useState("menu");
   const [avatar, setAvatar] = useState<AvatarState>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AVATAR);
     if (saved) return JSON.parse(saved);
@@ -692,7 +696,33 @@ memoryMessage={avatarMemoryMessage}
               </div>
 </div>
 {/* Conhece os teus Padrões */}
-<Patterns />
+
+{patternsPage === "menu" && (
+  <PatternsNew
+    onBack={() => setCurrentTab(0)}
+    onOpenAssessment={() => setPatternsPage("assessment")}
+    onOpenDaily={() => setPatternsPage("daily")}
+    onOpenEvolution={() => setPatternsPage("evolution")}
+  />
+)}
+
+{patternsPage === "assessment" && (
+  <HabitAssessment
+    onBack={() => setPatternsPage("menu")}
+  />
+)}
+
+{patternsPage === "daily" && (
+  <HabitDailyCheck
+    onBack={() => setPatternsPage("menu")}
+  />
+)}
+
+{patternsPage === "evolution" && (
+  <HabitEvolution
+    onBack={() => setPatternsPage("menu")}
+  />
+)}
             </motion.div>
           )}
 

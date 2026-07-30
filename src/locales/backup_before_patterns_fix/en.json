@@ -134,38 +134,38 @@
   "whatToAchieveToday": "What do you want to achieve today?",
   "goalPlaceholder": "Ex: Ler 2 páginas de um livro, regar as plantas...",
   "remove": "Remover",
-"dailyObjectives": {
-  "breathe3": "Do 3 minutes of slow breathing",
-  "hugExercise": "Do the Hug exercise",
-  "relaxShoulders": "Relax your shoulders consciously",
-  "pausePhone": "Take a break from your phone",
-  "slowBreathing": "Breathe slowly before reacting",
-  "sosTechnique": "Use an SOS technique whenever you feel anxious",
-  "questionThought": "Question an anxious thought",
-  "writeWorry": "Write down one worry and observe it",
-  "positiveReplace": "Replace a negative thought with a more balanced one",
-  "goodMoment": "Record something that went well today",
-  "focusTask": "Focus on one task for 5 minutes",
-  "avoidSearch": "Avoid an unnecessary reassurance search",
-  "drinkWater": "Drink water slowly and mindfully",
-  "stretch": "Do 5 minutes of stretching",
-  "walk": "Take a 10-minute walk",
-  "sunlight": "Get a few minutes of natural light",
-  "mindfulMeal": "Eat a meal mindfully",
-  "relaxFace": "Relax your jaw and face",
-  "petCompanionGoal": "Show affection to your companion",
-  "messageSomeone": "Send a positive message to someone",
-  "compliment": "Give a sincere compliment",
-  "familyMoment": "Create a meaningful moment with someone important",
-  "gratitude": "Be grateful for one simple thing",
-  "askHelp": "Ask for help if you need it",
-  "avoidSomething": "Do something you have been avoiding",
-  "organize": "Organize one small thing",
-  "learn": "Learn something new for 3 minutes",
-  "healthyChoice": "Make one healthy choice",
-  "smallVictory": "Celebrate a small victory",
-  "dailyFeeling": "Record how you felt today"
-},
+  "dailyObjectives": {
+    "breathe3": "Do 3 minutes of slow breathing",
+    "hugExercise": "Do the Hug exercise",
+    "relaxShoulders": "Relax your shoulders consciously",
+    "pausePhone": "Take a break from your phone",
+    "slowBreathing": "Breathe slowly before reacting",
+    "sosTechnique": "Use an SOS technique whenever you feel anxious",
+    "questionThought": "Questiona um pensamento ansioso",
+    "writeWorry": "Escreve uma preocupação e observa-a",
+    "positiveReplace": "Replace a negative thought with a more balanced one",
+    "goodMoment": "Regista algo que correu bem hoje",
+    "focusTask": "Focus on one task for 5 minutes",
+    "avoidSearch": "Avoid an unnecessary reassurance search",
+    "drinkWater": "Drink water slowly and mindfully",
+    "stretch": "Do 5 minutes of stretching",
+    "walk": "Take a 10-minute walk",
+    "sunlight": "Get a few minutes of natural light",
+    "mindfulMeal": "Eat a meal mindfully",
+    "relaxFace": "Relax your jaw and face",
+    "petCompanionGoal": "Show affection to your companion",
+    "messageSomeone": "Send a positive message to someone",
+    "compliment": "Give a sincere compliment",
+    "familyMoment": "Cria um momento presente com alguém importante",
+    "gratitude": "Be grateful for one simple thing",
+    "askHelp": "Ask for help if you need it",
+    "avoidSomething": "Do something you have been avoiding",
+    "organize": "Organize one small thing",
+    "learn": "Learn something new for 3 minutes",
+    "healthyChoice": "Make one healthy choice",
+    "smallVictory": "Celebra uma pequena vitória",
+    "dailyFeeling": "Regista como te sentiste hoje"
+  },
   "completed": "Completed!",
   "complete": "Complete",
   "justNow": "Just now",
@@ -374,93 +374,120 @@
   "relaxFace": "Relax your jaw and face",
   "abandonExercise": "Leave exercise",
   "focusAnother": "Focus on another activity",
-"patterns": {
-"habitsEvaluated": "{{count}} habits evaluated",
-"assessmentTitle": "Assess your habits",
-"assessmentDescription": "Choose the habits that you feel may be affecting your wellbeing.",
-"classify": "Classify",
-"save": "Save",
-"back": "Back",
-"dailyTitle": "Track your day",
-"dailyDescription": "Evaluate how you managed these habits.",
-"recordSaved": "Daily record saved", 
- "home": {
-    "title": "Know your Patterns",
-    "subtitle": "Discover how your brain reacts to anxiety and track your evolution.",
-    "premiumDescription": "Discover how your mind works, identify patterns that influence your emotions and create new ways to move forward.",
-    "featureMind": "Understand your thoughts and reactions",
-    "featurePatterns": "Identify automatic patterns that repeat",
-    "featureGrowth": "Develop new ways to respond",
-    "start": "Start discovery",
-    "assessment": {
-      "title": "My Assessment",
-      "description": "Discover your profile and track your evolution."
-    },
+  "patterns": {
+"home": {
+  "title": "Know your Patterns",
+  "subtitle": "Understand how your brain responds to anxiety and track your progress.",
 
-    "habits": {
-      "title": "Habits I Am Working On",
-      "description": "Track the habits you want to change."
-    },
+"featureMind": "Understand your thoughts and reactions",
 
-    "evolution": {
-      "title": "My Evolution",
-      "description": "Observe your progress over time."
-    },
+"featurePatterns": "Identify automatic patterns that repeat",
 
-    "library": {
-      "title": "Patterns Library",
-      "description": "Learn why these patterns happen."
-    },
+"featureGrowth": "Develop new ways to respond",
 
-    "plan": {
-      "title": "Personalised Plan",
-      "description": "Receive goals tailored to your profile."
-    }
+"start": "Start discovery",
+
+  "assessment": {
+    "title": "My Assessment",
+    "description": "Discover your profile and monitor your progress."
   },
 
+  "habits": {
+    "title": "Habits I'm Working On",
+    "description": "Track the habits you want to change."
+  },
+
+"evolution": {
+  "title": "Your Progress",
+  "lastSevenDays": "Last 7 days",
+  "smallProgress": "Small progress matters",
+  "betterDays": "Days with improvement:",
+  "harderDays": "More difficult days:",
+  "messages": {
+    "reassurance": "You trusted yourself more and needed fewer reassurances.",
+    "search": "You reduced the constant search for answers.",
+    "body": "You observed your body with more calm.",
+    "control": "You accepted uncertainty better.",
+    "avoidance": "You faced uncomfortable situations better.",
+    "rumination": "You created more distance from repetitive thoughts.",
+    "perfectionism": "You allowed more flexibility with yourself."
+  }
+},
+
+"library": {
+  "title": "Pattern Library",
+  "description": "Learn why these patterns happen.",
+
+  "brain": {
+    "title": "The brain and the need for certainty",
+    "description": "Anxiety leads the brain to seek certainty to reduce the feeling of danger. The more you search for guarantees, the more the brain learns that uncertainty is dangerous."
+  },
+
+  "confirmation": {
+    "title": "Reassurance seeking",
+    "description": "Asking for reassurance or searching for answers may bring relief for a few minutes, but it reinforces the anxiety cycle in the long term."
+  },
+
+  "cycle": {
+    "title": "The anxiety cycle",
+    "description": "Thought → anxiety → search for relief → temporary relief → reinforced anxiety."
+  }
+},
+
+  "plan": {
+    "title": "Personalised Plan",
+    "description": "Receive goals tailored to your profile."
+  }
+},
   "title": "Know your Patterns",
   "subtitle": "Discover habits and routines that may be feeding your anxiety.",
   "startQuestionnaire": "Start Questionnaire",
   "lastEvaluation": "Last evaluation",
-  "retake": "Retake",
+  "retake": "Review again",
   "detox": "Detox",
   "wellbeing": "Wellbeing Evolution",
-  "noData": "There is not enough data yet.",
+  "noData": "There is no data yet.",
   "objective": "Weekly Goal",
   "daysWithout": "Days without the habit",
-  "progress": "Evolution",
+  "progress": "Progress",
   "score": "Score",
   "profile": "Profile",
 
   "habits": {
- "title": "Which behaviours do you recognise in yourself?",
-  "subtitle": "Choose the ones you feel you use to relieve anxiety or discomfort.",
-  "search": "Search symptoms or look for answers online",
-  "social": "Spending too much time on social media",
-  "series": "Watching series or videos for a long time to disconnect",
-  "games": "Playing to avoid uncomfortable thoughts",
-  "smoking": "Smoking to cope with anxiety or stress",
-  "alcohol": "Using alcohol to relieve difficult emotions",
-  "emotionalEating": "Eating to relieve anxiety or emotions",
-  "caffeine": "Using caffeine to cope with the day",
-  "shopping": "Buying things for temporary relief",
-  "confirmation": "Constantly seeking reassurance from others",
-  "other": "Other behaviour",
-  "continue": "Create my plan"
+    "title": "Which behaviours do you recognise in yourself?",
+    "subtitle": "Choose those you use to relieve anxiety or discomfort.",
+    "symptomSearch": "Search symptoms or look for answers online",
+    "socialMedia": "Spend too much time on social media",
+    "series": "Watch series or videos for a long time to disconnect",
+    "videoGames": "Play games to avoid uncomfortable thoughts",
+    "shopping": "Buy things for temporary relief",
+    "checkingMessages": "Repeatedly check messages or notifications",
+    "food": "Eat even without hunger because of anxiety",
+    "caffeine": "Use caffeine to cope with the day",
+    "avoidance": "Avoid situations that cause discomfort",
+    "reassurance": "Constantly seek reassurance from others",
+    "other": "Other behaviour",
+    "continue": "Create my plan"
   },
 
-  "dashboard": {
+"dashboard": {
+  "myEvolution": "Your evolution",
+  "lastSevenDays": "Last 7 days",
+  "smallProgress": "Small progress matters",
+  "improvedDays": "You improved",
+"sameDays": "Same pattern:",
+"harderDays": "Harder days",
     "title": "Your evolution plan",
     "subtitle": "Observe your patterns and follow small changes.",
     "goal": "Current goal",
-    "today": "How did today go?",
+    "today": "How did it go today?",
     "better": "I managed to reduce this behaviour",
-    "same": "Stayed the same",
+    "same": "It stayed the same",
     "harder": "It was harder today",
     "days": "days of evolution",
-    "evolution": "Evolution of recent days",
+    "evolution": "Evolution over the last days",
     "wellbeing": "Relationship with your wellbeing",
-    "wellbeingMessage": "Let's observe how these changes relate to your evolution.",
+    "wellbeingMessage": "Let's observe how these changes relate to your progress.",
     "betterDays": "Improved days:",
     "otherDays": "Other days:"
   },
@@ -481,101 +508,86 @@
   "questions": {
     "q1": "I often seek reassurance from other people to feel safe.",
     "q2": "I find it difficult to trust my own decisions without asking others.",
-    "q3": "I feel the need to ask several times if everything is okay.",
-    "q4": "I search symptoms or information online to try to reduce anxiety.",
-    "q5": "I keep looking for answers even after finding an explanation.",
+    "q3": "I feel the need to ask repeatedly if everything is okay.",
+
+    "q4": "I search for symptoms or information online to reduce anxiety.",
+    "q5": "I repeatedly look for answers even after finding an explanation.",
     "q6": "I find it difficult to stop searching when I become worried.",
-    "q7": "I pay a lot of attention to sensations in my body.",
+
+    "q7": "I pay close attention to sensations in my body.",
     "q8": "I interpret small physical changes as possible signs of danger.",
     "q9": "I frequently check if something is wrong with my body.",
+
     "q10": "I feel the need to do things perfectly.",
-    "q11": "I feel uncomfortable when I make small mistakes.",
-    "q12": "I postpone tasks because I fear not doing them well.",
+    "q11": "I become uncomfortable when I make small mistakes.",
+    "q12": "I delay tasks because I fear not doing them well.",
+
     "q13": "I avoid situations because I fear anxiety or discomfort.",
     "q14": "I stop doing important things to avoid worries.",
     "q15": "I feel immediate relief when I avoid something that causes anxiety.",
+
     "q16": "I get stuck in repetitive thoughts about problems or negative possibilities.",
-    "q17": "I find it difficult to switch off my mind when worried.",
+    "q17": "I find it difficult to switch off my mind when I am worried.",
     "q18": "I mentally review situations trying to find answers.",
+
     "q19": "I feel the need to control every detail to feel calm.",
     "q20": "I find it difficult to accept that some things are unpredictable.",
-    "q21": "I become anxious when I cannot guarantee an outcome.",
+    "q21": "I feel anxious when I cannot guarantee an outcome.",
+
     "q22": "I often compare my life or performance with others.",
-    "q23": "I feel other people handle difficult situations better than me.",
-    "q24": "Comparisons make me feel less confident."
+    "q23": "I feel others handle difficult situations better than I do.",
+"q24": "Comparisons make me feel less confident."
   },
 
   "profile": {
     "reassurance": {
-      "name": "Reassurance seeking",
-      "description": "You tend to seek external guarantees to feel safe when anxiety appears.",
-      "strength": "You pay attention to details and value safety.",
-      "challenge": "Learn to trust your ability to handle uncertainty."
+      "name": "Reassurance Seeking",
+      "description": "You tend to look for external reassurance to feel safe when anxiety appears.",
+      "strength": "You pay attention to details and value security.",
+      "challenge": "Learn to trust your own ability to handle uncertainty."
     },
     "search": {
-      "name": "Safety searching",
-      "description": "Searching for answers may relieve anxiety in the moment but maintain the worry cycle.",
-      "strength": "You are curious and seek to understand what happens.",
-      "challenge": "Learn to tolerate uncertainty without immediate answers."
+      "name": "Safety Searching",
+      "description": "Looking for answers can bring temporary relief but may keep the anxiety cycle going.",
+      "strength": "You are curious and try to understand what is happening.",
+      "challenge": "Learn to tolerate some uncertainty without needing immediate answers."
     },
     "body": {
-      "name": "Body hypervigilance",
-      "description": "You are very aware of body sensations and may interpret them as danger.",
-      "strength": "You have awareness and attention to body signals.",
-      "challenge": "Learn to observe sensations without always seeing them as threats."
+      "name": "Body Hypervigilance",
+      "description": "You are highly aware of body sensations and may interpret them as danger signals.",
+      "strength": "You have strong awareness of your body.",
+      "challenge": "Learn to notice sensations without always seeing them as threats."
     },
     "perfectionism": {
       "name": "Perfectionism",
-      "description": "There is a strong need to do everything correctly and avoid mistakes.",
-      "strength": "You are dedicated and want to do things well.",
-      "challenge": "Accept that mistakes and imperfections are part of learning."
+      "description": "You feel a strong need to do things correctly and avoid mistakes.",
+      "strength": "You are dedicated and committed to doing things well.",
+      "challenge": "Accept that mistakes are part of learning and growth."
     },
     "avoidance": {
       "name": "Avoidance",
-      "description": "Avoiding situations may bring immediate relief but reinforce fear in the long term.",
-      "strength": "You try to protect yourself when something feels difficult.",
-      "challenge": "Take small steps even with some discomfort."
+      "description": "Avoiding situations can bring immediate relief but strengthen fear over time.",
+      "strength": "You try to protect yourself when things feel difficult.",
+      "challenge": "Take small steps even when discomfort appears."
     },
     "rumination": {
       "name": "Rumination",
-      "description": "Your mind becomes stuck analysing problems and possibilities.",
-      "strength": "You have strong reflection and analysis skills.",
+      "description": "Your mind can get stuck analysing problems and possible outcomes.",
+      "strength": "You have strong reflection and analytical skills.",
       "challenge": "Learn to disconnect and return to the present moment."
     },
     "control": {
-      "name": "Need for control",
-      "description": "There is a constant search to make sure everything goes well.",
+      "name": "Need for Control",
+      "description": "You may constantly try to guarantee that everything goes well.",
       "strength": "You are responsible and organised.",
       "challenge": "Accept that some uncertainty is part of life."
     },
     "comparison": {
-      "name": "Social comparison",
+      "name": "Social Comparison",
       "description": "Comparing yourself with others can affect how you see your own value.",
       "strength": "You observe and learn from people around you.",
-      "challenge": "Value your own journey more."
+      "challenge": "Value your own path and progress."
     }
-  }
-},
-
-"patternsNew": {
-  "title": "Know your Patterns",
-  "description": "Discover the habits that influence your wellbeing and track your evolution.",
-  "assessment": "Assess your habits",
-  "assessmentDesc": "Identify habits that may be affecting your wellbeing.",
-  "daily": "Track your progress",
-  "dailyDesc": "Evaluate daily how you managed these habits.",
-  "evolution": "My evolution",
-  "evolutionDesc": "Observe the evolution of your habits and compare it with your daily wellbeing.",
-  "evolutionDescription": "See how you manage your habits over time.",
-  "noRecords": "You do not have enough records yet.",
-  "lastRecord": "Last record",
-  "date": "Date",
-  "habitManagement": "Habit management",
-  "startEvolution": "Start by tracking your progress daily.",
-  "plan": {
-    "title": "Personalised Plan",
-    "description": "Receive goals tailored to your profile."
   }
 }
  }
- 

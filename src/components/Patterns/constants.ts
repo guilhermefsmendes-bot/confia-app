@@ -10,86 +10,86 @@ export const HABITS: HabitDefinition[] = [
   {
     id: "symptom_search",
     icon: "🔍",
-    translationKey: "patterns.habits.symptom_search"
+translationKey: "patterns.home.habits.symptomSearch"
   },
   {
     id: "google_answers",
     icon: "🌐",
-    translationKey: "patterns.habits.google_answers"
+translationKey: "patterns.home.habits.reassurance"
   },
   {
     id: "tv_series",
     icon: "🎬",
-    translationKey: "patterns.habits.tv_series"
+translationKey: "patterns.home.habits.series"
   },
   {
     id: "social_media",
     icon: "📱",
-    translationKey: "patterns.habits.social_media"
+translationKey: "patterns.home.habits.socialMedia"
   },
   {
     id: "video_games",
     icon: "🎮",
-    translationKey: "patterns.habits.video_games"
+translationKey: "patterns.home.habits.videoGames"
   },
   {
     id: "shopping",
     icon: "🛍️",
-    translationKey: "patterns.habits.shopping"
+translationKey: "patterns.home.habits.shopping"
   },
   {
     id: "food",
     icon: "🍫",
-    translationKey: "patterns.habits.food"
+translationKey: "patterns.home.habits.food"
   },
   {
     id: "coffee",
     icon: "☕",
-    translationKey: "patterns.habits.coffee"
+translationKey: "patterns.home.habits.caffeine"
   },
   {
     id: "alcohol",
     icon: "🍺",
-    translationKey: "patterns.habits.alcohol"
+translationKey: "patterns.home.habits.other"
   },
   {
     id: "tobacco",
     icon: "🚬",
-    translationKey: "patterns.habits.tobacco"
+translationKey: "patterns.home.habits.other"
   },
   {
     id: "sleep",
     icon: "🛏️",
-    translationKey: "patterns.habits.sleep"
+translationKey: "patterns.home.habits.other"
   },
   {
     id: "exercise",
     icon: "🏃",
-    translationKey: "patterns.habits.exercise"
+translationKey: "patterns.home.habits.other"
   },
   {
     id: "reassurance",
     icon: "💬",
-    translationKey: "patterns.habits.reassurance"
+translationKey: "patterns.home.habits.reassurance"
   },
   {
     id: "notifications",
     icon: "❤️",
-    translationKey: "patterns.habits.notifications"
+translationKey: "patterns.home.habits.checkingMessages"
   },
   {
     id: "youtube",
     icon: "📺",
-    translationKey: "patterns.habits.youtube"
+translationKey: "patterns.home.habits.series"
   },
   {
     id: "music",
     icon: "🎵",
-    translationKey: "patterns.habits.music"
+translationKey: "patterns.home.habits.other"
   },
   {
     id: "other",
     icon: "✨",
-    translationKey: "patterns.habits.other"
+translationKey: "patterns.home.habits.other"
   }
 ];

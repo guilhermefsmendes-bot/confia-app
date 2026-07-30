@@ -8,9 +8,13 @@ export const PatternsDashboard: React.FC = () => {
     "confia_patterns_habits_v1"
   );
 
-  const habitData = storedHabits
-    ? JSON.parse(storedHabits)
-    : null;
+const habitData = (() => {
+  try {
+    return storedHabits ? JSON.parse(storedHabits) : null;
+  } catch {
+    return null;
+  }
+})();
 
   const mainHabit = habitData?.habits?.[0];
 const daysSinceStart = habitData?.startedAt
@@ -30,20 +34,24 @@ const saveToday = (value:string) => {
 
   setToday(value);
 
-  const existing =
-    JSON.parse(
+const existing = (() => {
+  try {
+    return JSON.parse(
       localStorage.getItem(
         "confia_patterns_history_v1"
       ) || "[]"
     );
+  } catch {
+    return [];
+  }
+})();
 
-
-  const newEntry = {
-    date: new Date().toISOString(),
-    habit: mainHabit,
-    value
-  };
-
+const newEntry = {
+  date: new Date().toISOString(),
+  habit: mainHabit,
+  value,
+  pattern: mainHabit
+};
 
   localStorage.setItem(
     "confia_patterns_history_v1",
@@ -83,11 +91,11 @@ const saveToday = (value:string) => {
     🎯 {t("patterns.dashboard.goal")}
   </h3>
 
-  <p className="mt-2 text-[#7A5E57]">
-    {mainHabit
-      ? t(`patterns.habits.${mainHabit}`)
-      : ""}
-  </p>
+<p className="mt-2 text-[#7A5E57]">
+  {mainHabit
+    ? t(`patterns.home.habits.${mainHabit}`)
+    : ""}
+</p>
 
 </div>
 

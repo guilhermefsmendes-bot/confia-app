@@ -5,6 +5,7 @@ import { savePatternProfile } from "./storage";
 
 interface PatternQuestionnaireProps {
   onFinish?: () => void;
+  onBack?: () => void;
 }
 
 const OPTIONS = [
@@ -17,7 +18,9 @@ const OPTIONS = [
 
 export const PatternQuestionnaire: React.FC<PatternQuestionnaireProps> = ({
   onFinish,
+  onBack,
 }) => {
+
   const { t } = useTranslation();
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -26,33 +29,47 @@ export const PatternQuestionnaire: React.FC<PatternQuestionnaireProps> = ({
   const question = QUESTIONS[currentQuestion];
 
   const handleAnswer = (value: number) => {
+
     const newAnswers = [...answers, value];
+
     setAnswers(newAnswers);
 
-if (currentQuestion === QUESTIONS.length - 1) {
+    if (currentQuestion === QUESTIONS.length - 1) {
 
-  savePatternProfile({
-    completed: true,
-    answers: newAnswers,
-    createdAt: new Date().toISOString(),
-  });
+      savePatternProfile({
+        completed: true,
+        answers: newAnswers,
+        createdAt: new Date().toISOString(),
+      });
 
-  onFinish?.();
-  return;
-}
+      onFinish?.();
+      return;
+    }
+
     setCurrentQuestion((prev) => prev + 1);
   };
 
+
   return (
     <div className="bg-[#FFF8F5] rounded-2xl p-5">
+
+      <button
+        onClick={onBack}
+        className="text-sm text-[#7A5E57] mb-4"
+      >
+        ← {t("common.back")}
+      </button>
+
 
       <h2 className="text-xl font-black text-[#4E3B36] mb-2">
         🌱 {t("patterns.questionnaire.title")}
       </h2>
 
+
       <p className="text-sm text-[#7A5E57] mb-6">
         {currentQuestion + 1} / {QUESTIONS.length}
       </p>
+
 
       <div className="bg-white rounded-xl p-5 mb-6">
 
@@ -61,6 +78,7 @@ if (currentQuestion === QUESTIONS.length - 1) {
         </p>
 
       </div>
+
 
       <div className="space-y-3">
 

@@ -15,7 +15,11 @@ import {
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n";
+import HomeShop from "./components/HomeShop";
+import HomeInventory from "./components/HomeInventory";
 import { initLanguage } from "./i18n/language";
+import Avatar from "./components/Avatar";
+import HomeWorld from "./components/HomeWorld";
 import { AvatarState, Objective, DailyRating, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 import PatternsNew from './components/PatternsNew/PatternsNew';
@@ -29,7 +33,6 @@ import { TriageModal } from './components/TriageModal';
 import { AbracoTimer } from './components/AbracoTimer';
 import { ObjectivosList } from './components/ObjectivosList';
 import { ImpulsoSOS } from './components/ImpulsoSOS';
-import { Avatar } from './components/Avatar';
 import { ProgressoDashboard } from './components/ProgressoDashboard';
 import { FocoMente } from './components/FocoMente';
 import { StopMode } from './components/StopMode';
@@ -70,6 +73,9 @@ useEffect(() => {
 }, []);
   // Global App States
 const [patternsPage, setPatternsPage] = useState("menu");
+const [homeScreen, setHomeScreen] = useState<
+  "home" | "shop" | "inventory"
+>("home");
   const [avatar, setAvatar] = useState<AvatarState>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AVATAR);
     if (saved) return JSON.parse(saved);
@@ -80,9 +86,10 @@ const [patternsPage, setPatternsPage] = useState("menu");
       name: t("avatarName"),
 evolutionStage: t("avatarEvolutionStage"),
       
-      points: 10
+      points: 15
     };
   });
+const [inventory, setInventory] = useState<any[]>([]);
 const [objectivesHistory, setObjectivesHistory] = useState<
   { date: string; completed: number }[]
 >(() => {
@@ -284,6 +291,20 @@ setTimeout(() => {
       };
     });
   };
+
+const spendXp = (amount: number) => {
+  setAvatar(prev => ({
+    ...prev,
+    xp: prev.xp - amount
+  }));
+};
+
+const handleBuyItem = (item: any) => {
+  setInventory(prev => [
+    ...prev,
+    item
+  ]);
+};
 
   // Pet Amigo (Interaction)
   const handlePetAvatar = () => {
@@ -518,9 +539,9 @@ className="flex items-center justify-center w-24 h-24 relative"
       {/* Main Content Stage */}
       <main className="flex-1 pb-24 px-4 max-w-lg mx-auto w-full pt-4">
 <AnimatePresence mode="wait">
-  {currentTab === 0 && (
-            /* TAB 1: MENU PRINCIPAL */
-            <motion.div
+{currentTab === 0 && homeScreen === "home" && (
+          <motion.div
+
               key="main-menu"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -554,18 +575,33 @@ className="flex items-center justify-center w-24 h-24 relative"
   <button onClick={() => changeAppLanguage("fr")}>🇫🇷</button>
 </div>
 
-<Avatar
-                avatar={avatar}
-                onPet={handlePetAvatar}
-                celebrating={avatarCelebrating}
- levelUpTrigger={avatarCelebrating}
-  moodRating={
-    afternoonRating !== undefined
-      ? Math.round((morningRating + afternoonRating) / 2)
-      : morningRating
-  }
-memoryMessage={avatarMemoryMessage}
-              />
+<HomeWorld
+  avatar={avatar}
+  avatarCelebrating={avatarCelebrating}
+  avatarMemoryMessage={avatarMemoryMessage}
+  morningRating={morningRating}
+  afternoonRating={afternoonRating}
+  handlePetAvatar={handlePetAvatar}
+/>
+{homeScreen === "home" && (
+  <div className="flex justify-center gap-10 py-4">
+
+    <button
+      onClick={() => setHomeScreen("inventory")}
+      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
+    >
+      <span className="text-5xl">🎒</span>
+    </button>
+
+    <button
+      onClick={() => setHomeScreen("shop")}
+      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
+    >
+      <span className="text-5xl">🏠</span>
+    </button>
+
+  </div>
+)}
               {/* Crisis Screening SOS Button */}
               <button
                 onClick={() => setTriageOpen(true)}
@@ -726,6 +762,18 @@ memoryMessage={avatarMemoryMessage}
             </motion.div>
           )}
 
+{currentTab === 0 && homeScreen === "shop" && (
+<HomeShop
+  onBack={() => setHomeScreen("home")}
+  xp={avatar.xp}
+  spendXp={spendXp}
+/>
+)}
+{currentTab === 0 && homeScreen === "inventory" && (
+  <HomeInventory
+    onBack={() => setHomeScreen("home")}
+  />
+)}
           {currentTab === 1 && (
             /* TAB 2: ABRAÇO (TIMER DE RESPIRAÇÃO) */
             <motion.div

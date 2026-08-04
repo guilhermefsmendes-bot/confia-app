@@ -3,6 +3,9 @@
   "welcome": "Bem-vindo",
   "continue": "Continuar",
   "trigger": "Gatilho",
+"edit":"Editar",
+"save":"Guardar",
+"dragObjects":"Arrasta os objetos para decorar",
   "emotion": "Emoção",
   "thought": "Pensamento",
   "startTimer": "Iniciar Tempo",
@@ -569,6 +572,146 @@
   "plan": {
     "title": "Plano Personalizado",
     "description": "Recebe objetivos adaptados ao teu perfil."
+},
+  "inventory": {
+    "title": "Inventário",
+    "empty": "Ainda não tens objetos.",
+    "equip": "Equipar",
+    "equipped": "Equipado"
+  },
+
+  "shop": {
+    "title": "Loja",
+    "availableXp": "XP disponível"
+  },
+
+  "homeItems": {
+    "flower1": {
+      "name": "Flor pequena"
+    },
+    "flower2": {
+      "name": "Flor rosa"
+    },
+    "flower3": {
+      "name": "Flor vermelha"
+    },
+    "flower4": {
+      "name": "Tulipa"
+    },
+    "flower5": {
+      "name": "Rosa"
+    },
+    "flower6": {
+      "name": "Rosa murcha"
+    },
+    "flower7": {
+      "name": "Ramo de flores"
+    },
+    "flower8": {
+      "name": "Jacinto"
+
+    },
+
+    "tree1": {
+      "name": "Árvore verde"
+    },
+    "tree2": {
+      "name": "Pinheiro"
+    },
+    "tree3": {
+      "name": "Palmeira"
+    },
+    "tree4": {
+      "name": "Árvore de Natal"
+    },
+    "tree5": {
+      "name": "Cacto"
+    },
+    "tree6": {
+      "name": "Tronco"
+    },
+    "tree7": {
+      "name": "Trevo"
+    },
+    "tree8": {
+      "name": "Trevo pequeno"
+    },
+
+    "rock1": {
+      "name": "Rocha pequena"
+    },
+    "rock2": {
+      "name": "Rocha"
+    },
+    "rock3": {
+      "name": "Pedra natural"
+    },
+    "rock4": {
+      "name": "Pedra grande"
+    },
+    "rock5": {
+      "name": "Rocha escura"
+    },
+    "rock6": {
+      "name": "Pedra antiga"
+    },
+
+    "bench1": {
+      "name": "Banco de madeira"
+    },
+    "bench2": {
+      "name": "Banco simples"
+    },
+    "bench3": {
+      "name": "Banco confortável"
+    },
+    "bench4": {
+      "name": "Banco elegante"
+    },
+    "bench5": {
+      "name": "Banco de jardim"
+    },
+    "bench6": {
+      "name": "Banco especial"
+    },
+
+    "water1": {
+      "name": "Gota de água"
+    },
+    "water2": {
+      "name": "Flor aquática"
+    },
+    "water3": {
+      "name": "Fonte"
+    },
+    "water4": {
+      "name": "Onda"
+    },
+    "water5": {
+      "name": "Concha"
+    },
+    "water6": {
+      "name": "Pato"
+    },
+
+    "extra1": {
+      "name": "Lanterna"
+    },
+    "extra2": {
+      "name": "Borboleta"
+    },
+    "extra3": {
+      "name": "Esquilo"
+    },
+    "extra4": {
+      "name": "Ninho"
+    },
+    "extra5": {
+      "name": "Sol"
+    },
+    "extra6": {
+      "name": "Arco-íris"
   }
+}
 }
 }

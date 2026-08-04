@@ -673,26 +673,12 @@ animate={{
 
   const levelUpProgress = (avatar.xp / avatar.maxXp) * 100;
 
-  return (
-    <div className="flex flex-col items-center justify-center pt-2 pb-4 px-4">
-      {/* Speech Bubble / Balloon */}
-      <div className="relative h-14 flex items-center justify-center mb-1 w-full">
-        <AnimatePresence mode="wait">
-          {showBubble && (
-            <motion.div
-              key={bubbleText}
-              initial={{ opacity: 0, scale: 0.8, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: -5 }}
-              className="absolute bg-white/95 backdrop-blur-sm px-5 py-2 rounded-2xl shadow-md border border-[#E5A88B]/25 w-full max-w-[280px] text-center text-xs font-bold text-[#4E3B36] leading-relaxed"
-              style={{ bottom: 0 }}
-            >
-              {bubbleText}
-              <div className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-4 h-4 bg-white/95 rotate-45 border-r border-b border-[#E5A88B]/25" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+return (
+  <div className="relative flex flex-col items-center justify-center pt-2 pb-4 px-4">
+
+    <div className="absolute top-2 left-2 bg-white/90 rounded-full px-3 py-1 shadow text-xs font-bold text-[#C97B5E] z-30">
+      ⭐ Level {avatar.level}
+    </div>
 
       {/* Interactive Avatar Container */}
       <div
@@ -729,51 +715,13 @@ animate={{
         </AnimatePresence>
       </div>
 
-      {/* Click instructions */}
-      <p className="text-xs text-slate-500 mt-1 mb-4 flex items-center gap-1 bg-white px-3 py-1.5 rounded-full border border-[#E5A88B]/15 shadow-sm shadow-[#E5A88B]/5">
-        <Sparkles size={12} className="text-[#E5A88B] animate-pulse" />
-       {t("petCompanion")}
-      </p>
-
-      {/* Status Details */}
-      <div className="w-full max-w-sm bg-white rounded-[24px] p-5 border border-[#E5A88B]/15 shadow-xl shadow-[#E5A88B]/5">
-        <div className="flex items-center justify-between mb-2">
-          <div>
-          <h3 className="font-bold text-[#4E3B36] text-base">{t("avatarName")}</h3>
-            <p className="text-xs font-semibold text-[#C97B5E] flex items-center gap-1 mt-0.5">
-             <ShieldCheck size={13} /> {t("stage")}: {stage.name}
-            </p>
-          </div>
-          <div className="flex flex-col items-end">
-            <span className="text-xs font-mono font-bold text-[#C97B5E] bg-[#E5A88B]/10 px-2.5 py-1 rounded-xl">
-             {t("level")} {avatar.level}
-            </span>
-            <span className="text-[10px] font-mono text-slate-400 mt-1 flex items-center gap-0.5">
-             <Flame size={10} className="text-[#C97B5E]" /> {avatar.points} {t("points")}
-            </span>
-          </div>
-        </div>
-
-        <p className="text-xs text-slate-500 mb-3 leading-relaxed">
-          {stage.desc}
+   <p className="text-xs text-slate-500 mt-1 mb-4 flex items-center gap-1 bg-white px-3 py-1.5 rounded-full border border-[#E5A88B]/15 shadow-sm shadow-[#E5A88B]/5">
+          <Sparkles size={12} className="text-[#E5A88B] animate-pulse" />
+          {t("petCompanion")}
         </p>
 
-        {/* Progress bar */}
-        <div>
-          <div className="flex justify-between text-[11px] font-mono font-medium text-slate-400 mb-1">
-           <span>XP {t("level")}: {avatar.xp} / {avatar.maxXp}</span>
-            <span>{Math.round(levelUpProgress)}%</span>
-          </div>
-          <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-[2px]">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-[#E5A88B] via-[#F1C3AF] to-[#E29A86] shadow-sm"
-              initial={{ width: 0 }}
-              animate={{ width: `${levelUpProgress}%` }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            />
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
+
+export default Avatar;

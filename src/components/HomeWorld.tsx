@@ -35,6 +35,8 @@ import FarmAnimals from "./world/FarmAnimals";
 import HouseEvolution from "./world/HouseEvolution";
 import { getWorld, careWorld } from "../storage/homeWorld";
 import { getGrowth, careItem } from "../storage/homeGrowth";
+import GrassDetails from "./world/GrassDetails";
+import GrassTexture from "./world/GrassTexture";
 
 interface Props {
   avatar: any;
@@ -107,105 +109,46 @@ const isNight = hour >= 21 || hour < 7;
 
   return (
 
-    <div
-      className="relative overflow-hidden rounded-3xl h-[600px] bg-gradient-to-b from-sky-300 via-sky-100 to-sky-50"
-onDoubleClick={() => {
-  const updated = careWorld(5);
-  setWorld(updated);
-}}
+<div
+  className="relative overflow-hidden rounded-3xl h-[600px] bg-gradient-to-b from-sky-300 via-sky-100 to-sky-50"
+  onDoubleClick={() => {
+    const updated = careWorld(5);
+    setWorld(updated);
+  }}
+>
+<div className="absolute top-4 right-4 z-50">
+  <button
+    onClick={() => {
 
-      onPointerMove={(e) => {
+      if (editMode) {
+        savePositions(objectPositions);
+      }
 
-        if (!dragging) return;
+      setEditMode(!editMode);
 
-        const rect =
-          e.currentTarget.getBoundingClientRect();
+    }}
+    className={`px-4 py-2 rounded-xl font-bold shadow ${
+      editMode
+        ? "bg-green-500 text-white"
+        : "bg-white"
+    }`}
+  >
+    {editMode
+      ? `✅ ${t("save")}`
+      : `✏️ ${t("edit")}`}
+  </button>
+</div>
 
-        const left =
-          ((e.clientX - rect.left) / rect.width) * 100;
-
-        const top =
-          ((e.clientY - rect.top) / rect.height) * 100;
-
-
-        setObjectPositions(prev => ({
-
-          ...prev,
-
-          [dragging]: {
-            left: `${left}%`,
-            top: `${top}%`
-          }
-
-        }));
-
-      }}
-
-
-      onPointerUp={() => {
-
-        if (dragging) {
-
-          savePositions(objectPositions);
-
-        }
-
-        setDragging(null);
-
-      }}
-
-    >
-
-      <div className="absolute top-4 right-4 z-50">
-
-        <button
-
-          onClick={() => {
-
-            if (editMode) {
-
-              savePositions(objectPositions);
-
-            }
-
-            setEditMode(!editMode);
-
-          }}
-
-          className={`px-4 py-2 rounded-xl font-bold shadow ${
-            editMode
-              ? "bg-green-500 text-white"
-              : "bg-white"
-          }`}
-
-        >
-
-          {editMode
-            ? `✅ ${t("save")}`
-            : `✏️ ${t("edit")}`
-          }
-
-        </button>
-
-      </div>
-
-
-      {/* Céu */}
 <Clouds />
-
-<AmbientParticles />
-
+<GrassTexture />
 <Butterflies />
-<GardenZone />
-<HouseEvolution xp={avatar.xp}/>
 <RefugeEvolution xp={avatar.xp} />
 <FarmZones xp={avatar.xp} />
-      <div className="absolute inset-0 bg-gradient-to-b from-sky-300 via-sky-100 to-sky-50" />
-<FarmCare />
-{/* Céu dinâmico */}
+<GrassDetails />
 
+{/* Céu dinâmico */}
 <div
-  className={`absolute top-0 left-0 right-0 h-56 transition-all duration-1000 ${
+  className={`absolute top-0 left-0 right-0 h-56 z-0 transition-all duration-1000 ${
     isNight
       ? "bg-gradient-to-b from-indigo-900 to-slate-700"
       : "bg-gradient-to-b from-sky-300 to-sky-100"
@@ -225,17 +168,14 @@ onDoubleClick={() => {
 {/* Relva evolutiva */}
 
 <div
-  className={`absolute bottom-0 left-0 right-0 h-64 transition-all duration-1000 ${
+  className={`absolute bottom-0 left-0 right-0 h-[380px] transition-all duration-1000 ${
     world.health > 70
-      ? "bg-gradient-to-b from-green-400 to-green-600"
+? "bg-gradient-to-b from-emerald-300 via-green-500 to-green-800"
       : world.health > 40
-      ? "bg-gradient-to-b from-lime-300 to-green-500"
-      : "bg-gradient-to-b from-yellow-300 to-green-400"
+? "bg-gradient-to-b from-lime-200 via-emerald-400 to-green-700"
+: "bg-gradient-to-b from-amber-100 via-green-400 to-emerald-700"
   }`}
 />
-
-
-      {/* Objetos */}
 
 {equippedItems.map(item => {
 
@@ -248,34 +188,37 @@ onDoubleClick={() => {
       ? "scale-125"
       : "scale-150";
 
+  const animation =
+    item.id.includes("flower")
+      ? "animate-[wiggle_4s_ease-in-out_infinite]"
+      : item.id.includes("tree")
+      ? "animate-[wiggle_6s_ease-in-out_infinite]"
+      : "";
 
   return (
 
     <div
       key={item.id}
 
-      className={`absolute z-30 text-5xl select-none transition-transform duration-700 ${
+      className={`absolute z-30 text-3xl select-none transition-transform duration-700 ${
         editMode
           ? "cursor-move scale-110"
           : "hover:scale-110"
-      } ${scale}`}
-
+      } ${scale} ${animation}`}
 
       style={
-        objectPositions[item.id]
-        ??
-        defaultPositions[item.id]
-        ??
-        {
+        objectPositions[item.id] ??
+        defaultPositions[item.id] ?? {
           left: "50%",
           bottom: "10%"
         }
       }
 
-
       onPointerDown={(e) => {
 
         if (!editMode) return;
+
+        e.preventDefault();
 
         setDragging(item.id);
 
@@ -285,57 +228,45 @@ onDoubleClick={() => {
 
       }}
 
+onPointerMove={(e) => {
 
-      onPointerMove={(e) => {
+  if (dragging !== item.id) return;
 
-        if (dragging !== item.id) return;
+  const rect =
+    e.currentTarget.parentElement!.getBoundingClientRect();
 
+  const left =
+    ((e.clientX - rect.left) / rect.width) * 100;
 
-        setObjectPositions(prev => {
+  const top =
+    ((e.clientY - rect.top) / rect.height) * 100;
 
-          const current =
-            prev[item.id]
-            ??
-            defaultPositions[item.id]
-            ??
-            {
-              left: "50%",
-              bottom: "10%"
-            };
+  setObjectPositions(prev => ({
 
+    ...prev,
 
-          const updated = {
+    [item.id]: {
+      left: `${left}%`,
+      top: `${top}%`
+    }
 
-            ...current,
+  }));
 
-            transform:
-              `translate(${e.movementX}px, ${e.movementY}px)`
-
-          };
+}}
 
 
-          savePositions({
-            ...prev,
-            [item.id]: updated
-          });
 
+onPointerUp={() => {
 
-          return {
-            ...prev,
-            [item.id]: updated
-          };
+  if (dragging === item.id) {
 
-        });
+    savePositions(objectPositions);
 
-      }}
+    setDragging(null);
 
+  }
 
-      onPointerUp={() => {
-
-        setDragging(null);
-
-      }}
-
+}}
 
       onDoubleClick={() => {
 
@@ -347,7 +278,15 @@ onDoubleClick={() => {
 
     >
 
-      {item.emoji}
+<>
+  <div
+    className="absolute left-1/2 bottom-1 -translate-x-1/2 w-8 h-2 rounded-full bg-black/20 blur-sm"
+  />
+
+  <div className="relative">
+    {item.emoji}
+  </div>
+</>
 
     </div>
 

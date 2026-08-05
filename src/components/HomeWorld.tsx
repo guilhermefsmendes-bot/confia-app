@@ -111,6 +111,7 @@ const isNight = hour >= 21 || hour < 7;
 
 <div
   className="relative overflow-hidden rounded-3xl h-[600px] bg-gradient-to-b from-sky-300 via-sky-100 to-sky-50"
+  style={{ touchAction: "none" }}
   onDoubleClick={() => {
     const updated = careWorld(5);
     setWorld(updated);
@@ -165,15 +166,16 @@ const isNight = hour >= 21 || hour < 7;
   </div>
 )}
 <AtmosphereLayer />
+
 {/* Relva evolutiva */}
 
 <div
   className={`absolute bottom-0 left-0 right-0 h-[380px] transition-all duration-1000 ${
     world.health > 70
-? "bg-gradient-to-b from-emerald-300 via-green-500 to-green-800"
+      ? "bg-gradient-to-b from-emerald-300 via-green-500 to-green-800"
       : world.health > 40
-? "bg-gradient-to-b from-lime-200 via-emerald-400 to-green-700"
-: "bg-gradient-to-b from-amber-100 via-green-400 to-emerald-700"
+      ? "bg-gradient-to-b from-lime-200 via-emerald-400 to-green-700"
+      : "bg-gradient-to-b from-amber-100 via-green-400 to-emerald-700"
   }`}
 />
 
@@ -196,127 +198,118 @@ const isNight = hour >= 21 || hour < 7;
       : "";
 
   return (
-
     <div
       key={item.id}
-
       className={`absolute z-30 text-3xl select-none transition-transform duration-700 ${
         editMode
           ? "cursor-move scale-110"
           : "hover:scale-110"
       } ${scale} ${animation}`}
-
-      style={
-        objectPositions[item.id] ??
-        defaultPositions[item.id] ?? {
-          left: "50%",
-          bottom: "10%"
-        }
-      }
+      style={{
+        touchAction: "none",
+        ...(objectPositions[item.id] ??
+          defaultPositions[item.id] ?? {
+            left: "50%",
+            bottom: "10%"
+          })
+      }}
 
       onPointerDown={(e) => {
+        e.preventDefault();
+        e.currentTarget.setPointerCapture(e.pointerId);
+        setDragging(item.id);
+      }}
 
-        if (!editMode) return;
+      onPointerMove={(e) => {
+
+        if (dragging !== item.id) return;
 
         e.preventDefault();
 
-        setDragging(item.id);
+        const rect =
+          e.currentTarget.parentElement!.getBoundingClientRect();
 
-        e.currentTarget.setPointerCapture(
-          e.pointerId
-        );
+        const left =
+          ((e.clientX - rect.left) / rect.width) * 100;
+
+        const top =
+          ((e.clientY - rect.top) / rect.height) * 100;
+
+        setObjectPositions(prev => ({
+          ...prev,
+          [item.id]: {
+            left: `${left}%`,
+            top: `${top}%`
+          }
+        }));
 
       }}
 
-onPointerMove={(e) => {
+      onPointerUp={(e) => {
 
-  if (dragging !== item.id) return;
+        e.currentTarget.releasePointerCapture(
+          e.pointerId
+        );
 
-  const rect =
-    e.currentTarget.parentElement!.getBoundingClientRect();
+        if (dragging === item.id) {
 
-  const left =
-    ((e.clientX - rect.left) / rect.width) * 100;
+          savePositions(objectPositions);
+          setDragging(null);
 
-  const top =
-    ((e.clientY - rect.top) / rect.height) * 100;
+        }
 
-  setObjectPositions(prev => ({
-
-    ...prev,
-
-    [item.id]: {
-      left: `${left}%`,
-      top: `${top}%`
-    }
-
-  }));
-
-}}
-
-
-
-onPointerUp={() => {
-
-  if (dragging === item.id) {
-
-    savePositions(objectPositions);
-
-    setDragging(null);
-
-  }
-
-}}
+      }}
 
       onDoubleClick={() => {
 
         const updated = careItem(item.id);
-
         setGrowth(updated);
 
       }}
-
     >
 
-<>
-  <div
-    className="absolute left-1/2 bottom-1 -translate-x-1/2 w-8 h-2 rounded-full bg-black/20 blur-sm"
-  />
+      <div
+        className="absolute left-1/2 bottom-1 -translate-x-1/2 w-8 h-2 rounded-full bg-black/20 blur-sm"
+      />
 
-  <div className="relative">
-    {item.emoji}
-  </div>
-</>
+      <div className="relative">
+        {item.emoji}
+      </div>
 
     </div>
-
   );
 
 })}
 
-      {/* Avatar */}
+
+{/* Avatar */}
 
 <div
-className="absolute z-20 cursor-move"
+  className="absolute z-20 cursor-move"
   style={{
     left: `calc(50% + ${avatarPosition.x}px)`,
     top: `calc(50% + ${avatarPosition.y}px)`,
-    transform: "translate(-50%, -50%) scale(0.5)"
+    transform: "translate(-50%, -50%) scale(0.5)",
+    touchAction: "none"
   }}
 
   onPointerDown={(e)=>{
 
-    setDraggingAvatar(true);
+    e.preventDefault();
 
     e.currentTarget.setPointerCapture(
       e.pointerId
     );
+
+    setDraggingAvatar(true);
 
   }}
 
   onPointerMove={(e)=>{
 
     if(!draggingAvatar) return;
+
+    e.preventDefault();
 
     setAvatarPosition(prev => ({
       x: prev.x + e.movementX,
@@ -325,34 +318,37 @@ className="absolute z-20 cursor-move"
 
   }}
 
-  onPointerUp={()=>{
+  onPointerUp={(e)=>{
+
+    e.currentTarget.releasePointerCapture(
+      e.pointerId
+    );
 
     setDraggingAvatar(false);
 
   }}
 >
 
-<Avatar
-  onPet={handlePetAvatar}
-  avatar={avatar}
-/>
+  <Avatar
+    onPet={handlePetAvatar}
+    avatar={avatar}
+  />
 
 </div>
 
 
+{editMode && (
 
-      {editMode && (
+  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 px-5 py-2 rounded-full shadow font-semibold">
 
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 px-5 py-2 rounded-full shadow font-semibold">
+    {t("dragObjects")}
 
-          {t("dragObjects")}
+  </div>
 
-        </div>
-
-      )}
+)}
 
 
-    </div>
+</div>
 
   );
 

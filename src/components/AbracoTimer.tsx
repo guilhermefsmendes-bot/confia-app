@@ -262,7 +262,7 @@ stopAudio();
       <div className="min-h-[85px] w-full flex items-center justify-center px-4">
         <AnimatePresence mode="wait">
           <motion.div
-            key={phraseIdx + '-' + secondsLeft}
+key={phraseIdx}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}

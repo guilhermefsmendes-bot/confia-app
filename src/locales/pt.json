@@ -3,9 +3,9 @@
   "welcome": "Bem-vindo",
   "continue": "Continuar",
   "trigger": "Gatilho",
-"edit":"Editar",
-"save":"Guardar",
-"dragObjects":"Arrasta os objetos para decorar",
+  "edit": "Editar",
+  "save": "Guardar",
+  "dragObjects": "Arrasta os objetos para decorar",
   "emotion": "Emoção",
   "thought": "Pensamento",
   "startTimer": "Iniciar Tempo",
@@ -55,9 +55,9 @@
   "cycleMoreAnxiety": "Mais ansiedade",
   "cycleExplanation": "Quando procuramos garantias constantemente, o cérebro aprende que existe perigo e mantém o ciclo ativo.",
   "settings": "Definições",
-  "impulseHistoryTitle": "Histórico de impulsos",
+  "impulseHistoryTitle": "🛡️ Historial de impulsos",
   "impulseLastUsed": "Última utilização: há {{days}} dia(s)",
-  "impulseTotalUses": "Total de utilizações: {{count}}",
+  "impulseTotalUses": "Usos totais: {{count}}",
   "emotionalMemoryTitle": "A tua semana",
   "emotionalMemoryAverage": "Média semanal: {{average}}",
   "emotionalMemoryBalanced": "A tua semana mostra equilíbrio",
@@ -134,6 +134,41 @@
   "whatToAchieveToday": "O que queres alcançar hoje?",
   "goalPlaceholder": "Ex: Ler 2 páginas de um livro, regar as plantas...",
   "remove": "Remover",
+  "dailyCheckIn": {
+    "title": "Bom dia 🌱",
+    "subtitle": "Antes de começares o dia, como estás?",
+    "moodQuestion": "Como te sentes neste momento?",
+    "moodLow": "Muito mal",
+    "moodHigh": "Muito bem",
+    "needQuestion": "O que precisas mais hoje?",
+    "needs": {
+      "calm": "Acalmar",
+      "mind": "Organizar a mente",
+      "energy": "Ganhar energia",
+      "support": "Sentir-me acompanhado",
+      "well": "Continuar bem"
+    },
+    "continue": "Continuar",
+    "progressTitle": "A tua evolução",
+    "progressSubtitle": "Como tens estado nos últimos dias",
+    "weekAverage": "Média dos últimos dias:",
+    "responses": {
+      "lowCalm": "Hoje parece estar a ser um dia mais pesado. Vamos começar devagar. Estou aqui contigo. 🌿",
+      "lowMind": "A tua mente parece precisar de algum espaço. Vamos organizar um pensamento de cada vez. 🧠",
+      "lowEnergy": "Hoje não precisas de fazer tudo. Vamos recuperar energia com pequenos passos. 🌱",
+      "lowSupport": "Não precisas de enfrentar o dia sozinho. A Confia está aqui contigo. 🤝",
+      "lowWell": "Mesmo num dia difícil, estás a cuidar de ti. Isso já é um passo importante. 💚",
+      "highCalm": "Estás num momento tranquilo. Vamos aproveitar esta calma para fortalecer o teu dia. ✨",
+      "highMind": "Parece que estás num bom momento para organizar os pensamentos e seguir com clareza. 🧠",
+      "highEnergy": "Tens uma boa energia hoje. Vamos aproveitá-la para começar bem o dia! ☀️",
+      "highSupport": "Estás bem e ainda assim valorizas companhia. É uma boa forma de cuidar de ti. 🤝",
+      "highWell": "Que bom começar o dia assim. Vamos manter este equilíbrio. 🌱"
+    },
+    "completed": {
+      "title": "Check-in concluído",
+      "text": "Hoje começaste por cuidar de ti. 🌱"
+    }
+  },
   "dailyObjectives": {
     "breathe3": "Faz 3 minutos de respiração lenta",
     "hugExercise": "Faz o exercício Abraço",
@@ -187,6 +222,10 @@
   "safeSharing": "Partilha de forma livre e segura",
   "sharePlaceholder": "Descreve as tuas sensações ou vitórias hoje de forma reconfortante...",
   "shareSuccess": "Obrigado por partilhar! A tua mensagem foi enviada para o painel de partilha.",
+  "identifyTitle": "Identifico-me",
+  "identifyMessage": "Queres dizer que te identificas com esta experiência?",
+  "identifyCancel": "Ainda não",
+  "identifyConfirm": "Sim, identifico-me",
   "mindFocus": "Foco da Mente",
   "mindFocusCompleted": "A tua mente esteve ativamente em foco positivo. O teu amigo ganhou",
   "focusBenefit": "Este exercício ajuda a treinar a tua atenção para o presente.",
@@ -365,353 +404,349 @@
   "soundWhiteNoise": "Ruído branco",
   "stopBreathe": "Respira",
   "stopPause": "Pára um momento",
-
-"patterns": {
-"habitsEvaluated": "{{count}} hábitos avaliados",
-  "home": {
+  "patterns": {
+    "habitsEvaluated": "{{count}} hábitos avaliados",
+    "home": {
+      "title": "Conhece os teus Padrões",
+      "subtitle": "Descobre como o teu cérebro reage à ansiedade e acompanha a tua evolução.",
+      "assessment": {
+        "title": "A Minha Avaliação",
+        "description": "Descobre o teu perfil e acompanha a tua evolução."
+      },
+      "habits": {
+        "title": "Hábitos que Estou a Trabalhar",
+        "description": "Acompanha os hábitos que queres mudar."
+      },
+      "evolution": {
+        "title": "A Minha Evolução",
+        "description": "Observa o teu progresso ao longo do tempo."
+      },
+      "library": {
+        "title": "Biblioteca dos Padrões",
+        "description": "Aprende porque estes padrões acontecem."
+      },
+      "plan": {
+        "title": "Plano Personalizado",
+        "description": "Recebe objetivos adaptados ao teu perfil."
+      }
+    },
     "title": "Conhece os teus Padrões",
-    "subtitle": "Descobre como o teu cérebro reage à ansiedade e acompanha a tua evolução.",
-    "assessment": {
-      "title": "A Minha Avaliação",
-      "description": "Descobre o teu perfil e acompanha a tua evolução."
+    "subtitle": "Descobre os hábitos e rotinas que podem estar a alimentar a tua ansiedade.",
+    "startQuestionnaire": "Iniciar Questionário",
+    "lastEvaluation": "Última avaliação",
+    "retake": "Reavaliar",
+    "detox": "Desintoxicação",
+    "wellbeing": "Evolução do Bem-estar",
+    "noData": "Ainda não existem dados.",
+    "objective": "Objetivo da Semana",
+    "daysWithout": "Dias sem o hábito",
+    "progress": "Evolução",
+    "score": "Pontuação",
+    "profile": {
+      "reassurance": {
+        "name": "Procura de confirmação",
+        "description": "Tendes a procurar garantias externas para sentir segurança quando surge ansiedade.",
+        "strength": "Tens atenção aos detalhes e valorizas a segurança.",
+        "challenge": "Aprender a confiar mais na tua capacidade de lidar com a incerteza."
+      },
+      "search": {
+        "name": "Pesquisa de segurança",
+        "description": "A procura de respostas pode aliviar a ansiedade no momento, mas manter o ciclo de preocupação.",
+        "strength": "És curioso e procuras compreender o que acontece.",
+        "challenge": "Aprender a tolerar alguma incerteza sem procurar respostas imediatas."
+      },
+      "body": {
+        "name": "Hipervigilância corporal",
+        "description": "Estás atento às sensações do corpo e podes interpretá-las como sinais de perigo.",
+        "strength": "Tens consciência e atenção aos sinais do teu corpo.",
+        "challenge": "Aprender a observar sensações sem lhes atribuir sempre uma ameaça."
+      },
+      "perfectionism": {
+        "name": "Perfeccionismo",
+        "description": "Existe uma forte necessidade de fazer tudo corretamente e evitar erros.",
+        "strength": "Tens dedicação e vontade de fazer bem.",
+        "challenge": "Aceitar que erros e imperfeições fazem parte da aprendizagem."
+      },
+      "avoidance": {
+        "name": "Evitação",
+        "description": "Evitar situações pode trazer alívio imediato, mas reforçar o medo a longo prazo.",
+        "strength": "Procuras proteger-te quando algo parece difícil.",
+        "challenge": "Dar pequenos passos mesmo com algum desconforto."
+      },
+      "rumination": {
+        "name": "Ruminação",
+        "description": "A mente fica presa a analisar problemas e possibilidades.",
+        "strength": "Tens capacidade de reflexão e análise.",
+        "challenge": "Aprender a desligar e voltar ao momento presente."
+      },
+      "control": {
+        "name": "Necessidade de controlo",
+        "description": "Existe uma procura constante de garantir que tudo corre bem.",
+        "strength": "És responsável e organizado.",
+        "challenge": "Aceitar que alguma incerteza faz parte da vida."
+      },
+      "comparison": {
+        "name": "Comparação social",
+        "description": "Comparar-te com outros pode afetar a forma como avalias o teu próprio valor.",
+        "strength": "Observas e aprendes com quem te rodeia.",
+        "challenge": "Valorizar mais o teu próprio caminho."
+      }
     },
-    "habits": {
-      "title": "Hábitos que Estou a Trabalhar",
-      "description": "Acompanha os hábitos que queres mudar."
-    },
-    "evolution": {
-      "title": "A Minha Evolução",
-      "description": "Observa o teu progresso ao longo do tempo."
-    },
-    "library": {
-      "title": "Biblioteca dos Padrões",
-      "description": "Aprende porque estes padrões acontecem."
-    },
-    "plan": {
-      "title": "Plano Personalizado",
-      "description": "Recebe objetivos adaptados ao teu perfil."
-    }
-  },
-
-  "title": "Conhece os teus Padrões",
-  "subtitle": "Descobre os hábitos e rotinas que podem estar a alimentar a tua ansiedade.",
-  "startQuestionnaire": "Iniciar Questionário",
-  "lastEvaluation": "Última avaliação",
-  "retake": "Reavaliar",
-  "detox": "Desintoxicação",
-  "wellbeing": "Evolução do Bem-estar",
-  "noData": "Ainda não existem dados.",
-  "objective": "Objetivo da Semana",
-  "daysWithout": "Dias sem o hábito",
-  "progress": "Evolução",
-  "score": "Pontuação",
-  "profile": "Perfil",
-  "assessmentTitle": "Avalia os teus hábitos",
+    "assessmentTitle": "Avalia os teus hábitos",
     "assessmentDescription": "Escolhe os hábitos que sentes que podem estar a influenciar o teu bem-estar.",
     "classify": "Classifica a influência destes hábitos:",
     "save": "Guardar avaliação",
     "saved": "Avaliação guardada com sucesso!",
-"dailyTitle": "Acompanha o teu progresso",
-"dailyDescription": "Como conseguiste gerir estes hábitos hoje?",
-"dailyLevels": {
-  "veryHard": "Muito difícil",
-  "hard": "Difícil",
-  "medium": "Mais ou menos",
-  "good": "Bem",
-  "veryGood": "Muito bem"
-},
-"recordSaved": "Registo guardado:",
-"back": "Voltar",
-
-  "habits": {
-    "title": "Que comportamentos reconheces em ti?",
-    "subtitle": "Escolhe aqueles que sentes que utilizas para aliviar ansiedade ou desconforto.",
-    "symptomSearch": "Pesquisar sintomas ou procurar respostas na internet",
-    "socialMedia": "Passar demasiado tempo nas redes sociais",
-    "series": "Ver séries ou vídeos durante muito tempo para desligar",
-    "videoGames": "Jogar para evitar pensamentos desconfortáveis",
-    "shopping": "Comprar coisas para sentir alívio momentâneo",
-    "checkingMessages": "Verificar mensagens ou notificações repetidamente",
-    "food": "Comer mesmo sem fome por ansiedade",
-    "caffeine": "Consumir cafeína para lidar com o dia",
-    "avoidance": "Evitar situações que causam desconforto",
-    "reassurance": "Procurar constantemente confirmação de outras pessoas",
-    "other": "Outro comportamento",
-"search": "Pesquisar sintomas ou procurar respostas na internet",
-"social": "Passar demasiado tempo nas redes sociais",
-"games": "Jogar para evitar pensamentos desconfortáveis",
-"smoking": "Fumar para lidar com ansiedade ou stress",
-"alcohol": "Consumir álcool para aliviar emoções difíceis",
-"emotionalEating": "Comer para aliviar ansiedade ou emoções",
-    "continue": "Criar o meu plano"
-  },
-
-  "dashboard": {
-    "title": "O teu plano de evolução",
-    "subtitle": "Observa os teus padrões e acompanha pequenas mudanças.",
-    "goal": "Objetivo atual",
-    "today": "Como correu hoje?",
-    "better": "Consegui reduzir este comportamento",
-    "same": "Manteve-se igual",
-    "harder": "Foi mais difícil hoje",
-    "days": "dias de evolução",
-    "evolution": "Evolução dos últimos dias",
-    "wellbeing": "Relação com o teu bem-estar",
-    "wellbeingMessage": "Vamos observar como estas mudanças se relacionam com a tua evolução.",
-    "betterDays": "Dias com melhoria:",
-    "otherDays": "Outros dias:"
-  },
-
-  "questionnaire": {
-    "title": "Conhece os teus padrões",
-    "progress": "Pergunta {{current}} de {{total}}"
-  },
-
-  "answers": {
-    "never": "Nunca",
-    "rarely": "Raramente",
-    "sometimes": "Às vezes",
-    "often": "Frequentemente",
-    "almostAlways": "Quase sempre"
-  },
-
-  "questions": {
-    "q1": "Procuro frequentemente confirmação de outras pessoas para me sentir seguro.",
-    "q2": "Tenho dificuldade em confiar nas minhas próprias decisões sem pedir opinião.",
-    "q3": "Sinto necessidade de perguntar várias vezes se está tudo bem.",
-    "q4": "Pesquiso sintomas ou informações na internet para tentar reduzir a ansiedade.",
-    "q5": "Procuro respostas repetidamente mesmo depois de já ter encontrado uma explicação.",
-    "q6": "Sinto dificuldade em parar de pesquisar quando fico preocupado.",
-    "q7": "Presto muita atenção às sensações do meu corpo.",
-    "q8": "Interpreto pequenas alterações físicas como possíveis sinais de perigo.",
-    "q9": "Verifico frequentemente se existe algo errado com o meu corpo.",
-    "q10": "Sinto necessidade de fazer as coisas perfeitamente.",
-    "q11": "Fico incomodado quando cometo pequenos erros.",
-    "q12": "Adio tarefas por medo de não conseguir fazê-las bem.",
-    "q13": "Evito situações por receio de sentir ansiedade ou desconforto.",
-    "q14": "Deixo de fazer coisas importantes para evitar preocupações.",
-    "q15": "Sinto alívio imediato quando evito algo que me causa ansiedade.",
-    "q16": "Fico preso a pensamentos repetitivos sobre problemas ou possibilidades negativas.",
-    "q17": "Tenho dificuldade em desligar a mente quando estou preocupado.",
-    "q18": "Revejo mentalmente situações para tentar encontrar respostas.",
-    "q19": "Sinto necessidade de controlar todos os detalhes para ficar tranquilo.",
-    "q20": "Tenho dificuldade em aceitar que algumas coisas são imprevisíveis.",
-    "q21": "Fico ansioso quando não consigo garantir um determinado resultado.",
-    "q22": "Comparo frequentemente a minha vida ou o meu desempenho com o dos outros.",
-    "q23": "Sinto que os outros lidam melhor com situações difíceis do que eu.",
-    "q24": "As comparações fazem-me sentir menos confiante."
-  },
-
-  "profile": {
-    "reassurance": {
-      "name": "Procura de confirmação",
-      "description": "Tendes a procurar garantias externas para sentir segurança quando surge ansiedade.",
-      "strength": "Tens atenção aos detalhes e valorizas a segurança.",
-      "challenge": "Aprender a confiar mais na tua capacidade de lidar com a incerteza."
+    "dailyTitle": "Acompanha o teu progresso",
+    "dailyDescription": "Como conseguiste gerir estes hábitos hoje?",
+    "dailyLevels": {
+      "veryHard": "Muito difícil",
+      "hard": "Difícil",
+      "medium": "Mais ou menos",
+      "good": "Bem",
+      "veryGood": "Muito bem"
     },
-    "search": {
-      "name": "Pesquisa de segurança",
-      "description": "A procura de respostas pode aliviar a ansiedade no momento, mas manter o ciclo de preocupação.",
-      "strength": "És curioso e procuras compreender o que acontece.",
-      "challenge": "Aprender a tolerar alguma incerteza sem procurar respostas imediatas."
+    "recordSaved": "Registo guardado:",
+    "back": "Voltar",
+    "habits": {
+      "title": "Que comportamentos reconheces em ti?",
+      "subtitle": "Escolhe aqueles que sentes que utilizas para aliviar ansiedade ou desconforto.",
+      "symptomSearch": "Pesquisar sintomas ou procurar respostas na internet",
+      "socialMedia": "Passar demasiado tempo nas redes sociais",
+      "series": "Ver séries ou vídeos durante muito tempo para desligar",
+      "videoGames": "Jogar para evitar pensamentos desconfortáveis",
+      "shopping": "Comprar coisas para sentir alívio momentâneo",
+      "checkingMessages": "Verificar mensagens ou notificações repetidamente",
+      "food": "Comer mesmo sem fome por ansiedade",
+      "caffeine": "Consumir cafeína para lidar com o dia",
+      "avoidance": "Evitar situações que causam desconforto",
+      "reassurance": "Procurar constantemente confirmação de outras pessoas",
+      "other": "Outro comportamento",
+      "search": "Pesquisar sintomas ou procurar respostas na internet",
+      "social": "Passar demasiado tempo nas redes sociais",
+      "games": "Jogar para evitar pensamentos desconfortáveis",
+      "smoking": "Fumar para lidar com ansiedade ou stress",
+      "alcohol": "Consumir álcool para aliviar emoções difíceis",
+      "emotionalEating": "Comer para aliviar ansiedade ou emoções",
+      "continue": "Criar o meu plano"
     },
-    "body": {
-      "name": "Hipervigilância corporal",
-      "description": "Estás atento às sensações do corpo e podes interpretá-las como sinais de perigo.",
-      "strength": "Tens consciência e atenção aos sinais do teu corpo.",
-      "challenge": "Aprender a observar sensações sem lhes atribuir sempre uma ameaça."
+    "dashboard": {
+      "title": "O teu plano de evolução",
+      "subtitle": "Observa os teus padrões e acompanha pequenas mudanças.",
+      "goal": "Objetivo atual",
+      "today": "Como correu hoje?",
+      "better": "Consegui reduzir este comportamento",
+      "same": "Manteve-se igual",
+      "harder": "Foi mais difícil hoje",
+      "days": "dias de evolução",
+      "evolution": "Evolução dos últimos dias",
+      "wellbeing": "Relação com o teu bem-estar",
+      "wellbeingMessage": "Vamos observar como estas mudanças se relacionam com a tua evolução.",
+      "betterDays": "Dias com melhoria:",
+      "otherDays": "Outros dias:"
     },
-    "perfectionism": {
-      "name": "Perfeccionismo",
-      "description": "Existe uma forte necessidade de fazer tudo corretamente e evitar erros.",
-      "strength": "Tens dedicação e vontade de fazer bem.",
-      "challenge": "Aceitar que erros e imperfeições fazem parte da aprendizagem."
+    "questionnaire": {
+      "title": "Conhece os teus padrões",
+      "progress": "Pergunta {{current}} de {{total}}"
     },
-    "avoidance": {
-      "name": "Evitação",
-      "description": "Evitar situações pode trazer alívio imediato, mas reforçar o medo a longo prazo.",
-      "strength": "Procuras proteger-te quando algo parece difícil.",
-      "challenge": "Dar pequenos passos mesmo com algum desconforto."
+    "answers": {
+      "never": "Nunca",
+      "rarely": "Raramente",
+      "sometimes": "Às vezes",
+      "often": "Frequentemente",
+      "almostAlways": "Quase sempre"
     },
-    "rumination": {
-      "name": "Ruminação",
-      "description": "A mente fica presa a analisar problemas e possibilidades.",
-      "strength": "Tens capacidade de reflexão e análise.",
-      "challenge": "Aprender a desligar e voltar ao momento presente."
-    },
-    "control": {
-      "name": "Necessidade de controlo",
-      "description": "Existe uma procura constante de garantir que tudo corre bem.",
-      "strength": "És responsável e organizado.",
-      "challenge": "Aceitar que alguma incerteza faz parte da vida."
-    },
-    "comparison": {
-      "name": "Comparação social",
-      "description": "Comparar-te com outros pode afetar a forma como avalias o teu próprio valor.",
-      "strength": "Observas e aprendes com quem te rodeia.",
-      "challenge": "Valorizar mais o teu próprio caminho."
+    "questions": {
+      "q1": "Procuro frequentemente confirmação de outras pessoas para me sentir seguro.",
+      "q2": "Tenho dificuldade em confiar nas minhas próprias decisões sem pedir opinião.",
+      "q3": "Sinto necessidade de perguntar várias vezes se está tudo bem.",
+      "q4": "Pesquiso sintomas ou informações na internet para tentar reduzir a ansiedade.",
+      "q5": "Procuro respostas repetidamente mesmo depois de já ter encontrado uma explicação.",
+      "q6": "Sinto dificuldade em parar de pesquisar quando fico preocupado.",
+      "q7": "Presto muita atenção às sensações do meu corpo.",
+      "q8": "Interpreto pequenas alterações físicas como possíveis sinais de perigo.",
+      "q9": "Verifico frequentemente se existe algo errado com o meu corpo.",
+      "q10": "Sinto necessidade de fazer as coisas perfeitamente.",
+      "q11": "Fico incomodado quando cometo pequenos erros.",
+      "q12": "Adio tarefas por medo de não conseguir fazê-las bem.",
+      "q13": "Evito situações por receio de sentir ansiedade ou desconforto.",
+      "q14": "Deixo de fazer coisas importantes para evitar preocupações.",
+      "q15": "Sinto alívio imediato quando evito algo que me causa ansiedade.",
+      "q16": "Fico preso a pensamentos repetitivos sobre problemas ou possibilidades negativas.",
+      "q17": "Tenho dificuldade em desligar a mente quando estou preocupado.",
+      "q18": "Revejo mentalmente situações para tentar encontrar respostas.",
+      "q19": "Sinto necessidade de controlar todos os detalhes para ficar tranquilo.",
+      "q20": "Tenho dificuldade em aceitar que algumas coisas são imprevisíveis.",
+      "q21": "Fico ansioso quando não consigo garantir um determinado resultado.",
+      "q22": "Comparo frequentemente a minha vida ou o meu desempenho com o dos outros.",
+      "q23": "Sinto que os outros lidam melhor com situações difíceis do que eu.",
+      "q24": "As comparações fazem-me sentir menos confiante."
     }
-  }
-},
-
-"patternsNew": {
-  "title": "Conhece os teus Padrões",
-  "description": "Descobre os hábitos que influenciam o teu bem-estar e acompanha a tua evolução.",
-  "assessment": "Avalia os teus hábitos",
-  "assessmentDesc": "Identifica hábitos que podem estar a prejudicar o teu bem-estar.",
-  "daily": "Acompanha o teu progresso",
-  "dailyDesc": "Avalia diariamente como conseguiste gerir estes hábitos.",
-  "evolution": "A minha evolução",
-  "evolutionDesc": "Observa a evolução dos teus hábitos e compara com o teu bem-estar diário.",
-  "evolutionDescription": "Observa como tens conseguido gerir os teus hábitos ao longo do tempo.",
-  "noRecords": "Ainda não tens registos suficientes.",
-  "lastRecord": "Último registo",
-  "date": "Data",
-  "habitManagement": "Gestão dos hábitos",
-  "startEvolution": "Começa por acompanhar o teu progresso diariamente.",
-  "plan": {
-    "title": "Plano Personalizado",
-    "description": "Recebe objetivos adaptados ao teu perfil."
-},
-  "inventory": {
-    "title": "Inventário",
-    "empty": "Ainda não tens objetos.",
-    "equip": "Equipar",
-    "equipped": "Equipado"
   },
-
-  "shop": {
-    "title": "Loja",
-    "availableXp": "XP disponível"
+  "patternsNew": {
+    "title": "Conhece os teus Padrões",
+    "description": "Descobre os hábitos que influenciam o teu bem-estar e acompanha a tua evolução.",
+    "assessment": "Avalia os teus hábitos",
+    "assessmentDesc": "Identifica hábitos que podem estar a prejudicar o teu bem-estar.",
+    "daily": "Acompanha o teu progresso",
+    "dailyDesc": "Avalia diariamente como conseguiste gerir estes hábitos.",
+    "evolution": "A minha evolução",
+    "evolutionDesc": "Observa a evolução dos teus hábitos e compara com o teu bem-estar diário.",
+    "evolutionDescription": "Observa como tens conseguido gerir os teus hábitos ao longo do tempo.",
+    "noRecords": "Ainda não tens registos suficientes.",
+    "lastRecord": "Último registo",
+    "date": "Data",
+    "habitManagement": "Gestão dos hábitos",
+    "startEvolution": "Começa por acompanhar o teu progresso diariamente.",
+    "plan": {
+      "title": "Plano Personalizado",
+      "description": "Recebe objetivos adaptados ao teu perfil."
+    },
+    "inventory": {
+      "title": "Inventário",
+      "empty": "Ainda não tens objetos.",
+      "equip": "Equipar",
+      "equipped": "Equipado"
+    },
+    "shop": {
+      "title": "Loja",
+      "availableXp": "XP disponível"
+    },
+    "homeItems": {
+      "flower1": {
+        "name": "Flor pequena"
+      },
+      "flower2": {
+        "name": "Flor rosa"
+      },
+      "flower3": {
+        "name": "Flor vermelha"
+      },
+      "flower4": {
+        "name": "Tulipa"
+      },
+      "flower5": {
+        "name": "Rosa"
+      },
+      "flower6": {
+        "name": "Rosa murcha"
+      },
+      "flower7": {
+        "name": "Ramo de flores"
+      },
+      "flower8": {
+        "name": "Jacinto"
+      },
+      "tree1": {
+        "name": "Árvore verde"
+      },
+      "tree2": {
+        "name": "Pinheiro"
+      },
+      "tree3": {
+        "name": "Palmeira"
+      },
+      "tree4": {
+        "name": "Árvore de Natal"
+      },
+      "tree5": {
+        "name": "Cacto"
+      },
+      "tree6": {
+        "name": "Tronco"
+      },
+      "tree7": {
+        "name": "Trevo"
+      },
+      "tree8": {
+        "name": "Trevo pequeno"
+      },
+      "rock1": {
+        "name": "Rocha pequena"
+      },
+      "rock2": {
+        "name": "Rocha"
+      },
+      "rock3": {
+        "name": "Pedra natural"
+      },
+      "rock4": {
+        "name": "Pedra grande"
+      },
+      "rock5": {
+        "name": "Rocha escura"
+      },
+      "rock6": {
+        "name": "Pedra antiga"
+      },
+      "bench1": {
+        "name": "Banco de madeira"
+      },
+      "bench2": {
+        "name": "Banco simples"
+      },
+      "bench3": {
+        "name": "Banco confortável"
+      },
+      "bench4": {
+        "name": "Banco elegante"
+      },
+      "bench5": {
+        "name": "Banco de jardim"
+      },
+      "bench6": {
+        "name": "Banco especial"
+      },
+      "water1": {
+        "name": "Gota de água"
+      },
+      "water2": {
+        "name": "Flor aquática"
+      },
+      "water3": {
+        "name": "Fonte"
+      },
+      "water4": {
+        "name": "Onda"
+      },
+      "water5": {
+        "name": "Concha"
+      },
+      "water6": {
+        "name": "Pato"
+      },
+      "extra1": {
+        "name": "Lanterna"
+      },
+      "extra2": {
+        "name": "Borboleta"
+      },
+      "extra3": {
+        "name": "Esquilo"
+      },
+      "extra4": {
+        "name": "Ninho"
+      },
+      "extra5": {
+        "name": "Sol"
+      },
+      "extra6": {
+        "name": "Arco-íris"
+      }
+    }
   },
-
-  "homeItems": {
-    "flower1": {
-      "name": "Flor pequena"
-    },
-    "flower2": {
-      "name": "Flor rosa"
-    },
-    "flower3": {
-      "name": "Flor vermelha"
-    },
-    "flower4": {
-      "name": "Tulipa"
-    },
-    "flower5": {
-      "name": "Rosa"
-    },
-    "flower6": {
-      "name": "Rosa murcha"
-    },
-    "flower7": {
-      "name": "Ramo de flores"
-    },
-    "flower8": {
-      "name": "Jacinto"
-
-    },
-
-    "tree1": {
-      "name": "Árvore verde"
-    },
-    "tree2": {
-      "name": "Pinheiro"
-    },
-    "tree3": {
-      "name": "Palmeira"
-    },
-    "tree4": {
-      "name": "Árvore de Natal"
-    },
-    "tree5": {
-      "name": "Cacto"
-    },
-    "tree6": {
-      "name": "Tronco"
-    },
-    "tree7": {
-      "name": "Trevo"
-    },
-    "tree8": {
-      "name": "Trevo pequeno"
-    },
-
-    "rock1": {
-      "name": "Rocha pequena"
-    },
-    "rock2": {
-      "name": "Rocha"
-    },
-    "rock3": {
-      "name": "Pedra natural"
-    },
-    "rock4": {
-      "name": "Pedra grande"
-    },
-    "rock5": {
-      "name": "Rocha escura"
-    },
-    "rock6": {
-      "name": "Pedra antiga"
-    },
-
-    "bench1": {
-      "name": "Banco de madeira"
-    },
-    "bench2": {
-      "name": "Banco simples"
-    },
-    "bench3": {
-      "name": "Banco confortável"
-    },
-    "bench4": {
-      "name": "Banco elegante"
-    },
-    "bench5": {
-      "name": "Banco de jardim"
-    },
-    "bench6": {
-      "name": "Banco especial"
-    },
-
-    "water1": {
-      "name": "Gota de água"
-    },
-    "water2": {
-      "name": "Flor aquática"
-    },
-    "water3": {
-      "name": "Fonte"
-    },
-    "water4": {
-      "name": "Onda"
-    },
-    "water5": {
-      "name": "Concha"
-    },
-    "water6": {
-      "name": "Pato"
-    },
-
-    "extra1": {
-      "name": "Lanterna"
-    },
-    "extra2": {
-      "name": "Borboleta"
-    },
-    "extra3": {
-      "name": "Esquilo"
-    },
-    "extra4": {
-      "name": "Ninho"
-    },
-    "extra5": {
-      "name": "Sol"
-    },
-    "extra6": {
-      "name": "Arco-íris"
-  }
-}
-}
+  "communityChat": "Chat",
+  "shareCornerTitle": "Cantinho da Partilha",
+  "currentFeeling": "Qual é o teu sentimento atual?",
+  "identifyFirstChat": "❤️ Identifica-te primeiro para iniciar o chat",
+  "shareCornerDescription": "Partilha sentimentos e vitórias de forma totalmente anónima e sente que não estás sozinho nesta caminhada.",
+  "write": "Escrever",
+  "characters": "caracteres",
+  "sendMessage": "Enviar Mensagem",
+  "feelingRelieved": "Aliviado",
+  "feelingCalm": "Calmo",
+  "feelingGrateful": "Grato",
+  "feelingAnxious": "Ansioso",
+  "feelingAgitated": "Agitado",
+  "feelingFocused": "Focado"
 }

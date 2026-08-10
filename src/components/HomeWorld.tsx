@@ -166,11 +166,165 @@ const isNight = hour >= 21 || hour < 7;
   </div>
 )}
 <AtmosphereLayer />
+{/* Brilho suave do sol */}
+<div
+  className="
+    absolute
+    top-[-80px]
+    left-[-80px]
+    w-72
+    h-72
+    rounded-full
+    bg-yellow-200/30
+    blur-3xl
+    z-10
+    pointer-events-none
+  "
+/>
+{/* Linha de horizonte com relva alta */}
+<div
+  className="
+    absolute
+bottom-[360px]
+    left-0
+    right-0
+    h-24
+    z-10
+    flex
+    items-end
+    justify-around
+    overflow-hidden
+    pointer-events-none
+  "
+>
+  <span className="text-5xl">🌿</span>
+  <span className="text-6xl">🌾</span>
+  <span className="text-5xl">🌿</span>
+  <span className="text-7xl">🌾</span>
+  <span className="text-5xl">🌿</span>
+  <span className="text-6xl">🌾</span>
+  <span className="text-5xl">🌿</span>
+</div>
 
 {/* Relva evolutiva */}
+{/* Lago premium */}
+<div
+  className="
+    absolute
+    right-8
+    bottom-[120px]
+    w-52
+    h-28
+    rounded-[50%]
+    bg-gradient-to-b
+    from-sky-200
+    via-cyan-300
+    to-blue-500
+    shadow-xl
+    z-10
+    overflow-hidden
+  "
+>
+
+  {/* Reflexo do céu */}
+  <div
+    className="
+      absolute
+      top-3
+      left-8
+      w-32
+      h-8
+      rounded-full
+      bg-white/40
+      blur-md
+    "
+  />
+
+  {/* Ondas da água */}
+  <div
+    className="
+      absolute
+      bottom-5
+      left-6
+      w-28
+      h-2
+      rounded-full
+      bg-white/30
+      animate-pulse
+    "
+  />
+
+  <div
+    className="
+      absolute
+      bottom-10
+      right-8
+      w-20
+      h-1
+      rounded-full
+      bg-white/20
+    "
+  />
+
+</div>
+
+
+{/* Pedras junto ao lago */}
+<div className="absolute right-52 bottom-[115px] text-3xl z-20">
+  🪨
+</div>
+
+<div className="absolute right-14 bottom-[100px] text-2xl z-20">
+  🪨
+</div>
+
+<div className="absolute right-36 bottom-[95px] text-xl z-20">
+  🪨
+</div>
+
+
+{/* Canas à volta do lago */}
+<div
+  className="
+    absolute
+    right-56
+    bottom-[145px]
+    text-5xl
+    z-20
+  "
+>
+  🌾
+</div>
 
 <div
-  className={`absolute bottom-0 left-0 right-0 h-[380px] transition-all duration-1000 ${
+  className="
+    absolute
+    right-20
+    bottom-[145px]
+    text-4xl
+    z-20
+  "
+>
+  🌾
+</div>
+{/* Árvore decorativa com vento */}
+<div
+  className="
+    absolute
+    left-8
+    bottom-[260px]
+    z-20
+    text-8xl
+    select-none
+  "
+>
+  <div className="animate-[wiggle_4s_ease-in-out_infinite]">
+    🌳
+  </div>
+</div>
+
+<div
+className={`absolute bottom-0 left-0 right-0 h-[380px] transition-all duration-1000 ${
     world.health > 70
       ? "bg-gradient-to-b from-emerald-300 via-green-500 to-green-800"
       : world.health > 40
@@ -328,6 +482,21 @@ const isNight = hour >= 21 || hour < 7;
 
   }}
 >
+<div
+  className="
+    absolute
+    bottom-1
+    left-[45%]
+    translate-x-[-60%]
+    w-10
+    h-3
+    rounded-full
+    bg-black/20
+    blur-sm
+    pointer-events-none
+  "
+/>
+
 
   <Avatar
     onPet={handlePetAvatar}

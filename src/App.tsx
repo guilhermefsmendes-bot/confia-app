@@ -15,6 +15,9 @@ import {
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n";
+import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove, increment } from "firebase/firestore";
+import { db, auth, signInAnonymously } from "./firebase";
+import { initAnonymousAuth } from "./firebaseAuth";
 import HomeShop from "./components/HomeShop";
 import HomeInventory from "./components/HomeInventory";
 import { initLanguage } from "./i18n/language";
@@ -26,8 +29,11 @@ import PatternsNew from './components/PatternsNew/PatternsNew';
 import HabitAssessment from './components/PatternsNew/HabitAssessment';
 import HabitDailyCheck from './components/PatternsNew/HabitDailyCheck';
 import HabitEvolution from './components/PatternsNew/HabitEvolution';
+import { PartilhaFeed } from "./components/PartilhaFeed";
 
 // Component imports
+import DailyCheckIn from "./components/DailyCheckIn";
+import { hasCompletedToday } from "./storage/dailyCheckInStorage";
 
 import { TriageModal } from './components/TriageModal';
 import { AbracoTimer } from './components/AbracoTimer';
@@ -36,6 +42,7 @@ import { ImpulsoSOS } from './components/ImpulsoSOS';
 import { ProgressoDashboard } from './components/ProgressoDashboard';
 import { FocoMente } from './components/FocoMente';
 import { StopMode } from './components/StopMode';
+import { CommunityChat } from './components/CommunityChat';
 const STORAGE_KEYS = {
   AVATAR: 'confia_avatar_v2',
   OBJECTIVES: 'confia_objectives_v2',
@@ -63,6 +70,11 @@ const PRE_LOGGED_RATINGS: DailyRating[] = [
 export default function App() {
 const { t, i18n } = useTranslation();
 
+ useEffect(() => {
+    signInAnonymously(auth).catch((error) => {
+      console.error("Erro na autenticação anónima:", error);
+    });
+  }, []);
 const changeAppLanguage = (lang: string) => {
     localStorage.setItem("confia_language", lang);
     i18n.changeLanguage(lang);
@@ -70,6 +82,11 @@ const changeAppLanguage = (lang: string) => {
 
 useEffect(() => {
     initLanguage();
+}, []);
+useEffect(() => {
+  initAnonymousAuth().catch((error) => {
+    console.error("Firebase Auth:", error);
+  });
 }, []);
   // Global App States
 const [patternsPage, setPatternsPage] = useState("menu");
@@ -154,6 +171,12 @@ const [avatarMemoryMessage, setAvatarMemoryMessage] = useState("");
   const [prevLevel, setPrevLevel] = useState(avatar.level);
   const [showSplash, setShowSplash] = useState(true);
 const [showStopMode, setShowStopMode] = useState(false);
+
+// Chat privado da comunidade
+const [chatPost, setChatPost] = useState<SharePost | null>(null);
+const [showDailyCheckIn, setShowDailyCheckIn] = useState(
+  () => !hasCompletedToday()
+);
   // Open STOP mode from Android widget/deep link
   useEffect(() => {
     const handleStopLink = () => {
@@ -214,6 +237,64 @@ localStorage.setItem(
     localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
   }, [posts]);
 
+useEffect(() => {
+  const postsQuery = collection(db, "posts");
+
+  const unsubscribe = onSnapshot(
+    postsQuery,
+    (snapshot) => {
+      const firestorePosts: SharePost[] = snapshot.docs
+.map(doc => {
+const data = doc.data();
+const userId = auth.currentUser?.uid;
+
+let userReaction: "yellow" | "green" | "red" | undefined;
+
+if (userId) {
+  if (Array.isArray(data.yellowLikedBy) && data.yellowLikedBy.includes(userId)) {
+    userReaction = "yellow";
+  } else if (Array.isArray(data.greenLikedBy) && data.greenLikedBy.includes(userId)) {
+    userReaction = "green";
+  } else if (Array.isArray(data.redLikedBy) && data.redLikedBy.includes(userId)) {
+    userReaction = "red";
+  }
+}
+
+return {
+  id: doc.id,
+  authorId: data.authorId || "",
+  userName: data.userName || "Guardião Anon",
+  feeling: data.feeling || "Calmo",
+  message: data.message || "",
+  timestamp: data.createdAt
+    ? data.createdAt.toDate().toLocaleString("pt-PT")
+    : t("justNow"),
+
+  yellowLikes: data.yellowLikes || 0,
+  greenLikes: data.greenLikes || 0,
+  redLikes: data.redLikes || 0,
+
+  userReaction
+};
+})
+.sort((a, b) => {
+const dateA = snapshot.docs.find(doc => doc.id === a.id)?.data().createdAt;
+const dateB = snapshot.docs.find(doc => doc.id === b.id)?.data().createdAt;
+
+if (!dateA || !dateB) return 0;
+
+return dateB.toMillis() - dateA.toMillis();
+});
+
+  setPosts(firestorePosts);
+    },
+    (error) => {
+      console.error("Erro ao ouvir comunidade:", error);
+    }
+  );
+
+  return () => unsubscribe();
+}, []);
 
 // Check if selected date is already logged
 useEffect(() => {
@@ -432,38 +513,132 @@ const handleSaveRatings = () => {
   };
 
   // Create Community Post
-  const handleAddPost = (feeling: string, message: string) => {
-    const newPost: SharePost = {
-      id: `post-custom-${Date.now()}`,
-      userName: `Guardião Anon_${Math.floor(100 + Math.random() * 900)}`,
+const handleAddPost = async (feeling: string, message: string) => {
+  try {
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+
+    const userName = `Guardião Anon_${Math.floor(100 + Math.random() * 900)}`;
+
+    const docRef = await addDoc(collection(db, "posts"), {
+      authorId: auth.currentUser!.uid,
+      userName,
       feeling,
       message,
-     timestamp: t("justNow"),
-      likes: 0,
-      likedByUser: false
+      yellowLikes: 0,
+      greenLikes: 0,
+      redLikes: 0,
+      yellowLikedBy: [],
+      greenLikedBy: [],
+      redLikedBy: [],
+      createdAt: serverTimestamp()
+    });
+
+    const newPost: SharePost = {
+      id: docRef.id,
+      userName,
+      feeling,
+      message,
+      timestamp: t("justNow"),
+      yellowLikes: 0,
+      greenLikes: 0,
+      redLikes: 0,
+      userReaction: undefined
     };
+
     setPosts(prev => [newPost, ...prev]);
-    addXp(10); // Reward active sharing with +10 XP
-  };
 
-  // Like Community Post
-  const handleLikePost = (id: string) => {
-    setPosts(prev =>
-      prev.map(post => {
-        if (post.id === id) {
-          const nextLiked = !post.likedByUser;
-          return {
-            ...post,
-            likedByUser: nextLiked,
-            likes: nextLiked ? post.likes + 1 : post.likes - 1
-          };
-        }
-        return post;
-      })
-    );
-  };
+    // Partilhar na comunidade = +10 XP
+    addXp(10);
 
-  // Visual text helper for slider values (0-10)
+  } catch (error) {
+    console.error("Erro ao publicar na comunidade:", error);
+  }
+};
+
+  // Reações da comunidade
+const handleLikePost = async (
+  id: string,
+  reaction: "yellow" | "green" | "red"
+) => {
+  try {
+    const user = auth.currentUser;
+
+    if (!user) return;
+
+    console.log("REAÇÃO CLICADA:", id, reaction);
+    console.log("UTILIZADOR:", user.uid);
+
+    const postRef = doc(db, "posts", id);
+    const post = posts.find(p => p.id === id);
+
+    if (!post) return;
+
+    const currentReaction = post.userReaction;
+
+    // Se clicar novamente na mesma reação, remove-a
+    if (currentReaction === reaction) {
+      const field =
+        reaction === "yellow"
+          ? "yellowLikes"
+          : reaction === "green"
+          ? "greenLikes"
+          : "redLikes";
+
+      await updateDoc(postRef, {
+        [field]: increment(-1),
+        [`${reaction}LikedBy`]: arrayRemove(user.uid)
+      });
+
+      console.log("REAÇÃO REMOVIDA:", reaction);
+      return;
+    }
+
+    // Se já tinha outra reação, removemos primeiro essa reação
+    const updates: Record<string, any> = {};
+
+    if (currentReaction === "yellow") {
+      updates.yellowLikes = increment(-1);
+      updates.yellowLikedBy = arrayRemove(user.uid);
+    }
+
+    if (currentReaction === "green") {
+      updates.greenLikes = increment(-1);
+      updates.greenLikedBy = arrayRemove(user.uid);
+    }
+
+    if (currentReaction === "red") {
+      updates.redLikes = increment(-1);
+      updates.redLikedBy = arrayRemove(user.uid);
+    }
+
+    // Adiciona a nova reação
+    const newField =
+      reaction === "yellow"
+        ? "yellowLikes"
+        : reaction === "green"
+        ? "greenLikes"
+        : "redLikes";
+
+    updates[newField] = increment(1);
+    updates[`${reaction}LikedBy`] = arrayUnion(user.uid);
+
+    await updateDoc(postRef, updates);
+
+    console.log("REAÇÃO ADICIONADA:", reaction);
+  } catch (error) {
+    console.error("Erro ao atualizar reação:", error);
+  }
+};
+
+// Abre o chat privado associado a uma publicação
+const handleOpenChat = (post: SharePost) => {
+  setChatPost(post);
+};
+
+// Visual text helper for slider values (0-10)
+
 const getRatingLabel = (val: number) => {
     if (val <= 2) return { text: t("moodVeryAgitated"), emoji: '🥺', color: 'text-[#C97B5E]' };
     if (val <= 4) return { text: t("moodRestless"), emoji: '😐', color: 'text-[#C97B5E]' };
@@ -474,6 +649,12 @@ const getRatingLabel = (val: number) => {
 
 return (
     <div className="min-h-screen bg-[#FAF5F0] flex flex-col antialiased text-[#4E3B36]">
+{showDailyCheckIn && (
+  <DailyCheckIn
+    onComplete={() => setShowDailyCheckIn(false)}
+  />
+)}
+
       {/* Splash Welcome Screen Overlay */}
       <AnimatePresence>
         {showSplash && (
@@ -812,18 +993,25 @@ className="flex items-center justify-center w-24 h-24 relative"
             </motion.div>
           )}
 
-          {currentTab === 3 && (
-  /* TAB 4: IMPULSO SOS */
+{currentTab === 3 && (
+  /* TAB 4: IMPULSO SOS + COMUNIDADE */
   <motion.div
     key="impulso-tab"
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -10 }}
+    className="space-y-6"
   >
     <ImpulsoSOS onAddXp={addXp} />
+
+    <PartilhaFeed
+      posts={posts}
+      onAddPost={handleAddPost}
+      onLikePost={handleLikePost}
+      onOpenChat={handleOpenChat}
+    />
   </motion.div>
 )}
-
 
           {currentTab === 4 && (
             /* TAB 5: PROGRESSO */
@@ -903,6 +1091,13 @@ className="flex items-center justify-center w-24 h-24 relative"
           }}
         />
       )}
+      {chatPost && (
+        <CommunityChat
+          post={chatPost}
+          onClose={() => setChatPost(null)}
+        />
+      )}
+
       {/* Global Tab Navigation Footer */}
       {/* Global Tab Navigation Footer */}
       <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5A88B]/15 px-4 py-3.5">

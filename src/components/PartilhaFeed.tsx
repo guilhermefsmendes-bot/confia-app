@@ -6,24 +6,26 @@ import { useTranslation } from "react-i18next";
 interface PartilhaFeedProps {
   posts: SharePost[];
   onAddPost: (feeling: string, message: string) => void;
-  onLikePost: (id: string) => void;
+  onLikePost: (id: string, reaction: "yellow" | "green" | "red") => void;
+  onOpenChat: (post: SharePost) => void;
 }
 
 const FEELINGS_LIST = [
-  { text: 'Aliviado', emoji: '🌿', color: 'bg-[#FFF0E8] text-[#C97B5E] border-[#E5A88B]/20' },
-  { text: 'Calmo', emoji: '🧘‍♂️', color: 'bg-[#FAF5F0] text-[#8B5C4D] border-[#E5A88B]/15' },
-  { text: 'Grato', emoji: '🥰', color: 'bg-[#FFF9F6] text-[#A06050] border-[#E5A88B]/15' },
-  { text: 'Ansioso', emoji: '🥺', color: 'bg-[#F5D6C6]/20 text-[#A06050] border-[#F5D6C6]/30' },
-  { text: 'Agitado', emoji: '⚡', color: 'bg-[#FFF5EE] text-[#7A4E43] border-[#FFF5EE]' },
-  { text: 'Focado', emoji: '🎯', color: 'bg-white text-[#C97B5E] border-[#E5A88B]/20' }
+  { key: 'feelingRelieved', text: 'Aliviado', emoji: '🌿', color: 'bg-[#FFF0E8] text-[#C97B5E] border-[#E5A88B]/20' },
+  { key: 'feelingCalm', text: 'Calmo', emoji: '🧘‍♂️', color: 'bg-[#FAF5F0] text-[#8B5C4D] border-[#E5A88B]/15' },
+  { key: 'feelingGrateful', text: 'Grato', emoji: '🥰', color: 'bg-[#FFF9F6] text-[#A06050] border-[#E5A88B]/15' },
+  { key: 'feelingAnxious', text: 'Ansioso', emoji: '🥺', color: 'bg-[#F5D6C6]/20 text-[#A06050] border-[#F5D6C6]/30' },
+  { key: 'feelingAgitated', text: 'Agitado', emoji: '⚡', color: 'bg-[#FFF5EE] text-[#7A4E43] border-[#FFF5EE]' },
+  { key: 'feelingFocused', text: 'Focado', emoji: '🎯', color: 'bg-white text-[#C97B5E] border-[#E5A88B]/20' }
 ];
 
-export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({ posts, onAddPost, onLikePost }) => {
+export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({ posts, onAddPost, onLikePost, onOpenChat }) => {
 const { t } = useTranslation();
   const [selectedFeeling, setSelectedFeeling] = useState('Calmo');
   const [message, setMessage] = useState('');
   const [showCompose, setShowCompose] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
+const [confirmIdentify, setConfirmIdentify] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,10 +52,10 @@ const { t } = useTranslation();
       {/* Header Banner */}
       <div className="text-center space-y-1 w-full">
         <h2 className="text-xl font-black text-[#4E3B36] flex items-center justify-center gap-2 font-display">
-          <span className="text-[#E5A88B]">🤝</span> Cantinho da Partilha
+          <span className="text-[#E5A88B]">🤝</span> {t("shareCornerTitle")}
         </h2>
         <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto font-medium">
-          Partilha sentimentos e vitórias de forma totalmente anónima e sinta que não estás sozinho nesta caminhada.
+          {t("shareCornerDescription")}
         </p>
       </div>
 
@@ -88,7 +90,7 @@ const { t } = useTranslation();
             </div>
           </div>
           <span className="text-[11px] font-bold text-[#C97B5E] group-hover:translate-x-1 transition-transform">
-            Escrever &rarr;
+            {t("write")} &rarr;
           </span>
         </button>
       ) : (
@@ -101,7 +103,7 @@ const { t } = useTranslation();
           {/* Tag Selection */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-[#4E3B36] flex items-center gap-1">
-              <Smile size={14} className="text-[#E5A88B]" /> Qual é o teu sentimento atual?
+              <Smile size={14} className="text-[#E5A88B]" /> {t("currentFeeling")}
             </label>
             <div className="flex flex-wrap gap-1.5">
               {FEELINGS_LIST.map(feeling => (
@@ -116,7 +118,7 @@ const { t } = useTranslation();
                   }`}
                 >
                   <span>{feeling.emoji}</span>
-                  <span>{feeling.text}</span>
+                  <span>{t(feeling.key)}</span>
                 </button>
               ))}
             </div>
@@ -134,7 +136,7 @@ const { t } = useTranslation();
               className="w-full p-4 text-xs border border-slate-200/80 rounded-2xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] resize-none leading-relaxed text-[#4E3B36]"
             />
             <div className="flex justify-end text-[10px] text-slate-400 font-mono">
-              {message.length} / 220 caracteres
+              {message.length} / 220 {t("characters")}
             </div>
           </div>
 
@@ -151,7 +153,7 @@ const { t } = useTranslation();
               type="submit"
               className="flex-1 py-3 bg-[#E5A88B] hover:bg-[#D59375] text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-md shadow-[#E5A88B]/20 cursor-pointer"
             >
-              <Send size={13} /> Enviar Mensagem
+              <Send size={13} /> {t("sendMessage")}
             </button>
           </div>
         </motion.form>
@@ -193,25 +195,124 @@ const { t } = useTranslation();
                   {post.message}
                 </p>
 
-                {/* Actions */}
-                <div className="flex items-center gap-1.5 pt-1.5 border-t border-slate-100">
+                {/* Reações */}
+            <div className="flex items-center gap-1.5 pt-1.5 border-t border-slate-100">
+
+              {/* 💛 Apoio */}
+              <button
+                onClick={() => onLikePost(post.id, "yellow")}
+                className={`flex items-center gap-1 px-3 py-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer ${
+                  post.userReaction === "yellow"
+                    ? "bg-yellow-100 text-yellow-600 border border-yellow-200"
+                    : "bg-[#FAF5F0] text-slate-400 border border-[#E5A88B]/10 hover:bg-yellow-50 hover:text-yellow-600"
+                }`}
+              >
+                <span className="text-sm">💛</span>
+                <span>{post.yellowLikes}</span>
+              </button>
+
+              {/* 💚 Estou contigo */}
+              <button
+                onClick={() => onLikePost(post.id, "green")}
+                className={`flex items-center gap-1 px-3 py-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer ${
+                  post.userReaction === "green"
+                    ? "bg-green-100 text-green-600 border border-green-200"
+                    : "bg-[#FAF5F0] text-slate-400 border border-[#E5A88B]/10 hover:bg-green-50 hover:text-green-600"
+                }`}
+              >
+                <span className="text-sm">💚</span>
+                <span>{post.greenLikes}</span>
+              </button>
+
+              {/* ❤️ Identifico-me */}
+          <button
+            onClick={() => {
+              if (post.userReaction === "red") {
+                onLikePost(post.id, "red");
+                return;
+              }
+
+              setConfirmIdentify(post.id);
+            }}
+            className={`flex items-center gap-1 px-3 py-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer ${
+              post.userReaction === "red"
+                ? "bg-red-100 text-red-600 border border-red-200"
+                : "bg-[#FAF5F0] text-slate-400 border border-[#E5A88B]/10 hover:bg-red-50 hover:text-red-600"
+            }`}
+          >
+            <span className="text-sm">❤️</span>
+            <span>{post.redLikes}</span>
+          </button>
+
+          {confirmIdentify === post.id && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-5">
+              <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
+                <div className="text-center">
+                  <div className="text-4xl mb-3">❤️</div>
+
+                  <h3 className="text-base font-black text-[#4E3B36]">
+                    {t("identifyTitle")}
+                  </h3>
+
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    {t("identifyMessage")}
+                  </p>
+                </div>
+
+                <div className="flex gap-2 mt-6">
                   <button
-                    onClick={() => onLikePost(post.id)}
-                    className={`flex items-center gap-1 px-4 py-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer ${
-                      post.likedByUser
-                        ? 'bg-[#E5A88B]/10 text-[#C97B5E] border border-[#E5A88B]/20'
-                        : 'bg-[#FAF5F0] text-slate-400 border border-[#E5A88B]/10 hover:text-[#C97B5E] hover:bg-[#FFF0E8]'
-                    }`}
+                    type="button"
+                    onClick={() => setConfirmIdentify(null)}
+                    className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-500"
                   >
-                    <Heart size={12} fill={post.likedByUser ? 'currentColor' : 'none'} />
-                    <span>Apoiar ({post.likes})</span>
+                    {t("identifyCancel")}
                   </button>
 
-                  <div className="text-[10px] text-slate-300 font-mono select-none flex-1 text-right">
-                    #comunidadeConfia
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onLikePost(post.id, "red");
+                      setConfirmIdentify(null);
+                    }}
+                    className="flex-1 py-3 rounded-xl bg-red-500 text-white text-xs font-bold"
+                  >
+                    {t("identifyConfirm")}
+                  </button>
                 </div>
-              </motion.div>
+              </div>
+            </div>
+          )}
+
+          {/* 💬 Chat privado — disponível apenas após ❤️ */}
+      <button
+        type="button"
+        onClick={() => {
+          if (post.userReaction === "red") {
+            onOpenChat(post);
+          }
+        }}
+        disabled={post.userReaction !== "red"}
+        title={
+          post.userReaction === "red"
+            ? t("communityChat")
+            : t("identifyFirstChat")
+        }
+        className={`flex items-center gap-1 px-3 py-2 rounded-xl text-[10px] font-bold transition-all ${
+          post.userReaction === "red"
+            ? "text-[#C97B5E] bg-[#FFF0E8] border border-[#E5A88B]/20 hover:bg-[#FFE5D8] cursor-pointer"
+            : "text-slate-300 bg-slate-50 border border-slate-100 opacity-50 cursor-not-allowed"
+        }`}
+      >
+        <span className="text-sm">💬</span>
+      </button>
+
+  <div className="text-[10px] text-slate-300 font-mono select-none flex-1 text-right">
+                #comunidadeConfia
+      </div>
+
+            </div>
+
+          </motion.div>
             );
           })}
         </AnimatePresence>

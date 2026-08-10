@@ -26,12 +26,17 @@ export interface DailyRating {
 
 export interface SharePost {
   id: string;
+  authorId: string;
   userName: string;
   feeling: string; // e.g. "Ansioso", "Calmo", "Grato", "Agitado"
   message: string;
   timestamp: string;
-  likes: number;
-  likedByUser?: boolean;
+
+  yellowLikes: number;
+  greenLikes: number;
+  redLikes: number;
+
+  userReaction?: "yellow" | "green" | "red";
 }
 
 export interface TriageStep {

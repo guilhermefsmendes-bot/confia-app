@@ -8,9 +8,9 @@
   "cancel": "Annuler",
   "trigger": "Déclencheur",
   "emotion": "Émotion",
-"edit":"Modifier",
-"save":"Sauvegarder",
-"dragObjects":"Déplace les objets pour décorer",
+  "edit": "Modifier",
+  "save": "Sauvegarder",
+  "dragObjects": "Déplace les objets pour décorer",
   "thought": "Pensée",
   "startTimer": "Démarrer le temps",
   "psychoDefault": "Ce cycle d’anxiété apparaît lorsque le cerveau cherche des certitudes pour se sentir en sécurité.",
@@ -56,10 +56,10 @@
   "cycleNewDoubts": "Nouveaux doutes",
   "cycleMoreAnxiety": "Plus d’anxiété",
   "cycleExplanation": "Lorsque nous cherchons constamment des garanties, le cerveau apprend qu’il existe un danger et maintient le cycle actif.",
-  "impulseHistoryTitle": "Historique des impulsions",
+  "impulseHistoryTitle": "🛡️ Historique des impulsions",
   "evolutionDiary": "Journal d’évolution",
   "impulseLastUsed": "Dernière utilisation : il y a {{days}} jour(s)",
-  "impulseTotalUses": "Nombre total d'utilisations : {{count}}",
+  "impulseTotalUses": "Utilisations totales : {{count}}",
   "settings": "Paramètres",
   "emotionalMemoryTitle": "Ta semaine",
   "emotionalMemoryAverage": "Moyenne hebdomadaire : {{average}}",
@@ -137,38 +137,73 @@
   "whatToAchieveToday": "Que veux-tu accomplir aujourd’hui ?",
   "goalPlaceholder": "Ex: Ler 2 páginas de um livro, regar as plantas...",
   "remove": "Supprimer",
-"dailyObjectives": {
-  "breathe3": "Fais 3 minutes de respiration lente",
-  "hugExercise": "Fais l’exercice Câlin",
-  "relaxShoulders": "Relâche consciemment tes épaules",
-  "pausePhone": "Fais une pause sans téléphone",
-  "slowBreathing": "Respire lentement avant de réagir",
-  "sosTechnique": "Utilise une technique SOS lorsque tu ressens de l'anxiété",
-  "questionThought": "Remets en question une pensée anxieuse",
-  "writeWorry": "Écris une inquiétude et observe-la",
-  "positiveReplace": "Remplace une pensée négative par une pensée plus équilibrée",
-  "goodMoment": "Note quelque chose qui s'est bien passé aujourd'hui",
-  "focusTask": "Concentre-toi sur une tâche pendant 5 minutes",
-  "avoidSearch": "Évite une recherche de réassurance inutile",
-  "drinkWater": "Bois de l'eau lentement et en pleine conscience",
-  "stretch": "Fais 5 minutes d’étirements",
-  "walk": "Fais une marche de 10 minutes",
-  "sunlight": "Profite de quelques minutes de lumière naturelle",
-  "mindfulMeal": "Prends ton repas en pleine conscience",
-  "relaxFace": "Relâche ta mâchoire et ton visage",
-  "petCompanionGoal": "Donne de l’affection à ton compagnon",
-  "messageSomeone": "Envoie un message positif à quelqu’un",
-  "compliment": "Fais un compliment sincère",
-  "familyMoment": "Partage un moment de qualité avec une personne importante",
-  "gratitude": "Remercie pour une chose simple",
-  "askHelp": "Demande de l’aide si tu en as besoin",
-  "avoidSomething": "Fais quelque chose que tu évites depuis un moment",
-  "organize": "Organise une petite chose",
-  "learn": "Apprends quelque chose de nouveau pendant 3 minutes",
-  "healthyChoice": "Fais un choix sain",
-  "smallVictory": "Célèbre une petite victoire",
-  "dailyFeeling": "Note comment tu t'es senti aujourd'hui"
-},
+  "dailyCheckIn": {
+    "title": "Bonjour 🌱",
+    "subtitle": "Avant de commencer ta journée, comment vas-tu ?",
+    "moodQuestion": "Comment te sens-tu en ce moment ?",
+    "moodLow": "Très mal",
+    "moodHigh": "Très bien",
+    "needQuestion": "De quoi as-tu le plus besoin aujourd'hui ?",
+    "needs": {
+      "calm": "Me calmer",
+      "mind": "Organiser mes pensées",
+      "energy": "Gagner de l'énergie",
+      "support": "Me sentir accompagné",
+      "well": "Continuer à aller bien"
+    },
+    "continue": "Continuer",
+    "progressTitle": "Ton évolution",
+    "progressSubtitle": "Comment tu t'es senti ces derniers jours",
+    "weekAverage": "Moyenne des derniers jours :",
+    "responses": {
+      "lowCalm": "Aujourd'hui semble être une journée plus difficile. Prenons les choses doucement. Je suis avec toi. 🌿",
+      "lowMind": "Ton esprit semble avoir besoin d'un peu d'espace. Organisons une pensée à la fois. 🧠",
+      "lowEnergy": "Tu n'as pas besoin de tout faire aujourd'hui. Retrouvons ton énergie par petites étapes. 🌱",
+      "lowSupport": "Tu n'as pas à affronter cette journée seul. Confia est là avec toi. 🤝",
+      "lowWell": "Même lors d'une journée difficile, tu prends soin de toi. C'est déjà une étape importante. 💚",
+      "highCalm": "Tu te sens calme en ce moment. Utilisons ce calme pour renforcer ta journée. ✨",
+      "highMind": "Tu sembles être dans un bon état pour organiser tes pensées et avancer avec plus de clarté. 🧠",
+      "highEnergy": "Tu as une bonne énergie aujourd'hui ! Profitons-en pour bien commencer la journée. ☀️",
+      "highSupport": "Tu te sens bien et tu apprécies quand même la compagnie. C'est une belle façon de prendre soin de toi. 🤝",
+      "highWell": "C'est agréable de commencer la journée ainsi. Continuons à préserver cet équilibre. 🌱"
+    },
+    "completed": {
+      "title": "Check-in terminé",
+      "text": "Aujourd'hui, tu as commencé par prendre soin de toi. 🌱"
+    }
+  },
+  "dailyObjectives": {
+    "breathe3": "Fais 3 minutes de respiration lente",
+    "hugExercise": "Fais l’exercice Câlin",
+    "relaxShoulders": "Relâche consciemment tes épaules",
+    "pausePhone": "Fais une pause sans téléphone",
+    "slowBreathing": "Respire lentement avant de réagir",
+    "sosTechnique": "Utilise une technique SOS lorsque tu ressens de l'anxiété",
+    "questionThought": "Remets en question une pensée anxieuse",
+    "writeWorry": "Écris une inquiétude et observe-la",
+    "positiveReplace": "Remplace une pensée négative par une pensée plus équilibrée",
+    "goodMoment": "Note quelque chose qui s'est bien passé aujourd'hui",
+    "focusTask": "Concentre-toi sur une tâche pendant 5 minutes",
+    "avoidSearch": "Évite une recherche de réassurance inutile",
+    "drinkWater": "Bois de l'eau lentement et en pleine conscience",
+    "stretch": "Fais 5 minutes d’étirements",
+    "walk": "Fais une marche de 10 minutes",
+    "sunlight": "Profite de quelques minutes de lumière naturelle",
+    "mindfulMeal": "Prends ton repas en pleine conscience",
+    "relaxFace": "Relâche ta mâchoire et ton visage",
+    "petCompanionGoal": "Donne de l’affection à ton compagnon",
+    "messageSomeone": "Envoie un message positif à quelqu’un",
+    "compliment": "Fais un compliment sincère",
+    "familyMoment": "Partage un moment de qualité avec une personne importante",
+    "gratitude": "Remercie pour une chose simple",
+    "askHelp": "Demande de l’aide si tu en as besoin",
+    "avoidSomething": "Fais quelque chose que tu évites depuis un moment",
+    "organize": "Organise une petite chose",
+    "learn": "Apprends quelque chose de nouveau pendant 3 minutes",
+    "healthyChoice": "Fais un choix sain",
+    "smallVictory": "Célèbre une petite victoire",
+    "dailyFeeling": "Note comment tu t'es senti aujourd'hui"
+  },
   "completed": "Terminé",
   "complete": "Terminer",
   "justNow": "À l'instant",
@@ -187,9 +222,13 @@
   "guardianAchievements": "Réalisations du gardien",
   "positiveFrequency": "Fréquence positive",
   "howDoYouFeel": "Comment te sens-tu ?",
-  "safeSharing": "Partage sécurisé",
-  "sharePlaceholder": "Écris quelque chose que tu souhaites partager...",
+  "safeSharing": "Partage librement et en toute sécurité",
+  "sharePlaceholder": "Décris tes ressentis ou tes victoires d'aujourd'hui de manière réconfortante...",
   "shareSuccess": "Partage enregistré.",
+  "identifyTitle": "Je m'identifie",
+  "identifyMessage": "Veux-tu dire que tu te reconnais dans cette expérience ?",
+  "identifyCancel": "Pas encore",
+  "identifyConfirm": "Oui, je m'identifie",
   "mindFocus": "Focalisation de l'esprit",
   "mindFocusCompleted": "Ton esprit est resté concentré sur quelque chose de positif. Ton compagnon a gagné",
   "focusBenefit": "Aide ton esprit à revenir au moment présent.",
@@ -344,7 +383,7 @@
   "psychoInternet": "Pesquisar constantemente na internet pode dar alívio momentâneo, mas pode alimentar o ciclo da ansiedade.",
   "psychoSymptom": "Um sintoma pode parecer assustador, mas o cérebro ansioso tende a interpretar sinais neutros como ameaças.",
   "psychoDiseaseTalk": "Falar sobre doenças pode aumentar a atenção aos medos e reforçar a sensação de perigo.",
-  "impulseNeverUsed": "Vous n'avez pas encore utilisé cette aide.",
+  "impulseNeverUsed": "Tu n'as pas encore utilisé ce soutien.",
   "inhaleDescription": "Inspira lentamente pelo nariz.",
   "holdBreathDescription": "Mantém a respiração por alguns segundos.",
   "exhaleDescription": "Expire lentement et libère la tension.",
@@ -376,217 +415,209 @@
   "mindfulMeal": "Prends ton repas en pleine conscience",
   "relaxFace": "Relâche ta mâchoire et ton visage",
   "abandonExercise": "Abandonner l'exercice",
-  "focusAnother": "Se concentrer sur une autre activité"
-,
-"patterns": {
-  "habitsEvaluated": "{{count}} habitudes évaluées",
-  "assessmentTitle": "Évaluez vos habitudes",
-  "assessmentDescription": "Choisissez les habitudes qui pourraient affecter votre bien-être.",
-  "classify": "Classer",
-  "save": "Enregistrer",
-  "back": "Retour",
-  "dailyTitle": "Suivez votre journée",
-  "dailyDescription": "Évaluez comment vous avez géré ces habitudes.",
-  "recordSaved": "Enregistrement quotidien sauvegardé",
-
-  "home": {
+  "focusAnother": "Se concentrer sur une autre activité",
+  "patterns": {
+    "habitsEvaluated": "{{count}} habitudes évaluées",
+    "assessmentTitle": "Évaluez vos habitudes",
+    "assessmentDescription": "Choisissez les habitudes qui pourraient affecter votre bien-être.",
+    "classify": "Classer",
+    "save": "Enregistrer",
+    "back": "Retour",
+    "dailyTitle": "Suivez votre journée",
+    "dailyDescription": "Évaluez comment vous avez géré ces habitudes.",
+    "recordSaved": "Enregistrement quotidien sauvegardé",
+    "home": {
+      "title": "Découvrez vos schémas",
+      "subtitle": "Découvrez comment votre cerveau réagit à l’anxiété et suivez votre évolution.",
+      "premiumDescription": "Découvrez comment fonctionne votre esprit, identifiez les schémas qui influencent vos émotions et créez de nouvelles façons d’avancer.",
+      "featureMind": "Comprenez vos pensées et vos réactions",
+      "featurePatterns": "Identifiez les schémas automatiques qui se répètent",
+      "featureGrowth": "Développez de nouvelles façons de réagir",
+      "start": "Commencer la découverte",
+      "assessment": {
+        "title": "Mon évaluation",
+        "description": "Découvrez votre profil et suivez votre évolution."
+      },
+      "habits": {
+        "title": "Habitudes sur lesquelles je travaille",
+        "description": "Suivez les habitudes que vous souhaitez changer."
+      },
+      "evolution": {
+        "title": "Mon évolution",
+        "description": "Observez vos progrès au fil du temps."
+      },
+      "library": {
+        "title": "Bibliothèque des schémas",
+        "description": "Découvrez pourquoi ces schémas apparaissent."
+      },
+      "plan": {
+        "title": "Plan personnalisé",
+        "description": "Recevez des objectifs adaptés à votre profil."
+      }
+    },
     "title": "Découvrez vos schémas",
-    "subtitle": "Découvrez comment votre cerveau réagit à l’anxiété et suivez votre évolution.",
-    "premiumDescription": "Découvrez comment fonctionne votre esprit, identifiez les schémas qui influencent vos émotions et créez de nouvelles façons d’avancer.",
-    "featureMind": "Comprenez vos pensées et vos réactions",
-    "featurePatterns": "Identifiez les schémas automatiques qui se répètent",
-    "featureGrowth": "Développez de nouvelles façons de réagir",
-    "start": "Commencer la découverte",
-
-    "assessment": {
-      "title": "Mon évaluation",
-      "description": "Découvrez votre profil et suivez votre évolution."
+    "subtitle": "Découvrez les habitudes et routines qui peuvent alimenter votre anxiété.",
+    "startQuestionnaire": "Commencer le questionnaire",
+    "lastEvaluation": "Dernière évaluation",
+    "retake": "Refaire",
+    "detox": "Détox",
+    "wellbeing": "Évolution du bien-être",
+    "noData": "Il n’y a pas encore assez de données.",
+    "objective": "Objectif hebdomadaire",
+    "daysWithout": "Jours sans cette habitude",
+    "progress": "Évolution",
+    "score": "Score",
+    "profile": {
+      "reassurance": {
+        "name": "Recherche de réassurance",
+        "description": "Vous avez tendance à chercher des garanties extérieures pour vous sentir en sécurité lorsque l’anxiété apparaît.",
+        "strength": "Vous êtes attentif aux détails et vous accordez de l’importance à la sécurité.",
+        "challenge": "Apprenez à faire confiance à votre capacité à gérer l’incertitude."
+      },
+      "search": {
+        "name": "Recherche de sécurité",
+        "description": "Chercher des réponses peut soulager l’anxiété sur le moment, mais maintenir le cycle d’inquiétude.",
+        "strength": "Vous êtes curieux et cherchez à comprendre ce qui se passe.",
+        "challenge": "Apprenez à tolérer l’incertitude sans chercher immédiatement des réponses."
+      },
+      "body": {
+        "name": "Hypervigilance corporelle",
+        "description": "Vous êtes très attentif aux sensations de votre corps et pouvez les interpréter comme des dangers.",
+        "strength": "Vous avez une bonne conscience de votre corps et de ses signaux.",
+        "challenge": "Apprenez à observer les sensations sans toujours les considérer comme des menaces."
+      },
+      "perfectionism": {
+        "name": "Perfectionnisme",
+        "description": "Vous ressentez un fort besoin de tout faire correctement et d’éviter les erreurs.",
+        "strength": "Vous êtes impliqué et souhaitez bien faire les choses.",
+        "challenge": "Acceptez que les erreurs et les imperfections font partie de l’apprentissage."
+      },
+      "avoidance": {
+        "name": "Évitement",
+        "description": "Éviter certaines situations peut apporter un soulagement immédiat mais renforcer la peur à long terme.",
+        "strength": "Vous essayez de vous protéger lorsque quelque chose semble difficile.",
+        "challenge": "Faites de petits pas même avec une certaine dose d’inconfort."
+      },
+      "rumination": {
+        "name": "Rumination",
+        "description": "Votre esprit reste bloqué dans l’analyse des problèmes et des possibilités.",
+        "strength": "Vous avez de bonnes capacités de réflexion et d’analyse.",
+        "challenge": "Apprenez à décrocher et à revenir au moment présent."
+      },
+      "control": {
+        "name": "Besoin de contrôle",
+        "description": "Vous cherchez constamment à vous assurer que tout se passe bien.",
+        "strength": "Vous êtes responsable et organisé.",
+        "challenge": "Acceptez qu’une certaine incertitude fasse partie de la vie."
+      },
+      "comparison": {
+        "name": "Comparaison sociale",
+        "description": "Vous comparer aux autres peut influencer la façon dont vous percevez votre propre valeur.",
+        "strength": "Vous observez et apprenez des personnes qui vous entourent.",
+        "challenge": "Valorisez davantage votre propre parcours."
+      }
     },
-
     "habits": {
-      "title": "Habitudes sur lesquelles je travaille",
-      "description": "Suivez les habitudes que vous souhaitez changer."
+      "title": "Quels comportements reconnaissez-vous chez vous ?",
+      "subtitle": "Choisissez ceux que vous utilisez pour soulager l’anxiété ou l’inconfort.",
+      "search": "Rechercher des symptômes ou chercher des réponses en ligne",
+      "social": "Passer trop de temps sur les réseaux sociaux",
+      "series": "Regarder des séries ou des vidéos pendant longtemps pour se déconnecter",
+      "games": "Jouer pour éviter des pensées inconfortables",
+      "smoking": "Fumer pour gérer l’anxiété ou le stress",
+      "alcohol": "Utiliser l’alcool pour soulager des émotions difficiles",
+      "emotionalEating": "Manger pour soulager l’anxiété ou les émotions",
+      "caffeine": "Utiliser la caféine pour gérer la journée",
+      "shopping": "Acheter des choses pour obtenir un soulagement temporaire",
+      "confirmation": "Chercher constamment la réassurance des autres",
+      "other": "Autre comportement",
+      "continue": "Créer mon plan"
     },
-
-    "evolution": {
-      "title": "Mon évolution",
-      "description": "Observez vos progrès au fil du temps."
+    "dashboard": {
+      "title": "Votre plan d’évolution",
+      "subtitle": "Observez vos schémas et suivez de petits changements.",
+      "goal": "Objectif actuel",
+      "today": "Comment s’est passée votre journée ?",
+      "better": "J’ai réussi à réduire ce comportement",
+      "same": "C’est resté pareil",
+      "harder": "C’était plus difficile aujourd’hui",
+      "days": "jours d’évolution",
+      "evolution": "Évolution des derniers jours",
+      "wellbeing": "Relation avec votre bien-être",
+      "wellbeingMessage": "Observons comment ces changements sont liés à votre évolution.",
+      "betterDays": "Jours améliorés :",
+      "otherDays": "Autres jours :"
     },
-
-    "library": {
-      "title": "Bibliothèque des schémas",
-      "description": "Découvrez pourquoi ces schémas apparaissent."
+    "questionnaire": {
+      "title": "Découvrez vos schémas",
+      "progress": "Question {{current}} sur {{total}}"
     },
-
+    "answers": {
+      "never": "Jamais",
+      "rarely": "Rarement",
+      "sometimes": "Parfois",
+      "often": "Souvent",
+      "almostAlways": "Presque toujours"
+    },
+    "questions": {
+      "q1": "Je cherche souvent à être rassuré par les autres pour me sentir en sécurité.",
+      "q2": "J’ai du mal à faire confiance à mes propres décisions sans demander l’avis des autres.",
+      "q3": "Je ressens le besoin de demander plusieurs fois si tout va bien.",
+      "q4": "Je recherche des symptômes ou des informations en ligne pour essayer de réduire mon anxiété.",
+      "q5": "Je continue à chercher des réponses même après avoir trouvé une explication.",
+      "q6": "J’ai du mal à arrêter mes recherches lorsque je commence à m’inquiéter.",
+      "q7": "Je porte beaucoup d’attention aux sensations dans mon corps.",
+      "q8": "J’interprète de petits changements physiques comme des signes possibles de danger.",
+      "q9": "Je vérifie souvent si quelque chose ne va pas avec mon corps.",
+      "q10": "Je ressens le besoin de faire les choses parfaitement.",
+      "q11": "Je me sens mal à l’aise lorsque je fais de petites erreurs.",
+      "q12": "Je reporte certaines tâches parce que j’ai peur de ne pas bien les faire.",
+      "q13": "J’évite certaines situations parce que je crains l’anxiété ou l’inconfort.",
+      "q14": "J’arrête de faire des choses importantes pour éviter les inquiétudes.",
+      "q15": "Je ressens un soulagement immédiat lorsque j’évite quelque chose qui provoque de l’anxiété.",
+      "q16": "Je reste bloqué dans des pensées répétitives sur des problèmes ou des possibilités négatives.",
+      "q17": "J’ai du mal à arrêter mes pensées lorsque je suis inquiet.",
+      "q18": "Je repasse mentalement des situations en cherchant des réponses.",
+      "q19": "Je ressens le besoin de contrôler chaque détail pour rester calme.",
+      "q20": "J’ai du mal à accepter que certaines choses soient imprévisibles.",
+      "q21": "Je deviens anxieux lorsque je ne peux pas garantir un résultat.",
+      "q22": "Je compare souvent ma vie ou mes performances avec celles des autres.",
+      "q23": "J’ai l’impression que les autres gèrent mieux les situations difficiles que moi.",
+      "q24": "Les comparaisons diminuent ma confiance en moi."
+    }
+  },
+  "patternsNew": {
+    "title": "Découvrez vos schémas",
+    "description": "Découvrez les habitudes qui influencent votre bien-être et suivez votre évolution.",
+    "assessment": "Évaluer vos habitudes",
+    "assessmentDesc": "Identifiez les habitudes qui peuvent affecter votre bien-être.",
+    "daily": "Suivre vos progrès",
+    "dailyDesc": "Évaluez chaque jour comment vous avez géré ces habitudes.",
+    "evolution": "Mon évolution",
+    "evolutionDesc": "Observez l’évolution de vos habitudes et comparez-la avec votre bien-être quotidien.",
+    "evolutionDescription": "Voyez comment vous gérez vos habitudes au fil du temps.",
+    "noRecords": "Vous n’avez pas encore assez d’enregistrements.",
+    "lastRecord": "Dernier enregistrement",
+    "date": "Date",
+    "habitManagement": "Gestion des habitudes",
+    "startEvolution": "Commencez par suivre vos progrès chaque jour.",
     "plan": {
       "title": "Plan personnalisé",
       "description": "Recevez des objectifs adaptés à votre profil."
     }
   },
-
-  "title": "Découvrez vos schémas",
-  "subtitle": "Découvrez les habitudes et routines qui peuvent alimenter votre anxiété.",
-  "startQuestionnaire": "Commencer le questionnaire",
-  "lastEvaluation": "Dernière évaluation",
-  "retake": "Refaire",
-  "detox": "Détox",
-  "wellbeing": "Évolution du bien-être",
-  "noData": "Il n’y a pas encore assez de données.",
-  "objective": "Objectif hebdomadaire",
-  "daysWithout": "Jours sans cette habitude",
-  "progress": "Évolution",
-  "score": "Score",
-  "profile": "Profil",
-
-  "habits": {
-    "title": "Quels comportements reconnaissez-vous chez vous ?",
-    "subtitle": "Choisissez ceux que vous utilisez pour soulager l’anxiété ou l’inconfort.",
-    "search": "Rechercher des symptômes ou chercher des réponses en ligne",
-    "social": "Passer trop de temps sur les réseaux sociaux",
-    "series": "Regarder des séries ou des vidéos pendant longtemps pour se déconnecter",
-    "games": "Jouer pour éviter des pensées inconfortables",
-    "smoking": "Fumer pour gérer l’anxiété ou le stress",
-    "alcohol": "Utiliser l’alcool pour soulager des émotions difficiles",
-    "emotionalEating": "Manger pour soulager l’anxiété ou les émotions",
-    "caffeine": "Utiliser la caféine pour gérer la journée",
-    "shopping": "Acheter des choses pour obtenir un soulagement temporaire",
-    "confirmation": "Chercher constamment la réassurance des autres",
-    "other": "Autre comportement",
-    "continue": "Créer mon plan"
-  },
-
-  "dashboard": {
-    "title": "Votre plan d’évolution",
-    "subtitle": "Observez vos schémas et suivez de petits changements.",
-    "goal": "Objectif actuel",
-    "today": "Comment s’est passée votre journée ?",
-    "better": "J’ai réussi à réduire ce comportement",
-    "same": "C’est resté pareil",
-    "harder": "C’était plus difficile aujourd’hui",
-    "days": "jours d’évolution",
-    "evolution": "Évolution des derniers jours",
-    "wellbeing": "Relation avec votre bien-être",
-    "wellbeingMessage": "Observons comment ces changements sont liés à votre évolution.",
-    "betterDays": "Jours améliorés :",
-    "otherDays": "Autres jours :"
-  },
-
-  "questionnaire": {
-    "title": "Découvrez vos schémas",
-    "progress": "Question {{current}} sur {{total}}"
-  },
-
-  "answers": {
-    "never": "Jamais",
-    "rarely": "Rarement",
-    "sometimes": "Parfois",
-    "often": "Souvent",
-    "almostAlways": "Presque toujours"
-  },
-  "questions": {
-    "q1": "Je cherche souvent à être rassuré par les autres pour me sentir en sécurité.",
-    "q2": "J’ai du mal à faire confiance à mes propres décisions sans demander l’avis des autres.",
-    "q3": "Je ressens le besoin de demander plusieurs fois si tout va bien.",
-    "q4": "Je recherche des symptômes ou des informations en ligne pour essayer de réduire mon anxiété.",
-    "q5": "Je continue à chercher des réponses même après avoir trouvé une explication.",
-    "q6": "J’ai du mal à arrêter mes recherches lorsque je commence à m’inquiéter.",
-    "q7": "Je porte beaucoup d’attention aux sensations dans mon corps.",
-    "q8": "J’interprète de petits changements physiques comme des signes possibles de danger.",
-    "q9": "Je vérifie souvent si quelque chose ne va pas avec mon corps.",
-    "q10": "Je ressens le besoin de faire les choses parfaitement.",
-    "q11": "Je me sens mal à l’aise lorsque je fais de petites erreurs.",
-    "q12": "Je reporte certaines tâches parce que j’ai peur de ne pas bien les faire.",
-    "q13": "J’évite certaines situations parce que je crains l’anxiété ou l’inconfort.",
-    "q14": "J’arrête de faire des choses importantes pour éviter les inquiétudes.",
-    "q15": "Je ressens un soulagement immédiat lorsque j’évite quelque chose qui provoque de l’anxiété.",
-    "q16": "Je reste bloqué dans des pensées répétitives sur des problèmes ou des possibilités négatives.",
-    "q17": "J’ai du mal à arrêter mes pensées lorsque je suis inquiet.",
-    "q18": "Je repasse mentalement des situations en cherchant des réponses.",
-    "q19": "Je ressens le besoin de contrôler chaque détail pour rester calme.",
-    "q20": "J’ai du mal à accepter que certaines choses soient imprévisibles.",
-    "q21": "Je deviens anxieux lorsque je ne peux pas garantir un résultat.",
-    "q22": "Je compare souvent ma vie ou mes performances avec celles des autres.",
-    "q23": "J’ai l’impression que les autres gèrent mieux les situations difficiles que moi.",
-    "q24": "Les comparaisons diminuent ma confiance en moi."
-  },
-
-  "profile": {
-    "reassurance": {
-      "name": "Recherche de réassurance",
-      "description": "Vous avez tendance à chercher des garanties extérieures pour vous sentir en sécurité lorsque l’anxiété apparaît.",
-      "strength": "Vous êtes attentif aux détails et vous accordez de l’importance à la sécurité.",
-      "challenge": "Apprenez à faire confiance à votre capacité à gérer l’incertitude."
-    },
-
-    "search": {
-      "name": "Recherche de sécurité",
-      "description": "Chercher des réponses peut soulager l’anxiété sur le moment, mais maintenir le cycle d’inquiétude.",
-      "strength": "Vous êtes curieux et cherchez à comprendre ce qui se passe.",
-      "challenge": "Apprenez à tolérer l’incertitude sans chercher immédiatement des réponses."
-    },
-
-    "body": {
-      "name": "Hypervigilance corporelle",
-      "description": "Vous êtes très attentif aux sensations de votre corps et pouvez les interpréter comme des dangers.",
-      "strength": "Vous avez une bonne conscience de votre corps et de ses signaux.",
-      "challenge": "Apprenez à observer les sensations sans toujours les considérer comme des menaces."
-    },
-
-    "perfectionism": {
-      "name": "Perfectionnisme",
-      "description": "Vous ressentez un fort besoin de tout faire correctement et d’éviter les erreurs.",
-      "strength": "Vous êtes impliqué et souhaitez bien faire les choses.",
-      "challenge": "Acceptez que les erreurs et les imperfections font partie de l’apprentissage."
-    },
-
-    "avoidance": {
-      "name": "Évitement",
-      "description": "Éviter certaines situations peut apporter un soulagement immédiat mais renforcer la peur à long terme.",
-      "strength": "Vous essayez de vous protéger lorsque quelque chose semble difficile.",
-      "challenge": "Faites de petits pas même avec une certaine dose d’inconfort."
-    },
-
-    "rumination": {
-      "name": "Rumination",
-      "description": "Votre esprit reste bloqué dans l’analyse des problèmes et des possibilités.",
-      "strength": "Vous avez de bonnes capacités de réflexion et d’analyse.",
-      "challenge": "Apprenez à décrocher et à revenir au moment présent."
-    },
-
-    "control": {
-      "name": "Besoin de contrôle",
-      "description": "Vous cherchez constamment à vous assurer que tout se passe bien.",
-      "strength": "Vous êtes responsable et organisé.",
-      "challenge": "Acceptez qu’une certaine incertitude fasse partie de la vie."
-    },
-
-    "comparison": {
-      "name": "Comparaison sociale",
-      "description": "Vous comparer aux autres peut influencer la façon dont vous percevez votre propre valeur.",
-      "strength": "Vous observez et apprenez des personnes qui vous entourent.",
-      "challenge": "Valorisez davantage votre propre parcours."
-    }
-  }
-},
-
-"patternsNew": {
-  "title": "Découvrez vos schémas",
-  "description": "Découvrez les habitudes qui influencent votre bien-être et suivez votre évolution.",
-  "assessment": "Évaluer vos habitudes",
-  "assessmentDesc": "Identifiez les habitudes qui peuvent affecter votre bien-être.",
-  "daily": "Suivre vos progrès",
-  "dailyDesc": "Évaluez chaque jour comment vous avez géré ces habitudes.",
-  "evolution": "Mon évolution",
-  "evolutionDesc": "Observez l’évolution de vos habitudes et comparez-la avec votre bien-être quotidien.",
-  "evolutionDescription": "Voyez comment vous gérez vos habitudes au fil du temps.",
-  "noRecords": "Vous n’avez pas encore assez d’enregistrements.",
-  "lastRecord": "Dernier enregistrement",
-  "date": "Date",
-  "habitManagement": "Gestion des habitudes",
-  "startEvolution": "Commencez par suivre vos progrès chaque jour.",
-  "plan": {
-    "title": "Plan personnalisé",
-    "description": "Recevez des objectifs adaptés à votre profil."
-  }
-}
+  "communityChat": "Chat",
+  "shareCornerTitle": "Coin du Partage",
+  "currentFeeling": "Quel est ton sentiment actuel ?",
+  "identifyFirstChat": "❤️ Identifie-toi d'abord pour démarrer le chat",
+  "shareCornerDescription": "Partage tes sentiments et tes victoires en toute confidentialité et sens que tu n'es pas seul dans ce parcours.",
+  "write": "Écrire",
+  "characters": "caractères",
+  "sendMessage": "Envoyer",
+  "feelingRelieved": "Soulagé",
+  "feelingCalm": "Calme",
+  "feelingGrateful": "Reconnaissant",
+  "feelingAnxious": "Anxieux",
+  "feelingAgitated": "Agité",
+  "feelingFocused": "Concentré"
 }

@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc
+} from "firebase/firestore";
 import { X, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { db, auth } from "../firebase";
@@ -31,6 +42,44 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
 
   const currentUser = auth.currentUser;
 
+  /*
+   * Descobre com quem a conversa deve acontecer.
+   *
+   * Se somos o autor da publicação:
+   *   -> procuramos quem deu ❤️
+   *
+   * Se somos quem deu ❤️:
+   *   -> conversamos com o autor da publicação.
+   */
+  const getOtherUserId = (): string | null => {
+    if (!currentUser) return null;
+console.log("MEU UID:", currentUser.uid);
+console.log("AUTOR DO POST:", post.authorId);
+console.log("NOME DO POST:", post.userName);
+console.log("RED LIKED BY:", post.redLikedBy);
+console.log("================================");
+console.log("CHAT DEBUG - post:", post);
+console.log("CHAT DEBUG - redLikedBy:", (post as any).redLikedBy);
+
+
+
+    // Somos o autor da publicação.
+    if (currentUser.uid === post.authorId) {
+      const redLikedBy = Array.isArray((post as any).redLikedBy)
+        ? (post as any).redLikedBy
+        : [];
+
+      const otherUser = redLikedBy.find(
+        (uid: string) => uid !== currentUser.uid
+      );
+
+      return otherUser || null;
+    }
+
+    // Somos a pessoa que deu ❤️.
+    return post.authorId || null;
+  };
+
   // Criar ou encontrar a conversa
   useEffect(() => {
     const createOrFindChat = async () => {
@@ -39,17 +88,41 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         return;
       }
 
-      // Não permitir conversa consigo próprio
-      if (currentUser.uid === post.authorId) {
+      const otherUserId = getOtherUserId();
+
+      if (!otherUserId) {
+        console.log("Ainda não existe outro utilizador para esta conversa.");
+        setLoading(false);
+        return;
+      }
+
+      // Segurança: nunca criar conversa consigo próprio.
+      if (currentUser.uid === otherUserId) {
         setLoading(false);
         return;
       }
 
       try {
-        const participants = [currentUser.uid, post.authorId].sort();
+        const participants = [
+          currentUser.uid,
+          otherUserId
+        ].sort();
 
-        // ID único e previsível para esta conversa/publicação
-        const chatIdValue = `${post.id}_${participants[0]}_${participants[1]}`;
+        /*
+         * O ID depende da publicação + os dois utilizadores.
+         *
+         * Assim:
+         *
+         * Anon_229 -> Anon_731
+         *
+         * e
+         *
+         * Anon_731 -> Anon_229
+         *
+         * obtêm exatamente o mesmo chatId.
+         */
+        const chatIdValue =
+          `${post.id}_${participants[0]}_${participants[1]}`;
 
         const chatRef = doc(db, "chats", chatIdValue);
         const chatSnapshot = await getDoc(chatRef);
@@ -63,11 +136,15 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
             lastMessage: "",
             lastMessageAt: serverTimestamp()
           });
+
+          console.log("NOVO CHAT CRIADO:", chatIdValue);
+        } else {
+          console.log("CHAT EXISTENTE ENCONTRADO:", chatIdValue);
         }
 
-        console.log("CHAT CRIADO/ENCONTRADO:", chatIdValue);
-    setChatId(chatIdValue);
+        setChatId(chatIdValue);
         setLoading(false);
+
       } catch (error) {
         console.error("Erro ao iniciar chat:", error);
         setLoading(false);
@@ -76,7 +153,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
 
     createOrFindChat();
   }, [post.id, post.authorId]);
-  
+
   // Escutar mensagens em tempo real
   useEffect(() => {
     if (!chatId) return;
@@ -96,10 +173,11 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
     const unsubscribe = onSnapshot(
       messagesQuery,
       (snapshot) => {
-        const loadedMessages: ChatMessage[] = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<ChatMessage, "id">)
-        }));
+        const loadedMessages: ChatMessage[] =
+          snapshot.docs.map((messageDoc) => ({
+            id: messageDoc.id,
+            ...(messageDoc.data() as Omit<ChatMessage, "id">)
+          }));
 
         setMessages(loadedMessages);
       },
@@ -114,15 +192,67 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
   const handleSend = async () => {
     const text = message.trim();
 
-    if (!text || !chatId || !currentUser || sending) {
+    if (!text || !currentUser || sending) {
       return;
     }
 
     setSending(true);
 
     try {
+      let activeChatId = chatId;
+
+      // Se o chat ainda não foi criado, cria/encontra agora.
+      if (!activeChatId) {
+        const otherUserId = getOtherUserId();
+
+        if (!otherUserId) {
+          console.error(
+            "Não foi possível identificar o outro participante."
+          );
+          return;
+        }
+
+        if (otherUserId === currentUser.uid) {
+          console.error(
+            "Tentativa de criar conversa consigo próprio."
+          );
+          return;
+        }
+
+        const participants = [
+          currentUser.uid,
+          otherUserId
+        ].sort();
+
+        const newChatId =
+          `${post.id}_${participants[0]}_${participants[1]}`;
+
+        const chatRef = doc(db, "chats", newChatId);
+        const chatSnapshot = await getDoc(chatRef);
+
+        if (!chatSnapshot.exists()) {
+          await setDoc(chatRef, {
+            participants,
+            postId: post.id,
+            authorId: post.authorId,
+            createdAt: serverTimestamp(),
+            lastMessage: "",
+            lastMessageAt: serverTimestamp()
+          });
+        }
+
+        activeChatId = newChatId;
+        setChatId(newChatId);
+      }
+
+      // Enviar mensagem.
       await addDoc(
-        collection(db, "chats", chatId, "messages"),
+        collection(
+          db,
+          "chats",
+          activeChatId,
+          "messages"
+        ),
         {
           senderId: currentUser.uid,
           text,
@@ -130,7 +260,17 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         }
       );
 
+      // Atualizar última mensagem do chat.
+      await updateDoc(
+        doc(db, "chats", activeChatId),
+        {
+          lastMessage: text,
+          lastMessageAt: serverTimestamp()
+        }
+      );
+
       setMessage("");
+
     } catch (error) {
       console.error("Erro ao enviar mensagem:", error);
     } finally {
@@ -173,26 +313,35 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
                 {t("chatLoading")}
               </span>
             </div>
+
           ) : messages.length === 0 ? (
             <div className="h-full flex items-center justify-center text-center px-8">
               <div>
                 <div className="text-3xl mb-3">💬</div>
+
                 <p className="text-xs font-bold text-[#4E3B36]">
                   {t("chatEmpty")}
                 </p>
+
                 <p className="text-[10px] text-slate-400 mt-1">
                   {t("chatStartMessage")}
                 </p>
               </div>
             </div>
+
           ) : (
             messages.map((item) => {
-              const mine = item.senderId === currentUser?.uid;
+              const mine =
+                item.senderId === currentUser?.uid;
 
               return (
                 <div
                   key={item.id}
-                  className={`flex ${mine ? "justify-end" : "justify-start"}`}
+                  className={`flex ${
+                    mine
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
                 >
                   <div
                     className={`max-w-[78%] px-4 py-2.5 rounded-2xl text-xs leading-relaxed ${
@@ -212,11 +361,17 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         {/* Campo de mensagem */}
         <div className="p-3 border-t border-slate-100 bg-white">
           <div className="flex items-end gap-2">
+
             <textarea
               value={message}
-              onChange={(event) => setMessage(event.target.value)}
+              onChange={(event) =>
+                setMessage(event.target.value)
+              }
               onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
+                if (
+                  event.key === "Enter" &&
+                  !event.shiftKey
+                ) {
                   event.preventDefault();
                   handleSend();
                 }
@@ -230,12 +385,13 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
             <button
               type="button"
               onClick={handleSend}
-              disabled={!message.trim() || sending || !chatId}
+              disabled={!message.trim() || sending}
               className="w-11 h-11 shrink-0 rounded-2xl bg-[#C97B5E] text-white flex items-center justify-center disabled:opacity-40 transition-opacity"
               aria-label={t("chatSend")}
             >
               <Send size={17} />
             </button>
+
           </div>
         </div>
 

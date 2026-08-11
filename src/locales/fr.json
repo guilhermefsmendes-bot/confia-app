@@ -619,5 +619,19 @@
   "feelingGrateful": "Reconnaissant",
   "feelingAnxious": "Anxieux",
   "feelingAgitated": "Agité",
-  "feelingFocused": "Concentré"
+  "feelingFocused": "Concentré",
+  "report": "Signaler",
+  "blockUser": "Bloquer utilisateur",
+  "communityTerms": "Règles de la communauté",
+  "communitySafeSpace": "C'est un espace sûr de partage. Respectez les autres membres.",
+  "inappropriateContent": "Contenu inapproprié",
+  "deleteMyData": "Supprimer mes données",
+  "blockConfirm": "Bloquer cet utilisateur ?",
+  "communityTermsButton": "Voir les règles de la communauté",
+  "blockError": "Impossible de bloquer cet utilisateur.",
+  "deleteDataConfirm": "Êtes-vous sûr de vouloir supprimer toutes vos données ? Cette action est irréversible.",
+  "deleteDataSuccess": "Vos données ont été supprimées avec succès.",
+  "deleteDataError": "Impossible de supprimer vos données. Réessayez.",
+  "communityDescription": "La communauté Confia a été créée pour le partage et le soutien entre utilisateurs.",
+  "deleteAccountDescription": "Supprime vos publications, réactions, conversations et autres données associées à votre compte."
 }

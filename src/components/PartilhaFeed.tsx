@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { auth } from '../firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import { Share2, Heart, MessageSquarePlus, Smile, RefreshCw, Send, CheckCircle } from 'lucide-react';
 import { SharePost } from '../types';
@@ -8,6 +9,9 @@ interface PartilhaFeedProps {
   onAddPost: (feeling: string, message: string) => void;
   onLikePost: (id: string, reaction: "yellow" | "green" | "red") => void;
   onOpenChat: (post: SharePost) => void;
+  onDeletePost: (id: string) => void;
+  onReportPost: (post: SharePost, reason: string) => void;
+  onBlockUser: (id: string) => void;
 }
 
 const FEELINGS_LIST = [
@@ -19,13 +23,22 @@ const FEELINGS_LIST = [
   { key: 'feelingFocused', text: 'Focado', emoji: '🎯', color: 'bg-white text-[#C97B5E] border-[#E5A88B]/20' }
 ];
 
-export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({ posts, onAddPost, onLikePost, onOpenChat }) => {
+export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
+  posts,
+  onAddPost,
+  onLikePost,
+  onOpenChat,
+  onDeletePost,
+ onReportPost,
+  onBlockUser
+}) => {
 const { t } = useTranslation();
   const [selectedFeeling, setSelectedFeeling] = useState('Calmo');
   const [message, setMessage] = useState('');
   const [showCompose, setShowCompose] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
 const [confirmIdentify, setConfirmIdentify] = useState<string | null>(null);
+const [reportPost, setReportPost] = useState<SharePost | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,6 +207,43 @@ const [confirmIdentify, setConfirmIdentify] = useState<string | null>(null);
                 <p className="text-xs text-[#4E3B36] leading-relaxed font-semibold">
                   {post.message}
                 </p>
+
+<div className="flex gap-3">
+  {post.authorId === auth.currentUser?.uid && (
+    <button
+      onClick={() => onDeletePost(post.id)}
+      className="text-[10px] text-red-400 font-bold hover:text-red-600"
+    >
+      🗑️ Apagar
+    </button>
+  )}
+
+  {post.authorId !== auth.currentUser?.uid && (
+    <button
+      onClick={() =>
+        onReportPost(
+          post,
+          t("inappropriateContent")
+        )
+      }
+      className="text-[10px] text-orange-400 font-bold hover:text-orange-600"
+    >
+      {t("report")}
+    </button>
+  )}
+{post.authorId !== auth.currentUser?.uid && (
+  <button
+    onClick={() => {
+if (confirm(t("blockConfirm"))) {
+        onBlockUser(post.authorId);
+      }
+    }}
+    className="text-[10px] text-slate-400 font-bold hover:text-slate-600"
+  >
+  {t("blockUser")}
+  </button>
+)}
+</div>
 
                 {/* Reações */}
             <div className="flex items-center gap-1.5 pt-1.5 border-t border-slate-100">

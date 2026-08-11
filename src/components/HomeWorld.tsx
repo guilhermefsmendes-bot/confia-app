@@ -240,17 +240,17 @@ bottom-[360px]
     "
   />
 
-  {/* Ondas da água */}
+  {/* Ondas da água com vento */}
   <div
     className="
       absolute
       bottom-5
-      left-6
-      w-28
+      left-0
+      w-32
       h-2
       rounded-full
       bg-white/30
-      animate-pulse
+      animate-[wave_4s_ease-in-out_infinite]
     "
   />
 
@@ -258,14 +258,27 @@ bottom-[360px]
     className="
       absolute
       bottom-10
-      right-8
-      w-20
+      left-12
+      w-24
       h-1
       rounded-full
-      bg-white/20
+      bg-white/25
+      animate-[wave_5s_ease-in-out_infinite]
     "
   />
 
+  <div
+    className="
+      absolute
+      bottom-16
+      left-4
+      w-16
+      h-1
+      rounded-full
+      bg-white/20
+      animate-[wave_6s_ease-in-out_infinite]
+    "
+  />
 </div>
 
 

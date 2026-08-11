@@ -6,3 +6,14 @@
   --font-display: "Space Grotesk", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
+@keyframes wave {
+  0%, 100% {
+    transform: translateX(-8px);
+    opacity: 0.4;
+  }
+
+  50% {
+    transform: translateX(20px);
+    opacity: 0.8;
+  }
+}

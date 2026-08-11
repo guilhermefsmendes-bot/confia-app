@@ -15,14 +15,15 @@ import {
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n";
-import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove, increment } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove, increment, deleteDoc } from "firebase/firestore";
 import { db, auth, signInAnonymously } from "./firebase";
 import { initAnonymousAuth } from "./firebaseAuth";
-import HomeShop from "./components/HomeShop";
 import HomeInventory from "./components/HomeInventory";
+import { deleteAllUserData } from "./storage/deleteUserData";
 import { initLanguage } from "./i18n/language";
 import Avatar from "./components/Avatar";
 import HomeWorld from "./components/HomeWorld";
+import HomeShop from "./components/HomeShop";
 import { AvatarState, Objective, DailyRating, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 import PatternsNew from './components/PatternsNew/PatternsNew';
@@ -91,7 +92,7 @@ useEffect(() => {
   // Global App States
 const [patternsPage, setPatternsPage] = useState("menu");
 const [homeScreen, setHomeScreen] = useState<
-  "home" | "shop" | "inventory"
+"home" | "shop" | "inventory" | "settings"
 >("home");
   const [avatar, setAvatar] = useState<AvatarState>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AVATAR);
@@ -171,6 +172,7 @@ const [avatarMemoryMessage, setAvatarMemoryMessage] = useState("");
   const [prevLevel, setPrevLevel] = useState(avatar.level);
   const [showSplash, setShowSplash] = useState(true);
 const [showStopMode, setShowStopMode] = useState(false);
+const [showCommunityTerms, setShowCommunityTerms] = useState(false);
 
 // Chat privado da comunidade
 const [chatPost, setChatPost] = useState<SharePost | null>(null);
@@ -436,7 +438,7 @@ const handleSaveRatings = () => {
 };
 
   // Toggle single objective completion
-  // Toggle single objective completion
+
   const handleToggleObjective = (id: string) => {
     setObjectives(prev => {
       const updatedObjectives = prev.map(obj => {
@@ -495,7 +497,11 @@ const handleSaveRatings = () => {
     });
   };
   // Create objective
-  const handleAddCustomObjective = (text: string, category: 'corporeo' | 'mental' | 'social' | 'nutricao') => {
+
+  const handleAddCustomObjective = (
+    text: string,
+    category: 'corporeo' | 'mental' | 'social' | 'nutricao'
+  ) => {
     const newObj: Objective = {
       id: `obj-custom-${Date.now()}`,
       text,
@@ -504,14 +510,117 @@ const handleSaveRatings = () => {
       completed: false,
       isCustom: true
     };
+
     setObjectives(prev => [newObj, ...prev]);
   };
+
+  const handleDeleteAccountData = async () => {
+    const confirmed = window.confirm(
+      t("deleteDataConfirm")
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteAllUserData();
+
+      alert(t("deleteDataSuccess"));
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Erro ao apagar os dados:", error);
+      alert(t("deleteDataError"));
+    }
+  };
+
 
   // Delete objective
   const handleDeleteObjective = (id: string) => {
     setObjectives(prev => prev.filter(o => o.id !== id));
   };
 
+const handleDeleteAllUserData = async () => {
+  const confirmed = window.confirm(
+ t("deleteDataConfirm")
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await deleteAllUserData();
+
+    alert(t("deleteDataSuccess"));
+
+    window.location.reload();
+  } catch (error) {
+    console.error("Erro ao apagar os dados:", error);
+    alert(t("deleteDataError"));
+  }
+};
+const handleDeletePost = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, "posts", id));
+
+    setPosts(prev =>
+      prev.filter(post => post.id !== id)
+    );
+
+  } catch (error) {
+    console.error("Erro ao apagar publicação:", error);
+    alert("Não foi possível apagar esta publicação.");
+  }
+};
+// Denunciar publicação
+const handleReportPost = async (
+  post: SharePost,
+  reason: string
+) => {
+  try {
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+
+    await addDoc(collection(db, "reports"), {
+      postId: post.id,
+      reportedUserId: post.authorId,
+      reporterId: auth.currentUser!.uid,
+      reason,
+      createdAt: serverTimestamp()
+    });
+
+    alert("Obrigado. A denúncia foi enviada para análise.");
+    
+  } catch (error) {
+    console.error("Erro ao denunciar publicação:", error);
+    alert("Não foi possível enviar a denúncia.");
+  }
+};
+// Bloquear utilizador
+const handleBlockUser = async (blockedUserId: string) => {
+  try {
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+
+    if (auth.currentUser!.uid === blockedUserId) return;
+
+    await addDoc(collection(db, "blocks"), {
+      blockerId: auth.currentUser!.uid,
+      blockedUserId,
+      createdAt: serverTimestamp()
+    });
+
+    setPosts(prev =>
+      prev.filter(post => post.authorId !== blockedUserId)
+    );
+
+    alert("Utilizador bloqueado.");
+
+  } catch (error) {
+    console.error("Erro ao bloquear utilizador:", error);
+alert(t("blockError"));
+  }
+};
   // Create Community Post
 const handleAddPost = async (feeling: string, message: string) => {
   try {
@@ -535,9 +644,10 @@ const handleAddPost = async (feeling: string, message: string) => {
       createdAt: serverTimestamp()
     });
 
-    const newPost: SharePost = {
-      id: docRef.id,
-      userName,
+const newPost: SharePost = {
+  id: docRef.id,
+  authorId: auth.currentUser!.uid,
+  userName,
       feeling,
       message,
       timestamp: t("justNow"),
@@ -955,6 +1065,91 @@ className="flex items-center justify-center w-24 h-24 relative"
     onBack={() => setHomeScreen("home")}
   />
 )}
+<button
+  onClick={() => setHomeScreen("settings")}
+  className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
+>
+  <span className="text-5xl">⚙️</span>
+</button>
+{currentTab === 0 && homeScreen === "settings" && (
+  <motion.div
+    key="settings-screen"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    className="space-y-5"
+  >
+    <div className="flex items-center gap-3">
+      <button
+        onClick={() => setHomeScreen("home")}
+        className="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-lg"
+      >
+        ←
+      </button>
+
+      <h2 className="text-xl font-black text-[#4E3B36]">
+        Definições
+      </h2>
+    </div>
+
+<div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm">
+  <h3 className="text-sm font-black text-[#4E3B36] mb-2">
+    {t("communityTerms")}
+  </h3>
+
+  <p className="text-xs text-slate-500 leading-relaxed">
+    A comunidade Confia foi criada para partilha e apoio entre utilizadores.
+    Respeita os outros membros e evita publicar conteúdo ofensivo,
+    ameaçador ou informações pessoais.
+    <br /><br />
+    Publicações inadequadas podem ser denunciadas e removidas.
+    Utilizadores podem ser bloqueados para manter um ambiente seguro.
+  </p>
+</div>
+
+
+<div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm mb-4">
+
+  <h3 className="text-sm font-black text-[#4E3B36] mb-1">
+    {t("communityTerms")}
+  </h3>
+
+  <p className="text-xs text-slate-500 leading-relaxed mb-4">
+    Conhece as regras para uma comunidade segura e respeitosa.
+  </p>
+
+  <button
+    onClick={() => setShowCommunityTerms(true)}
+    className="w-full py-3.5 rounded-2xl bg-[#FFF0E8] border border-[#E5A88B]/30 text-[#C97B5E] font-black text-xs uppercase tracking-wide"
+  >
+    {t("communityTermsButton")}
+  </button>
+
+</div>
+    <div className="bg-white border border-red-100 rounded-3xl p-5 shadow-sm">
+      <h3 className="text-sm font-black text-[#4E3B36] mb-1">
+        {t("deleteMyData")}
+      </h3>
+
+      <p className="text-xs text-slate-500 leading-relaxed mb-4">
+        Elimina as tuas publicações, reações, conversas e restantes dados
+        associados à tua conta.
+      </p>
+
+      <button
+        onClick={handleDeleteAccountData}
+        className="w-full py-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 font-black text-xs uppercase tracking-wide hover:bg-red-100 transition"
+      >
+        🗑️ Eliminar todos os meus dados
+      </button>
+    </div>
+  </motion.div>
+)}
+
+
+
+
+
           {currentTab === 1 && (
             /* TAB 2: ABRAÇO (TIMER DE RESPIRAÇÃO) */
             <motion.div
@@ -1009,6 +1204,9 @@ className="flex items-center justify-center w-24 h-24 relative"
       onAddPost={handleAddPost}
       onLikePost={handleLikePost}
       onOpenChat={handleOpenChat}
+  onDeletePost={handleDeletePost}
+ onReportPost={handleReportPost}
+onBlockUser={handleBlockUser}
     />
   </motion.div>
 )}

@@ -40,12 +40,16 @@ const ACTIVITIES = (t: any): FocusActivity[] => [
   {
     id: 'ler',
 title: t("readBookTitle"),
+ icon: '📖',
+ emoji: '📖',
 description: t("readBookDesc"),
 exerciseTitle: t("readBookExercise"),
 exerciseDesc: t("readBookExerciseDesc"),
 tip: t("readBookTip")
   },
   {
+icon: '✍️',
+emoji: '✍️',
     id: 'escrever',
 title: t("writeTitle"),
 description: t("writeDesc"),
@@ -54,6 +58,8 @@ exerciseDesc: t("writeExerciseDesc"),
 tip: t("writeTip")
   },
   {
+icon: '🎨',
+emoji: '🎨',
     id: 'desenhar',
 title: t("drawTitle"),
 description: t("drawDesc"),
@@ -65,6 +71,8 @@ tip: t("drawTip")
     id: 'organizar',
 title: t("organizeTitle"),
 description: t("organizeDesc"),
+icon: '🗂️',
+emoji: '🗂️',
 exerciseTitle: t("organizeExercise"),
 exerciseDesc: t("organizeExerciseDesc"),
 tip: t("organizeTip")
@@ -73,6 +81,8 @@ tip: t("organizeTip")
     id: 'artesanato',
 title: t("craftTitle"),
 description: t("craftDesc"),
+icon: '🧵',
+emoji: '🧵',
 exerciseTitle: t("craftExercise"),
 exerciseDesc: t("craftExerciseDesc"),
 tip: t("craftTip")
@@ -81,6 +91,8 @@ tip: t("craftTip")
     id: 'plantas',
 title: t("plantsTitle"),
 description: t("plantsDesc"),
+icon: '🌱',
+emoji: '🌱',
 exerciseTitle: t("plantsExercise"),
 exerciseDesc: t("plantsExerciseDesc"),
 tip: t("plantsTip")

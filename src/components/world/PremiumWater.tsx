@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "motion/react";
 
 const shorelineRocks = [
   { left: "8%", bottom: "14%", scale: 0.65, rotate: -12 },
@@ -28,34 +27,17 @@ export default function PremiumWater() {
         pointer-events-none
       "
     >
-      {/* Shadow beneath the water */}
+      {/* Margem do lago */}
       <div
         className="
           absolute
-          inset-x-[-5%]
-          bottom-[-8%]
-          h-[35%]
-          rounded-[50%]
-          bg-black/25
-          blur-xl
-        "
-      />
-
-      {/* Natural shoreline */}
-      <div
-        className="
-          absolute
-          inset-[-4%]
+          inset-[-3%]
           rounded-[48%_52%_46%_54%]
-          bg-gradient-to-br
-          from-stone-500/70
-          via-amber-700/35
-          to-emerald-950/40
-          blur-[1px]
+          bg-stone-400/60
         "
       />
 
-      {/* Water body */}
+      {/* Água */}
       <div
         className="
           absolute
@@ -66,122 +48,63 @@ export default function PremiumWater() {
           from-[#b8e2e2]
           via-[#4da7ad]
           to-[#176274]
-          shadow-[inset_0_8px_18px_rgba(255,255,255,0.22),inset_0_-14px_24px_rgba(4,45,58,0.38)]
         "
       >
-        {/* Sky reflection */}
-        <div
-          className="
-            absolute
-            left-[12%]
-            top-[8%]
-            w-[65%]
-            h-[38%]
-            rounded-full
-            bg-white/20
-            blur-xl
-          "
-        />
-
-        {/* Deep water gradient */}
+        {/* Zona mais profunda */}
         <div
           className="
             absolute
             inset-x-0
             bottom-0
-            h-[65%]
-            bg-gradient-to-t
-            from-[#064a5b]/55
-            via-[#147586]/15
-            to-transparent
+            h-[60%]
+            bg-[#064a5b]/25
           "
         />
 
-        {/* Long water reflections */}
-        <motion.div
+        {/* Reflexos estáticos */}
+        <div
           className="
             absolute
-            left-[8%]
-            top-[28%]
-            w-[52%]
+            left-[12%]
+            top-[18%]
+            w-[48%]
             h-[3px]
-            rounded-full
-            bg-white/35
-            blur-[1px]
-          "
-          animate={{
-            scaleX: [0.8, 1.15, 0.8],
-            opacity: [0.25, 0.5, 0.25],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-
-        <motion.div
-          className="
-            absolute
-            left-[24%]
-            top-[43%]
-            w-[40%]
-            h-[2px]
             rounded-full
             bg-white/25
           "
-          animate={{
-            scaleX: [1, 0.7, 1],
-            opacity: [0.15, 0.4, 0.15],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
         />
 
-        <motion.div
+        <div
           className="
             absolute
-            right-[8%]
-            top-[58%]
-            w-[32%]
+            left-[28%]
+            top-[38%]
+            w-[34%]
             h-[2px]
             rounded-full
             bg-white/20
           "
-          animate={{
-            scaleX: [0.7, 1, 0.7],
-          }}
-          transition={{
-            duration: 4.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
         />
 
-        {/* Tiny ripples */}
-        <div className="absolute left-[18%] bottom-[25%] h-[8px] w-[24px] rounded-[50%] border border-white/20" />
-        <div className="absolute left-[58%] bottom-[18%] h-[6px] w-[18px] rounded-[50%] border border-white/15" />
-        <div className="absolute right-[14%] top-[36%] h-[7px] w-[22px] rounded-[50%] border border-white/15" />
-
-        {/* Soft foreground reflection */}
         <div
           className="
             absolute
-            left-[20%]
-            bottom-[8%]
-            w-[60%]
-            h-[20%]
+            right-[12%]
+            top-[55%]
+            w-[26%]
+            h-[2px]
             rounded-full
-            bg-white/10
-            blur-md
+            bg-white/15
           "
         />
+
+        {/* Pequenas ondas */}
+        <div className="absolute left-[18%] bottom-[25%] h-[7px] w-[22px] rounded-[50%] border border-white/20" />
+        <div className="absolute left-[58%] bottom-[18%] h-[5px] w-[16px] rounded-[50%] border border-white/15" />
+        <div className="absolute right-[14%] top-[36%] h-[6px] w-[20px] rounded-[50%] border border-white/15" />
       </div>
 
-      {/* Shoreline rocks */}
+      {/* Pedras */}
       {shorelineRocks.map((rock, index) => (
         <div
           key={index}
@@ -193,8 +116,7 @@ export default function PremiumWater() {
             bg-gradient-to-br
             from-stone-300
             via-stone-500
-            to-stone-800
-            shadow-md
+            to-stone-700
           "
           style={{
             left: rock.left,
@@ -204,35 +126,21 @@ export default function PremiumWater() {
         />
       ))}
 
-      {/* Reeds */}
+      {/* Vegetação junto à água */}
       {reeds.map((reed, index) => (
-        <motion.div
+        <div
           key={index}
-          className="
-            absolute
-            bottom-0
-            w-5
-            h-16
-            origin-bottom
-          "
+          className="absolute bottom-0 w-5 h-16 origin-bottom"
           style={{
             left: reed.left,
             bottom: reed.bottom,
             transform: `scale(${reed.scale})`,
           }}
-          animate={{
-            rotate: [-3, 3, -3],
-          }}
-          transition={{
-            duration: 4 + index * 0.4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
         >
           <span className="absolute bottom-0 left-2 h-full w-[2px] rounded-full bg-emerald-950/65 -rotate-[12deg]" />
           <span className="absolute bottom-[18%] left-1 h-[45%] w-[2px] rounded-full bg-emerald-900/50 -rotate-[32deg]" />
           <span className="absolute bottom-[28%] left-3 h-[40%] w-[2px] rounded-full bg-emerald-950/50 rotate-[28deg]" />
-        </motion.div>
+        </div>
       ))}
     </div>
   );

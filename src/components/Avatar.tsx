@@ -15,6 +15,15 @@ export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet, celebrating, leve
 
 
 const { t, i18n } = useTranslation();
+const getRandomMessage = () => {
+  const messages = t("avatarMessages", { returnObjects: true });
+
+  if (Array.isArray(messages) && messages.length > 0) {
+    return messages[Math.floor(Math.random() * messages.length)];
+  }
+
+  return memoryMessage || t("avatarWelcome");
+};
 const AFFIRMATIONS = [
   t("affirmation1"),
   t("affirmation2"),
@@ -143,8 +152,9 @@ setShowBubble(true);
       };
     }
   };
+const stageDetails = getStageDetails(avatar.level);
+const stage = Math.min(10, avatar.level);
 
-  const stage = getStageDetails(avatar.level);
 
   // SVG representation based on level
   const renderAvatarSVG = () => {

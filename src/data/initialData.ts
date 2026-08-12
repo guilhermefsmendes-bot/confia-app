@@ -12,35 +12,28 @@ const OBJECTIVES_LIBRARY: Objective[] = [
   { id: 'positiveReplace', text: 'dailyObjectives.positiveReplace', category: 'mental', xpReward: 15, completed: false },
   { id: 'goodMoment', text: 'dailyObjectives.goodMoment', category: 'mental', xpReward: 10, completed: false },
 
-  { id: 'focusTask', text: 'dailyObjectives.focusTask', category: 'mental', xpReward: 15, completed: false },
-  { id: 'avoidSearch', text: 'dailyObjectives.avoidSearch', category: 'mental', xpReward: 15, completed: false },
   { id: 'drinkWater', text: 'dailyObjectives.drinkWater', category: 'corporeo', xpReward: 10, completed: false },
   { id: 'stretch', text: 'dailyObjectives.stretch', category: 'corporeo', xpReward: 15, completed: false },
   { id: 'walk', text: 'dailyObjectives.walk', category: 'corporeo', xpReward: 15, completed: false },
-  { id: 'sunlight', text: 'dailyObjectives.sunlight', category: 'corporeo', xpReward: 10, completed: false },
-  { id: 'mindfulMeal', text: 'dailyObjectives.mindfulMeal', category: 'nutricao', xpReward: 10, completed: false },
-  { id: 'relaxFace', text: 'dailyObjectives.relaxFace', category: 'corporeo', xpReward: 10, completed: false },
 
-  { id: 'petCompanionGoal', text: 'dailyObjectives.petCompanionGoal', category: 'social', xpReward: 10, completed: false },
+  { id: 'mindfulMeal', text: 'dailyObjectives.mindfulMeal', category: 'nutricao', xpReward: 10, completed: false },
+
   { id: 'messageSomeone', text: 'dailyObjectives.messageSomeone', category: 'social', xpReward: 15, completed: false },
-  { id: 'compliment', text: 'dailyObjectives.compliment', category: 'social', xpReward: 10, completed: false },
   { id: 'familyMoment', text: 'dailyObjectives.familyMoment', category: 'social', xpReward: 15, completed: false },
 
   { id: 'gratitude', text: 'dailyObjectives.gratitude', category: 'mental', xpReward: 10, completed: false },
   { id: 'askHelp', text: 'dailyObjectives.askHelp', category: 'social', xpReward: 20, completed: false },
-  { id: 'avoidSomething', text: 'dailyObjectives.avoidSomething', category: 'mental', xpReward: 20, completed: false },
-  { id: 'organize', text: 'dailyObjectives.organize', category: 'vida', xpReward: 10, completed: false },
-  { id: 'learn', text: 'dailyObjectives.learn', category: 'vida', xpReward: 15, completed: false },
-  { id: 'healthyChoice', text: 'dailyObjectives.healthyChoice', category: 'vida', xpReward: 10, completed: false },
-  { id: 'smallVictory', text: 'dailyObjectives.smallVictory', category: 'mental', xpReward: 10, completed: false },
-  { id: 'dailyFeeling', text: 'dailyObjectives.dailyFeeling', category: 'mental', xpReward: 15, completed: false }
+  { id: 'smallVictory', text: 'dailyObjectives.smallVictory', category: 'mental', xpReward: 10, completed: false }
 ];
+
+
 const daySeed = Math.floor(Date.now() / 86400000);
 
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 }
+
 
 const dailyObjectives = [...OBJECTIVES_LIBRARY];
 
@@ -55,7 +48,12 @@ dailyObjectives.sort((a, b) => {
 
   return ra - rb;
 });
-export const INITIAL_OBJECTIVES: Objective[] = dailyObjectives.slice(0, 5);
+
+
+export const INITIAL_OBJECTIVES: Objective[] =
+  dailyObjectives.slice(0, 5);
+
+
 
 export const SOOTHING_PHRASES: string[] = [
   "hugPhrase1",
@@ -67,75 +65,87 @@ export const SOOTHING_PHRASES: string[] = [
   "hugPhrase9"
 ];
 
+
+
 export const INITIAL_POSTS: SharePost[] = [
   {
-    id: 'post-1',
-    userName: 'Sofia M.',
-    feeling: 'Aliviada',
-    message: 'Hoje consegui ir ao supermercado sozinha! A ansiedade bateu à porta logo na entrada, mas fiz três respirações profundas e segui em frente. Um pequeno passo, mas uma grande vitória para mim! 😊🌿',
-    timestamp: 'Há 2 horas',
-    likes: 14,
-    likedByUser: false
+    id: "post-1",
+    authorId: "user-sofia",
+    userName: "Sofia M.",
+    feeling: "Aliviada",
+    message: "Hoje consegui ir ao supermercado sozinha! A ansiedade bateu à porta logo na entrada, mas fiz três respirações profundas e segui em frente.",
+    timestamp: "Há 2 horas",
+    yellowLikes: 14,
+    greenLikes: 5,
+    redLikes: 0
   },
   {
-    id: 'post-2',
-    userName: 'Pedro Silva',
-    feeling: 'Ansioso',
-    message: 'Dia difícil no trabalho, sinto o peito um pouco apertado. Vim aqui para o separador "Abraço" respirar um bocadinho e já me sinto um pouco mais ancorado. Força para todos nós.',
-    timestamp: 'Há 4 horas',
-    likes: 22,
-    likedByUser: false
+    id: "post-2",
+    authorId: "user-pedro",
+    userName: "Pedro Silva",
+    feeling: "Ansioso",
+    message: "Dia difícil no trabalho, sinto o peito apertado. Vim ao Abraço respirar um pouco e já me sinto melhor.",
+    timestamp: "Há 4 horas",
+    yellowLikes: 22,
+    greenLikes: 3,
+    redLikes: 1
   },
   {
-    id: 'post-3',
-    userName: 'Ana Rita',
-    feeling: 'Grata',
-    message: 'Agradecer pelas pequenas coisas: o cheiro a café logo pela manhã, o sol a bater na janela e este cantinho seguro chamado Confia. O meu avatar acabou de evoluir para o estágio de Bebé Calmo! 🥰 Stage: Egg -> Baby!',
-    timestamp: 'Há 6 horas',
-    likes: 19,
-    likedByUser: false
+    id: "post-3",
+    authorId: "user-ana",
+    userName: "Ana Rita",
+    feeling: "Grata",
+    message: "Agradecer pelas pequenas coisas: o café da manhã, o sol e este cantinho seguro chamado Confia.",
+    timestamp: "Há 6 horas",
+    yellowLikes: 19,
+    greenLikes: 8,
+    redLikes: 0
   },
   {
-    id: 'post-4',
-    userName: 'Lucas_98',
-    feeling: 'Focado',
-    message: 'Lembrete do dia: Tu não és os teus pensamentos de catástrofe. Eles são apenas hipóteses que a tua mente ansiosa cria. Tu és a consciência por trás deles. Fiquem bem! 💫',
-    timestamp: 'Há 1 dia',
-    likes: 31,
-    likedByUser: false
+    id: "post-4",
+    authorId: "user-lucas",
+    userName: "Lucas_98",
+    feeling: "Focado",
+    message: "Tu não és os teus pensamentos de catástrofe. São apenas hipóteses que a mente cria.",
+    timestamp: "Há 1 dia",
+    yellowLikes: 31,
+    greenLikes: 10,
+    redLikes: 0
   }
 ];
+
+
 
 export const TRIAGE_FLOW: TriageStep[] = [
   {
     id: 1,
-    title: 'Como te sentes no teu corpo?',
-    description: 'A ansiedade manifesta-se muito fisicamente. Identificar o que sentes ajuda a desmistificar a crise e a indicar ao teu cérebro que podes lidar com ela.',
+    title: "Como te sentes no teu corpo?",
+    description: "A ansiedade manifesta-se muito fisicamente.",
     options: [
-      'Coração muito acelerado ou palpitações',
-      'Falta de ar ou aperto forte no peito',
-      'Tremores, calafrios ou suores frios',
-      'Músculos muito tensos (mandíbula, pescoço)',
-      'Pensamentos em turbilhão e medo de perder o controlo'
+      "Coração acelerado",
+      "Aperto no peito",
+      "Tremores",
+      "Tensão muscular",
+      "Pensamentos em turbilhão"
     ],
-    type: 'question'
+    type: "question"
   },
   {
     id: 2,
-    title: 'Desacelerar o Coração (Respiração 4-2-4)',
-    description: 'Quando o coração acelera, respiramos rápido demais, o que aumenta a ansiedade. Vamos forçar um ritmo lento. Acompanha o círculo abaixo para equilibrar o teu sistema nervoso.',
-    type: 'breathing'
+    title: "Respiração 4-2-4",
+    description: "Vamos desacelerar o sistema nervoso.",
+    type: "breathing"
   },
   {
     id: 3,
-    title: 'Ancoragem Sensorial (Método 5-4-3-2-1)',
-    description: 'A ansiedade puxa a tua mente para cenários futuros assustadores. Vamos trazer-te de volta ao presente usando os teus cinco sentidos. Responde mentalmente ou em voz alta:',
-    type: 'grounding'
+    title: "Ancoragem Sensorial",
+    description: "Volta ao presente usando os sentidos.",
+    type: "grounding"
   },
   {
     id: 4,
-    title: 'Afirmação de Segurança',
-    description: 'Lembra-te: o que estás a sentir é um pico de adrenalina. É desconfortável, mas NÃO é perigoso. Vai passar por si só em poucos minutos. Diz para ti mesmo:',
-    type: 'instruction'
+    title: "Afirmação de Segurança",
+    description: "Este momento vai passar.",
+    type: "instruction"
   }
 ];

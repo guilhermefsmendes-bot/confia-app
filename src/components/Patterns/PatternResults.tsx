@@ -10,6 +10,7 @@ interface PatternResultsProps {
 
 export const PatternResults: React.FC<PatternResultsProps> = ({
   dominant,
+  onContinue,
 }) => {
   const { t } = useTranslation();
 

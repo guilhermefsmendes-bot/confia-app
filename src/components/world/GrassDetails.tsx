@@ -1,18 +1,16 @@
-import { motion } from "motion/react";
-
 const tufts = [
-  { left: "5%", top: "69%", scale: 0.7, delay: 0 },
-  { left: "11%", top: "81%", scale: 1.0, delay: 0.4 },
-  { left: "19%", top: "73%", scale: 0.8, delay: 0.8 },
-  { left: "27%", top: "86%", scale: 1.15, delay: 0.2 },
-  { left: "35%", top: "76%", scale: 0.65, delay: 1 },
-  { left: "44%", top: "90%", scale: 1.0, delay: 0.5 },
-  { left: "52%", top: "72%", scale: 0.75, delay: 1.2 },
-  { left: "60%", top: "84%", scale: 1.1, delay: 0.7 },
-  { left: "69%", top: "75%", scale: 0.7, delay: 0.3 },
-  { left: "77%", top: "88%", scale: 1.0, delay: 1.1 },
-  { left: "86%", top: "72%", scale: 0.8, delay: 0.6 },
-  { left: "93%", top: "84%", scale: 0.95, delay: 0.9 },
+  { left: "5%", top: "69%", scale: 0.7 },
+  { left: "11%", top: "81%", scale: 1.0 },
+  { left: "19%", top: "73%", scale: 0.8 },
+  { left: "27%", top: "86%", scale: 1.15 },
+  { left: "35%", top: "76%", scale: 0.65 },
+  { left: "44%", top: "90%", scale: 1.0 },
+  { left: "52%", top: "72%", scale: 0.75 },
+  { left: "60%", top: "84%", scale: 1.1 },
+  { left: "69%", top: "75%", scale: 0.7 },
+  { left: "77%", top: "88%", scale: 1.0 },
+  { left: "86%", top: "72%", scale: 0.8 },
+  { left: "93%", top: "84%", scale: 0.95 },
 ];
 
 function GrassTuft({
@@ -39,25 +37,16 @@ export default function GrassDetails() {
   return (
     <>
       {tufts.map((item, index) => (
-        <motion.div
+        <div
           key={index}
           className="absolute z-[12] pointer-events-none origin-bottom"
           style={{
             left: item.left,
             top: item.top,
           }}
-          animate={{
-            rotate: [-2, 2, -2],
-          }}
-          transition={{
-            duration: 4 + index * 0.25,
-            delay: item.delay,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
         >
           <GrassTuft scale={item.scale} />
-        </motion.div>
+        </div>
       ))}
     </>
   );

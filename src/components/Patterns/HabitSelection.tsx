@@ -38,9 +38,13 @@ export const HabitSelection: React.FC<HabitSelectionProps> = ({
   };
 
   const handleContinue = () => {
-    savePatternProfile({
-      habits: selected,
-    });
+savePatternProfile({
+  selectedHabit: selected,
+  completed: false,
+  answers: [],
+createdAt: new Date().toISOString(),
+});
+
 
     onFinish();
   };

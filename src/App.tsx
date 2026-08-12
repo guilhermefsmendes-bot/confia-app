@@ -194,6 +194,9 @@ console.log("OBJECTIVOS:", objectives);
   const [currentTab, setCurrentTab] = useState<number>(0);
 const stopAbracoRef = useRef<(() => void) | null>(null);
 const changeTab = (tab:number) => {
+  // Sempre que mudamos de separador, fechamos qualquer sub-ecrã
+  // aberto dentro do separador principal.
+  setHomeScreen("home");
   setCurrentTab(tab);
 };
   const [triageOpen, setTriageOpen] = useState(false);
@@ -1005,8 +1008,10 @@ className="flex items-center justify-center w-24 h-24 relative"
   afternoonRating={afternoonRating}
   handlePetAvatar={handlePetAvatar}
 />
+
+{/* Botões do menu principal — só existem quando homeScreen === "home" */}
 {homeScreen === "home" && (
-  <div className="flex justify-center gap-10 py-4">
+  <div className="flex justify-center gap-6 py-4">
 
     <button
       onClick={() => setHomeScreen("inventory")}
@@ -1022,8 +1027,16 @@ className="flex items-center justify-center w-24 h-24 relative"
       <span className="text-5xl">🏠</span>
     </button>
 
+    <button
+      onClick={() => setHomeScreen("settings")}
+      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
+    >
+      <span className="text-5xl">⚙️</span>
+    </button>
+
   </div>
 )}
+
               {/* Crisis Screening SOS Button */}
               <button
                 onClick={() => setTriageOpen(true)}
@@ -1196,12 +1209,6 @@ className="flex items-center justify-center w-24 h-24 relative"
     onBack={() => setHomeScreen("home")}
   />
 )}
-<button
-  onClick={() => setHomeScreen("settings")}
-  className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
->
-  <span className="text-5xl">⚙️</span>
-</button>
 {currentTab === 0 && homeScreen === "settings" && (
   <motion.div
     key="settings-screen"
@@ -1448,6 +1455,7 @@ onBlockUser={handleBlockUser}
               key={tab.index}
 onClick={() => {
   window.dispatchEvent(new Event("stop-background-audio"));
+  setHomeScreen("home");
   setCurrentTab(tab.index);
 }}
               className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all relative cursor-pointer ${

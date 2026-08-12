@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "motion/react";
 
 const stones = [
   { left: "12%", bottom: "13%", scale: 0.55, rotate: -12 },
@@ -42,12 +41,14 @@ function Stone({
         transform: `scale(${scale}) rotate(${rotate}deg)`,
       }}
     >
-      <div className="absolute -bottom-1 left-1/2 h-2 w-12 -translate-x-1/2 rounded-full bg-black/20 blur-sm" />
-
-      <div className="relative h-8 w-12 overflow-hidden rounded-[55%_45%_48%_52%] bg-gradient-to-br from-stone-400 via-stone-500 to-stone-800 shadow-md">
-        <div className="absolute left-2 top-1 h-2 w-5 rounded-full bg-white/20 blur-[1px]" />
-        <div className="absolute bottom-1 right-1 h-2 w-4 rounded-full bg-black/20 blur-[1px]" />
-      </div>
+      <div
+        className="
+          h-7
+          w-11
+          rounded-[55%_45%_48%_52%]
+          bg-stone-500
+        "
+      />
     </div>
   );
 }
@@ -62,38 +63,27 @@ function GrassCluster({
   scale: number;
 }) {
   return (
-    <motion.div
+    <div
       className="absolute pointer-events-none origin-bottom z-[25]"
       style={{
         left,
         bottom,
         transform: `scale(${scale})`,
       }}
-      animate={{
-        rotate: [-1.5, 1.5, -1.5],
-      }}
-      transition={{
-        duration: 4.5,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
     >
-      <div className="relative h-12 w-10">
-        <span className="absolute bottom-0 left-4 h-12 w-[3px] origin-bottom rotate-[-20deg] rounded-full bg-emerald-950/45" />
-        <span className="absolute bottom-0 left-5 h-11 w-[3px] rounded-full bg-emerald-900/50" />
-        <span className="absolute bottom-0 left-6 h-10 w-[3px] origin-bottom rotate-[20deg] rounded-full bg-emerald-950/40" />
-        <span className="absolute bottom-0 left-2 h-7 w-[2px] origin-bottom rotate-[-38deg] rounded-full bg-green-950/30" />
-        <span className="absolute bottom-0 left-8 h-7 w-[2px] origin-bottom rotate-[38deg] rounded-full bg-green-950/30" />
+      <div className="relative h-10 w-9">
+        <span className="absolute bottom-0 left-4 h-10 w-[3px] rotate-[-20deg] rounded-full bg-emerald-950/50" />
+        <span className="absolute bottom-0 left-5 h-9 w-[3px] rounded-full bg-emerald-900/55" />
+        <span className="absolute bottom-0 left-6 h-8 w-[3px] rotate-[20deg] rounded-full bg-emerald-950/45" />
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export default function PremiumGround() {
   return (
     <>
-      {/* Base do terreno */}
-
+      {/* Terreno base */}
       <div
         className="
           absolute
@@ -101,69 +91,43 @@ export default function PremiumGround() {
           bottom-0
           h-[58%]
           bg-gradient-to-b
-          from-emerald-600/55
-          via-emerald-700/70
-          to-emerald-950/85
+          from-emerald-600/60
+          via-emerald-700/75
+          to-emerald-950/90
           pointer-events-none
           z-[2]
         "
       />
 
-      {/* Segundo plano de terreno */}
-
+      {/* Variação simples do terreno */}
       <div
         className="
           absolute
-          left-[-8%]
-          right-[-8%]
-          bottom-[24%]
-          h-[30%]
-          rounded-[50%]
-          bg-gradient-to-b
-          from-emerald-500/25
-          to-emerald-950/25
-          blur-2xl
+          inset-x-0
+          bottom-[22%]
+          h-[25%]
+          bg-emerald-500/15
           pointer-events-none
           z-[3]
         "
       />
 
-      {/* Grande zona de luz no centro */}
-
-      <div
-        className="
-          absolute
-          left-[12%]
-          right-[12%]
-          bottom-[4%]
-          h-[48%]
-          rounded-[50%]
-          bg-emerald-300/10
-          blur-3xl
-          pointer-events-none
-          z-[4]
-        "
-      />
-
-      {/* Zona de sombra periférica */}
-
+      {/* Sombra inferior */}
       <div
         className="
           absolute
           inset-x-0
           bottom-0
-          h-[42%]
+          h-[35%]
           bg-gradient-to-t
-          from-black/20
-          via-transparent
+          from-black/15
           to-transparent
           pointer-events-none
           z-[5]
         "
       />
 
-      {/* Caminho orgânico */}
-
+      {/* Caminho */}
       <div
         className="
           absolute
@@ -174,78 +138,23 @@ export default function PremiumGround() {
           rotate-[7deg]
           rounded-[48%]
           bg-gradient-to-b
-          from-stone-300/20
-          via-stone-400/30
+          from-stone-300/25
+          via-amber-200/25
           to-stone-500/15
-          blur-[1px]
           pointer-events-none
           z-[7]
         "
       />
 
-      {/* Luz sobre o caminho */}
-
-      <div
-        className="
-          absolute
-          left-[42%]
-          bottom-[5%]
-          w-[18%]
-          h-[45%]
-          rotate-[7deg]
-          rounded-[50%]
-          bg-amber-100/10
-          blur-2xl
-          pointer-events-none
-          z-[8]
-        "
-      />
-
-      {/* Zonas de contacto com o chão */}
-
-      <div
-        className="
-          absolute
-          left-[15%]
-          right-[15%]
-          bottom-[10%]
-          h-10
-          rounded-[50%]
-          bg-black/10
-          blur-2xl
-          pointer-events-none
-          z-[10]
-        "
-      />
-
-      {/* Pedras naturais */}
-
+      {/* Pedras */}
       {stones.map((stone, index) => (
         <Stone key={index} {...stone} />
       ))}
 
-      {/* Pequenos grupos de vegetação */}
-
+      {/* Vegetação */}
       {grassClusters.map((cluster, index) => (
         <GrassCluster key={index} {...cluster} />
       ))}
-
-      {/* Brilho muito subtil do terreno */}
-
-      <div
-        className="
-          absolute
-          left-[20%]
-          right-[20%]
-          bottom-[18%]
-          h-24
-          rounded-[50%]
-          bg-white/5
-          blur-3xl
-          pointer-events-none
-          z-[12]
-        "
-      />
     </>
   );
 }

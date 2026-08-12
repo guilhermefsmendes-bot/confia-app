@@ -4,6 +4,7 @@ import { Avatar } from "./Avatar";
 import { getEquipped } from "../storage/homeInventory";
 import { getPositions, savePositions } from "../storage/homePositions";
 import { homeItems } from "../data/homeItems";
+import { getWeeklyTrophies } from "../storage/weeklyTrophies";
 const AmbientParticles = () => {
   return (
     <>
@@ -37,6 +38,13 @@ import { getWorld, careWorld } from "../storage/homeWorld";
 import { getGrowth, careItem } from "../storage/homeGrowth";
 import GrassDetails from "./world/GrassDetails";
 import GrassTexture from "./world/GrassTexture";
+import PremiumSky from "./world/PremiumSky";
+import PremiumVegetation from "./world/PremiumVegetation";
+import PremiumDepth from "./world/PremiumDepth";
+import PremiumGround from "./world/PremiumGround";
+import PremiumPath from "./world/PremiumPath";
+import PremiumWater from "./world/PremiumWater";
+import PremiumLighting from "./world/PremiumLighting";
 
 interface Props {
   avatar: any;
@@ -80,6 +88,12 @@ const isNight = hour >= 21 || hour < 7;
 
   const equippedItems = homeItems.filter(item =>
     equipped.includes(item.id)
+  );
+
+  const weeklyTrophies = getWeeklyTrophies();
+
+  const equippedTrophies = weeklyTrophies.filter(trophy =>
+    equipped.includes(trophy.id)
   );
 
 
@@ -147,24 +161,9 @@ const isNight = hour >= 21 || hour < 7;
 <FarmZones xp={avatar.xp} />
 <GrassDetails />
 
-{/* Céu dinâmico */}
-<div
-  className={`absolute top-0 left-0 right-0 h-56 z-0 transition-all duration-1000 ${
-    isNight
-      ? "bg-gradient-to-b from-indigo-900 to-slate-700"
-      : "bg-gradient-to-b from-sky-300 to-sky-100"
-  }`}
-/>
-
-{isNight ? (
-  <div className="absolute top-6 right-10 text-5xl animate-pulse">
-    🌙
-  </div>
-) : (
-  <div className="absolute top-6 right-10 text-5xl animate-pulse">
-    ☀️
-  </div>
-)}
+{/* Céu cinematográfico premium */}
+<PremiumSky isNight={isNight} />
+<PremiumLighting isNight={isNight} />
 <AtmosphereLayer />
 {/* Brilho suave do sol */}
 <div
@@ -181,170 +180,77 @@ const isNight = hour >= 21 || hour < 7;
     pointer-events-none
   "
 />
-{/* Linha de horizonte com relva alta */}
-<div
-  className="
-    absolute
-bottom-[360px]
-    left-0
-    right-0
-    h-24
-    z-10
-    flex
-    items-end
-    justify-around
-    overflow-hidden
-    pointer-events-none
-  "
->
-  <span className="text-5xl">🌿</span>
-  <span className="text-6xl">🌾</span>
-  <span className="text-5xl">🌿</span>
-  <span className="text-7xl">🌾</span>
-  <span className="text-5xl">🌿</span>
-  <span className="text-6xl">🌾</span>
-  <span className="text-5xl">🌿</span>
-</div>
+{/* Vegetação cinematográfica */}
+<PremiumDepth />
+<PremiumGround />
+<PremiumPath />
+<PremiumWater />
+<PremiumVegetation />
 
 {/* Relva evolutiva */}
-{/* Lago premium */}
-<div
-  className="
-    absolute
-    right-8
-    bottom-[120px]
-    w-52
-    h-28
-    rounded-[50%]
-    bg-gradient-to-b
-    from-sky-200
-    via-cyan-300
-    to-blue-500
-    shadow-xl
-    z-10
-    overflow-hidden
-  "
->
 
-  {/* Reflexo do céu */}
+{equippedTrophies.map(trophy => (
   <div
-    className="
-      absolute
-      top-3
-      left-8
-      w-32
-      h-8
-      rounded-full
-      bg-white/40
-      blur-md
-    "
-  />
+    key={trophy.id}
+    className={`absolute z-30 select-none text-6xl transition-transform duration-300 ${
+      editMode
+        ? "cursor-move scale-110"
+        : "hover:scale-110"
+    }`}
+    style={{
+      touchAction: "none",
+      ...(objectPositions[trophy.id] ?? {
+        left: "50%",
+        top: "35%"
+      })
+    }}
+    onPointerDown={(e) => {
+      e.preventDefault();
+      e.currentTarget.setPointerCapture(e.pointerId);
+      setDragging(trophy.id);
+    }}
+    onPointerMove={(e) => {
+      if (dragging !== trophy.id) return;
 
-  {/* Ondas da água com vento */}
-  <div
-    className="
-      absolute
-      bottom-5
-      left-0
-      w-32
-      h-2
-      rounded-full
-      bg-white/30
-      animate-[wave_4s_ease-in-out_infinite]
-    "
-  />
+      e.preventDefault();
 
-  <div
-    className="
-      absolute
-      bottom-10
-      left-12
-      w-24
-      h-1
-      rounded-full
-      bg-white/25
-      animate-[wave_5s_ease-in-out_infinite]
-    "
-  />
+      const rect =
+        e.currentTarget.parentElement!.getBoundingClientRect();
 
-  <div
-    className="
-      absolute
-      bottom-16
-      left-4
-      w-16
-      h-1
-      rounded-full
-      bg-white/20
-      animate-[wave_6s_ease-in-out_infinite]
-    "
-  />
-</div>
+      const left =
+        ((e.clientX - rect.left) / rect.width) * 100;
 
+      const top =
+        ((e.clientY - rect.top) / rect.height) * 100;
 
-{/* Pedras junto ao lago */}
-<div className="absolute right-52 bottom-[115px] text-3xl z-20">
-  🪨
-</div>
+      setObjectPositions(prev => ({
+        ...prev,
+        [trophy.id]: {
+          left: `${left}%`,
+          top: `${top}%`
+        }
+      }));
+    }}
+    onPointerUp={(e) => {
+      e.currentTarget.releasePointerCapture(e.pointerId);
 
-<div className="absolute right-14 bottom-[100px] text-2xl z-20">
-  🪨
-</div>
+      if (dragging === trophy.id) {
+        savePositions({
+          ...objectPositions,
+          [trophy.id]: objectPositions[trophy.id]
+        });
 
-<div className="absolute right-36 bottom-[95px] text-xl z-20">
-  🪨
-</div>
+        setDragging(null);
+      }
+    }}
+  >
+    <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-12 h-2 rounded-full bg-black/20 blur-sm" />
 
-
-{/* Canas à volta do lago */}
-<div
-  className="
-    absolute
-    right-56
-    bottom-[145px]
-    text-5xl
-    z-20
-  "
->
-  🌾
-</div>
-
-<div
-  className="
-    absolute
-    right-20
-    bottom-[145px]
-    text-4xl
-    z-20
-  "
->
-  🌾
-</div>
-{/* Árvore decorativa com vento */}
-<div
-  className="
-    absolute
-    left-8
-    bottom-[260px]
-    z-20
-    text-8xl
-    select-none
-  "
->
-  <div className="animate-[wiggle_4s_ease-in-out_infinite]">
-    🌳
+    <div className="relative">
+      {trophy.emoji}
+    </div>
   </div>
-</div>
-
-<div
-className={`absolute bottom-0 left-0 right-0 h-[380px] transition-all duration-1000 ${
-    world.health > 70
-      ? "bg-gradient-to-b from-emerald-300 via-green-500 to-green-800"
-      : world.health > 40
-      ? "bg-gradient-to-b from-lime-200 via-emerald-400 to-green-700"
-      : "bg-gradient-to-b from-amber-100 via-green-400 to-emerald-700"
-  }`}
-/>
+))}
 
 {equippedItems.map(item => {
 
@@ -441,6 +347,98 @@ className={`absolute bottom-0 left-0 right-0 h-[380px] transition-all duration-1
 
       <div className="relative">
         {item.emoji}
+      </div>
+
+    </div>
+  );
+
+})}
+
+
+{/* Weekly Trophies */}
+
+{equippedTrophies.map(trophy => {
+
+  return (
+    <div
+      key={trophy.id}
+      className={`absolute z-30 select-none text-5xl transition-transform duration-300 ${
+        editMode
+          ? "cursor-move scale-110"
+          : "hover:scale-110"
+      }`}
+      style={{
+        touchAction: "none",
+        ...(objectPositions[trophy.id] ?? {
+          left: "65%",
+          bottom: "15%"
+        })
+      }}
+
+      onPointerDown={(e) => {
+
+        e.preventDefault();
+
+        e.currentTarget.setPointerCapture(
+          e.pointerId
+        );
+
+        setDragging(trophy.id);
+
+      }}
+
+      onPointerMove={(e) => {
+
+        if (dragging !== trophy.id) return;
+
+        e.preventDefault();
+
+        const rect =
+          e.currentTarget.parentElement!.getBoundingClientRect();
+
+        const left =
+          ((e.clientX - rect.left) / rect.width) * 100;
+
+        const top =
+          ((e.clientY - rect.top) / rect.height) * 100;
+
+        setObjectPositions(prev => ({
+          ...prev,
+          [trophy.id]: {
+            left: `${left}%`,
+            top: `${top}%`
+          }
+        }));
+
+      }}
+
+      onPointerUp={(e) => {
+
+        e.currentTarget.releasePointerCapture(
+          e.pointerId
+        );
+
+        if (dragging === trophy.id) {
+
+          savePositions({
+            ...objectPositions,
+            [trophy.id]: objectPositions[trophy.id]
+          });
+
+          setDragging(null);
+
+        }
+
+      }}
+    >
+
+      <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-10 h-2 rounded-full bg-black/20 blur-sm" />
+
+      <div
+        className="relative"
+        title={trophy.title}
+      >
+        {trophy.emoji}
       </div>
 
     </div>

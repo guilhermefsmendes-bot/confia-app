@@ -1,36 +1,62 @@
 import { motion } from "motion/react";
 
-export default function GrassDetails() {
-  const details = [
-    { left: "8%", top: "70%", emoji: "🌱" },
-    { left: "18%", top: "82%", emoji: "🌿" },
-    { left: "32%", top: "75%", emoji: "🌱" },
-    { left: "48%", top: "88%", emoji: "🍃" },
-    { left: "62%", top: "72%", emoji: "🌱" },
-    { left: "76%", top: "84%", emoji: "🌿" },
-    { left: "90%", top: "76%", emoji: "🌱" },
-  ];
+const tufts = [
+  { left: "5%", top: "69%", scale: 0.7, delay: 0 },
+  { left: "11%", top: "81%", scale: 1.0, delay: 0.4 },
+  { left: "19%", top: "73%", scale: 0.8, delay: 0.8 },
+  { left: "27%", top: "86%", scale: 1.15, delay: 0.2 },
+  { left: "35%", top: "76%", scale: 0.65, delay: 1 },
+  { left: "44%", top: "90%", scale: 1.0, delay: 0.5 },
+  { left: "52%", top: "72%", scale: 0.75, delay: 1.2 },
+  { left: "60%", top: "84%", scale: 1.1, delay: 0.7 },
+  { left: "69%", top: "75%", scale: 0.7, delay: 0.3 },
+  { left: "77%", top: "88%", scale: 1.0, delay: 1.1 },
+  { left: "86%", top: "72%", scale: 0.8, delay: 0.6 },
+  { left: "93%", top: "84%", scale: 0.95, delay: 0.9 },
+];
 
+function GrassTuft({
+  scale,
+}: {
+  scale: number;
+}) {
+  return (
+    <div
+      className="relative h-10 w-8 origin-bottom"
+      style={{ transform: `scale(${scale})` }}
+    >
+      <span className="absolute bottom-0 left-3 h-9 w-[2px] rounded-full bg-emerald-950/40 -rotate-[18deg]" />
+      <span className="absolute bottom-0 left-4 h-10 w-[2px] rounded-full bg-emerald-900/35" />
+      <span className="absolute bottom-0 left-5 h-8 w-[2px] rounded-full bg-emerald-950/30 rotate-[18deg]" />
+
+      <span className="absolute bottom-0 left-2 h-6 w-[2px] rounded-full bg-green-950/25 -rotate-[38deg]" />
+      <span className="absolute bottom-0 left-6 h-6 w-[2px] rounded-full bg-green-950/25 rotate-[38deg]" />
+    </div>
+  );
+}
+
+export default function GrassDetails() {
   return (
     <>
-      {details.map((item, index) => (
+      {tufts.map((item, index) => (
         <motion.div
           key={index}
-          className="absolute z-10 text-lg opacity-40 pointer-events-none"
+          className="absolute z-[12] pointer-events-none origin-bottom"
           style={{
             left: item.left,
             top: item.top,
           }}
           animate={{
-            rotate: [-3, 3, -3],
+            rotate: [-2, 2, -2],
           }}
           transition={{
-            duration: 3 + index,
+            duration: 4 + index * 0.25,
+            delay: item.delay,
             repeat: Infinity,
             ease: "easeInOut",
           }}
         >
-          {item.emoji}
+          <GrassTuft scale={item.scale} />
         </motion.div>
       ))}
     </>

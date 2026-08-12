@@ -735,5 +735,32 @@
   "deleteDataSuccess": "Your data has been deleted successfully.",
   "deleteDataError": "Could not delete your data. Please try again.",
   "communityDescription": "The Confia community was created for sharing and support between users.",
-  "deleteAccountDescription": "Deletes your posts, reactions, conversations and remaining data associated with your account."
+  "deleteAccountDescription": "Deletes your posts, reactions, conversations and remaining data associated with your account.",
+  "weeklyGoal": {
+    "title": "🏆 Weekly Goal",
+    "subtitle": "One goal to follow for 7 days.",
+    "placeholder": "Write your goal...",
+    "maxCharacters": "Maximum 20 characters",
+    "medalExplanation": "Your goal will be saved on the medal when you complete all 7 days.",
+    "start": "Start goal",
+    "days": "days",
+    "completeToday": "Complete today",
+    "recoverDay": "Recover missed day",
+    "todayCompleted": "Today's goal is complete.",
+    "completed": "Goal completed!",
+    "medalReady": "Your personalized medal is ready for the next phase.",
+    "day": "Day",
+    "tapDay": "Tap a day to record how it went.",
+    "easeQuestion": "Was it easy to achieve your goal?",
+    "dayNote": "Day note",
+    "dayNotePlaceholder": "E.g. June 15",
+    "saveDay": "Save day",
+    "ease1": "Very difficult",
+    "ease2": "Difficult",
+    "ease3": "Normal",
+    "ease4": "Easy",
+    "ease5": "Super easy"
+  },
+  "trophy": "Trophy",
+  "equip": "Equip"
 }

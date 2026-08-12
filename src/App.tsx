@@ -19,12 +19,13 @@ import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, arrayU
 import { db, auth, signInAnonymously } from "./firebase";
 import { initAnonymousAuth } from "./firebaseAuth";
 import HomeInventory from "./components/HomeInventory";
+import { createWeeklyTrophy } from "./storage/weeklyTrophies";
 import { deleteAllUserData } from "./storage/deleteUserData";
 import { initLanguage } from "./i18n/language";
 import Avatar from "./components/Avatar";
 import HomeWorld from "./components/HomeWorld";
 import HomeShop from "./components/HomeShop";
-import { AvatarState, Objective, DailyRating, SharePost } from './types';
+import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 import PatternsNew from './components/PatternsNew/PatternsNew';
 import HabitAssessment from './components/PatternsNew/HabitAssessment';
@@ -39,6 +40,7 @@ import { hasCompletedToday } from "./storage/dailyCheckInStorage";
 import { TriageModal } from './components/TriageModal';
 import { AbracoTimer } from './components/AbracoTimer';
 import { ObjectivosList } from './components/ObjectivosList';
+import { WeeklyGoalSection } from "./components/WeeklyGoalSection";
 import { ImpulsoSOS } from './components/ImpulsoSOS';
 import { ProgressoDashboard } from './components/ProgressoDashboard';
 import { FocoMente } from './components/FocoMente';
@@ -114,6 +116,35 @@ const [objectivesHistory, setObjectivesHistory] = useState<
   const saved = localStorage.getItem(STORAGE_KEYS.OBJECTIVES_HISTORY);
   return saved ? JSON.parse(saved) : [];
 });
+const [weeklyGoal, setWeeklyGoal] = useState<WeeklyGoal | null>(() => {
+  const saved = localStorage.getItem('confia_weekly_goal_v1');
+
+  if (!saved) return null;
+
+  try {
+    return JSON.parse(saved);
+  } catch {
+    return null;
+  }
+});
+
+useEffect(() => {
+  if (weeklyGoal) {
+    localStorage.setItem(
+      'confia_weekly_goal_v1',
+      JSON.stringify(weeklyGoal)
+    );
+  } else {
+    localStorage.removeItem('confia_weekly_goal_v1');
+  }
+}, [weeklyGoal]);
+
+
+
+
+
+
+
 const [objectives, setObjectives] = useState<Objective[]>(() => {
   const today = new Date().toISOString().split("T")[0];
 
@@ -275,6 +306,10 @@ return {
   yellowLikes: data.yellowLikes || 0,
   greenLikes: data.greenLikes || 0,
   redLikes: data.redLikes || 0,
+
+  redLikedBy: Array.isArray(data.redLikedBy)
+    ? data.redLikedBy
+    : [],
 
   userReaction
 };
@@ -512,6 +547,102 @@ const handleSaveRatings = () => {
     };
 
     setObjectives(prev => [newObj, ...prev]);
+  };
+
+  const getLocalDateString = (date = new Date()) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const getMondayOfCurrentWeek = () => {
+    const date = new Date();
+    const day = date.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+
+    date.setDate(date.getDate() + diff);
+
+    return getLocalDateString(date);
+  };
+
+  const handleCreateWeeklyGoal = (title: string) => {
+    const cleanTitle = title.trim().slice(0, 20);
+
+    if (!cleanTitle) return;
+
+    setWeeklyGoal({
+      id: `weekly-${Date.now()}`,
+      title: cleanTitle,
+      weekStart: getMondayOfCurrentWeek(),
+      completedDays: [],
+      medalUnlocked: false,
+      dailyCredits: {}
+    });
+  };
+
+  const handleCompleteWeeklyDay = (
+    targetDate: string,
+    ease: number,
+    note: string,
+    recovery: boolean
+  ) => {
+    if (!weeklyGoal || weeklyGoal.medalUnlocked) return;
+
+    const today = getLocalDateString();
+    const alreadyCompleted = weeklyGoal.completedDays.includes(targetDate);
+
+    setWeeklyGoal(prev => {
+      if (!prev) return prev;
+
+      const credits = prev.dailyCredits ?? {};
+      const todayCredits = credits[today] ?? 0;
+
+      // Alterar uma avaliação já existente não consome novo crédito.
+      if (!alreadyCompleted && todayCredits >= 2) {
+        return prev;
+      }
+
+      const completedDays = alreadyCompleted
+        ? prev.completedDays
+        : [...prev.completedDays, targetDate];
+
+      const nextCredits = alreadyCompleted
+        ? credits
+        : {
+            ...credits,
+            [today]: todayCredits + 1
+          };
+
+      const dailyRatings = {
+        ...(prev.dailyRatings ?? {}),
+        [targetDate]: {
+          ease,
+          note
+        }
+      };
+
+      const medalUnlocked = completedDays.length >= 7;
+
+      if (
+        medalUnlocked &&
+        !prev.medalUnlocked
+      ) {
+        createWeeklyTrophy(
+          prev.id,
+          prev.title
+        );
+      }
+
+      return {
+        ...prev,
+        completedDays,
+        dailyCredits: nextCredits,
+        dailyRatings,
+        medalUnlocked
+      };
+    });
   };
 
   const handleDeleteAccountData = async () => {
@@ -1183,6 +1314,12 @@ className="flex items-center justify-center w-24 h-24 relative"
                   onToggleComplete={handleToggleObjective}
                   onAddCustomObjective={handleAddCustomObjective}
                   onDeleteObjective={handleDeleteObjective}
+                />
+
+                <WeeklyGoalSection
+                  weeklyGoal={weeklyGoal}
+                  onCreateGoal={handleCreateWeeklyGoal}
+                  onCompleteDay={handleCompleteWeeklyDay}
                 />
               </div>
             </motion.div>

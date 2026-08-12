@@ -633,5 +633,32 @@
   "deleteDataSuccess": "Vos données ont été supprimées avec succès.",
   "deleteDataError": "Impossible de supprimer vos données. Réessayez.",
   "communityDescription": "La communauté Confia a été créée pour le partage et le soutien entre utilisateurs.",
-  "deleteAccountDescription": "Supprime vos publications, réactions, conversations et autres données associées à votre compte."
+  "deleteAccountDescription": "Supprime vos publications, réactions, conversations et autres données associées à votre compte.",
+  "weeklyGoal": {
+    "title": "🏆 Objectif de la Semaine",
+    "subtitle": "Un objectif à suivre pendant 7 jours.",
+    "placeholder": "Écris ton objectif...",
+    "maxCharacters": "Maximum 20 caractères",
+    "medalExplanation": "Ton objectif sera enregistré sur la médaille lorsque tu auras terminé les 7 jours.",
+    "start": "Commencer l'objectif",
+    "days": "jours",
+    "completeToday": "Terminer aujourd'hui",
+    "recoverDay": "Récupérer un jour perdu",
+    "todayCompleted": "L'objectif d'aujourd'hui est terminé.",
+    "completed": "Objectif terminé !",
+    "medalReady": "Ta médaille personnalisée est prête pour la prochaine phase.",
+    "day": "Jour",
+    "tapDay": "Appuie sur un jour pour noter comment cela s'est passé.",
+    "easeQuestion": "Était-il facile d'atteindre ton objectif ?",
+    "dayNote": "Note du jour",
+    "dayNotePlaceholder": "Ex. : 15 juin",
+    "saveDay": "Enregistrer le jour",
+    "ease1": "Très difficile",
+    "ease2": "Difficile",
+    "ease3": "Normal",
+    "ease4": "Facile",
+    "ease5": "Super facile"
+  },
+  "trophy": "Trophée",
+  "equip": "Équiper"
 }

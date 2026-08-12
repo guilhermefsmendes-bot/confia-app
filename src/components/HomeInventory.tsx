@@ -8,29 +8,26 @@ import {
   toggleEquip,
 } from "../storage/homeInventory";
 
+import { getWeeklyTrophies } from "../storage/weeklyTrophies";
 
 interface HomeInventoryProps {
   onBack: () => void;
 }
 
-
 const HomeInventory: React.FC<HomeInventoryProps> = ({ onBack }) => {
-
   const [, setRefresh] = useState(0);
 
   const inventory = getInventory();
   const equipped = getEquipped();
 
-
   const items = homeItems.filter(item =>
     inventory.includes(item.id)
   );
 
+  const weeklyTrophies = getWeeklyTrophies();
 
   return (
-
     <div className="space-y-6">
-
 
       <button
         onClick={onBack}
@@ -39,12 +36,11 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({ onBack }) => {
         ←
       </button>
 
-<div className="text-5xl text-center">
-  🎒
-</div>
- 
+      <div className="text-5xl text-center">
+        🎒
+      </div>
 
-      {items.length === 0 ? (
+      {items.length === 0 && weeklyTrophies.length === 0 ? (
 
         <div className="bg-white rounded-3xl p-6 shadow-md text-center">
 
@@ -58,78 +54,127 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({ onBack }) => {
 
         </div>
 
-
       ) : (
 
+        <>
 
-        <div className="grid grid-cols-3 gap-4">
+          {items.length > 0 && (
+            <div className="grid grid-cols-3 gap-4">
 
+              {items.map(item => {
 
-          {items.map(item => {
+                const isEquipped =
+                  equipped.includes(item.id);
 
+                return (
 
-            const isEquipped =
-              equipped.includes(item.id);
+                  <div
+                    key={item.id}
+                    className="bg-white rounded-2xl shadow p-4 flex flex-col items-center gap-3"
+                  >
 
+                    <div className="text-6xl">
+                      {item.emoji}
+                    </div>
 
+                    <button
+                      onClick={() => {
+                        toggleEquip(item.id);
+                        setRefresh(v => v + 1);
+                      }}
+                      className={`w-full rounded-xl py-2 font-bold ${
+                        isEquipped
+                          ? "bg-green-500 text-white"
+                          : "bg-slate-200"
+                      }`}
+                    >
+                      {isEquipped ? "✔" : "Equipar"}
+                    </button>
 
-            return (
+                  </div>
 
-              <div
-                key={item.id}
-                className="bg-white rounded-2xl shadow p-4 flex flex-col items-center gap-3"
-              >
+                );
+              })}
 
+            </div>
+          )}
 
-                <div className="text-6xl">
-                  {item.emoji}
+          {weeklyTrophies.length > 0 && (
+
+            <div className="space-y-4">
+
+              <div className="text-center">
+                <div className="text-4xl">
+                  🏆
                 </div>
 
+                <p className="mt-1 font-extrabold text-[#4E3B36]">
+                  Troféus
+                </p>
+              </div>
 
+              <div className="grid grid-cols-2 gap-4">
 
-                <button
-                  onClick={() => {
+                {weeklyTrophies.map(trophy => {
 
-                    toggleEquip(item.id);
+                  const isEquipped =
+                    equipped.includes(trophy.id);
 
-                    setRefresh(v => v + 1);
+                  return (
 
-                  }}
+                    <div
+                      key={trophy.id}
+                      className="rounded-2xl bg-white p-4 shadow flex flex-col items-center gap-3"
+                    >
 
-                  className={`w-full rounded-xl py-2 font-bold ${
-                    isEquipped
-                      ? "bg-green-500 text-white"
-                      : "bg-slate-200"
-                  }`}
-                >
+                      <div className="text-6xl">
+                        {trophy.emoji}
+                      </div>
 
-                  {isEquipped
-                    ? "✔"
-                    : "Equipar"
-                  }
+                      <div className="w-full text-center">
 
-                </button>
+                        <p className="text-sm font-extrabold text-[#4E3B36] break-words">
+                          {trophy.title}
+                        </p>
 
+                        <p className="mt-1 text-xs text-slate-400">
+                          Objetivo concluído
+                        </p>
+
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          toggleEquip(trophy.id);
+                          setRefresh(v => v + 1);
+                        }}
+                        className={`w-full rounded-xl py-2 font-bold ${
+                          isEquipped
+                            ? "bg-green-500 text-white"
+                            : "bg-slate-200"
+                        }`}
+                      >
+                        {isEquipped ? "✔" : "Equipar"}
+                      </button>
+
+                    </div>
+
+                  );
+
+                })}
 
               </div>
 
-            );
+            </div>
 
+          )}
 
-          })}
-
-
-        </div>
-
+        </>
 
       )}
 
-
     </div>
-
   );
-
 };
-
 
 export default HomeInventory;

@@ -16,6 +16,22 @@ difficulty?: 'easy' | 'medium' | 'hard';
   completed: boolean;
   isCustom?: boolean;
 }
+export interface WeeklyGoal {
+  id: string;
+  title: string;
+  weekStart: string;
+  completedDays: string[];
+  medalUnlocked: boolean;
+  dailyCredits?: Record<string, number>;
+  dailyRatings?: Record<
+    string,
+    {
+      ease: number;
+      note: string;
+    }
+  >;
+}
+
 
 export interface DailyRating {
   date: string; // YYYY-MM-DD

@@ -635,5 +635,32 @@
   "deleteDataSuccess": "Tus datos se han eliminado correctamente.",
   "deleteDataError": "No se han podido eliminar tus datos. Inténtalo de nuevo.",
   "communityDescription": "La comunidad Confia fue creada para compartir y apoyar a los usuarios.",
-  "deleteAccountDescription": "Elimina tus publicaciones, reacciones, conversaciones y otros datos asociados a tu cuenta."
+  "deleteAccountDescription": "Elimina tus publicaciones, reacciones, conversaciones y otros datos asociados a tu cuenta.",
+  "weeklyGoal": {
+    "title": "🏆 Objetivo de la Semana",
+    "subtitle": "Un objetivo para seguir durante 7 días.",
+    "placeholder": "Escribe tu objetivo...",
+    "maxCharacters": "Máximo 20 caracteres",
+    "medalExplanation": "Tu objetivo se guardará en la medalla cuando completes los 7 días.",
+    "start": "Empezar objetivo",
+    "days": "días",
+    "completeToday": "Completar hoy",
+    "recoverDay": "Recuperar día perdido",
+    "todayCompleted": "El objetivo de hoy está completado.",
+    "completed": "¡Objetivo completado!",
+    "medalReady": "Tu medalla personalizada está preparada para la próxima fase.",
+    "day": "Día",
+    "tapDay": "Toca un día para registrar cómo fue.",
+    "easeQuestion": "¿Fue fácil cumplir el objetivo?",
+    "dayNote": "Nota del día",
+    "dayNotePlaceholder": "Ej.: 15 de junio",
+    "saveDay": "Guardar día",
+    "ease1": "Muy difícil",
+    "ease2": "Difícil",
+    "ease3": "Normal",
+    "ease4": "Tranquilo",
+    "ease5": "Súper tranquilo"
+  },
+  "trophy": "Trofeo",
+  "equip": "Equipar"
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 const patches = [
   { left: "8%", top: "72%", w: 220, h: 70, r: -6 },
@@ -18,7 +18,7 @@ const grass = [
   { left: "46%", top: "92%", rotate: 5 },
 ];
 
-export default function GrassTexture() {
+function GrassTexture() {
   return (
     <>
       {/* Variações simples do terreno */}
@@ -69,3 +69,5 @@ export default function GrassTexture() {
     </>
   );
 }
+
+export default memo(GrassTexture);

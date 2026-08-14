@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 const PremiumTree = ({
   left,
@@ -76,7 +76,7 @@ const GrassBlade = ({
   </div>
 );
 
-export default function PremiumVegetation() {
+function PremiumVegetation() {
   return (
     <>
       {/* Árvores */}
@@ -104,3 +104,5 @@ export default function PremiumVegetation() {
     </>
   );
 }
+
+export default memo(PremiumVegetation);

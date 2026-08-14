@@ -12,7 +12,7 @@ interface AvatarProps {
   moodRating?: number;
   memoryMessage?: string;
 }
-export const Avatar: React.FC<AvatarProps> = ({
+const AvatarComponent: React.FC<AvatarProps> = ({
   avatar,
   onPet,
   compact,
@@ -743,4 +743,5 @@ return (
   );
 };
 
+export const Avatar = React.memo(AvatarComponent);
 export default Avatar;

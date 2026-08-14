@@ -1,4 +1,5 @@
-export default function Butterflies() {
+import { memo } from "react";
+function Butterflies() {
   return (
     <>
       <div
@@ -23,3 +24,5 @@ export default function Butterflies() {
     </>
   );
 }
+
+export default memo(Butterflies);

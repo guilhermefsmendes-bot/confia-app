@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 const shorelineRocks = [
   { left: "8%", bottom: "14%", scale: 0.65, rotate: -12 },
@@ -14,7 +14,7 @@ const reeds = [
   { left: "94%", bottom: "30%", scale: 0.55 },
 ];
 
-export default function PremiumWater() {
+function PremiumWater() {
   return (
     <div
       className="
@@ -145,3 +145,5 @@ export default function PremiumWater() {
     </div>
   );
 }
+
+export default memo(PremiumWater);

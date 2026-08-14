@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 const stones = [
   { left: "12%", bottom: "13%", scale: 0.55, rotate: -12 },
@@ -80,7 +80,7 @@ function GrassCluster({
   );
 }
 
-export default function PremiumGround() {
+function PremiumGround() {
   return (
     <>
       {/* Terreno base */}
@@ -158,3 +158,5 @@ export default function PremiumGround() {
     </>
   );
 }
+
+export default memo(PremiumGround);

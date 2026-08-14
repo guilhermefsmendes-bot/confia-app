@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
   onOpenEvolution: () => void;
 }
 
-export default function PatternsNew({
+function PatternsNew({
   onBack,
   onOpenAssessment,
   onOpenDaily,
@@ -191,3 +191,5 @@ export default function PatternsNew({
     </div>
   );
 }
+
+export default memo(PatternsNew);

@@ -1,10 +1,10 @@
-import React from "react";
+import React, { memo } from "react";
 
 interface PremiumLightingProps {
   isNight: boolean;
 }
 
-export default function PremiumLighting({
+function PremiumLighting({
   isNight,
 }: PremiumLightingProps) {
   return (
@@ -31,3 +31,5 @@ export default function PremiumLighting({
     </div>
   );
 }
+
+export default memo(PremiumLighting);

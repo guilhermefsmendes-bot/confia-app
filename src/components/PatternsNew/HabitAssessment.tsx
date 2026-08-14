@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -24,7 +24,7 @@ const categories = [
   { id: "other", icon: "✨" },
 ];
 
-export default function HabitAssessment({ onBack }: Props) {
+function HabitAssessment({ onBack }: Props) {
   const { t } = useTranslation();
 
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -299,3 +299,5 @@ export default function HabitAssessment({ onBack }: Props) {
     </div>
   );
 }
+
+export default memo(HabitAssessment);

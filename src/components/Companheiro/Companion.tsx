@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Heart, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -11,7 +11,7 @@ interface CompanionProps {
   avatarXp?: number;
 }
 
-export default function Companion({
+function Companion({
   avatarLevel = 1,
   avatarXp = 0,
 }: CompanionProps) {
@@ -173,3 +173,5 @@ export default function Companion({
     </motion.div>
   );
 }
+
+export default memo(Companion);

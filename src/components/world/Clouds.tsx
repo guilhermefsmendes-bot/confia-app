@@ -1,4 +1,5 @@
-export default function Clouds() {
+import { memo } from "react";
+function Clouds() {
   return (
     <>
       <div className="absolute top-6 left-[8%] text-7xl opacity-60 pointer-events-none">
@@ -11,3 +12,5 @@ export default function Clouds() {
     </>
   );
 }
+
+export default memo(Clouds);

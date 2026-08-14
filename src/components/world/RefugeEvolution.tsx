@@ -1,11 +1,11 @@
-import React from "react";
+import React, { memo } from "react";
 import { getRefugeLevel } from "../../data/refugeProgress";
 
 interface Props {
   xp: number;
 }
 
-export default function RefugeEvolution({ xp }: Props) {
+function RefugeEvolution({ xp }: Props) {
 
   const level = getRefugeLevel(xp).level;
 
@@ -64,3 +64,5 @@ export default function RefugeEvolution({ xp }: Props) {
     </>
   );
 }
+
+export default memo(RefugeEvolution);

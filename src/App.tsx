@@ -1394,7 +1394,6 @@ className="flex items-center justify-center w-24 h-24 relative"
               key="goals-tab"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
             >
               <div className="bg-white border border-slate-100/80 rounded-[32px] p-6 shadow-sm">
                 <ObjectivosList

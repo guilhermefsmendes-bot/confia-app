@@ -1,21 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "./Avatar";
 import { getEquipped } from "../storage/homeInventory";
 import { getPositions, savePositions } from "../storage/homePositions";
 import { homeItems } from "../data/homeItems";
 import { getWeeklyTrophies } from "../storage/weeklyTrophies";
-const AmbientParticles = () => {
+const AmbientParticles = React.memo(() => {
+  const particles = useMemo(() => {
+    return [...Array(15)].map((_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 60}%`,
+      animationDelay: `${i * 0.3}s`,
+    }));
+  }, []);
+
   return (
     <>
-      {[...Array(15)].map((_, i) => (
+      {particles.map((particle) => (
         <div
-          key={i}
+          key={particle.id}
           className="absolute text-white/70 animate-pulse pointer-events-none"
           style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 60}%`,
-            animationDelay: `${i * 0.3}s`,
+            left: particle.left,
+            top: particle.top,
+            animationDelay: particle.animationDelay,
           }}
         >
           ✨
@@ -23,7 +32,7 @@ const AmbientParticles = () => {
       ))}
     </>
   );
-};
+});
 import AtmosphereLayer from "./AtmosphereLayer";
 import Clouds from "./world/Clouds";
 import Butterflies from "./world/Butterflies";
@@ -535,4 +544,4 @@ const isNight = hour >= 21 || hour < 7;
 };
 
 
-export default HomeWorld;
+export default React.memo(HomeWorld);

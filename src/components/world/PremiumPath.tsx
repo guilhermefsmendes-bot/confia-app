@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 const stones = [
   { left: "18%", top: "76%", rotate: -12, scale: 0.7 },
@@ -9,7 +9,7 @@ const stones = [
   { left: "76%", top: "79%", rotate: 6, scale: 0.55 },
 ];
 
-export default function PremiumPath() {
+function PremiumPath() {
   return (
     <>
       {/* Caminho */}
@@ -75,3 +75,5 @@ export default function PremiumPath() {
     </>
   );
 }
+
+export default memo(PremiumPath);

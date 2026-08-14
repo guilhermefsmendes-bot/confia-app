@@ -1,10 +1,10 @@
-import React from "react";
+import React, { memo } from "react";
 
 interface PremiumSkyProps {
   isNight: boolean;
 }
 
-export default function PremiumSky({ isNight }: PremiumSkyProps) {
+function PremiumSky({ isNight }: PremiumSkyProps) {
   return (
     <div className="absolute inset-0 pointer-events-none">
 
@@ -42,3 +42,5 @@ export default function PremiumSky({ isNight }: PremiumSkyProps) {
     </div>
   );
 }
+
+export default memo(PremiumSky);

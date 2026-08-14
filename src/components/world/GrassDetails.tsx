@@ -1,3 +1,4 @@
+import { memo } from "react";
 const tufts = [
   { left: "5%", top: "69%", scale: 0.7 },
   { left: "11%", top: "81%", scale: 1.0 },
@@ -33,7 +34,7 @@ function GrassTuft({
   );
 }
 
-export default function GrassDetails() {
+function GrassDetails() {
   return (
     <>
       {tufts.map((item, index) => (
@@ -51,3 +52,5 @@ export default function GrassDetails() {
     </>
   );
 }
+
+export default memo(GrassDetails);

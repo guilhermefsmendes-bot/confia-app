@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -27,7 +27,7 @@ const icons: Record<string, string> = {
   other: "✨",
 };
 
-export default function HabitDailyCheck({ onBack }: Props) {
+function HabitDailyCheck({ onBack }: Props) {
   const { t } = useTranslation();
 
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -265,3 +265,5 @@ export default function HabitDailyCheck({ onBack }: Props) {
     </div>
   );
 }
+
+export default memo(HabitDailyCheck);

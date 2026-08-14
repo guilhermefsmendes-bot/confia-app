@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -130,7 +130,7 @@ function MiniLineChart({
   );
 }
 
-export default function HabitEvolution({ onBack }: Props) {
+function HabitEvolution({ onBack }: Props) {
   const { t } = useTranslation();
 
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -549,3 +549,5 @@ export default function HabitEvolution({ onBack }: Props) {
     </div>
   );
 }
+
+export default memo(HabitEvolution);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 const distantTrees = [
   { left: "4%", scale: 0.45 },
@@ -72,7 +72,7 @@ function ForegroundGrass({
   );
 }
 
-export default function PremiumDepth() {
+function PremiumDepth() {
   return (
     <>
       {distantTrees.map((tree, index) => (
@@ -98,3 +98,5 @@ export default function PremiumDepth() {
     </>
   );
 }
+
+export default memo(PremiumDepth);

@@ -964,14 +964,9 @@ className="flex items-center justify-center w-24 h-24 relative"
 
       {/* Main Content Stage */}
       <main className="flex-1 pb-24 px-4 max-w-lg mx-auto w-full pt-4">
-<AnimatePresence mode="wait">
 {currentTab === 0 && homeScreen === "home" && (
-          <motion.div
-
+          <div
               key="main-menu"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
               {/* Interactive Amigo Panel */}
@@ -1218,15 +1213,13 @@ className="flex items-center justify-center w-24 h-24 relative"
     onBack={() => setPatternsPage("menu")}
   />
 )}
-            </motion.div>
+            </div>
           )}
 
 
 {currentTab === 0 && homeScreen === "companion" && (
-  <motion.div
+  <div
     key="companion-screen"
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
     className="flex-1 px-4 pt-4"
   >
     <div className="max-w-md mx-auto">
@@ -1244,7 +1237,7 @@ className="flex items-center justify-center w-24 h-24 relative"
       />
 
     </div>
-  </motion.div>
+  </div>
 )}
 
 {currentTab === 0 && homeScreen === "shop" && (
@@ -1260,11 +1253,8 @@ className="flex items-center justify-center w-24 h-24 relative"
   />
 )}
 {currentTab === 0 && homeScreen === "settings" && (
-  <motion.div
+  <div
     key="settings-screen"
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -10 }}
     className="space-y-5"
   >
     <div className="flex items-center gap-3">
@@ -1314,7 +1304,7 @@ className="flex items-center justify-center w-24 h-24 relative"
         🗑️ {t("deleteMyData")}
       </button>
     </div>
-  </motion.div>
+  </div>
 )}
 
 
@@ -1452,7 +1442,7 @@ onBlockUser={handleBlockUser}
 />
             </motion.div>
           )}
-        </AnimatePresence>
+        
       </main>
 
       {/* Triage / Screening Help Modal */}

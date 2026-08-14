@@ -789,5 +789,11 @@
     "ease5": "Super tranquilo"
   },
   "trophy": "Troféu",
-  "equip": "Equipar"
+  "equip": "Equipar",
+  "communityGuidelines": "Regras da comunidade",
+  "communityGuidelinesDescription": "A comunidade Confia foi criada para partilha e apoio entre utilizadores. Respeita os outros membros e evita publicar conteúdo ofensivo, ameaçador ou informações pessoais.",
+  "communityGuidelinesShort": "Conhece as regras para uma comunidade segura e respeitosa.",
+  "viewCommunityGuidelines": "Ver regras da comunidade",
+  "deleteMyDataDescription": "Elimina as tuas publicações, reações, conversas e restantes dados associados à tua conta.",
+  "close": "Fechar"
 }

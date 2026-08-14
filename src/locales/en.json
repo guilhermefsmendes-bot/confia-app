@@ -762,5 +762,11 @@
     "ease5": "Super easy"
   },
   "trophy": "Trophy",
-  "equip": "Equip"
+  "equip": "Equip",
+  "communityGuidelines": "Community Guidelines",
+  "communityGuidelinesDescription": "The Confia community was created for sharing and support between users. Respect other members and avoid posting offensive, threatening, or personal information.",
+  "communityGuidelinesShort": "Learn the rules for a safe and respectful community.",
+  "viewCommunityGuidelines": "View community guidelines",
+  "deleteMyDataDescription": "Delete your posts, reactions, conversations, and other data associated with your account.",
+  "close": "Close"
 }

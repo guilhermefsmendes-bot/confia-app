@@ -660,5 +660,11 @@
     "ease5": "Super facile"
   },
   "trophy": "Trophée",
-  "equip": "Équiper"
+  "equip": "Équiper",
+  "communityGuidelines": "Règles de la communauté",
+  "communityGuidelinesDescription": "La communauté Confia a été créée pour permettre le partage et le soutien entre utilisateurs. Respecte les autres membres et évite de publier du contenu offensant, menaçant ou des informations personnelles.",
+  "communityGuidelinesShort": "Découvre les règles pour une communauté sûre et respectueuse.",
+  "viewCommunityGuidelines": "Voir les règles de la communauté",
+  "deleteMyDataDescription": "Supprime tes publications, réactions, conversations et autres données associées à ton compte.",
+  "close": "Fermer"
 }

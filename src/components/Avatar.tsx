@@ -6,12 +6,21 @@ import { AvatarState } from '../types';
 interface AvatarProps {
   avatar: AvatarState;
   onPet: () => void;
+  compact?: boolean;
   celebrating?: boolean;
   levelUpTrigger?: boolean;
   moodRating?: number;
   memoryMessage?: string;
 }
-export const Avatar: React.FC<AvatarProps> = ({ avatar, onPet, celebrating, levelUpTrigger, moodRating, memoryMessage }) => {
+export const Avatar: React.FC<AvatarProps> = ({
+  avatar,
+  onPet,
+  compact,
+  celebrating,
+  levelUpTrigger,
+  moodRating,
+  memoryMessage
+}) => {
 
 
 const { t, i18n } = useTranslation();

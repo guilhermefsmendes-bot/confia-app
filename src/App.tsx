@@ -22,7 +22,6 @@ import HomeInventory from "./components/HomeInventory";
 import { createWeeklyTrophy } from "./storage/weeklyTrophies";
 import { deleteAllUserData } from "./storage/deleteUserData";
 import { initLanguage } from "./i18n/language";
-import Avatar from "./components/Avatar";
 import HomeWorld from "./components/HomeWorld";
 import HomeShop from "./components/HomeShop";
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
@@ -35,6 +34,7 @@ import { PartilhaFeed } from "./components/PartilhaFeed";
 
 // Component imports
 import DailyCheckIn from "./components/DailyCheckIn";
+import Companion from "./components/Companheiro/Companion";
 import { hasCompletedToday } from "./storage/dailyCheckInStorage";
 
 import { TriageModal } from './components/TriageModal';
@@ -46,6 +46,7 @@ import { ProgressoDashboard } from './components/ProgressoDashboard';
 import { FocoMente } from './components/FocoMente';
 import { StopMode } from './components/StopMode';
 import { CommunityChat } from './components/CommunityChat';
+import { Avatar } from "./components/Avatar";
 const STORAGE_KEYS = {
   AVATAR: 'confia_avatar_v2',
   OBJECTIVES: 'confia_objectives_v2',
@@ -1034,6 +1035,29 @@ className="flex items-center justify-center w-24 h-24 relative"
       <span className="text-5xl">⚙️</span>
     </button>
 
+    <button
+      onClick={() => setHomeScreen("companion")}
+      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg overflow-hidden"
+    >
+      <div
+        className="w-16 h-16 flex items-center justify-center overflow-hidden pointer-events-none"
+      >
+        <div
+          className="w-48 h-48 flex items-center justify-center"
+          style={{
+            transform: "scale(0.34)",
+            transformOrigin: "center center"
+          }}
+        >
+          <Avatar
+            avatar={avatar}
+            onPet={() => {}}
+            compact
+          />
+        </div>
+      </div>
+    </button>
+
   </div>
 )}
 
@@ -1197,6 +1221,32 @@ className="flex items-center justify-center w-24 h-24 relative"
             </motion.div>
           )}
 
+
+{currentTab === 0 && homeScreen === "companion" && (
+  <motion.div
+    key="companion-screen"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="flex-1 px-4 pt-4"
+  >
+    <div className="max-w-md mx-auto">
+      
+      <button
+        onClick={() => setHomeScreen("home")}
+        className="mb-4 text-xs font-bold text-[#C97B5E]"
+      >
+        ← {t("back")}
+      </button>
+
+      <Companion
+        avatarLevel={avatar.level}
+        avatarXp={avatar.xp}
+      />
+
+    </div>
+  </motion.div>
+)}
+
 {currentTab === 0 && homeScreen === "shop" && (
 <HomeShop
   onBack={() => setHomeScreen("home")}
@@ -1226,25 +1276,9 @@ className="flex items-center justify-center w-24 h-24 relative"
       </button>
 
       <h2 className="text-xl font-black text-[#4E3B36]">
-        Definições
+        {t("settings")}
       </h2>
     </div>
-
-<div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm">
-  <h3 className="text-sm font-black text-[#4E3B36] mb-2">
-    {t("communityTerms")}
-  </h3>
-
-  <p className="text-xs text-slate-500 leading-relaxed">
-    A comunidade Confia foi criada para partilha e apoio entre utilizadores.
-    Respeita os outros membros e evita publicar conteúdo ofensivo,
-    ameaçador ou informações pessoais.
-    <br /><br />
-    Publicações inadequadas podem ser denunciadas e removidas.
-    Utilizadores podem ser bloqueados para manter um ambiente seguro.
-  </p>
-</div>
-
 
 <div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm mb-4">
 
@@ -1253,7 +1287,7 @@ className="flex items-center justify-center w-24 h-24 relative"
   </h3>
 
   <p className="text-xs text-slate-500 leading-relaxed mb-4">
-    Conhece as regras para uma comunidade segura e respeitosa.
+    {t("communityGuidelinesShort")}
   </p>
 
   <button
@@ -1270,15 +1304,14 @@ className="flex items-center justify-center w-24 h-24 relative"
       </h3>
 
       <p className="text-xs text-slate-500 leading-relaxed mb-4">
-        Elimina as tuas publicações, reações, conversas e restantes dados
-        associados à tua conta.
+        {t("deleteMyDataDescription")}
       </p>
 
       <button
         onClick={handleDeleteAccountData}
         className="w-full py-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 font-black text-xs uppercase tracking-wide hover:bg-red-100 transition"
       >
-        🗑️ Eliminar todos os meus dados
+        🗑️ {t("deleteMyData")}
       </button>
     </div>
   </motion.div>
@@ -1288,7 +1321,55 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 
 
-          {currentTab === 1 && (
+          
+
+{/* Community Guidelines Modal */}
+
+{showCommunityTerms && (
+  <div
+    className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-5"
+    onClick={() => setShowCommunityTerms(false)}
+  >
+
+    <div
+      className="w-full max-w-md bg-white rounded-[32px] shadow-2xl p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <div className="flex items-center justify-between mb-5">
+
+        <h2 className="text-xl font-black text-[#4E3B36]">
+          {t("communityGuidelines")}
+        </h2>
+
+        <button
+          onClick={() => setShowCommunityTerms(false)}
+          className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-slate-500"
+          aria-label={t("close")}
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div className="text-sm text-slate-600 leading-relaxed">
+        {t("communityGuidelinesDescription")}
+      </div>
+
+      <button
+        onClick={() => setShowCommunityTerms(false)}
+        className="w-full mt-6 py-3.5 rounded-2xl bg-[#FFF0E8] border border-[#E5A88B]/30 text-[#C97B5E] font-black text-xs uppercase tracking-wide"
+      >
+        {t("close")}
+      </button>
+
+    </div>
+
+  </div>
+)}
+
+
+{currentTab === 1 && (
             /* TAB 2: ABRAÇO (TIMER DE RESPIRAÇÃO) */
             <motion.div
               key="embrace-tab"

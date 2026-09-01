@@ -148,12 +148,25 @@ function PremiumGround() {
 
       {/* Pedras */}
       {stones.map((stone, index) => (
-        <Stone key={index} {...stone} />
+        <React.Fragment key={index}>
+          <Stone
+            left={stone.left}
+            bottom={stone.bottom}
+            scale={stone.scale}
+            rotate={stone.rotate}
+          />
+        </React.Fragment>
       ))}
 
       {/* Vegetação */}
       {grassClusters.map((cluster, index) => (
-        <GrassCluster key={index} {...cluster} />
+        <React.Fragment key={index}>
+          <GrassCluster
+            left={cluster.left}
+            bottom={cluster.bottom}
+            scale={cluster.scale}
+          />
+        </React.Fragment>
       ))}
     </>
   );

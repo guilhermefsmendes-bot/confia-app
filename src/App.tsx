@@ -23,6 +23,7 @@ import { createWeeklyTrophy } from "./storage/weeklyTrophies";
 import { deleteAllUserData } from "./storage/deleteUserData";
 import { initLanguage } from "./i18n/language";
 import HomeWorld from "./components/HomeWorld";
+import HomeProgressSummary from "./components/HomeProgressSummary";
 import HomeShop from "./components/HomeShop";
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
@@ -31,9 +32,15 @@ import HabitAssessment from './components/PatternsNew/HabitAssessment';
 import HabitDailyCheck from './components/PatternsNew/HabitDailyCheck';
 import HabitEvolution from './components/PatternsNew/HabitEvolution';
 import { PartilhaFeed } from "./components/PartilhaFeed";
+import {
+  analyzeReactiveState,
+} from "./data/reactive/reactiveEngine";
+import {
+  recordReactiveResponse,
+} from "./data/reactive/reactiveHistoryStorage";
 
 // Component imports
-import DailyCheckIn from "./components/DailyCheckIn";
+import DailyCheckIn from "./components/DailyCheckIn/DailyCheckIn";
 import Companion from "./components/Companheiro/Companion";
 import { hasCompletedToday } from "./storage/dailyCheckInStorage";
 
@@ -106,7 +113,7 @@ const [homeScreen, setHomeScreen] = useState<
       maxXp: 100,
       name: t("avatarName"),
 evolutionStage: t("avatarEvolutionStage"),
-      
+
       points: 15
     };
   });
@@ -243,6 +250,38 @@ const [showDailyCheckIn, setShowDailyCheckIn] = useState(
   const [afternoonRating, setAfternoonRating] = useState<number>(5);
   const [todayLogged, setTodayLogged] = useState(false);
   const [noteText, setNoteText] = useState('');
+
+  // Resposta imediata da Confia após um registo do utilizador
+  const [reactiveMessageKey, setReactiveMessageKey] =
+    useState<string | null>(null);
+
+  // Analisa o contexto existente quando a Home é aberta.
+  //
+  // Importante:
+  // - apenas lê o contexto existente;
+  // - não regista uma nova resposta no histórico;
+  // - não altera o reactiveEngine;
+  // - respostas provocadas explicitamente pelo utilizador
+  //   continuam a ser registadas em handleSaveRatings.
+  useEffect(() => {
+    if (currentTab !== 0 || homeScreen !== "home") return;
+
+    if (ratings.length === 0) {
+      setReactiveMessageKey(null);
+      return;
+    }
+
+    const reactiveResult = analyzeReactiveState({
+      source: "mood",
+    });
+
+    if (reactiveResult?.response?.translationKey) {
+      setReactiveMessageKey(
+        reactiveResult.response.translationKey
+      );
+    }
+  }, [currentTab, homeScreen, ratings]);
+
 const [selectedDate, setSelectedDate] = useState(
   new Date().toISOString().split('T')[0]
 );
@@ -275,11 +314,19 @@ localStorage.setItem(
   }, [posts]);
 
 useEffect(() => {
-  const postsQuery = collection(db, "posts");
+  let unsubscribe: (() => void) | undefined;
 
-  const unsubscribe = onSnapshot(
-    postsQuery,
-    (snapshot) => {
+  const startCommunityListener = async () => {
+    try {
+      if (!auth.currentUser) {
+        await signInAnonymously(auth);
+      }
+
+      const postsQuery = collection(db, "posts");
+
+      unsubscribe = onSnapshot(
+        postsQuery,
+        (snapshot) => {
       const firestorePosts: SharePost[] = snapshot.docs
 .map(doc => {
 const data = doc.data();
@@ -334,7 +381,16 @@ return dateB.toMillis() - dateA.toMillis();
     }
   );
 
-  return () => unsubscribe();
+    } catch (error) {
+      console.error("Erro ao iniciar comunidade:", error);
+    }
+  };
+
+  startCommunityListener();
+
+  return () => {
+    unsubscribe?.();
+  };
 }, []);
 
 // Check if selected date is already logged
@@ -472,8 +528,41 @@ const handleSaveRatings = () => {
     addXp(15);
   }
 
+  /**
+   * Persistir primeiro os novos dados.
+   *
+   * Isto permite que o motor reativo analise imediatamente
+   * o registo acabado de fazer, sem esperar pelo useEffect.
+   */
+  localStorage.setItem(
+    STORAGE_KEYS.RATINGS,
+    JSON.stringify(nextRatings)
+  );
+
   setRatings(nextRatings);
   setTodayLogged(true);
+
+  /**
+   * Analisar imediatamente o novo estado do utilizador.
+   */
+  const reactiveResult = analyzeReactiveState({
+    source: "mood",
+  });
+
+  setReactiveMessageKey(
+    reactiveResult.response.translationKey
+  );
+
+  /**
+   * Esta utilização corresponde a uma resposta realmente
+   * provocada por uma ação explícita do utilizador.
+   */
+  recordReactiveResponse({
+    responseId: reactiveResult.response.id,
+    situation: reactiveResult.situation,
+    intent: reactiveResult.intent,
+    timestamp: new Date().toISOString(),
+  });
 };
 
   // Toggle single objective completion
@@ -724,7 +813,7 @@ const handleReportPost = async (
     });
 
     alert("Obrigado. A denúncia foi enviada para análise.");
-    
+
   } catch (error) {
     console.error("Erro ao denunciar publicação:", error);
     alert("Não foi possível enviar a denúncia.");
@@ -896,7 +985,10 @@ return (
     <div className="min-h-screen bg-[#FAF5F0] flex flex-col antialiased text-[#4E3B36]">
 {showDailyCheckIn && (
   <DailyCheckIn
-    onComplete={() => setShowDailyCheckIn(false)}
+    onComplete={() => {
+      addXp(20);
+      setShowDailyCheckIn(false);
+    }}
   />
 )}
 
@@ -971,30 +1063,6 @@ className="flex items-center justify-center w-24 h-24 relative"
             >
               {/* Interactive Amigo Panel */}
               <div className="bg-white border border-[#E5A88B]/15 rounded-[32px] p-6 shadow-sm space-y-4">
-                {/* Logo da App */}
-                <div className="flex flex-col items-center justify-center pt-2 pb-1 text-center space-y-2 border-b border-slate-50 pb-4">
-<div className="flex items-center justify-center w-12 h-12">
-<img
-  src="/images/confia-icon.png"
-  alt="Confia"
-  className="w-12 h-12 rounded-2xl shadow-md"
-/>
-                  </div>
-                  <div className="space-y-0.5">
-                    <h2 className="text-base font-black tracking-tight text-[#4E3B36] font-display">
-                      Confia
-                    </h2>
-                    <p className="text-[9px] text-[#C97B5E] font-extrabold uppercase tracking-widest font-display">
-                     {t("tagline")}
-                    </p>
-                  </div>
-                </div>
-<div className="flex justify-center gap-2 py-2">
-  <button onClick={() => changeAppLanguage("pt")}>🇵🇹</button>
-  <button onClick={() => changeAppLanguage("en")}>🇬🇧</button>
-  <button onClick={() => changeAppLanguage("es")}>🇪🇸</button>
-  <button onClick={() => changeAppLanguage("fr")}>🇫🇷</button>
-</div>
 
 <HomeWorld
   avatar={avatar}
@@ -1004,6 +1072,33 @@ className="flex items-center justify-center w-24 h-24 relative"
   afternoonRating={afternoonRating}
   handlePetAvatar={handlePetAvatar}
 />
+
+{homeScreen === "home" && (
+  <>
+  <HomeProgressSummary />
+
+  {reactiveMessageKey && (
+  <div className="mt-5 rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] to-white p-5 shadow-sm">
+    <div className="flex items-start gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-lg shadow-sm">
+        ✨
+      </div>
+
+      <div className="min-w-0">
+        <p className="text-xs font-black uppercase tracking-wider text-[#C97B5E] font-display">
+          {t("reactiveInsightTitle")}
+        </p>
+
+        <p className="mt-1.5 text-sm font-semibold leading-relaxed text-[#4E3B36]">
+          {t(reactiveMessageKey)}
+        </p>
+      </div>
+    </div>
+  </div>
+)}
+
+  </>
+)}
 
 {/* Botões do menu principal — só existem quando homeScreen === "home" */}
 {homeScreen === "home" && (
@@ -1128,7 +1223,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                   <div className="flex justify-between text-[9px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
                     <span>0 ({t("difficult")})</span>
 <span>10 ({t("peaceful")})</span>
-                    
+
                   </div>
                 </div>
 
@@ -1183,6 +1278,8 @@ className="flex items-center justify-center w-24 h-24 relative"
   ? t("updateTodayRecord")
   : t("saveDailyRecord")}
                 </button>
+
+
               </div>
 </div>
 {/* Conhece os teus Padrões */}
@@ -1223,7 +1320,7 @@ className="flex items-center justify-center w-24 h-24 relative"
     className="flex-1 px-4 pt-4"
   >
     <div className="max-w-md mx-auto">
-      
+
       <button
         onClick={() => setHomeScreen("home")}
         className="mb-4 text-xs font-bold text-[#C97B5E]"
@@ -1270,9 +1367,52 @@ className="flex items-center justify-center w-24 h-24 relative"
       </h2>
     </div>
 
+{/* Idioma */}
+  <div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm mb-4">
+    <h3 className="text-sm font-black text-[#4E3B36] mb-1">
+      {t("language")}
+    </h3>
+
+    <p className="text-xs text-slate-500 leading-relaxed mb-4">
+      {t("chooseLanguage")}
+    </p>
+
+    <div className="grid grid-cols-2 gap-2">
+      <button
+        onClick={() => changeAppLanguage("pt")}
+        className="py-3 rounded-2xl border border-[#E5A88B]/30 bg-[#FFF0E8] text-[#C97B5E] font-black text-xs"
+      >
+        🇵🇹 Português
+      </button>
+
+      <button
+        onClick={() => changeAppLanguage("en")}
+        className="py-3 rounded-2xl border border-slate-200 bg-white text-[#4E3B36] font-black text-xs"
+      >
+        🇬🇧 English
+      </button>
+
+      <button
+        onClick={() => changeAppLanguage("es")}
+        className="py-3 rounded-2xl border border-slate-200 bg-white text-[#4E3B36] font-black text-xs"
+      >
+        🇪🇸 Español
+      </button>
+
+      <button
+        onClick={() => changeAppLanguage("fr")}
+        className="py-3 rounded-2xl border border-slate-200 bg-white text-[#4E3B36] font-black text-xs"
+      >
+        🇫🇷 Français
+      </button>
+    </div>
+  </div>
+
 <div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm mb-4">
 
-  <h3 className="text-sm font-black text-[#4E3B36] mb-1">
+
+
+<h3 className="text-sm font-black text-[#4E3B36] mb-1">
     {t("communityTerms")}
   </h3>
 
@@ -1311,7 +1451,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 
 
-          
+
 
 {/* Community Guidelines Modal */}
 
@@ -1442,7 +1582,7 @@ onBlockUser={handleBlockUser}
 />
             </motion.div>
           )}
-        
+
       </main>
 
       {/* Triage / Screening Help Modal */}
@@ -1544,7 +1684,7 @@ onClick={() => {
             </button>
           ))}
         </div>
-      </footer>     
+      </footer>
     </div>
   );
 }

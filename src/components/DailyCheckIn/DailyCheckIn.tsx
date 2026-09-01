@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { saveDailyCheckIn } from "../../storage/dailyCheckInStorage";
+import {
+  analyzeReactiveState,
+} from "../../data/reactive/reactiveEngine";
+import {
+  recordReactiveResponse,
+} from "../../data/reactive/reactiveHistoryStorage";
 
 interface Props {
   onComplete?: () => void;
@@ -12,6 +18,8 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
   const [mood, setMood] = useState<number | null>(null);
   const [need, setNeed] = useState<string | null>(null);
   const [completed, setCompleted] = useState(false);
+  const [reactiveMessageKey, setReactiveMessageKey] =
+    useState<string | null>(null);
 
   const needs = [
     {
@@ -44,12 +52,38 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
   const handleComplete = () => {
     if (mood === null || need === null) return;
 
+    /**
+     * O check-in é persistido primeiro para que o motor
+     * analise os dados acabados de registar.
+     */
     saveDailyCheckIn(mood, need);
+
+    const reactiveResult = analyzeReactiveState({
+      source: "daily_checkin",
+      currentMood: mood,
+      currentNeed: need,
+    });
+
+    setReactiveMessageKey(
+      reactiveResult.response.translationKey
+    );
+
+    recordReactiveResponse({
+      responseId: reactiveResult.response.id,
+      situation: reactiveResult.situation,
+      intent: reactiveResult.intent,
+      timestamp: new Date().toISOString(),
+    });
+
     setCompleted(true);
 
+    /**
+     * Dar tempo suficiente para o utilizador ler
+     * a reação da Confia antes de fechar o check-in.
+     */
     setTimeout(() => {
       onComplete?.();
-    }, 1200);
+    }, 4000);
   };
 
   if (completed) {
@@ -65,6 +99,26 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
           <p className="mt-3 text-slate-600">
             {t("dailyCheckIn.completed.text")}
           </p>
+
+          {reactiveMessageKey && (
+            <div className="mt-5 rounded-2xl border border-[#E8DDD7] bg-[#FFF9F5] p-4 text-left">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-base shadow-sm">
+                  ✨
+                </div>
+
+                <div>
+                  <p className="text-xs font-black text-[#4E3B36]">
+                    Confia
+                  </p>
+
+                  <p className="mt-1 text-sm font-medium leading-relaxed text-slate-600">
+                    {t(reactiveMessageKey)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-6 inline-flex rounded-full bg-emerald-100 px-5 py-2 font-bold text-emerald-700">
             +20 XP

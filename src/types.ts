@@ -10,7 +10,7 @@ export interface AvatarState {
 export interface Objective {
   id: string;
   text: string;
-  category: 'corporeo' | 'mental' | 'social' | 'nutricao';
+  category: 'corporeo' | 'mental' | 'social' | 'nutricao' | 'acao';
   xpReward: number;
 difficulty?: 'easy' | 'medium' | 'hard';
   completed: boolean;

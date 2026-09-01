@@ -84,7 +84,7 @@ function readMoodHistory(): CompanionMoodRecord[] {
  */
 function readObjectivesHistory(): CompanionObjectiveRecord[] {
   try {
-    const raw = localStorage.getItem("confia_objectives_history");
+    const raw = localStorage.getItem("confia_objectives_history_v1");
 
     if (!raw) return [];
 
@@ -113,7 +113,7 @@ function readObjectivesHistory(): CompanionObjectiveRecord[] {
  */
 function readHabitsHistory(): CompanionHabitRecord[] {
   try {
-    const raw = localStorage.getItem("confia_habits_daily");
+    const raw = localStorage.getItem("confia_habits_daily_history");
 
     if (!raw) return [];
 
@@ -165,7 +165,7 @@ function readImpulseHistory(): CompanionImpulseRecord[] {
  */
 function readXp(): number {
   try {
-    const raw = localStorage.getItem("confia_avatar");
+    const raw = localStorage.getItem("confia_avatar_v2");
 
     if (!raw) return 0;
 

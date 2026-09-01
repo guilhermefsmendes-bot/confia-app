@@ -2,6 +2,12 @@ import React, { useState, useEffect } from "react";
 import { saveEpisode } from "./Impulso";
 import ProgressBar from "./ProgressBar";
 import { useTranslation } from "react-i18next";
+import {
+  analyzeReactiveState,
+} from "../data/reactive/reactiveEngine";
+import {
+  recordReactiveResponse,
+} from "../data/reactive/reactiveHistoryStorage";
 interface ImpulsoSOSProps {
   onAddXp: (amount: number) => void;
 }
@@ -80,6 +86,8 @@ const daysWithoutUse =
   const [thought, setThought] = useState<Thought | null>(null);
   
   const [completed, setCompleted] = useState(false);
+  const [reactiveMessageKey, setReactiveMessageKey] =
+    useState<string | null>(null);
 
   // Estados do Cronómetro (180 segundos = 3 minutos)
   const [timeLeft, setTimeLeft] = useState(180);
@@ -138,12 +146,39 @@ const getPsychoeducationMessage = () => {
 
 
   const finishSOS = () => {
+    /**
+     * Guardar primeiro o episódio.
+     *
+     * O motor reativo consegue assim analisar imediatamente
+     * a diferença entre intensidade inicial e final.
+     */
     saveEpisode({
       createdAt: new Date().toISOString(),
       initialIntensity: intensity,
       finalIntensity,
       completed: true,
       xpEarned: 30,
+    });
+
+    const reactiveResult = analyzeReactiveState({
+      source: "impulse",
+      initialIntensity: intensity,
+      finalIntensity,
+    });
+
+    setReactiveMessageKey(
+      reactiveResult.response.translationKey
+    );
+
+    /**
+     * Esta resposta foi provocada diretamente
+     * pela conclusão de um Impulso.
+     */
+    recordReactiveResponse({
+      responseId: reactiveResult.response.id,
+      situation: reactiveResult.situation,
+      intent: reactiveResult.intent,
+      timestamp: new Date().toISOString(),
     });
 
     onAddXp(30);
@@ -167,9 +202,75 @@ const getPsychoeducationMessage = () => {
   // 1. Ecrã de Conclusão (Sucesso)
   if (completed) {
     return (
-      <div style={{ padding: "20px", textAlign: "center", fontFamily: "sans-serif" }}>
-       <h2>{t("sosCompleted")}</h2>
+      <div
+        style={{
+          padding: "20px",
+          textAlign: "center",
+          fontFamily: "sans-serif",
+        }}
+      >
+        <h2>{t("sosCompleted")}</h2>
+
         <p>{t("impulseCongratulations")}</p>
+
+        {reactiveMessageKey && (
+          <div
+            style={{
+              marginTop: "20px",
+              padding: "16px",
+              borderRadius: "16px",
+              border: "1px solid #E8DDD7",
+              background: "#FFF9F5",
+              textAlign: "left",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "12px",
+              }}
+            >
+              <div
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "12px",
+                  background: "#FFFFFF",
+                }}
+              >
+                ✨
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 800,
+                    color: "#4E3B36",
+                  }}
+                >
+                  Confia
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "4px",
+                    fontSize: "14px",
+                    lineHeight: 1.6,
+                    color: "#64748B",
+                  }}
+                >
+                  {t(reactiveMessageKey)}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

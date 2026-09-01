@@ -76,21 +76,23 @@ function PremiumDepth() {
   return (
     <>
       {distantTrees.map((tree, index) => (
-        <DistantTree
-          key={index}
-          left={tree.left}
-          scale={tree.scale}
-        />
+        <React.Fragment key={index}>
+          <DistantTree
+            left={tree.left}
+            scale={tree.scale}
+          />
+        </React.Fragment>
       ))}
 
       <div className="absolute bottom-[34%] left-0 right-0 h-16 pointer-events-none">
         {foregroundGrass.map((grass, index) => (
-          <ForegroundGrass
-            key={index}
-            left={grass.left}
-            height={grass.height}
-            rotate={grass.rotate}
-          />
+          <React.Fragment key={index}>
+            <ForegroundGrass
+              left={grass.left}
+              height={grass.height}
+              rotate={grass.rotate}
+            />
+          </React.Fragment>
         ))}
       </div>
 

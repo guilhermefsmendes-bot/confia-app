@@ -8,8 +8,10 @@ import {
   serverTimestamp,
   doc,
   getDoc,
+  getDocs,
   setDoc,
-  updateDoc
+  updateDoc,
+  where
 } from "firebase/firestore";
 import { X, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -82,49 +84,110 @@ console.log("CHAT DEBUG - redLikedBy:", (post as any).redLikedBy);
 
   // Criar ou encontrar a conversa
   useEffect(() => {
+    let cancelled = false;
+
     const createOrFindChat = async () => {
-      if (!currentUser || !post.authorId) {
-        setLoading(false);
-        return;
-      }
-
-      const otherUserId = getOtherUserId();
-
-      if (!otherUserId) {
-        console.log("Ainda não existe outro utilizador para esta conversa.");
-        setLoading(false);
-        return;
-      }
-
-      // Segurança: nunca criar conversa consigo próprio.
-      if (currentUser.uid === otherUserId) {
-        setLoading(false);
-        return;
-      }
-
       try {
+        setLoading(true);
+
+        let user = auth.currentUser;
+
+        if (!user) {
+          await new Promise<void>((resolve, reject) => {
+            const unsubscribeAuth = auth.onAuthStateChanged((authUser) => {
+              unsubscribeAuth();
+
+              if (authUser) {
+                resolve();
+              } else {
+                reject(new Error("Utilizador não autenticado."));
+              }
+            });
+          });
+
+          user = auth.currentUser;
+        }
+
+        if (!user || !post.authorId || cancelled) {
+          setLoading(false);
+          return;
+        }
+
+        const myUid = user.uid;
+
+        console.log("CHAT - MEU UID:", myUid);
+        console.log("CHAT - AUTOR DO POST:", post.authorId);
+
+        /*
+         * PRIMEIRO:
+         * Procuramos diretamente uma conversa existente
+         * para este utilizador e esta publicação.
+         *
+         * Isto permite que A e B encontrem exatamente
+         * o mesmo chat, mesmo que redLikedBy já não contenha
+         * o UID do outro utilizador.
+         */
+        const chatsQuery = query(
+          collection(db, "chats"),
+          where("participants", "array-contains", myUid),
+          where("postId", "==", post.id)
+        );
+
+        const chatsSnapshot = await getDocs(chatsQuery);
+
+        if (!chatsSnapshot.empty) {
+          const existingChat = chatsSnapshot.docs[0];
+
+          console.log(
+            "CHAT EXISTENTE ENCONTRADO:",
+            existingChat.id
+          );
+
+          if (!cancelled) {
+            setChatId(existingChat.id);
+            setLoading(false);
+          }
+
+          return;
+        }
+
+        /*
+         * Se não existe chat, tentamos descobrir o outro
+         * utilizador para criar a conversa.
+         */
+        let otherUserId: string | null = null;
+
+        if (myUid !== post.authorId) {
+          otherUserId = post.authorId;
+        } else {
+          const redLikedBy = Array.isArray(post.redLikedBy)
+            ? post.redLikedBy
+            : [];
+
+          otherUserId =
+            redLikedBy.find(
+              (uid: string) => uid !== myUid
+            ) || null;
+        }
+
+        if (!otherUserId || otherUserId === myUid) {
+          console.log(
+            "Ainda não foi possível identificar o outro participante."
+          );
+
+          setLoading(false);
+          return;
+        }
+
         const participants = [
-          currentUser.uid,
+          myUid,
           otherUserId
         ].sort();
 
-        /*
-         * O ID depende da publicação + os dois utilizadores.
-         *
-         * Assim:
-         *
-         * Anon_229 -> Anon_731
-         *
-         * e
-         *
-         * Anon_731 -> Anon_229
-         *
-         * obtêm exatamente o mesmo chatId.
-         */
-        const chatIdValue =
+        const newChatId =
           `${post.id}_${participants[0]}_${participants[1]}`;
 
-        const chatRef = doc(db, "chats", chatIdValue);
+        const chatRef = doc(db, "chats", newChatId);
         const chatSnapshot = await getDoc(chatRef);
 
         if (!chatSnapshot.exists()) {
@@ -137,21 +200,28 @@ console.log("CHAT DEBUG - redLikedBy:", (post as any).redLikedBy);
             lastMessageAt: serverTimestamp()
           });
 
-          console.log("NOVO CHAT CRIADO:", chatIdValue);
-        } else {
-          console.log("CHAT EXISTENTE ENCONTRADO:", chatIdValue);
+          console.log("NOVO CHAT CRIADO:", newChatId);
         }
 
-        setChatId(chatIdValue);
-        setLoading(false);
+        if (!cancelled) {
+          setChatId(newChatId);
+          setLoading(false);
+        }
 
       } catch (error) {
         console.error("Erro ao iniciar chat:", error);
-        setLoading(false);
+
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     createOrFindChat();
+
+    return () => {
+      cancelled = true;
+    };
   }, [post.id, post.authorId]);
 
   // Escutar mensagens em tempo real

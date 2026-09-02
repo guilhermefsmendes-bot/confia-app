@@ -25,14 +25,38 @@ export type Trigger =
 // Emoções principais
 export type Emotion =
   | "fear"
+  | "anxiety"
+  | "sadness"
+  | "frustration"
+  | "confusion"
+
+  /**
+   * IDs mantidos para compatibilidade
+   * com episódios/fluxos anteriores.
+   */
   | "uncertainty"
   | "urgency"
   | "curiosity"
   | "guilt";
 
 // Episódio completo
+export type ImpulseNeed =
+  | "calm"
+  | "mind"
+  | "control"
+  | "support";
+
 export interface ImpulseEpisode {
   createdAt: string;
+
+  /**
+   * Necessidade escolhida pelo utilizador
+   * no início do Impulso.
+   *
+   * Opcional para manter compatibilidade
+   * com episódios guardados antes da 1C.5.
+   */
+  need?: ImpulseNeed;
 
   initialIntensity: Intensity;
 

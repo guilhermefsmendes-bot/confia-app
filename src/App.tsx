@@ -1,17 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import {
+  motion,
+  AnimatePresence } from 'motion/react';
 import {
   Heart,
   Sun,
-  Compass,ArrowUp,
+  Compass,
+  ArrowUp,
   Sparkles,
- Moon,
+  Moon,
   Users,
   AlertCircle,
   Brain,
   CheckCircle2,
   Calendar,
-  Gift
+  Gift,
+  House,
+  Wind,
+  Target,
+  Zap,
+  ChartNoAxesCombined,
+  Backpack,
+  Store,
+  Settings
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n";
@@ -38,6 +49,9 @@ import {
 import {
   recordReactiveResponse,
 } from "./data/reactive/reactiveHistoryStorage";
+import {
+  collectReactiveRecentMemory,
+} from "./data/reactive/reactiveRecentMemory";
 
 // Component imports
 import DailyCheckIn from "./components/DailyCheckIn/DailyCheckIn";
@@ -64,6 +78,7 @@ OBJECTIVES_HISTORY: 'confia_objectives_history_v1',
   LAST_PET_DATE: 'confia_last_pet_date_v2',
 LAST_IMPULSE_USE: 'confia_last_impulse_use_v1',
 IMPULSE_COUNT: 'confia_impulse_count_v1',
+LAST_APP_OPEN_DATE: 'confia_last_app_open_date_v1',
 
 };
 
@@ -80,6 +95,152 @@ const PRE_LOGGED_RATINGS: DailyRating[] = [
 
 export default function App() {
 const { t, i18n } = useTranslation();
+
+/**
+ * ==========================================================
+ * CONFIA 3A — ESTADO DIÁRIO
+ * CONFIA 3A.1 — SNAPSHOT ESTÁVEL
+ * ==========================================================
+ *
+ * O estado da abertura é capturado uma única vez por
+ * montagem da app.
+ *
+ * Isto é importante porque a data atual é escrita no
+ * localStorage depois da primeira renderização.
+ *
+ * Sem este snapshot, um rerender poderia transformar
+ * "primeira abertura de hoje" em "já abriu hoje" durante
+ * a própria sessão.
+ */
+
+const getLocalCalendarDate = () => {
+  const now = new Date();
+
+  const year =
+    now.getFullYear();
+
+  const month =
+    String(now.getMonth() + 1).padStart(2, "0");
+
+  const day =
+    String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const getCalendarDaysDifference = (
+  previousDate: string | null,
+  currentDate: string
+) => {
+  if (!previousDate) {
+    return undefined;
+  }
+
+  const previousParts =
+    previousDate.split("-").map(Number);
+
+  const currentParts =
+    currentDate.split("-").map(Number);
+
+  if (
+    previousParts.length !== 3 ||
+    currentParts.length !== 3 ||
+    previousParts.some(Number.isNaN) ||
+    currentParts.some(Number.isNaN)
+  ) {
+    return undefined;
+  }
+
+  const previousUtc = Date.UTC(
+    previousParts[0],
+    previousParts[1] - 1,
+    previousParts[2]
+  );
+
+  const currentUtc = Date.UTC(
+    currentParts[0],
+    currentParts[1] - 1,
+    currentParts[2]
+  );
+
+  const dayMs =
+    24 * 60 * 60 * 1000;
+
+  return Math.max(
+    0,
+    Math.round(
+      (currentUtc - previousUtc) / dayMs
+    )
+  );
+};
+
+const [dailyOpenState] = useState(() => {
+  const appOpenDate =
+    getLocalCalendarDate();
+
+  const previousAppOpenDate =
+    localStorage.getItem(
+      STORAGE_KEYS.LAST_APP_OPEN_DATE
+    );
+
+  const isFirstAppOpenToday =
+    previousAppOpenDate !== appOpenDate;
+
+  const daysSincePreviousAppOpen =
+    getCalendarDaysDifference(
+      previousAppOpenDate,
+      appOpenDate
+    );
+
+  return {
+    appOpenDate,
+    previousAppOpenDate,
+    isFirstAppOpenToday,
+    daysSincePreviousAppOpen,
+  };
+});
+
+const {
+  appOpenDate,
+  previousAppOpenDate,
+  isFirstAppOpenToday,
+  daysSincePreviousAppOpen,
+} = dailyOpenState;
+
+/**
+ * A escrita acontece depois do commit.
+ *
+ * O segundo getItem funciona como proteção adicional para:
+ * - StrictMode;
+ * - efeitos repetidos;
+ * - escrita já efetuada por esta própria montagem.
+ */
+useEffect(() => {
+  if (!isFirstAppOpenToday) {
+    return;
+  }
+
+  const storedDate =
+    localStorage.getItem(
+      STORAGE_KEYS.LAST_APP_OPEN_DATE
+    );
+
+  if (storedDate === appOpenDate) {
+    return;
+  }
+
+  localStorage.setItem(
+    STORAGE_KEYS.LAST_APP_OPEN_DATE,
+    appOpenDate
+  );
+}, [
+  appOpenDate,
+  isFirstAppOpenToday,
+]);
+
+/* CONFIA 3A — FIM DO ESTADO DIÁRIO */
+
+
 
  useEffect(() => {
     signInAnonymously(auth).catch((error) => {
@@ -102,7 +263,7 @@ useEffect(() => {
   // Global App States
 const [patternsPage, setPatternsPage] = useState("menu");
 const [homeScreen, setHomeScreen] = useState<
-"home" | "shop" | "inventory" | "settings"
+  "home" | "companion" | "patterns" | "shop" | "inventory" | "settings" | "progress"
 >("home");
   const [avatar, setAvatar] = useState<AvatarState>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AVATAR);
@@ -248,6 +409,700 @@ const [showDailyCheckIn, setShowDailyCheckIn] = useState(
   // Today rating active inputs
   const [morningRating, setMorningRating] = useState<number>(5);
   const [afternoonRating, setAfternoonRating] = useState<number>(5);
+  const [showDayRatingPanel, setShowDayRatingPanel] = useState(false);
+
+/**
+ * 1D.5 — PARA TI AGORA + MEMÓRIA CONTEXTUAL
+ *
+ * O Reactive Engine continua a decidir situação + intenção.
+ *
+ * A memória reativa acrescenta contexto quando existe evidência real
+ * de que uma estratégia anterior foi eficaz.
+ *
+ * A memória nunca escolhe automaticamente uma necessidade.
+ * Apenas contextualiza a recomendação apresentada ao utilizador.
+ */
+/**
+ * 1D.11A — PRIMEIRO CONTACTO INTELIGENTE
+ *
+ * A ausência de ratings significa que a CONFIA ainda está
+ * no início da relação com o utilizador.
+ *
+ * Não fingimos memória, padrões ou conhecimento que ainda
+ * não existem. Este valor é totalmente derivado do histórico
+ * real já existente e não cria storage adicional.
+ */
+const isFirstContact =
+  currentTab === 0 &&
+  homeScreen === "home" &&
+  ratings.length === 0;
+
+/**
+ * 1D.11B — PRIMEIROS SINAIS
+ *
+ * Com um ou dois registos já existe informação real,
+ * mas ainda não existe histórico suficiente para comunicar
+ * a experiência como se a CONFIA já conhecesse padrões
+ * consolidados do utilizador.
+ *
+ * Esta camada é apenas de apresentação.
+ * O Reactive Engine continua a decidir a resposta.
+ */
+const isEarlyLearning =
+  currentTab === 0 &&
+  homeScreen === "home" &&
+  ratings.length >= 1 &&
+  ratings.length <= 2;
+
+const homeNowMemory = (() => {
+  if (currentTab !== 0 || homeScreen !== "home") {
+    return null;
+  }
+
+  try {
+    const memory = collectReactiveRecentMemory();
+
+    const effectiveImpulse =
+      memory?.recentEffectiveImpulse ?? null;
+
+    const continuity =
+      memory?.continuity ?? null;
+
+    /*
+     * 1D.6C — HIERARQUIA DA MEMÓRIA
+     *
+     * Primeiro verificamos se existe aprendizagem pessoal
+     * suficiente para apresentar um padrão observado.
+     *
+     * A aprendizagem exige pelo menos dois episódios eficazes.
+     * Isto evita transformar uma única experiência numa conclusão.
+     *
+     * A necessidade observada é apenas memória contextual.
+     * Nunca escolhe automaticamente o percurso.
+     */
+    if (memory?.hasImpulseLearning) {
+      return {
+        kind: "impulseLearning" as const,
+
+        effectiveCount:
+          memory.effectiveImpulseCount,
+
+        recentCount:
+          memory.recentImpulseCount,
+
+        averageReduction:
+          memory.recentImpulseAverageReduction ?? null,
+
+        need:
+          memory.effectiveImpulseNeed ?? null,
+
+        needCount:
+          memory.effectiveImpulseNeedCount,
+
+        /*
+         * Mantemos a última experiência eficaz disponível
+         * para eventual utilização visual futura.
+         */
+        recentEffective:
+          effectiveImpulse &&
+          typeof effectiveImpulse.initialIntensity === "number" &&
+          typeof effectiveImpulse.finalIntensity === "number"
+            ? {
+                before: effectiveImpulse.initialIntensity,
+                after: effectiveImpulse.finalIntensity,
+                reduction: effectiveImpulse.reduction,
+                need: effectiveImpulse.need ?? null,
+              }
+            : null,
+      };
+    }
+
+    /*
+     * 2. Ainda não existe evidência suficiente para falar
+     * de aprendizagem.
+     *
+     * Nesse caso mantemos a memória da última experiência
+     * eficaz exatamente como anteriormente.
+     */
+    if (
+      effectiveImpulse &&
+      typeof effectiveImpulse.initialIntensity === "number" &&
+      typeof effectiveImpulse.finalIntensity === "number"
+    ) {
+      return {
+        kind: "impulseMemory" as const,
+
+        need:
+          effectiveImpulse.need ?? null,
+
+        before:
+          effectiveImpulse.initialIntensity,
+
+        after:
+          effectiveImpulse.finalIntensity,
+
+        reduction:
+          effectiveImpulse.reduction,
+
+        continuity:
+          continuity,
+      };
+    }
+
+    /*
+     * 1D.7B — continuidade sem uma última experiência
+     * suficientemente recente para mostrar Antes / Agora.
+     *
+     * Continua a ser apenas memória contextual.
+     */
+    if (
+      continuity?.hasRepeatedSignals
+    ) {
+      return {
+        kind: "continuity" as const,
+
+        /**
+         * 1D.8C — CONTINUIDADE VISÍVEL COMPATÍVEL
+         *
+         * A Home recebe agora as três dimensões da memória.
+         * Continua sem decidir a ação.
+         */
+        signalCount:
+          continuity.signalCount,
+
+        moodDirection:
+          continuity.moodDirection,
+
+        moodRecordCount:
+          continuity.moodRecordCount,
+
+        repeatedCheckInNeed:
+          continuity.repeatedCheckInNeed ?? null,
+
+        repeatedCheckInNeedCount:
+          continuity.repeatedCheckInNeedCount,
+
+        repeatedNeed:
+          continuity.repeatedNeed ?? null,
+
+        repeatedNeedCount:
+          continuity.repeatedNeedCount,
+
+        recentEffectiveImpulseCount:
+          continuity.recentEffectiveImpulseCount,
+      };
+    }
+
+    return null;
+  } catch {
+    /*
+     * A memória é apenas uma camada complementar.
+     *
+     * Se não estiver disponível, o Principal continua
+     * a funcionar normalmente através do Reactive Engine.
+     */
+    return null;
+  }
+})();
+
+
+const homeNowAction = (() => {
+  if (currentTab !== 0 || homeScreen !== "home") {
+    return null;
+  }
+
+  /*
+   * 1D.6D — separação entre MEMÓRIA e AÇÃO.
+   *
+   * A memória contextual não deve decidir sozinha
+   * qual é a próxima ação do utilizador.
+   *
+   * Ela informa o Principal sobre experiências anteriores.
+   * O Reactive Engine continua a ser responsável
+   * pela decisão da ação atual.
+   */
+
+  /*
+   * 1D.4 — decisão normal do Reactive Engine.
+   */
+  const result = analyzeReactiveState({
+    source: "general",
+  });
+
+  const intent = result?.intent;
+
+  if (!intent) {
+    return null;
+  }
+
+  switch (intent) {
+    // Regulação / momento difícil
+    case "calm":
+    case "ground":
+    case "encourage_regulation":
+    case "support_difficult_moment":
+    case "gentle_check":
+      return {
+        kind: "impulse" as const,
+        titleKey: "homeNow.impulse.title",
+        textKey: "homeNow.impulse.text",
+        actionKey: "homeNow.impulse.action",
+      };
+
+    // Aprendizagem a partir do Impulso
+    case "reinforce_impulse":
+    case "review_impulse":
+    case "reinforce_effective_strategy":
+      return {
+        kind: "impulse" as const,
+        titleKey: "homeNow.impulseMemory.title",
+        textKey: "homeNow.impulseMemory.text",
+        actionKey: "homeNow.impulseMemory.action",
+      };
+
+    // Padrões / reflexão
+    case "connect_pattern":
+    case "invite_reflection":
+    case "explore":
+    case "reflect":
+    case "clarify":
+      return {
+        kind: "patterns" as const,
+        titleKey: "homeNow.patterns.title",
+        textKey: "homeNow.patterns.text",
+        actionKey: "homeNow.patterns.action",
+      };
+
+    // Objetivos
+    case "celebrate_objective":
+    case "redirect_objective":
+      return {
+        kind: "objectives" as const,
+        titleKey: "homeNow.objectives.title",
+        textKey: "homeNow.objectives.text",
+        actionKey: "homeNow.objectives.action",
+      };
+
+    // Evolução
+    case "reinforce_progress":
+    case "highlight_small_win":
+    case "recognize_consistency":
+      return {
+        kind: "progress" as const,
+        titleKey: "homeNow.progress.title",
+        textKey: "homeNow.progress.text",
+        actionKey: "homeNow.progress.action",
+      };
+
+    // Retoma / início
+    case "welcome":
+    case "encourage_return":
+      return {
+        kind: "record" as const,
+        titleKey: "homeNow.record.title",
+        textKey: "homeNow.record.text",
+        actionKey: "homeNow.record.action",
+      };
+
+    /*
+     * Intenções genéricas não recebem uma recomendação
+     * artificial apenas para preencher espaço.
+     */
+    default:
+      return null;
+  }
+})();
+
+
+/**
+ * ==========================================================
+ * CONFIA 3B — CONTEXTO DIÁRIO
+ * ==========================================================
+ *
+ * A 3A sabe quando a app foi aberta.
+ *
+ * A 3B combina esse estado factual com informação que
+ * já foi preparada pelas camadas existentes da Principal.
+ *
+ * Não existe aqui uma segunda decisão emocional.
+ *
+ * O Reactive Engine continua responsável pela decisão
+ * da situação e da ação atual.
+ *
+ * A memória recente continua responsável pela aprendizagem
+ * e continuidade.
+ *
+ * dailyContext limita-se a preparar a futura experiência
+ * "Momento de Hoje".
+ */
+
+type DailyContextState =
+  | "first_contact"
+  | "return_after_absence"
+  | "first_today"
+  | "already_here_today";
+
+const dailyContext = (() => {
+  if (
+    currentTab !== 0 ||
+    homeScreen !== "home"
+  ) {
+    return null;
+  }
+
+  /**
+   * --------------------------------------------------------
+   * ESTADO DIÁRIO
+   * --------------------------------------------------------
+   *
+   * Hierarquia:
+   *
+   * 1. Primeiro contacto absoluto.
+   *
+   * 2. Regresso após pelo menos um dia completo
+   *    sem abrir a CONFIA.
+   *
+   * 3. Primeira abertura do dia.
+   *
+   * 4. Já esteve na CONFIA hoje.
+   */
+  let state: DailyContextState;
+
+  if (isFirstContact) {
+    state = "first_contact";
+  } else if (
+    isFirstAppOpenToday &&
+    typeof daysSincePreviousAppOpen === "number" &&
+    daysSincePreviousAppOpen >= 2
+  ) {
+    state = "return_after_absence";
+  } else if (isFirstAppOpenToday) {
+    state = "first_today";
+  } else {
+    state = "already_here_today";
+  }
+
+  /**
+   * --------------------------------------------------------
+   * MEMÓRIA
+   * --------------------------------------------------------
+   *
+   * Reutilizamos apenas a memória que a Principal já
+   * considerou suficientemente sólida para apresentar.
+   */
+  const memoryKind =
+    homeNowMemory?.kind ?? null;
+
+  const hasImpulseLearning =
+    memoryKind === "impulseLearning";
+
+  const hasImpulseMemory =
+    memoryKind === "impulseMemory";
+
+  const hasContinuityMemory =
+    memoryKind === "continuity";
+
+  /**
+   * --------------------------------------------------------
+   * CONFIA 3E.1 — CONTINUIDADE INTELIGENTE
+   * --------------------------------------------------------
+   *
+   * Este nível NÃO representa uma nova memória.
+   *
+   * É apenas uma classificação da memória que já foi
+   * recolhida por homeNowMemory.
+   *
+   * A ordem é deliberadamente conservadora:
+   *
+   * learned_impulse
+   *   = aprendizagem sustentada por múltiplos episódios.
+   *
+   * effective_impulse
+   *   = uma experiência eficaz conhecida, ainda sem
+   *     evidência suficiente para afirmar um padrão.
+   *
+   * repeated_signals
+   *   = existem sinais repetidos de continuidade.
+   *
+   * early_learning
+   *   = existem poucos registos e a CONFIA ainda está
+   *     a aprender.
+   *
+   * none
+   *   = não existe evidência suficiente para comunicar
+   *     aprendizagem ou continuidade.
+   */
+  const dailyLearningLevel =
+    hasImpulseLearning
+      ? "learned_impulse"
+      : hasImpulseMemory
+        ? "effective_impulse"
+        : hasContinuityMemory
+          ? "repeated_signals"
+          : isEarlyLearning
+            ? "early_learning"
+            : "none";
+
+
+  /**
+   * --------------------------------------------------------
+   * AÇÃO
+   * --------------------------------------------------------
+   *
+   * Não voltamos a executar o motor.
+   *
+   * Apenas reutilizamos a ação já escolhida
+   * por homeNowAction.
+   */
+  const suggestedAction =
+    homeNowAction?.kind ?? null;
+
+  /**
+   * --------------------------------------------------------
+   * CONTEXTO FINAL
+   * --------------------------------------------------------
+   *
+   * Ainda não existem aqui mensagens, UI, XP,
+   * celebrações ou histórico próprio.
+   */
+  return {
+    state,
+
+    isFirstOpenToday:
+      isFirstAppOpenToday,
+
+    previousOpenDate:
+      previousAppOpenDate,
+
+    daysSincePreviousOpen:
+      daysSincePreviousAppOpen,
+
+    isEarlyLearning,
+
+    memoryKind,
+
+    hasImpulseLearning,
+
+    hasImpulseMemory,
+
+    hasContinuityMemory,
+
+    suggestedAction,
+    dailyLearningLevel,
+  };
+})();
+
+/* CONFIA 3B — FIM DO CONTEXTO DIÁRIO */
+
+/**
+ * 1D.8C — CONTINUIDADE VISÍVEL COMPATÍVEL
+ *
+ * A memória pode enriquecer "Para ti agora", mas apenas
+ * quando pertence ao mesmo domínio da ação escolhida pelo
+ * Reactive Engine.
+ *
+ * Assim evitamos, por exemplo:
+ * - falar do Impulso numa recomendação de Objetivos;
+ * - falar de melhoria histórica num momento atual incompatível;
+ * - transformar memória em decisão.
+ */
+/**
+ * ==========================================================
+ * CONFIA 4B — MUNDO VIVO
+ * ==========================================================
+ *
+ * O mundo não cria uma interpretação própria.
+ *
+ * Apenas recebe uma tradução visual muito leve do nível de
+ * continuidade que o Ritual Diário já calculou.
+ *
+ * Não existe storage, estado, efeito ou motor adicional.
+ */
+const worldMood:
+  | "growing"
+  | "settling"
+  | "discovering"
+  | "neutral" =
+  dailyContext?.dailyLearningLevel === "learned_impulse" ||
+  dailyContext?.dailyLearningLevel === "repeated_signals"
+    ? "growing"
+    : dailyContext?.dailyLearningLevel === "effective_impulse"
+      ? "settling"
+      : dailyContext?.dailyLearningLevel === "early_learning"
+        ? "discovering"
+        : "neutral";
+
+const homeNowContext = (() => {
+  if (!homeNowAction || !homeNowMemory) {
+    return null;
+  }
+
+  /**
+   * ----------------------------------------------------------
+   * IMPULSO
+   * ----------------------------------------------------------
+   */
+  if (homeNowAction.kind === "impulse") {
+    if (homeNowMemory.kind === "impulseLearning") {
+      return {
+        kind: "impulseLearning" as const,
+        memory: homeNowMemory,
+      };
+    }
+
+    if (
+      homeNowMemory.kind === "impulseMemory" &&
+      homeNowMemory.continuity?.hasRepeatedSignals &&
+      (
+        homeNowMemory.continuity.repeatedNeedCount >= 2 ||
+        homeNowMemory.continuity.recentEffectiveImpulseCount >= 2
+      )
+    ) {
+      return {
+        kind: "continuity" as const,
+        source: "impulse" as const,
+        count: Math.max(
+          homeNowMemory.continuity.repeatedNeedCount,
+          homeNowMemory.continuity.recentEffectiveImpulseCount
+        ),
+      };
+    }
+
+    if (
+      homeNowMemory.kind === "continuity" &&
+      (
+        homeNowMemory.repeatedNeedCount >= 2 ||
+        homeNowMemory.recentEffectiveImpulseCount >= 2
+      )
+    ) {
+      return {
+        kind: "continuity" as const,
+        source: "impulse" as const,
+        count: Math.max(
+          homeNowMemory.repeatedNeedCount,
+          homeNowMemory.recentEffectiveImpulseCount
+        ),
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * ----------------------------------------------------------
+   * PADRÕES / REFLEXÃO
+   * ----------------------------------------------------------
+   *
+   * Aqui a convergência entre duas ou mais fontes é útil:
+   * há algo recorrente que vale a pena observar.
+   *
+   * Não dizemos que uma coisa causou a outra.
+   */
+  if (
+    homeNowAction.kind === "patterns" &&
+    homeNowMemory.kind === "continuity"
+  ) {
+    /**
+     * 1D.8E — CHECK-IN VISÍVEL
+     *
+     * Quando existem duas ou mais fontes de continuidade,
+     * mostramos primeiro a convergência transversal.
+     */
+    if (homeNowMemory.signalCount >= 2) {
+      return {
+        kind: "continuity" as const,
+        source: "cross" as const,
+        count: homeNowMemory.signalCount,
+      };
+    }
+
+    /**
+     * Sem convergência entre fontes, uma necessidade repetida
+     * nos últimos Check-Ins pode contextualizar uma ação
+     * que o Reactive Engine já decidiu como reflexão/padrões.
+     *
+     * A memória continua sem escolher a ação.
+     */
+    if (
+      homeNowMemory.repeatedCheckInNeed &&
+      homeNowMemory.repeatedCheckInNeedCount >= 2
+    ) {
+      return {
+        kind: "continuity" as const,
+        source: "checkIn" as const,
+        count: homeNowMemory.repeatedCheckInNeedCount,
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * ----------------------------------------------------------
+   * PROGRESSO
+   * ----------------------------------------------------------
+   *
+   * Só mostramos memória emocional quando a direção
+   * transversal observada é de melhoria.
+   */
+  if (
+    homeNowAction.kind === "progress" &&
+    homeNowMemory.kind === "continuity" &&
+    homeNowMemory.moodDirection === "improving"
+  ) {
+    return {
+      kind: "continuity" as const,
+      source: "mood" as const,
+      count: homeNowMemory.moodRecordCount,
+    };
+  }
+
+  /**
+   * Objetivos e Registo não recebem contexto histórico
+   * artificial nesta fase.
+   */
+  return null;
+})();
+
+
+const handleHomeNowAction = () => {
+  if (!homeNowAction) {
+    return;
+  }
+
+  switch (homeNowAction.kind) {
+    case "impulse":
+      changeTab(3);
+      return;
+
+    case "patterns":
+      setPatternsPage("menu");
+      setHomeScreen("patterns");
+      return;
+
+    case "objectives":
+      changeTab(2);
+      return;
+
+    case "progress":
+      setHomeScreen("progress");
+      return;
+
+    case "record":
+      setShowDayRatingPanel(true);
+
+      requestAnimationFrame(() => {
+        document
+          .getElementById("home-daily-record")
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+      });
+
+      return;
+  }
+};
   const [todayLogged, setTodayLogged] = useState(false);
   const [noteText, setNoteText] = useState('');
 
@@ -281,6 +1136,55 @@ const [showDailyCheckIn, setShowDailyCheckIn] = useState(
       );
     }
   }, [currentTab, homeScreen, ratings]);
+
+  /**
+   * Objetivos — leitura contextual ao entrar.
+   *
+   * Não regista resposta no histórico porque abrir
+   * o separador não é uma nova ação emocional.
+   *
+   * objective_completed continua reservado para
+   * uma conclusão acabada de acontecer.
+   */
+  useEffect(() => {
+    if (currentTab !== 1) return;
+
+    const objectiveReactiveResult =
+      analyzeReactiveState({
+        source: "objective",
+      });
+
+    /**
+     * Silêncio inteligente.
+     *
+     * "no_data" é uma situação válida para o motor
+     * global da CONFIA, mas não representa uma
+     * descoberta relevante dentro dos Objetivos.
+     *
+     * Portanto:
+     *
+     * - improving   -> mostrar
+     * - declining   -> mostrar
+     * - consistent  -> mostrar
+     * - no_data     -> silêncio
+     */
+    if (
+      objectiveReactiveResult.situation === "no_data"
+    ) {
+      setReactiveMessageKey(null);
+      return;
+    }
+
+    if (
+      objectiveReactiveResult?.response?.translationKey
+    ) {
+      setReactiveMessageKey(
+        objectiveReactiveResult.response.translationKey
+      );
+    } else {
+      setReactiveMessageKey(null);
+    }
+  }, [currentTab, objectivesHistory]);
 
 const [selectedDate, setSelectedDate] = useState(
   new Date().toISOString().split('T')[0]
@@ -576,6 +1480,43 @@ const handleSaveRatings = () => {
           if (nextCompleted) {
             // Reward XP on check
             addXp(obj.xpReward);
+
+            /**
+             * 2F.1 — conclusão atual.
+             *
+             * Informamos o mesmo Reactive Engine usado
+             * pelo resto da CONFIA.
+             *
+             * Não criamos regras editoriais locais.
+             */
+            const objectiveReactiveResult =
+              analyzeReactiveState({
+                source: "objective",
+                objectiveCompleted: true,
+              });
+
+            /**
+             * A resposta imediata usa o mesmo estado
+             * reativo já existente na CONFIA.
+             */
+            setReactiveMessageKey(
+              objectiveReactiveResult.response.translationKey
+            );
+
+            /**
+             * Esta resposta foi provocada por uma ação
+             * explícita do utilizador, por isso entra
+             * no histórico/cooldown reativo.
+             */
+            recordReactiveResponse({
+              responseId:
+                objectiveReactiveResult.response.id,
+              situation:
+                objectiveReactiveResult.situation,
+              intent:
+                objectiveReactiveResult.intent,
+              timestamp: new Date().toISOString(),
+            });
           } else {
             // Deduct points/XP if unchecked
             setAvatar(a => ({
@@ -609,7 +1550,8 @@ const handleSaveRatings = () => {
 
         const entry = {
           date: todayStr,
-          completed: completedCount
+          completed: completedCount,
+          total: updatedObjectives.length
         };
 
         if (existing >= 0) {
@@ -1047,8 +1989,8 @@ className="flex items-center justify-center w-24 h-24 relative"
         </div>
         <div className="flex items-center gap-2">
           {/* Level badge quick indicator */}
-          <div className="flex items-center gap-1.5 bg-[#E5A88B]/10 text-[#C97B5E] px-3 py-1.5 rounded-xl border border-[#E5A88B]/25 text-xs font-black font-mono">
-            <Sparkles size={13} className="text-[#E5A88B] animate-pulse" />
+          <div className="flex items-center gap-1.5 bg-[#FFF8F4] text-[#C97B5E] px-3 py-1.5 rounded-xl border border-[#E5A88B]/20 text-xs font-bold font-mono">
+            <Sparkles size={13} strokeWidth={1.9} className="text-[#E5A88B]" />
             {t("level")} {avatar.level}
           </div>
         </div>
@@ -1059,10 +2001,10 @@ className="flex items-center justify-center w-24 h-24 relative"
 {currentTab === 0 && homeScreen === "home" && (
           <div
               key="main-menu"
-              className="space-y-6"
+              className="space-y-5"
             >
               {/* Interactive Amigo Panel */}
-              <div className="bg-white border border-[#E5A88B]/15 rounded-[32px] p-6 shadow-sm space-y-4">
+              <div className="space-y-4">
 
 <HomeWorld
   avatar={avatar}
@@ -1071,25 +2013,396 @@ className="flex items-center justify-center w-24 h-24 relative"
   morningRating={morningRating}
   afternoonRating={afternoonRating}
   handlePetAvatar={handlePetAvatar}
+  worldMood={worldMood}
+
 />
+
+{/* ======================================================
+    CONFIA 3C.1 — MOMENTO DE HOJE
+
+    Primeira manifestação visual do Ritual Diário.
+
+    Não substitui:
+    - A CONFIA percebeu;
+    - Para ti agora;
+    - primeiro contacto;
+    - Reactive Engine.
+
+    Apenas dá contexto à chegada do utilizador naquele dia.
+====================================================== */}
+{dailyContext &&
+ dailyContext.state !== "first_contact" && (
+  <section
+    className="relative mt-4 overflow-hidden rounded-[30px] border border-[#E5A88B]/20 bg-gradient-to-br from-[#FFF8F3] via-white to-[#FFFDFB] px-5 py-4 shadow-[0_12px_32px_rgba(92,64,52,0.055)]"
+    aria-label={t("dailyMoment.eyebrow")}
+  >
+    {/* detalhe atmosférico — CSS puro */}
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#F8E4D8]/35 blur-2xl"
+    />
+
+    <div
+      aria-hidden="true"
+      className="absolute left-0 top-5 h-14 w-[3px] rounded-r-full bg-gradient-to-b from-[#E5A88B]/70 to-[#E5A88B]/15"
+    />
+
+    <div className="relative flex items-start gap-3.5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/20 bg-white/90 shadow-sm">
+        <Sparkles
+          size={18}
+          strokeWidth={1.8}
+          className="text-[#C97B5E]"
+        />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+          {t("dailyMoment.eyebrow")}
+        </p>
+
+        <h2 className="mt-1 text-[15px] font-black leading-snug text-[#4E3B36]">
+          {dailyContext.state === "return_after_absence"
+            ? t("dailyMoment.return.title")
+            : dailyContext.state === "first_today"
+              ? t("dailyMoment.firstToday.title")
+              : t("dailyMoment.continueToday.title")}
+        </h2>
+
+        <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#8A6A5D]">
+          {dailyContext.state === "return_after_absence"
+            ? t("dailyMoment.return.text")
+            : dailyContext.state === "first_today"
+              ? (
+                  <>
+                    {/* CONFIA 3E.2 — LINGUAGEM DE APRENDIZAGEM */}
+                    {dailyContext.dailyLearningLevel === "learned_impulse"
+                      ? t("dailyMoment.learning.learnedImpulse")
+                      : dailyContext.dailyLearningLevel === "effective_impulse"
+                        ? t("dailyMoment.learning.effectiveImpulse")
+                        : dailyContext.dailyLearningLevel === "repeated_signals"
+                          ? t("dailyMoment.learning.repeatedSignals")
+                          : dailyContext.dailyLearningLevel === "early_learning"
+                            ? t("dailyMoment.learning.early")
+                            : t("dailyMoment.learning.neutral")}
+                  </>
+                )
+              : t("dailyMoment.continueToday.text")}
+        </p>
+
+        {dailyContext.state === "return_after_absence" &&
+         typeof dailyContext.daysSincePreviousOpen === "number" &&
+         dailyContext.daysSincePreviousOpen >= 2 && (
+          <div className="mt-3 inline-flex items-center rounded-full border border-[#E5A88B]/15 bg-white/80 px-3 py-1.5">
+            <span className="text-[9px] font-bold text-[#9A7567]">
+              {t("dailyMoment.return.days", {
+                count: dailyContext.daysSincePreviousOpen,
+              })}
+            </span>
+          </div>
+        )}
+
+        {/* ======================================================
+            CONFIA 5D.2 — CURIOSIDADE EVOLUTIVA
+
+            Torna visível a aprendizagem já existente.
+            Não representa percentagem, ranking ou progressão
+            independente.
+        ====================================================== */}
+        {dailyContext.dailyLearningLevel !== "none" && (
+          <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-[#E8DDD7]/45 bg-white/45 px-3.5 py-2.5">
+            <div
+              aria-hidden="true"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#E5A88B]/20 bg-[#FFF9F5]"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-[#C97B5E]/70" />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[8px] font-black uppercase tracking-[0.14em] text-[#B79587]">
+                {t("dailyMoment.evolvingInsight.eyebrow")}
+              </p>
+
+              <p className="mt-0.5 text-[10px] font-bold leading-relaxed text-[#806D65]">
+                {/* CONFIA 5E.2 — CURIOSIDADE CONCRETA */}
+                {homeNowMemory?.kind === "impulseLearning" &&
+                 homeNowMemory.need &&
+                 homeNowMemory.needCount >= 2
+                  ? t(
+                      `dailyMoment.concreteInsight.impulse.${homeNowMemory.need}`
+                    )
+                  : homeNowMemory?.kind === "continuity" &&
+                      homeNowMemory.repeatedNeed &&
+                      homeNowMemory.repeatedNeedCount >= 2
+                    ? t(
+                        `dailyMoment.concreteInsight.impulse.${homeNowMemory.repeatedNeed}`
+                      )
+                    : homeNowMemory?.kind === "continuity" &&
+                        homeNowMemory.repeatedCheckInNeed &&
+                        homeNowMemory.repeatedCheckInNeedCount >= 2
+                      ? t(
+                          "dailyMoment.concreteInsight.checkIn"
+                        )
+                      : homeNowMemory?.kind === "continuity" &&
+                          homeNowMemory.moodRecordCount >= 3 &&
+                          homeNowMemory.moodDirection === "improving"
+                        ? t(
+                            "dailyMoment.concreteInsight.moodImproving"
+                          )
+                        : homeNowMemory?.kind === "continuity" &&
+                            homeNowMemory.moodRecordCount >= 3 &&
+                            homeNowMemory.moodDirection === "declining"
+                          ? t(
+                              "dailyMoment.concreteInsight.moodDeclining"
+                            )
+                          : homeNowMemory?.kind === "continuity" &&
+                              homeNowMemory.moodRecordCount >= 3 &&
+                              homeNowMemory.moodDirection === "stable"
+                            ? t(
+                                "dailyMoment.concreteInsight.moodStable"
+                              )
+                            : dailyContext.dailyLearningLevel === "learned_impulse"
+                              ? t("dailyMoment.evolvingInsight.learnedImpulse")
+                              : dailyContext.dailyLearningLevel === "effective_impulse"
+                                ? t("dailyMoment.evolvingInsight.effectiveImpulse")
+                                : dailyContext.dailyLearningLevel === "repeated_signals"
+                                  ? t("dailyMoment.evolvingInsight.repeatedSignals")
+                                  : t("dailyMoment.evolvingInsight.early")}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================
+            CONFIA 5C — CONTINUIDADE DO REGRESSO
+
+            Reconhece continuidade temporal confirmada entre
+            a abertura atual e a abertura anterior.
+
+            Não atribui um registo específico ao dia anterior.
+            Não cria streak nem recompensa.
+        ====================================================== */}
+        {dailyContext.state === "first_today" &&
+         dailyContext.daysSincePreviousOpen === 1 && (
+          <div className="mt-3 rounded-2xl border border-[#E5A88B]/15 bg-gradient-to-r from-[#FFF9F5]/80 to-white/70 px-3.5 py-3">
+            <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#C97B5E]">
+              {t("dailyMoment.continuityReturn.eyebrow")}
+            </p>
+
+            <p className="mt-1 text-[10px] font-semibold leading-relaxed text-[#806D65]">
+              {dailyContext.dailyLearningLevel === "learned_impulse"
+                ? t("dailyMoment.continuityReturn.learnedImpulse")
+                : dailyContext.dailyLearningLevel === "effective_impulse"
+                  ? t("dailyMoment.continuityReturn.effectiveImpulse")
+                  : dailyContext.dailyLearningLevel === "repeated_signals"
+                    ? t("dailyMoment.continuityReturn.repeatedSignals")
+                    : dailyContext.dailyLearningLevel === "early_learning"
+                      ? t("dailyMoment.continuityReturn.early")
+                      : t("dailyMoment.continuityReturn.neutral")}
+            </p>
+          </div>
+        )}
+
+        {/* ======================================================
+            CONFIA 5B — SEMENTE DE AMANHÃ
+
+            Surge apenas na primeira abertura do dia.
+            Cria continuidade sem promessa artificial,
+            streak, recompensa ou penalização.
+        ====================================================== */}
+        {dailyContext.state === "first_today" && (
+          <div className="mt-3 flex items-start gap-2.5 rounded-2xl border border-[#E8DDD7]/60 bg-white/60 px-3.5 py-3">
+            <div
+              aria-hidden="true"
+              className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#D9A66F]"
+            />
+
+            <p className="text-[10px] font-semibold leading-relaxed text-[#8A746A]">
+              {dailyContext.dailyLearningLevel === "learned_impulse"
+                ? t("dailyMoment.tomorrow.learnedImpulse")
+                : dailyContext.dailyLearningLevel === "effective_impulse"
+                  ? t("dailyMoment.tomorrow.effectiveImpulse")
+                  : dailyContext.dailyLearningLevel === "repeated_signals"
+                    ? t("dailyMoment.tomorrow.repeatedSignals")
+                    : dailyContext.dailyLearningLevel === "early_learning"
+                      ? t("dailyMoment.tomorrow.early")
+                      : t("dailyMoment.tomorrow.neutral")}
+            </p>
+          </div>
+        )}
+
+        {dailyContext.suggestedAction &&
+         homeNowAction &&
+         dailyContext.suggestedAction === homeNowAction.kind && (
+          <div className="mt-4 border-t border-[#E8DDD7]/60 pt-3">
+            {/* CONFIA 3D — AÇÃO INTELIGENTE DO DIA */}
+            <p className="text-[9px] font-bold leading-relaxed text-slate-400">
+              {t("dailyMoment.actionHint")}
+            </p>
+
+            <button
+              type="button"
+              onClick={handleHomeNowAction}
+              className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-2xl border border-[#E5A88B]/20 bg-white/85 px-4 py-2 text-[10px] font-black text-[#C97B5E] shadow-[0_5px_16px_rgba(92,64,52,0.045)] transition-[transform,opacity,background-color] active:scale-[0.98] active:opacity-75"
+            >
+              <span>
+                {t(homeNowAction.actionKey)}
+              </span>
+
+              <span
+                aria-hidden="true"
+                className="text-sm leading-none"
+              >
+                →
+              </span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+)}
 
 {homeScreen === "home" && (
   <>
-  <HomeProgressSummary />
+  {homeNowMemory?.kind === "impulseLearning" &&
+  !homeNowAction && (
+  <div className="mt-4 overflow-hidden rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC] shadow-[0_10px_30px_rgba(92,64,52,0.06)]">
+    <div className="px-5 pt-5 pb-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/20 bg-white">
+          <Sparkles
+            size={18}
+            strokeWidth={1.8}
+            className="text-[#C97B5E]"
+          />
+        </div>
 
-  {reactiveMessageKey && (
-  <div className="mt-5 rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] to-white p-5 shadow-sm">
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+            {t("impulseLearning.eyebrow")}
+          </p>
+
+          <h3 className="mt-1 text-base font-black leading-tight text-[#4E3B36]">
+            {t("impulseLearning.title")}
+          </h3>
+
+          <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-500">
+            {t("impulseLearning.description", {
+              count: homeNowMemory.effectiveCount,
+              reduction:
+                homeNowMemory.averageReduction !== null
+                  ? Math.round(
+                      homeNowMemory.averageReduction * 10
+                    ) / 10
+                  : 0,
+            })}
+          </p>
+        </div>
+      </div>
+
+      {homeNowMemory.need && (
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-[20px] border border-[#E8DDD7]/60 bg-white/80 px-4 py-3">
+          <div>
+            <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">
+              {t("impulseLearning.patternLabel")}
+            </p>
+
+            <p className="mt-1 text-sm font-black text-[#4E3B36]">
+              {t(
+                `impulsePremium.${homeNowMemory.need}Title`
+              )}
+            </p>
+          </div>
+
+          <div className="rounded-full bg-[#FFF3EC] px-3 py-1.5 text-[9px] font-black text-[#C97B5E]">
+            {t("impulseLearning.observed", {
+              count: homeNowMemory.needCount,
+            })}
+          </div>
+        </div>
+      )}
+
+      <p className="mt-3 text-[10px] font-semibold leading-relaxed text-slate-400">
+        {t("impulseLearning.disclaimer")}
+      </p>
+    </div>
+  </div>
+)}
+
+{isFirstContact && (
+  <section
+    className={`relative mt-4 overflow-hidden rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC] p-5 shadow-[0_10px_28px_rgba(92,64,52,0.05)] ${
+      homeNowAction ? "rounded-b-[22px]" : ""
+    }`}
+    aria-label={t("firstContactInsight.eyebrow")}
+  >
+    <div
+      aria-hidden="true"
+      className="absolute left-0 top-6 h-12 w-[3px] rounded-r-full bg-[#E5A88B]/55"
+    />
+
     <div className="flex items-start gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-lg shadow-sm">
-        ✨
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/15 bg-white shadow-sm">
+        <Sparkles
+          size={18}
+          strokeWidth={1.8}
+          className="text-[#C97B5E]"
+        />
       </div>
 
       <div className="min-w-0">
         <p className="text-xs font-black uppercase tracking-wider text-[#C97B5E] font-display">
-          {t("reactiveInsightTitle")}
+          {t("firstContactInsight.eyebrow")}
         </p>
 
-        <p className="mt-1.5 text-sm font-semibold leading-relaxed text-[#4E3B36]">
+        <h3 className="mt-1.5 text-sm font-black leading-snug text-[#4E3B36]">
+          {t("firstContactInsight.title")}
+        </h3>
+
+        <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-slate-500">
+          {t("firstContactInsight.text")}
+        </p>
+      </div>
+    </div>
+  </section>
+)}
+
+{reactiveMessageKey && (
+  <div
+    className={`mt-4 rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] to-white p-5 shadow-sm ${
+      homeNowAction ? "rounded-b-[22px]" : ""
+    }`}
+  >
+    <div className="flex items-start gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white border border-[#E5A88B]/15">
+        <Sparkles
+          size={18}
+          strokeWidth={1.8}
+          className="text-[#C97B5E]"
+        />
+      </div>
+
+      <div className="min-w-0">
+        <p className="text-xs font-black uppercase tracking-wider text-[#C97B5E] font-display">
+          {isEarlyLearning
+            ? t("earlyLearningInsight.eyebrow")
+            : t("reactiveInsightTitle")}
+        </p>
+
+        {isEarlyLearning && (
+          <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#8A6A5D]">
+            {t("earlyLearningInsight.text")}
+          </p>
+        )}
+
+        <p
+          className={`font-semibold leading-relaxed text-[#4E3B36] ${
+            isEarlyLearning
+              ? "mt-2 text-sm"
+              : "mt-1.5 text-sm"
+          }`}
+        >
           {t(reactiveMessageKey)}
         </p>
       </div>
@@ -1100,219 +2413,537 @@ className="flex items-center justify-center w-24 h-24 relative"
   </>
 )}
 
-{/* Botões do menu principal — só existem quando homeScreen === "home" */}
-{homeScreen === "home" && (
-  <div className="flex justify-center gap-6 py-4">
-
-    <button
-      onClick={() => setHomeScreen("inventory")}
-      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
-    >
-      <span className="text-5xl">🎒</span>
-    </button>
-
-    <button
-      onClick={() => setHomeScreen("shop")}
-      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
-    >
-      <span className="text-5xl">🏠</span>
-    </button>
-
-    <button
-      onClick={() => setHomeScreen("settings")}
-      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
-    >
-      <span className="text-5xl">⚙️</span>
-    </button>
-
-    <button
-      onClick={() => setHomeScreen("companion")}
-      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg overflow-hidden"
-    >
+              {/* Para ti agora — ação contextual da CONFIA */}
+{homeScreen === "home" && homeNowAction && (
+  <div className={reactiveMessageKey || isFirstContact ? "-mt-2 pt-2" : ""}>
+    {(reactiveMessageKey || isFirstContact) && (
       <div
-        className="w-16 h-16 flex items-center justify-center overflow-hidden pointer-events-none"
-      >
-        <div
-          className="w-48 h-48 flex items-center justify-center"
-          style={{
-            transform: "scale(0.34)",
-            transformOrigin: "center center"
-          }}
-        >
-          <Avatar
-            avatar={avatar}
-            onPet={() => {}}
-            compact
-          />
-        </div>
-      </div>
-    </button>
+        aria-hidden="true"
+        className="mx-auto h-5 w-px bg-gradient-to-b from-[#E5A88B]/45 to-[#E5A88B]/10"
+      />
+    )}
 
+    <section
+      className={`rounded-[28px] border border-[#E5A88B]/20 bg-gradient-to-br from-[#FFF7F2] via-white to-[#FFFDFC] p-5 shadow-[0_10px_28px_rgba(92,64,52,0.05)] ${
+        reactiveMessageKey || isFirstContact ? "relative overflow-hidden" : ""
+      }`}
+      aria-label={t("homeNow.eyebrow")}
+    >
+      {(reactiveMessageKey || isFirstContact) && (
+        <div
+          aria-hidden="true"
+          className="absolute left-0 top-6 h-12 w-[3px] rounded-r-full bg-[#E5A88B]/55"
+        />
+      )}
+    <div className="flex items-start gap-3.5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/15 bg-white text-[#C97B5E] shadow-sm">
+        <Compass
+          size={18}
+          strokeWidth={1.8}
+        />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+          {homeNowContext?.kind === "impulseLearning"
+            ? t("impulseLearning.eyebrow")
+            : homeNowContext?.kind === "continuity"
+              ? t("homeNow.continuityMemory.eyebrow")
+              : t("homeNow.eyebrow")}
+        </p>
+
+        <h3 className="mt-1 text-sm font-black leading-snug text-[#4E3B36]">
+          {t(homeNowAction.titleKey)}
+        </h3>
+
+        {homeNowContext?.kind === "impulseLearning" && (
+          <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#8A6A5D]">
+            {t("impulseLearning.description", {
+              count: homeNowContext.memory.effectiveCount,
+              reduction:
+                homeNowContext.memory.averageReduction !== null
+                  ? Math.round(
+                      homeNowContext.memory.averageReduction * 10
+                    ) / 10
+                  : 0,
+            })}
+          </p>
+        )}
+
+        {/* 1D.8D — LINGUAGEM TRANSVERSAL */}
+        {homeNowContext?.kind === "continuity" && (
+          <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#8A6A5D]">
+            {homeNowContext.source === "mood"
+              ? t("homeNow.continuityMemory.mood")
+              : homeNowContext.source === "impulse"
+                ? t("homeNow.continuityMemory.impulse")
+                : homeNowContext.source === "cross"
+                  ? t("homeNow.continuityMemory.cross")
+                  : t("homeNow.continuityMemory.checkIn")}
+          </p>
+        )}
+
+        <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-slate-500">
+          {t(homeNowAction.textKey)}
+        </p>
+
+        <button
+          type="button"
+          onClick={handleHomeNowAction}
+          className="mt-3 inline-flex min-h-9 items-center gap-2 rounded-xl text-[10px] font-black text-[#C97B5E] transition-opacity active:opacity-70"
+        >
+          <span>
+            {t(homeNowAction.actionKey)}
+          </span>
+
+          <span aria-hidden="true">
+            →
+          </span>
+        </button>
+      </div>
+    </div>
+    </section>
   </div>
 )}
 
-              {/* Crisis Screening SOS Button */}
-              <button
-                onClick={() => setTriageOpen(true)}
-                className="w-full p-5 bg-[#FFF0E8] border border-[#E5A88B]/35 rounded-[32px] flex items-center justify-between group shadow-sm transition-all hover:bg-[#FFE8DE] cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-[#E5A88B] text-white rounded-2xl shadow-md shadow-[#E5A88B]/20 animate-pulse">
-                    <Brain size={20} />
-                  </div>
+{/* Hoje — resumo + registo diário */}
+              <div className="mt-1">
+                <HomeProgressSummary
+  onOpenProgress={() => setHomeScreen("progress")}
+/>
 
-                  <div className="text-left">
-                    <h3 className="text-sm font-black text-[#4E3B36] font-display">
-                      {t("crisisQuestion")}
-                    </h3>
-
-                    <p className="text-xs text-slate-500 mt-0.5 font-semibold">
-                      {t("crisisStartSupport")}
-                    </p>
-                  </div>
-
-                  <span className="text-xs font-black text-[#C97B5E] group-hover:translate-x-1 transition-transform font-display">
-                    SOS &rarr;
-                  </span>
-                </div>
-              </button>
-              {/* Day Rating Panel */}
-              <div className="bg-white border border-[#E5A88B]/15 rounded-[32px] p-6 shadow-sm space-y-5">
-<div className="space-y-2">
-  <label className="text-xs font-bold text-[#4E3B36]">
-   📅 {t("recordDate")}
-  </label>
-
-  <input
-    type="date"
-    value={selectedDate}
-    onChange={(e) => setSelectedDate(e.target.value)}
-    className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] font-bold text-[#4E3B36]"
-  />
-</div>
-                <div className="space-y-1">
-<h3 className="text-sm font-black text-[#4E3B36] flex items-center gap-1.5 font-display uppercase tracking-wider">
-  <Calendar size={15} className="text-[#E5A88B]" /> {t("classifyDay")}
-</h3>
-
-<p className="text-xs text-slate-500 font-semibold leading-relaxed">
-  {t("wellbeingDescription")}
-</p>
-                </div>
-
-                {/* Morning Slider */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#4E3B36]">
-                    <span className="flex items-center gap-1 text-[#C97B5E] font-display uppercase tracking-wider">
-                        <Sun size={15} /> {t("morning")}: {morningRating} / 10
-                    </span>
-                    <span className={`font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1 ${getRatingLabel(morningRating).color} font-display`}>
-                   <span>{getRatingLabel(morningRating).emoji}</span>
-                      <span>{getRatingLabel(morningRating).text}</span>
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    step="1"
-                    value={morningRating}
-                    onChange={(e) => setMorningRating(Number(e.target.value))}
-                    className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#E5A88B]"
-                  />
-                  <div className="flex justify-between text-[9px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
-                    <span>0 ({t("difficult")})</span>
-<span>10 ({t("peaceful")})</span>
-
-                  </div>
-                </div>
-
-                {/* Afternoon Slider */}
-                <div className="space-y-2 pt-2 border-t border-slate-100">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#4E3B36]">
-                    <span className="flex items-center gap-1 text-[#C97B5E] font-display uppercase tracking-wider">
-                      <Moon size={15} /> {t("afternoon")}: {afternoonRating} / 10
-                    </span>
-                    <span className={`font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1 ${getRatingLabel(afternoonRating).color} font-display`}>
-                      <span>{getRatingLabel(afternoonRating).emoji}</span>
-                      <span>{getRatingLabel(afternoonRating).text}</span>
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    step="1"
-               value={afternoonRating}
-                    onChange={(e) => setAfternoonRating(Number(e.target.value))}
-                    className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#E5A88B]"
-                  />
-                  <div className="flex justify-between text-[9px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
-<span>0 ({t("difficult")})</span>
-<span>10 ({t("peaceful")})</span>
-                  </div>
-                </div>
-
-                {/* Diary commentary note */}
-                <div className="space-y-1.5 pt-2">
-                  <label className="text-xs font-bold text-[#4E3B36]">
-  {t("dailyNote")}
-</label>
-                  <input
-                    type="text"
-                    placeholder={t("dailyNotePlaceholder")}
-                    value={noteText}
-                    onChange={(e) => setNoteText(e.target.value)}
-                    maxLength={100}
-                    className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] font-bold text-[#4E3B36]"
-                  />
-                </div>
-
-                {/* Submit button */}
-                <button
-                  onClick={handleSaveRatings}
-                className="w-full py-4 bg-gradient-to-r from-[#E5A88B] to-[#D59375] hover:from-[#D59375] hover:to-[#C68060] text-white font-extrabold text-xs uppercase tracking-wider font-display rounded-2xl transition-all duration-300 flex items-center justify-center gap-2"
+                {/* Registo diário premium — integrado na área Hoje */}
+                <section
+                  id="home-daily-record"
+                  className="overflow-hidden rounded-b-[30px] border border-[#E8DDD7]/70 bg-gradient-to-b from-white to-[#FFFDFC] shadow-[0_12px_30px_rgba(92,64,52,0.06)]"
                 >
-                  <CheckCircle2 size={15} />
-                 {todayLogged
-  ? t("updateTodayRecord")
-  : t("saveDailyRecord")}
+
+                <button
+                  type="button"
+                  onClick={() => setShowDayRatingPanel((current) => !current)}
+                  aria-expanded={showDayRatingPanel}
+                  className="w-full flex items-center justify-between gap-4 border-t border-[#E5A88B]/10 px-5 py-4 text-left transition-colors duration-200 active:bg-[#FFF9F5]"
+                >
+                  <div className="flex min-w-0 items-center gap-3.5">
+                    <div className="w-11 h-11 shrink-0 rounded-2xl border border-[#E5A88B]/15 bg-gradient-to-br from-[#FFF5EF] to-[#F8EAE2] flex items-center justify-center shadow-[0_5px_14px_rgba(92,64,52,0.04)]">
+                      <Calendar
+                        size={19}
+                        strokeWidth={1.8}
+                        className="text-[#C97B5E]"
+                      />
+                    </div>
+
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-black text-[#4E3B36] font-display">
+                        {t("classifyDay")}
+                      </h3>
+
+                      <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 font-semibold">
+                        {t("wellbeingDescription")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span
+                    aria-hidden="true"
+                    className="shrink-0 w-8 h-8 rounded-full border border-[#E5A88B]/15 bg-white flex items-center justify-center text-[#C97B5E] text-lg font-light shadow-sm"
+                  >
+                    {showDayRatingPanel ? "−" : "+"}
+                  </span>
                 </button>
 
+                {showDayRatingPanel && (
+                  <div className="border-t border-[#E5A88B]/10 bg-[#FFFCFA]/70 px-5 pb-5 pt-4 space-y-5">
 
+                    {/* Data */}
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-bold text-[#4E3B36]">
+                        {t("recordDate")}
+                      </label>
+
+                      <input
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] font-bold text-[#4E3B36]"
+                      />
+                    </div>
+
+                    {/* Manhã */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-[#C97B5E]">
+                          <Sun size={15} strokeWidth={1.8} />
+                          {t("morning")}
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-[#4E3B36]">
+                            {morningRating}
+                          </span>
+
+                          <span
+                            className={`text-[10px] font-bold flex items-center gap-1 ${getRatingLabel(morningRating).color}`}
+                          >
+                            
+                            <span>{getRatingLabel(morningRating).text}</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        step="1"
+                        value={morningRating}
+                        onChange={(e) => setMorningRating(Number(e.target.value))}
+                        className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#E5A88B]"
+                      />
+
+                      <div className="flex justify-between text-[9px] text-slate-400 font-bold">
+                        <span>0 · {t("difficult")}</span>
+                        <span>10 · {t("peaceful")}</span>
+                      </div>
+                    </div>
+
+                    {/* Tarde */}
+                    <div className="space-y-2 pt-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-[#C97B5E]">
+                          <Moon size={15} strokeWidth={1.8} />
+                          {t("afternoon")}
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-[#4E3B36]">
+                            {afternoonRating}
+                          </span>
+
+                          <span
+                            className={`text-[10px] font-bold flex items-center gap-1 ${getRatingLabel(afternoonRating).color}`}
+                          >
+                            
+                            <span>{getRatingLabel(afternoonRating).text}</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      <input
+                        type="range"
+                        min="0"
+                        max="10"
+                        step="1"
+                        value={afternoonRating}
+                        onChange={(e) => setAfternoonRating(Number(e.target.value))}
+                        className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#E5A88B]"
+                      />
+
+                      <div className="flex justify-between text-[9px] text-slate-400 font-bold">
+                        <span>0 · {t("difficult")}</span>
+                        <span>10 · {t("peaceful")}</span>
+                      </div>
+                    </div>
+
+                    {/* Nota opcional */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-[#4E3B36]">
+                        {t("dailyNote")}
+                      </label>
+
+                      <input
+                        type="text"
+                        placeholder={t("dailyNotePlaceholder")}
+                        value={noteText}
+                        onChange={(e) => setNoteText(e.target.value)}
+                        maxLength={100}
+                        className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] font-bold text-[#4E3B36]"
+                      />
+                    </div>
+
+                    {/* Guardar */}
+                    <button
+                      onClick={handleSaveRatings}
+                      className="w-full py-3.5 bg-[#D59375] active:bg-[#C68060] text-white font-extrabold text-xs rounded-2xl shadow-[0_8px_20px_rgba(201,123,94,0.18)] transition-colors duration-200 flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle2 size={15} />
+
+                      {todayLogged
+                        ? t("updateTodayRecord")
+                        : t("saveDailyRecord")}
+                    </button>
+
+                  </div>
+                )}
+
+                </section>
               </div>
+
+{/* O teu espaço — navegação secundária premium */}
+{homeScreen === "home" && (
+  <section
+    className="relative overflow-hidden rounded-[30px] border border-[#E8DDD7]/70 bg-gradient-to-br from-white via-[#FFFDFC] to-[#FFF6F1] shadow-[0_12px_32px_rgba(92,64,52,0.055)]"
+    aria-label={t("homeSpace.title")}
+  >
+    {/* Cabeçalho */}
+    <div className="relative px-5 pb-4 pt-5">
+      <div
+        aria-hidden="true"
+        className="absolute left-5 top-0 h-px w-10 bg-[#E5A88B]/45"
+      />
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+        {t("homeSpace.title")}
+      </p>
+
+      <p className="mt-1 text-[11px] font-semibold text-slate-400">
+        {t("homeSpace.subtitle")}
+      </p>
+    </div>
+
+    {/* Amigo — protagonista */}
+    <div className="px-3">
+      <button
+        type="button"
+        onClick={() => setHomeScreen("companion")}
+        className="relative w-full overflow-hidden flex items-center justify-between gap-4 rounded-[24px] border border-[#E5A88B]/20 bg-gradient-to-br from-white via-white to-[#FFF3EC] px-4 py-4 text-left shadow-[0_8px_22px_rgba(92,64,52,0.055)] transition-colors duration-200 active:bg-[#FFF8F4]"
+      >
+        <div
+          aria-hidden="true"
+          className="absolute -right-7 -top-8 h-24 w-24 rounded-full bg-[#F4D8C9]/20"
+        />
+
+        <div className="relative flex min-w-0 items-center gap-3.5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#E5A88B]/15 bg-gradient-to-br from-[#FFF8F4] to-[#F3E2D8] shadow-[0_5px_14px_rgba(92,64,52,0.04)]">
+            <Sparkles
+              size={19}
+              strokeWidth={1.8}
+              className="text-[#C97B5E]"
+            />
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+              CONFIA
+            </p>
+
+            <p className="mt-0.5 text-sm font-black text-[#4E3B36]">
+              {t("companion")}
+            </p>
+          </div>
+        </div>
+
+        <span
+          aria-hidden="true"
+          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#E5A88B]/15 bg-white/90 text-base font-light text-[#C97B5E] shadow-sm"
+        >
+          →
+        </span>
+      </button>
+    </div>
+
+    {/* Áreas do espaço */}
+    <div className="mt-3 grid grid-cols-3 gap-2 px-3">
+      {/* Hábitos */}
+      <button
+        type="button"
+        onClick={() => {
+          setPatternsPage("menu");
+          setHomeScreen("patterns");
+        }}
+        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
+          <ChartNoAxesCombined
+            size={16}
+            strokeWidth={1.8}
+            className="text-[#C97B5E]"
+          />
+        </div>
+
+        <span className="text-[10px] font-bold text-[#6D5A53]">
+          {t("patternsPremium.habits")}
+        </span>
+      </button>
+
+      {/* Inventário */}
+      <button
+        type="button"
+        onClick={() => setHomeScreen("inventory")}
+        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
+          <Backpack
+            size={16}
+            strokeWidth={1.8}
+            className="text-[#C97B5E]"
+          />
+        </div>
+
+        <span className="text-[10px] font-bold text-[#6D5A53]">
+          {t("inventory")}
+        </span>
+      </button>
+
+      {/* Loja */}
+      <button
+        type="button"
+        onClick={() => setHomeScreen("shop")}
+        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
+          <Store
+            size={16}
+            strokeWidth={1.8}
+            className="text-[#C97B5E]"
+          />
+        </div>
+
+        <span className="text-[10px] font-bold text-[#6D5A53]">
+          {t("shop")}
+        </span>
+      </button>
+    </div>
+
+    {/* Definições — utilidade secundária */}
+    <div className="mx-4 mt-3 border-t border-[#E8DDD7]/55">
+      <button
+        type="button"
+        onClick={() => setHomeScreen("settings")}
+        className="flex w-full items-center justify-end gap-1.5 px-1 py-3.5 text-slate-400 transition-colors duration-200 active:text-[#C97B5E]"
+      >
+        <Settings
+          size={13}
+          strokeWidth={1.8}
+        />
+
+        <span className="text-[9px] font-bold">
+          {t("settings")}
+        </span>
+      </button>
+    </div>
+  </section>
+)}
+
+{/* Apoio — acesso SOS discreto e sempre disponível */}
+<button
+  type="button"
+  onClick={() => setTriageOpen(true)}
+  className="group w-full rounded-[22px] border border-[#E8DDD7]/60 bg-white/45 px-4 py-3 text-left transition-colors duration-200 active:bg-[#FFF8F4]"
+>
+  <div className="flex items-center gap-3">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E5A88B]/20 bg-[#FFF8F4]">
+      <Brain
+        size={16}
+        strokeWidth={1.7}
+        className="text-[#C97B5E]"
+      />
+    </div>
+
+    <div className="min-w-0 flex-1">
+      <p className="text-xs font-black text-[#4E3B36] font-display">
+        {t("crisisQuestion")}
+      </p>
+
+      <p className="mt-0.5 truncate text-[10px] font-semibold text-slate-400">
+        {t("crisisStartSupport")}
+      </p>
+    </div>
+
+    <div className="flex shrink-0 items-center gap-1.5">
+      <span className="text-[10px] font-black tracking-wide text-[#C97B5E]">
+        SOS
+      </span>
+
+      <span
+        aria-hidden="true"
+        className="text-sm font-light text-[#C97B5E]"
+      >
+        →
+      </span>
+    </div>
+  </div>
+</button>
+
 </div>
-{/* Conhece os teus Padrões */}
 
-{patternsPage === "menu" && (
-  <PatternsNew
-    onBack={() => setCurrentTab(0)}
-    onOpenAssessment={() => setPatternsPage("assessment")}
-    onOpenDaily={() => setPatternsPage("daily")}
-    onOpenEvolution={() => setPatternsPage("evolution")}
-  />
-)}
-
-{patternsPage === "assessment" && (
-  <HabitAssessment
-    onBack={() => setPatternsPage("menu")}
-  />
-)}
-
-{patternsPage === "daily" && (
-  <HabitDailyCheck
-    onBack={() => setPatternsPage("menu")}
-  />
-)}
-
-{patternsPage === "evolution" && (
-  <HabitEvolution
-    onBack={() => setPatternsPage("menu")}
-  />
-)}
             </div>
           )}
 
+
+{/* Evolução — ecrã próprio dentro do Principal */}
+{currentTab === 0 && homeScreen === "progress" && (
+  <div
+    key="progress-screen"
+    className="flex-1"
+  >
+    <div className="mb-4 flex items-center gap-3">
+      <button
+        type="button"
+        onClick={() => setHomeScreen("home")}
+        aria-label={t("back")}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E8DDD7]/80 bg-white text-[#C97B5E] shadow-sm transition-transform active:scale-95"
+      >
+        <ArrowLeft
+          size={18}
+          strokeWidth={1.9}
+        />
+      </button>
+
+      <div className="min-w-0">
+        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+          {t("homeProgress.eyebrow")}
+        </p>
+
+        <h2 className="text-lg font-black tracking-tight text-[#4E3B36]">
+          {t("homeProgress.evolutionTitle")}
+        </h2>
+      </div>
+    </div>
+
+    <ProgressoDashboard
+      ratings={ratings}
+      avatarLevel={avatar.level}
+      avatarXp={avatar.xp}
+      completedObjectivesCount={completedObjectivesCount}
+      objectivesHistory={objectivesHistory}
+    />
+  </div>
+)}
+
+{/* Padrões — ecrã próprio dentro do Principal */}
+{currentTab === 0 && homeScreen === "patterns" && (
+  <>
+    {patternsPage === "menu" && (
+      <PatternsNew
+        onBack={() => {
+          setPatternsPage("menu");
+          setHomeScreen("home");
+        }}
+        onOpenAssessment={() => setPatternsPage("assessment")}
+        onOpenDaily={() => setPatternsPage("daily")}
+        onOpenEvolution={() => setPatternsPage("evolution")}
+      />
+    )}
+
+    {patternsPage === "assessment" && (
+      <HabitAssessment
+        onBack={() => setPatternsPage("menu")}
+      />
+    )}
+
+    {patternsPage === "daily" && (
+      <HabitDailyCheck
+        onBack={() => setPatternsPage("menu")}
+      />
+    )}
+
+    {patternsPage === "evolution" && (
+      <HabitEvolution
+        onBack={() => setPatternsPage("menu")}
+      />
+    )}
+  </>
+)}
 
 {currentTab === 0 && homeScreen === "companion" && (
   <div
@@ -1526,6 +3157,36 @@ className="flex items-center justify-center w-24 h-24 relative"
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="bg-white border border-slate-100/80 rounded-[32px] p-6 shadow-sm">
+                {currentTab === 1 && reactiveMessageKey && (
+                  <section
+                    className="mb-4 overflow-hidden rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FFFDFC] shadow-[0_12px_32px_rgba(92,64,52,0.06)]"
+                  >
+                    <div className="flex items-start gap-3.5 p-5">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/15 bg-white text-[#C97B5E] shadow-sm">
+                        <Sparkles
+                          size={18}
+                          strokeWidth={1.8}
+                        />
+                      </div>
+                
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+                          {t("homeNow.eyebrow")}
+                        </p>
+                
+                        <p className="mt-1.5 text-sm font-semibold leading-relaxed text-[#4E3B36]">
+                          {t(reactiveMessageKey)}
+                        </p>
+                      </div>
+                    </div>
+                
+                    <div
+                      aria-hidden="true"
+                      className="h-[3px] w-full bg-gradient-to-r from-[#E5A88B]/10 via-[#C97B5E]/45 to-[#E5A88B]/10"
+                    />
+                  </section>
+                )}
+
                 <ObjectivosList
                   objectives={objectives}
                   onToggleComplete={handleToggleObjective}
@@ -1543,43 +3204,34 @@ className="flex items-center justify-center w-24 h-24 relative"
           )}
 
 {currentTab === 3 && (
-  /* TAB 4: IMPULSO SOS + COMUNIDADE */
+  /* TAB 4: IMPULSO — intervenção imediata / SOS */
   <motion.div
     key="impulso-tab"
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -10 }}
-    className="space-y-6"
   >
     <ImpulsoSOS onAddXp={addXp} />
-
-    <PartilhaFeed
-      posts={posts}
-      onAddPost={handleAddPost}
-      onLikePost={handleLikePost}
-      onOpenChat={handleOpenChat}
-  onDeletePost={handleDeletePost}
- onReportPost={handleReportPost}
-onBlockUser={handleBlockUser}
-    />
   </motion.div>
 )}
 
           {currentTab === 4 && (
-            /* TAB 5: PROGRESSO */
+            /* TAB 5: COMUNIDADE */
             <motion.div
-              key="progress-tab"
+              key="community-tab"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-<ProgressoDashboard
-  ratings={ratings}
-  avatarLevel={avatar.level}
-  avatarXp={avatar.xp}
-  completedObjectivesCount={completedObjectivesCount}
-  objectivesHistory={objectivesHistory}
-/>
+              <PartilhaFeed
+                posts={posts}
+                onAddPost={handleAddPost}
+                onLikePost={handleLikePost}
+                onOpenChat={handleOpenChat}
+                onDeletePost={handleDeletePost}
+                onReportPost={handleReportPost}
+                onBlockUser={handleBlockUser}
+              />
             </motion.div>
           )}
 
@@ -1639,7 +3291,7 @@ onBlockUser={handleBlockUser}
         <StopMode
           onStartImpulse={() => {
             setShowStopMode(false);
-            setCurrentTab(4);
+            setCurrentTab(3);
           }}
         />
       )}
@@ -1655,12 +3307,15 @@ onBlockUser={handleBlockUser}
       <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5A88B]/15 px-4 py-3.5">
         <div className="max-w-lg mx-auto flex items-center justify-between">
           {[
-           { label: t("home"), icon: '🏠', index: 0 },
-            { label: t("hug"), icon: '🫂', index: 1 },
-            { label: t("objectives"), icon: '🎯', index: 2 },
-            { label: t("impulse"), icon: '🆘', index: 3 },
-            { label: t("progress"), icon: '📈', index: 4 }
-          ].map(tab => (
+           { label: t("home"), icon: House, index: 0 },
+           { label: t("hug"), icon: Wind, index: 1 },
+           { label: t("objectives"), icon: Target, index: 2 },
+           { label: t("impulse"), icon: Zap, index: 3 },
+           { label: t("community"), icon: Users, index: 4 }
+          ].map(tab => {
+            const TabIcon = tab.icon;
+
+            return (
             <button
               key={tab.index}
 onClick={() => {
@@ -1679,10 +3334,15 @@ onClick={() => {
                 />
               )}
 
-              <span className="text-lg mb-0.5">{tab.icon}</span>
+              <TabIcon
+                size={20}
+                strokeWidth={currentTab === tab.index ? 2.4 : 1.9}
+                className="mb-1 transition-all duration-300"
+              />
               <span className="text-[10px] tracking-tight">{tab.label}</span>
             </button>
-          ))}
+            );
+          })}
         </div>
       </footer>
     </div>

@@ -33,6 +33,19 @@ export interface CompanionHabitRecord {
 
 export interface CompanionImpulseRecord {
   date: string;
+
+  /**
+   * Percurso escolhido no Impulso.
+   *
+   * Opcional porque episódios antigos
+   * não possuem esta informação.
+   */
+  need?:
+    | "calm"
+    | "mind"
+    | "control"
+    | "support";
+
   intensity?: number;
   finalIntensity?: number;
   emotion?: string;
@@ -146,6 +159,7 @@ function readImpulseHistory(): CompanionImpulseRecord[] {
 
     return episodes.map((episode) => ({
       date: episode.createdAt,
+      need: episode.need,
       intensity: episode.initialIntensity,
       finalIntensity: episode.finalIntensity,
       emotion: episode.emotion,

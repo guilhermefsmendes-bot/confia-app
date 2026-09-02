@@ -286,22 +286,85 @@ function buildMetrics(
       (value): value is number => typeof value === "number"
     );
 
-  const objectives = data.objectives.slice(-7);
+  /**
+   * Objetivos — períodos comparáveis.
+   *
+   * O histórico anterior à 2F.1 pode conter
+   * registos sem denominador real.
+   *
+   * Por isso apenas usamos registos com total > 0.
+   */
+  const validObjectiveRecords =
+    data.objectives.filter(
+      (item) =>
+        typeof item.completed === "number" &&
+        typeof item.total === "number" &&
+        item.total > 0
+    );
 
-  const objectivesCompleted = objectives.reduce(
-    (sum, item) => sum + item.completed,
-    0
-  );
+  /**
+   * Trabalhamos com até 6 dias válidos:
+   *
+   * - últimos 3 = período recente
+   * - 3 anteriores = período anterior
+   */
+  const recentObjectiveRecords =
+    validObjectiveRecords.slice(-3);
 
-  const objectivesTotal = objectives.reduce(
-    (sum, item) => sum + item.total,
-    0
-  );
+  const previousObjectiveRecords =
+    validObjectiveRecords.slice(-6, -3);
+
+  const calculateObjectivePeriodRate = (
+    records: typeof validObjectiveRecords
+  ) => {
+    const completed = records.reduce(
+      (sum, item) => sum + item.completed,
+      0
+    );
+
+    const total = records.reduce(
+      (sum, item) => sum + item.total,
+      0
+    );
+
+    return {
+      completed,
+      total,
+      rate:
+        total > 0
+          ? completed / total
+          : undefined,
+      validDays: records.length,
+    };
+  };
+
+  const recentObjectivePeriod =
+    calculateObjectivePeriodRate(
+      recentObjectiveRecords
+    );
+
+  const previousObjectivePeriod =
+    calculateObjectivePeriodRate(
+      previousObjectiveRecords
+    );
+
+  const objectivesCompleted =
+    recentObjectivePeriod.completed;
+
+  const objectivesTotal =
+    recentObjectivePeriod.total;
 
   const objectiveCompletionRate =
-    objectivesTotal > 0
-      ? objectivesCompleted / objectivesTotal
-      : undefined;
+    recentObjectivePeriod.rate;
+
+  const previousObjectiveCompletionRate =
+    previousObjectivePeriod.rate;
+
+  const objectiveValidDays =
+    recentObjectivePeriod.validDays;
+
+  const previousObjectiveValidDays =
+    previousObjectivePeriod.validDays;
 
   const dates = sortDates([
     ...moods.map((item) => item.date),
@@ -337,16 +400,22 @@ function buildMetrics(
     activeDays: calculateActiveDays(data),
 
     objectivesCompleted:
-      objectives.length > 0
+      validObjectiveRecords.length > 0
         ? objectivesCompleted
         : undefined,
 
     objectivesTotal:
-      objectives.length > 0
+      validObjectiveRecords.length > 0
         ? objectivesTotal
         : undefined,
 
     objectiveCompletionRate,
+
+    previousObjectiveCompletionRate,
+
+    objectiveValidDays,
+
+    previousObjectiveValidDays,
 
     impulseCount: data.impulse.length,
 
@@ -473,17 +542,84 @@ function detectSituation(
     };
   }
 
-  // Objetivos em evolução
-  if (
+  /**
+   * Objetivos — tendência temporal real.
+   *
+   * Para chamar algo de tendência precisamos
+   * de dados dos dois lados da comparação.
+   *
+   * Exigimos pelo menos:
+   * - 2 dias válidos recentes
+   * - 2 dias válidos anteriores
+   */
+  const hasComparableObjectivePeriods =
     typeof metrics.objectiveCompletionRate === "number" &&
-    metrics.objectiveCompletionRate >= 0.75
-  ) {
-    return {
-      situation: "objectives_improving",
-      confidence: 0.84,
-      reasoning:
-        "A taxa recente de conclusão dos objetivos é elevada.",
-    };
+    typeof metrics.previousObjectiveCompletionRate === "number" &&
+    typeof metrics.objectiveValidDays === "number" &&
+    typeof metrics.previousObjectiveValidDays === "number" &&
+    metrics.objectiveValidDays >= 2 &&
+    metrics.previousObjectiveValidDays >= 2;
+
+  if (hasComparableObjectivePeriods) {
+    const recentRate =
+      metrics.objectiveCompletionRate as number;
+
+    const previousRate =
+      metrics.previousObjectiveCompletionRate as number;
+
+    const change =
+      recentRate - previousRate;
+
+    /**
+     * Melhoria real:
+     * pelo menos +15 pontos percentuais.
+     */
+    if (change >= 0.15) {
+      return {
+        situation: "objectives_improving",
+        confidence: 0.88,
+        reasoning:
+          "A conclusão de objetivos melhorou face ao período anterior.",
+      };
+    }
+
+    /**
+     * Declínio real:
+     * pelo menos -15 pontos percentuais.
+     *
+     * Uma simples reversão de um objetivo
+     * não é suficiente para produzir este estado.
+     */
+    if (change <= -0.15) {
+      return {
+        situation: "objectives_declining",
+        confidence: 0.86,
+        reasoning:
+          "A conclusão de objetivos diminuiu face ao período anterior.",
+      };
+    }
+
+    /**
+     * Consistência positiva:
+     *
+     * - variação inferior a 15 pontos percentuais
+     * - pelo menos 60% em ambos os períodos
+     *
+     * Desta forma 10% -> 10% não é apresentado
+     * como uma conquista de consistência.
+     */
+    if (
+      Math.abs(change) < 0.15 &&
+      recentRate >= 0.60 &&
+      previousRate >= 0.60
+    ) {
+      return {
+        situation: "objectives_consistent",
+        confidence: 0.84,
+        reasoning:
+          "A conclusão de objetivos manteve-se consistente entre períodos.",
+      };
+    }
   }
 
   // Utilização consistente
@@ -669,6 +805,24 @@ export function buildReactiveContext(
       };
     }
 
+  } else if (
+    input.source === "objective" &&
+    input.objectiveCompleted === true
+  ) {
+    /**
+     * A ação atual tem prioridade.
+     *
+     * O utilizador acabou de concluir um objetivo,
+     * portanto essa conclusão não deve ser substituída
+     * por um sinal histórico de humor, Impulso ou uso.
+     */
+    detection = {
+      situation: "objective_completed" as const,
+      confidence: 0.98,
+      reasoning:
+        "O utilizador acabou de concluir um objetivo.",
+    };
+
   } else if (input.source === "mood") {
     const hasMood =
       typeof metrics.currentMood === "number";
@@ -736,6 +890,42 @@ export function buildReactiveContext(
         confidence: 0.80,
         reasoning:
           "O registo atual não apresenta uma variação dominante.",
+      };
+    }
+
+  } else if (input.source === "objective") {
+    /**
+     * Leitura histórica dos Objetivos.
+     *
+     * O detectSituation continua a ser a única fonte
+     * das tendências temporais.
+     *
+     * Porém, quando a origem atual é "objective",
+     * não permitimos que uma situação de Mood,
+     * Impulso ou utilização seja apresentada dentro
+     * do separador Objetivos.
+     */
+    const objectiveHistoricalDetection =
+      detectSituation(metrics, data);
+
+    const objectiveSituations = new Set([
+      "objectives_improving",
+      "objectives_declining",
+      "objectives_consistent",
+    ]);
+
+    if (
+      objectiveSituations.has(
+        objectiveHistoricalDetection.situation
+      )
+    ) {
+      detection = objectiveHistoricalDetection;
+    } else {
+      detection = {
+        situation: "no_data" as const,
+        confidence: 0.96,
+        reasoning:
+          "Ainda não existem dados históricos suficientes de objetivos para identificar uma tendência.",
       };
     }
 
@@ -894,19 +1084,213 @@ function selectResponse(
     }
 
     /**
-     * Necessidade que tem aparecido repetidamente
-     * nos Daily Check-Ins.
+     * 1D.9A — SCORING SEM DUPLICAÇÃO
+     *
+     * Necessidades repetidas do Daily Check-In são avaliadas
+     * exclusivamente pela memória transversal abaixo.
+     *
+     * A mesma evidência não deve receber peso duas vezes.
      */
-    if (memory.repeatedNeed) {
-      if (tags.includes(memory.repeatedNeed)) {
+
+    /**
+     * 1D.8B — MEMÓRIA TRANSVERSAL
+     *
+     * A continuidade pode agora vir de Humor,
+     * Daily Check-In e Impulso.
+     *
+     * A memória apenas aumenta a relevância de respostas
+     * já válidas para a situação e intenção atuais.
+     *
+     * Não altera situation.
+     * Não altera intent.
+     * Não cria candidatos.
+     * Não ignora cooldown.
+     */
+    if (memory.continuity?.hasRepeatedSignals) {
+      const continuity =
+        memory.continuity;
+
+      /**
+       * --------------------------------------------------------
+       * DAILY CHECK-IN
+       * --------------------------------------------------------
+       *
+       * Se uma necessidade apareceu repetidamente,
+       * reforçamos apenas respostas explicitamente
+       * relacionadas com essa necessidade.
+       */
+      const repeatedCheckInNeed =
+        continuity.repeatedCheckInNeed;
+
+      if (
+        repeatedCheckInNeed &&
+        continuity.repeatedCheckInNeedCount >= 2 &&
+        tags.includes(repeatedCheckInNeed)
+      ) {
         score += 4;
       }
 
       if (
-        memory.repeatedNeed === "well" &&
+        repeatedCheckInNeed === "well" &&
+        continuity.repeatedCheckInNeedCount >= 2 &&
         tags.includes("continuation")
       ) {
-        score += 4;
+        score += 3;
+      }
+
+      /**
+       * --------------------------------------------------------
+       * IMPULSO
+       * --------------------------------------------------------
+       *
+       * Mantemos a aprendizagem já existente, mas agora
+       * apenas quando a continuidade do Impulso é real.
+       */
+      const repeatedImpulseNeed =
+        continuity.repeatedNeed;
+
+      const hasImpulseContinuity =
+        continuity.recentEffectiveImpulseCount >= 2 ||
+        continuity.repeatedNeedCount >= 2;
+
+      /**
+       * 1D.9B — NORMALIZAÇÃO DO IMPULSO
+       *
+       * Uma estratégia eficaz recente já reforça as tags
+       * "impulse" e "strategy" no bloco anterior.
+       *
+       * A continuidade não deve duplicar automaticamente
+       * esse mesmo reforço. Quando existe experiência eficaz
+       * recente, usamos a continuidade apenas para acrescentar
+       * informação mais específica: aprendizagem e necessidade.
+       *
+       * Se não existe recentEffectiveImpulse, a continuidade
+       * pode continuar a reforçar impulse/strategy por si só.
+       */
+      if (hasImpulseContinuity) {
+        if (tags.includes("learning")) {
+          score += 2;
+        }
+
+        if (!memory.recentEffectiveImpulse) {
+          if (tags.includes("strategy")) {
+            score += 2;
+          }
+
+          if (tags.includes("impulse")) {
+            score += 2;
+          }
+        }
+
+        if (
+          repeatedImpulseNeed &&
+          tags.includes(repeatedImpulseNeed)
+        ) {
+          score += 3;
+        }
+      }
+
+      /**
+       * --------------------------------------------------------
+       * HUMOR
+       * --------------------------------------------------------
+       *
+       * A tendência histórica só reforça respostas quando
+       * o estado atual não a contradiz.
+       *
+       * Exemplo:
+       * uma tendência histórica de melhoria não deve fazer
+       * a Confia falar de progresso se o momento atual está
+       * claramente em descida.
+       */
+      const continuityMood =
+        continuity.moodDirection;
+
+      const currentMoodDirection =
+        memory.moodDirection;
+
+      const moodCompatible =
+        continuityMood !== "unknown" &&
+        (
+          currentMoodDirection === "unknown" ||
+          currentMoodDirection === "stable" ||
+          currentMoodDirection === continuityMood
+        );
+
+      if (moodCompatible) {
+        if (continuityMood === "improving") {
+          if (tags.includes("progress")) {
+            score += 3;
+          }
+
+          if (tags.includes("positive")) {
+            score += 2;
+          }
+
+          if (tags.includes("small-win")) {
+            score += 2;
+          }
+        }
+
+        if (continuityMood === "declining") {
+          if (tags.includes("support")) {
+            score += 3;
+          }
+
+          if (tags.includes("attention")) {
+            score += 2;
+          }
+
+          if (tags.includes("difficult")) {
+            score += 2;
+          }
+        }
+
+        if (
+          continuityMood === "stable" &&
+          tags.includes("stability")
+        ) {
+          score += 2;
+        }
+      }
+
+      /**
+       * --------------------------------------------------------
+       * CONVERGÊNCIA
+       * --------------------------------------------------------
+       *
+       * Duas ou mais fontes com continuidade aumentam
+       * ligeiramente a relevância de respostas de reflexão
+       * e aprendizagem.
+       *
+       * É um reforço pequeno: convergência não significa
+       * causalidade nem deve dominar a ação atual.
+       */
+      if (continuity.signalCount >= 2) {
+        /**
+         * Reflexão é transversal.
+         *
+         * A convergência entre diferentes fontes pode tornar
+         * uma resposta reflexiva ligeiramente mais relevante.
+         */
+        if (tags.includes("reflection")) {
+          score += 1;
+        }
+
+        /**
+         * Learning representa aprendizagem de estratégia.
+         *
+         * Por isso só recebe o reforço da convergência quando
+         * existe também continuidade real do Impulso.
+         *
+         * Humor + Check-In, por si só, não são suficientes.
+         */
+        if (
+          hasImpulseContinuity &&
+          tags.includes("learning")
+        ) {
+          score += 1;
+        }
       }
     }
 

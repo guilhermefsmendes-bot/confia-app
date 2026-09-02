@@ -57,6 +57,8 @@
   "cycleMoreAnxiety": "More anxiety",
   "cycleExplanation": "When we constantly seek reassurance, the brain learns that there is danger and keeps the cycle active.",
   "evolutionDiary": "Evolution Diary",
+  "inventory": "Inventory",
+  "shop": "Shop",
   "settings": "Settings",
   "home": "Home",
   "impulseHistoryTitle": "🛡️ Impulse History",
@@ -135,7 +137,7 @@
   "goalCategory": "Goal Category",
   "saveGoal": "Save Goal",
   "whatToAchieveToday": "What do you want to achieve today?",
-  "goalPlaceholder": "Ex: Ler 2 páginas de um livro, regar as plantas...",
+  "goalPlaceholder": "E.g. Read 2 pages, water the plants...",
   "remove": "Remover",
   "dailyCheckIn": {
     "title": "Good morning 🌱",
@@ -896,9 +898,17 @@
       "noData": "We're still getting to know your rhythm. Keep checking in and we'll start finding patterns.",
       "improving": "You've been showing positive progress. Even small steps count — keep taking care of yourself.",
       "difficult": "The last few days seem to have been harder. You don't have to feel good every day. What matters is staying present.",
-      "stable": "Your wellbeing has remained relatively stable. Consistency is progress too.",
+      "stable": "Your wellbeing has remained relatively stable. It may be useful to keep noticing this rhythm without needing to force it.",
       "active": "You've been showing up and taking care of yourself. Every small step helps build bigger change."
-    }
+    },
+    "trend": {
+      "learning": "Getting to know you",
+      "improving": "Positive trend",
+      "difficult": "More demanding days",
+      "stable": "Steady rhythm"
+    },
+    "openEvolution": "See my progress",
+    "evolutionTitle": "My progress"
   },
   "reactive": {
     "responses": {
@@ -1239,5 +1249,282 @@
   },
   "reactiveInsightTitle": "Confia noticed...",
   "language": "Language",
-  "chooseLanguage": "Choose the language for the app."
+  "chooseLanguage": "Choose the language for the app.",
+  "homeToday": {
+    "title": "Today",
+    "subtitle": "Your moment, in one place"
+  },
+  "homeSpace": {
+    "title": "Your space",
+    "subtitle": "Everything that grows with you"
+  },
+  "community": "Community",
+  "impulsePremium": {
+    "eyebrow": "IMPULSE",
+    "title": "A moment to come back to yourself.",
+    "subtitle": "You don't need to know exactly what to do. Just tell us what you need right now.",
+    "question": "What do you need right now?",
+    "calmTitle": "Calm down",
+    "calmDesc": "Lower the intensity and create some space.",
+    "mindTitle": "Clear my mind",
+    "mindDesc": "Slow down thoughts that are taking up too much space.",
+    "controlTitle": "Regain control",
+    "controlDesc": "Pause, orient myself and choose the next step.",
+    "supportTitle": "Feel supported",
+    "supportDesc": "I don't want to go through this moment alone.",
+    "continue": "Continue",
+    "chooseFirst": "Choose what feels closest to what you need right now.",
+    "history": "Your journey",
+    "historyUses": "{{count}} uses",
+    "historyFirst": "This space learns with you each time you use it."
+  },
+  "impulseAdaptive": {
+    "routeLabel": "Chosen path",
+    "calmRoute": "Calm the body",
+    "mindRoute": "Give the mind some space",
+    "controlRoute": "Regain orientation",
+    "supportRoute": "Feel supported",
+    "supportStepTitle": "Stay here for a moment.",
+    "supportStepText": "You don't have to solve everything right now. Just acknowledge what you're feeling and allow yourself not to carry this moment alone.",
+    "supportPrompt": "If there is someone you feel safe with, you could consider sending a simple message. You don't have to explain everything.",
+    "supportExample": "You could say: “I'm having a difficult moment. Can you stay with me for a little while?”",
+    "supportContinue": "When you're ready, let's notice how you feel now."
+  },
+  "impulseExperience": {
+    "step": "Step {{current}} of {{total}}",
+    "intensityNow": "How intense does it feel right now?",
+    "intensityNowDesc": "You don't need to overthink it. Choose the number that feels closest to what you're experiencing.",
+    "intensityAfter": "How intense does it feel now?",
+    "intensityAfterDesc": "Just compare it with how you felt when you started.",
+    "low": "Low",
+    "medium": "Moderate",
+    "high": "High",
+    "initial": "At the start",
+    "now": "Now"
+  },
+  "impulseClosing": {
+    "gratitudeEyebrow": "A MOMENT FOR YOU",
+    "timerTitle": "Stay here for a few minutes",
+    "timerDesc": "Give the exercise some space without rushing. You don't need to do anything perfectly.",
+    "completedEyebrow": "IMPULSE COMPLETE",
+    "completedTitle": "Notice where you are now.",
+    "completedDesc": "This moment has been recorded. CONFIA will keep learning with you.",
+    "before": "Before",
+    "after": "Now",
+    "difference": "Change",
+    "confiaNoticed": "CONFIA noticed...",
+    "xpEarned": "+30 XP",
+    "xpDesc": "For taking care of yourself in this moment"
+  },
+  "impulseMemory": {
+    "memoryEyebrow": "CONFIA REMEMBERS",
+    "memoryText": "Recently, you chose {{need}} and the intensity went from {{before}} to {{after}}. This approach seemed to help you.",
+    "helpedRecently": "Helped you recently"
+  },
+  "homeNow": {
+    "eyebrow": "For you now",
+    "impulse": {
+      "title": "A moment to come back to yourself",
+      "text": "Based on what you've been recording, it may help to create a little space now to settle and regain your centre.",
+      "action": "Go to Impulse"
+    },
+    "impulseMemory": {
+      "title": "Something that helped before",
+      "text": "The last time you used Impulse, your intensity went from {{before}} to {{after}}. You can try this space again if it feels like it could help.",
+      "action": "Open Impulse",
+      "eyebrow": "CONFIA REMEMBERS"
+    },
+    "patterns": {
+      "title": "There's something worth noticing",
+      "text": "Your records can become more meaningful when you look at them together.",
+      "action": "Explore my patterns"
+    },
+    "objectives": {
+      "title": "One small step may be enough",
+      "text": "This may be a good moment to return to your goals and choose where you want to place your energy.",
+      "action": "See my goals"
+    },
+    "progress": {
+      "title": "Look at the path you've been taking",
+      "text": "Your records contain information that may be useful to look at with a little distance.",
+      "action": "See my progress"
+    },
+    "record": {
+      "title": "Start by saying how you are",
+      "text": "A simple check-in helps Confia understand your current moment and support you more usefully.",
+      "action": "Record how I am"
+    },
+    "continuity": {
+      "eyebrow": "CONFIA NOTICED A REPEAT",
+      "text": "Similar signals have appeared more than once in your recent records ({{count}} occurrences). They may be worth noticing without jumping to conclusions."
+    },
+    "continuityMemory": {
+      "eyebrow": "CONFIA HAS NOTICED",
+      "mood": "I've noticed a similar direction across your recent records. It may be worth looking at this change with a little distance.",
+      "checkIn": "A need has been showing up repeatedly in your check-ins. It may be worth noticing what these moments have in common.",
+      "impulse": "There's an approach that has helped you more than once. You can keep it in mind if it feels useful again.",
+      "cross": "There are signals across different records that seem worth looking at together."
+    }
+  },
+  "impulseLearning": {
+    "eyebrow": "CONFIA HAS LEARNED FROM YOU",
+    "title": "One approach seems to be helping you",
+    "description": "In your recent effective episodes, intensity dropped by an average of {{reduction}} points. We now have {{count}} experiences showing this signal.",
+    "patternLabel": "Pattern observed",
+    "observed": "{{count}} times",
+    "disclaimer": "This does not mean it is always the best option. Confia is simply recognizing a pattern in your records."
+  },
+  "firstContactInsight": {
+    "eyebrow": "CONFIA starts here",
+    "title": "Let's start by getting to know you",
+    "text": "Each check-in helps CONFIA understand how you've been feeling. Over time, what you see here becomes more personal."
+  },
+  "earlyLearningInsight": {
+    "eyebrow": "CONFIA is learning",
+    "text": "I'm starting to receive some signals from you. I'm still building context to better understand what repeats and what changes."
+  },
+  "objectivesPremium": {
+    "eyebrow": "Your progress",
+    "title": "Your path",
+    "subtitle": "Every small action counts. Today you're building your path, one step at a time.",
+    "today": "Today",
+    "todayProgress": "Today's progress",
+    "progressHint": "Small actions are progress too.",
+    "nextStep": "Next step",
+    "nextStepTitle": "One step at a time",
+    "nextStepHint": "You don't need to do everything now. Start with this small action.",
+    "completeStep": "Complete this step",
+    "smallWinsEyebrow": "The rest of your day",
+    "smallWins": "Small wins",
+    "completedEyebrow": "Today",
+    "completedTitle": "Path completed",
+    "allDone": "You've completed all of today's goals",
+    "allDoneHint": "Every step counted. Take in this moment before thinking about the next one.",
+    "noObjectives": "You don't have a next step yet. You can create your own goal below.",
+    "actionCategory": "Action",
+    "completedLabel": "Completed",
+    "markPending": "Mark goal as pending",
+    "markCompleted": "Mark goal as completed",
+    "yourGoalEyebrow": "Your way",
+    "createOwnTitle": "Create a small action of your own"
+  },
+  "weeklyGoalPremium": {
+    "pathEyebrow": "Your week",
+    "pathTitle": "A 7-day path",
+    "continuity": "Continuity",
+    "remaining": "{{count}} steps left to the medal",
+    "pathComplete": "Path completed",
+    "today": "Today",
+    "shortDay": "D{{day}}",
+    "dayLabel": "Day {{day}} of the path",
+    "tapHint": "Tap a day to record how it went.",
+    "credits": "{{count}} entries available today"
+  },
+  "hugDoodle": {
+    "eyebrow": "A moment for your hands",
+    "title": "Doodle",
+    "description": "A small pause to draw without thinking too much.",
+    "open": "I want to doodle",
+    "prompt": "Draw a place where you would like to be right now.",
+    "canvasLabel": "Area for drawing with your finger",
+    "clear": "Clear",
+    "close": "I'm done",
+    "private": "This doodle stays only in this moment.",
+    "tools": "Your stroke",
+    "toolsHint": "Choose a colour and let your hand follow.",
+    "undo": "Undo last stroke",
+    "color": "Stroke colour",
+    "chooseColor": "Choose this colour",
+    "thickness": "Stroke thickness",
+    "chooseThickness": "Choose this thickness",
+    "challenge": "Your challenge",
+    "newChallenge": "Another challenge",
+    "ritualEyebrow": "That's enough for now",
+    "ritual": "Let it stay here. You don't need to explain it.",
+    "ritualDescription": "Sometimes getting something out of your head and onto the page is enough for now.",
+    "letGo": "Let it go",
+    "another": "Another doodle",
+    "prompts": {
+      "landscape": "Draw your day as a landscape.",
+      "shape": "If this moment had a shape, what would it be?",
+      "place": "Draw a place where you would like to be right now.",
+      "lines": "Turn what's in your head into lines.",
+      "smile": "Draw something that would make you smile.",
+      "weather": "If your day were weather, what would the sky look like?",
+      "safeCorner": "Invent a small place where you would feel good.",
+      "animal": "Draw an animal with an impossible personality.",
+      "goat": "Draw a goat on top of a mountain.",
+      "badCat": "Draw the worst cat you possibly can.",
+      "cloudHouse": "Draw a house built on top of a cloud.",
+      "tinyWorld": "Invent an entire world that fits inside a circle."
+    }
+  },
+  "dailyMoment": {
+    "eyebrow": "Today",
+    "return": {
+      "title": "Good to have you back",
+      "text": "There is nothing to catch up on. We can simply start with where you are right now.",
+      "days_one": "It has been {{count}} day since you last opened CONFIA",
+      "days_other": "It has been {{count}} days since you last opened CONFIA"
+    },
+    "firstToday": {
+      "title": "Your moment today",
+      "text": "A new day does not need to begin with a big change. Simply notice where you are right now.",
+      "learningText": "We are still getting to know your rhythm. Each small check-in helps CONFIA become more useful to you.",
+      "memoryText": "There are already previous experiences that can help guide today without always starting from zero.",
+      "continuityText": "There are already a few signs of continuity. Today, one more small step is enough."
+    },
+    "continueToday": {
+      "title": "We continue from here",
+      "text": "You have already been with CONFIA today. There is no need to start again — we continue from here."
+    },
+    "actionHint": "One small action to continue from here.",
+    "learning": {
+      "learnedImpulse": "We have seen more than once that some of your experiences with CONFIA ended lighter than they began. We can use that learning without assuming every day is the same.",
+      "effectiveImpulse": "There was a previous experience where you ended lighter than you began. It is still too early to call it a pattern, but it is worth keeping in mind.",
+      "repeatedSignals": "Some signals have been appearing again in your records. We do not need to draw conclusions yet — simply keep noticing them.",
+      "early": "We are still getting to know your rhythm. Each small check-in helps CONFIA understand what may be useful for you.",
+      "neutral": "Today we do not need to start from any conclusion. We can simply begin with where you are right now."
+    },
+    "tomorrow": {
+      "learnedImpulse": "There are experiences we are beginning to recognise. Tomorrow we can keep seeing whether this learning still makes sense for you.",
+      "effectiveImpulse": "Something helped you in a previous experience. Tomorrow we can keep noticing whether it also makes sense in other moments.",
+      "repeatedSignals": "Some signals have started to repeat. Tomorrow we can keep noticing them without drawing conclusions too soon.",
+      "early": "CONFIA is still getting to know your rhythm. Tomorrow there will be a little more context to continue from.",
+      "neutral": "This is where we started today. Tomorrow we continue with whatever your day brings."
+    },
+    "continuityReturn": {
+      "eyebrow": "We continue from here",
+      "learnedImpulse": "You came back and CONFIA already has some learning to keep in context. We will keep noticing what truly holds over time.",
+      "effectiveImpulse": "We continue with a previous experience that seemed to help, without assuming it will always work in the same way.",
+      "repeatedSignals": "We keep noticing the signals that have appeared more than once, without turning them into a conclusion yet.",
+      "early": "Another day gives CONFIA a little more context to get to know your rhythm.",
+      "neutral": "We continue from where we left off, without you having to start all over again."
+    },
+    "evolvingInsight": {
+      "eyebrow": "CONFIA is noticing",
+      "early": "Getting to know your rhythm.",
+      "repeatedSignals": "Recognising signals that are beginning to repeat.",
+      "effectiveImpulse": "Understanding better what may help you.",
+      "learnedImpulse": "Learning with you from what genuinely helps."
+    },
+    "concreteInsight": {
+      "impulse": {
+        "calm": "Calming down already seems to have helped in more than one moment.",
+        "mind": "Organising your thoughts already seems to have helped in more than one moment.",
+        "control": "Regaining a sense of control already seems to have helped in more than one moment.",
+        "support": "Seeking support already seems to have helped in more than one moment."
+      },
+      "checkIn": "A need has appeared more than once across your check-ins.",
+      "moodImproving": "Across several recent entries, your mood has shown a more favourable direction.",
+      "moodDeclining": "Across several recent entries, your mood has shown a more difficult direction.",
+      "moodStable": "Across several recent entries, your mood has remained in a similar direction."
+    }
+  },
+  "companionWorldStatus": {
+    "growing": "Growing with you",
+    "settling": "Finding balance",
+    "discovering": "Getting to know you",
+    "neutral": "Here with you"
+  }
 }

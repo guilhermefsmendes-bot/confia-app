@@ -46,14 +46,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
 
-  console.log(
-    "WEEKLY GOAL - idioma:",
-    i18n.language,
-    "| título:",
-    t("weeklyGoal.title"),
-    "| dias:",
-    t("weeklyGoal.days")
-  );
+
 
   const [title, setTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -69,6 +62,15 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
 
   const completedDays = weeklyGoal?.completedDays ?? [];
   const progress = completedDays.length;
+
+  const weeklyPercentage = Math.round(
+    (progress / 7) * 100
+  );
+
+  const remainingDays = Math.max(
+    0,
+    7 - progress
+  );
 
   const todayCredits = weeklyGoal?.dailyCredits?.[today] ?? 0;
 
@@ -180,7 +182,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
           type="button"
           onClick={handleCreate}
           disabled={!title.trim()}
-          className="w-full rounded-2xl bg-[#4E3B36] px-4 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="w-full rounded-2xl bg-gradient-to-r from-[#E5A88B] to-[#C97B5E] px-4 py-3 font-bold text-white shadow-md shadow-[#E5A88B]/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {t("weeklyGoal.start")}
         </button>
@@ -190,107 +192,215 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
 
   return (
     <>
-      <div className="mt-6 rounded-[28px] border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-2xl">
-              {weeklyGoal.medalUnlocked ? "🏅" : "🏆"}
-            </div>
-
-            <div>
-              <h3 className="font-extrabold text-[#4E3B36]">
-                {t("weeklyGoal.title")}
-              </h3>
-
-              <p className="font-semibold text-[#6E5B54]">
-                {weeklyGoal.title}
-              </p>
-            </div>
-          </div>
-
-          <div className="text-right">
-            <div className="text-lg font-extrabold text-[#4E3B36]">
-              {progress}/7
-            </div>
-
-            <div className="text-xs text-[#8A7770]">
-              {t("weeklyGoal.days")}
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-5 h-3 overflow-hidden rounded-full bg-amber-100">
+      <section className="mt-6 overflow-hidden rounded-[30px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFF3EC] shadow-sm">
+        <div className="relative p-5">
           <div
-            className="h-full rounded-full bg-amber-400 transition-all duration-500"
-            style={{ width: `${(progress / 7) * 100}%` }}
+            className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#E5A88B]/10 blur-3xl"
+            aria-hidden="true"
           />
-        </div>
 
-        <div className="mb-3 grid grid-cols-7 gap-1.5">
-          {weekDates.map((date, index) => {
-            const completed = completedDays.includes(date);
-            const hasRating = !!weeklyGoal.dailyRatings?.[date];
+          <div className="relative">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/25 bg-white text-xl shadow-sm">
+                  {weeklyGoal.medalUnlocked ? "🏅" : "🏆"}
+                </div>
 
-            return (
-              <button
-                key={date}
-                type="button"
-                onClick={() => openDay(date)}
-                disabled={
-                  !completed &&
-                  !canUseToday &&
-                  !(date < today && missedDays.includes(date))
-                }
-                className={`relative flex h-11 items-center justify-center rounded-xl text-xs font-bold transition-transform active:scale-95 ${
-                  completed
-                    ? "bg-amber-400 text-white"
-                    : "bg-white text-[#9B8B84] border border-amber-100"
-                } disabled:cursor-not-allowed disabled:opacity-50`}
-              >
-                <span className="flex flex-col items-center justify-center leading-none">
-                  <span className="text-xs font-extrabold">
-                    {index + 1}
-                  </span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+                    {t("weeklyGoalPremium.pathEyebrow")}
+                  </p>
 
-                  {completed && (
-                    <span className="mt-0.5 text-[9px] leading-none">
-                      ✓
-                    </span>
-                  )}
+                  <h3 className="mt-0.5 text-base font-black text-[#4E3B36]">
+                    {t("weeklyGoalPremium.pathTitle")}
+                  </h3>
+
+                  <p className="mt-1 text-xs font-semibold leading-relaxed text-[#79665E]">
+                    {weeklyGoal.title}
+                  </p>
+                </div>
+              </div>
+
+              <div className="shrink-0 rounded-2xl border border-[#E5A88B]/20 bg-white px-3 py-2 text-right shadow-sm">
+                <div className="text-lg font-black leading-none text-[#4E3B36]">
+                  {progress}/7
+                </div>
+
+                <div className="mt-1 text-[9px] font-black uppercase tracking-wider text-[#A88A7D]">
+                  {t("weeklyGoal.days")}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-[24px] border border-white bg-white/75 p-4 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#A88A7D]">
+                    {t("weeklyGoalPremium.continuity")}
+                  </p>
+
+                  <p className="mt-1 text-xs font-bold text-[#5D4942]">
+                    {weeklyGoal.medalUnlocked
+                      ? t("weeklyGoalPremium.pathComplete")
+                      : t("weeklyGoalPremium.remaining", {
+                          count: remainingDays
+                        })}
+                  </p>
+                </div>
+
+                <span className="rounded-full bg-[#FFF0E8] px-2.5 py-1 text-[10px] font-black text-[#C97B5E]">
+                  {weeklyPercentage}%
                 </span>
+              </div>
 
-                {hasRating && (
-                  <span className="absolute -right-1 -top-1 text-[9px]">
-                    ⭐
+              <div className="mt-5">
+                <div className="relative">
+                  <div
+                    className="absolute left-[7%] right-[7%] top-5 h-1 rounded-full bg-[#F1E5DF]"
+                    aria-hidden="true"
+                  />
+
+                  <div
+                    className="absolute left-[7%] top-5 h-1 rounded-full bg-gradient-to-r from-[#E5A88B] to-[#C97B5E] transition-all duration-500"
+                    style={{
+                      width: `${
+                        progress <= 1
+                          ? 0
+                          : ((Math.min(progress, 7) - 1) / 6) * 86
+                      }%`
+                    }}
+                    aria-hidden="true"
+                  />
+
+                  <div className="relative grid grid-cols-7 gap-1">
+                    {weekDates.map((date, index) => {
+                      const completed =
+                        completedDays.includes(date);
+
+                      const hasRating =
+                        !!weeklyGoal.dailyRatings?.[date];
+
+                      const isToday =
+                        date === today;
+
+                      const isMissed =
+                        date < today &&
+                        !completed;
+
+                      const disabled =
+                        !completed &&
+                        !canUseToday &&
+                        !(
+                          date < today &&
+                          missedDays.includes(date)
+                        );
+
+                      return (
+                        <button
+                          key={date}
+                          type="button"
+                          onClick={() => openDay(date)}
+                          disabled={disabled}
+                          aria-label={t(
+                            "weeklyGoalPremium.dayLabel",
+                            {
+                              day: index + 1
+                            }
+                          )}
+                          className="group flex min-w-0 flex-col items-center disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <span
+                            className={`relative z-10 flex h-10 w-10 max-w-full items-center justify-center rounded-full border text-[11px] font-black transition-all active:scale-95 ${
+                              completed
+                                ? "border-[#E5A88B] bg-[#E5A88B] text-white shadow-md shadow-[#E5A88B]/20"
+                                : isToday
+                                  ? "border-[#C97B5E] bg-white text-[#C97B5E] shadow-sm ring-4 ring-[#E5A88B]/10"
+                                  : isMissed
+                                    ? "border-[#E8D8D0] bg-[#FBF7F5] text-[#AD9489]"
+                                    : "border-[#E8DDD7] bg-white text-[#9B857B]"
+                            }`}
+                          >
+                            {completed ? (
+                              <span className="text-sm">
+                                ✓
+                              </span>
+                            ) : (
+                              index + 1
+                            )}
+
+                            {hasRating && (
+                              <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white bg-[#C97B5E] text-[7px] text-white">
+                                ★
+                              </span>
+                            )}
+                          </span>
+
+                          <span
+                            className={`mt-2 text-[8px] font-black uppercase tracking-tight ${
+                              isToday
+                                ? "text-[#C97B5E]"
+                                : completed
+                                  ? "text-[#8D746A]"
+                                  : "text-[#B09B92]"
+                            }`}
+                          >
+                            {isToday
+                              ? t("weeklyGoalPremium.today")
+                              : t(
+                                  "weeklyGoalPremium.shortDay",
+                                  {
+                                    day: index + 1
+                                  }
+                                )}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 flex items-center justify-between gap-3 border-t border-[#F0E5DF] pt-3">
+                <p className="text-[10px] font-semibold leading-relaxed text-[#9A857C]">
+                  {t("weeklyGoalPremium.tapHint")}
+                </p>
+
+                {!weeklyGoal.medalUnlocked && (
+                  <span className="shrink-0 text-[9px] font-black text-[#C97B5E]">
+                    {t("weeklyGoalPremium.credits", {
+                      count: Math.max(0, 2 - todayCredits)
+                    })}
                   </span>
                 )}
-              </button>
-            );
-          })}
-        </div>
+              </div>
+            </div>
 
-        <p className="mb-4 text-center text-xs text-[#8A7770]">
-          {t("weeklyGoal.tapDay")}
-        </p>
+            {weeklyGoal.medalUnlocked && (
+              <div className="mt-4 rounded-[24px] border border-[#E5A88B]/25 bg-gradient-to-r from-[#FFF0E8] to-[#FFF8F4] p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm">
+                    🏅
+                  </div>
 
-        {weeklyGoal.medalUnlocked && (
-          <div className="rounded-2xl bg-amber-100 p-4 text-center">
-            <div className="mb-1 text-2xl">🏅</div>
+                  <div>
+                    <p className="text-sm font-black text-[#4E3B36]">
+                      {t("weeklyGoal.completed")}
+                    </p>
 
-            <p className="font-extrabold text-[#4E3B36]">
-              {t("weeklyGoal.completed")}
-            </p>
-
-            <p className="mt-1 text-sm text-[#7A6A64]">
-              {t("weeklyGoal.medalReady")}
-            </p>
+                    <p className="mt-1 text-xs font-medium leading-relaxed text-[#7A6A64]">
+                      {t("weeklyGoal.medalReady")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      </section>
 
       {selectedDate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[30px] bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F302B]/45 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[30px] border border-[#E5A88B]/20 bg-[#FFFCFA] p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-extrabold text-[#4E3B36]">

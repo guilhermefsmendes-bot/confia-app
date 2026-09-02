@@ -11,6 +11,7 @@ interface AvatarProps {
   levelUpTrigger?: boolean;
   moodRating?: number;
   memoryMessage?: string;
+  companionWorldMood?: "growing" | "settling" | "discovering" | "neutral";
 }
 const AvatarComponent: React.FC<AvatarProps> = ({
   avatar,
@@ -19,7 +20,8 @@ const AvatarComponent: React.FC<AvatarProps> = ({
   celebrating,
   levelUpTrigger,
   moodRating,
-  memoryMessage
+  memoryMessage,
+  companionWorldMood = "neutral"
 }) => {
 
 
@@ -163,6 +165,39 @@ setShowBubble(true);
   };
 const stageDetails = getStageDetails(avatar.level);
 const stage = Math.min(10, avatar.level);
+
+/**
+ * ==========================================================
+ * CONFIA 4C — COMPANION VIVO
+ * ==========================================================
+ *
+ * Estado puramente visual derivado do worldMood existente.
+ * Não interpreta, não guarda e não cria comportamento.
+ */
+const companionStatus =
+  companionWorldMood === "growing"
+    ? {
+        label: t("companionWorldStatus.growing"),
+        className:
+          "border-emerald-200/70 bg-emerald-50/85 text-emerald-700"
+      }
+    : companionWorldMood === "settling"
+      ? {
+          label: t("companionWorldStatus.settling"),
+          className:
+            "border-orange-200/70 bg-orange-50/85 text-orange-700"
+        }
+      : companionWorldMood === "discovering"
+        ? {
+            label: t("companionWorldStatus.discovering"),
+            className:
+              "border-sky-200/70 bg-sky-50/85 text-sky-700"
+          }
+        : {
+            label: t("companionWorldStatus.neutral"),
+            className:
+              "border-white/65 bg-white/80 text-slate-600"
+          };
 
 
   // SVG representation based on level
@@ -327,24 +362,7 @@ const isLevel10 = stage === 10;
     }}
   />
 )}
-{celebrating && (
-  <motion.circle
-    cx="100"
-    cy="110"
-    r="90"
-    fill="none"
-    stroke="#fef08a"
-    strokeWidth="4"
-    animate={{
-      opacity: [0, 1, 0],
-      scale: [0.8, 1.2, 0.8],
-    }}
-    transition={{
-      duration: 1,
-      repeat: Infinity,
-    }}
-  />
-)}
+
 
 {celebrating && (
   <>
@@ -695,8 +713,58 @@ animate={{
 return (
   <div className="relative flex flex-col items-center justify-center pt-2 pb-4 px-4">
 
-    <div className="absolute top-2 left-2 bg-white/90 rounded-full px-3 py-1 shadow text-xs font-bold text-[#C97B5E] z-30">
-      ⭐ Level {avatar.level}
+      {/* CONFIA 4C — ESTADO VISÍVEL DO COMPANION */}
+      <div
+        aria-hidden="true"
+        className={`
+          pointer-events-none
+          absolute left-1/2 top-2 z-40
+          -translate-x-1/2
+          whitespace-nowrap
+          rounded-full border
+          px-3 py-1
+          text-[9px] font-black
+          tracking-[0.02em]
+          shadow-[0_5px_16px_rgba(70,50,40,0.06)]
+          ${companionStatus.className}
+        `}
+      >
+        {companionStatus.label}
+      </div>
+
+    <div
+      className="
+        absolute
+        top-2
+        left-2
+        z-30
+        flex items-center gap-1.5
+        rounded-full
+        border border-white/60
+        bg-white/80
+        px-2.5 py-1.5
+        text-[11px] font-bold
+        text-[#A9583E]
+        shadow-[0_6px_18px_rgba(80,60,50,0.10)]
+        backdrop-blur-md
+      "
+    >
+      <span
+        className="
+          flex h-5 w-5
+          items-center justify-center
+          rounded-full
+          bg-[#FFF1E8]
+          text-[#C97B5E]
+        "
+        aria-hidden="true"
+      >
+        <Sparkles size={11} strokeWidth={2} />
+      </span>
+
+      <span>
+        {t("level")} {avatar.level}
+      </span>
     </div>
 
       {/* Interactive Avatar Container */}

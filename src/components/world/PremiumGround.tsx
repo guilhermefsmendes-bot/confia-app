@@ -127,24 +127,6 @@ function PremiumGround() {
         "
       />
 
-      {/* Caminho */}
-      <div
-        className="
-          absolute
-          left-[38%]
-          bottom-[-8%]
-          w-[28%]
-          h-[62%]
-          rotate-[7deg]
-          rounded-[48%]
-          bg-gradient-to-b
-          from-stone-300/25
-          via-amber-200/25
-          to-stone-500/15
-          pointer-events-none
-          z-[7]
-        "
-      />
 
       {/* Pedras */}
       {stones.map((stone, index) => (

@@ -35,6 +35,21 @@ export interface ReactiveAnalysisInput {
   // Daily Check-In
   currentMood?: number;
   currentNeed?: string;
+
+  // Objetivos
+  /**
+   * Resultado da ação atual sobre um objetivo.
+   *
+   * true:
+   * o utilizador acabou de concluir o objetivo.
+   *
+   * false:
+   * o utilizador voltou a marcá-lo como pendente.
+   *
+   * undefined:
+   * não existe uma ação atual de objetivo.
+   */
+  objectiveCompleted?: boolean;
 }
 
 
@@ -112,7 +127,24 @@ export interface ReactiveMetrics {
 
   objectivesCompleted?: number;
   objectivesTotal?: number;
+
+  /**
+   * Taxa real do período recente de Objetivos.
+   * Apenas usa registos cujo total seja > 0.
+   */
   objectiveCompletionRate?: number;
+
+  /**
+   * Taxa real do período imediatamente anterior.
+   */
+  previousObjectiveCompletionRate?: number;
+
+  /**
+   * Número de dias válidos disponíveis
+   * em cada período comparado.
+   */
+  objectiveValidDays?: number;
+  previousObjectiveValidDays?: number;
 
   impulseCount: number;
   impulseAverageReduction?: number;

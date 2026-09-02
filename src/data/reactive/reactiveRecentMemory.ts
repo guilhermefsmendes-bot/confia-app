@@ -63,6 +63,18 @@ export interface ReactiveMemoryCheckIn {
 export interface ReactiveMemoryImpulse {
   date: string;
 
+  /**
+   * Necessidade/percurso utilizado.
+   *
+   * Só existe em episódios registados
+   * após a introdução da memória adaptativa.
+   */
+  need?:
+    | "calm"
+    | "mind"
+    | "control"
+    | "support";
+
   initialIntensity: number;
   finalIntensity: number;
 
@@ -120,6 +132,100 @@ export interface ReactiveRecentMemory {
    */
   effectiveImpulseCount: number;
 
+  /**
+   * Número total de episódios de Impulso
+   * considerados na memória recente.
+   */
+  recentImpulseCount: number;
+
+  /**
+   * Redução média observada nos episódios
+   * recentes com intensidade final disponível.
+   */
+  recentImpulseAverageReduction?: number;
+
+  /**
+   * Necessidade/percurso que mais aparece
+   * entre os episódios eficazes recentes.
+   *
+   * Não representa uma escolha automática.
+   * Serve apenas como memória contextual.
+   */
+  effectiveImpulseNeed?: "calm" | "mind" | "control" | "support";
+
+  /**
+   * Número de episódios eficazes associados
+   * à necessidade/percurso acima.
+   */
+  effectiveImpulseNeedCount: number;
+
+  /**
+   * Indica se existe evidência suficiente
+   * para falar de uma tendência pessoal.
+   */
+  hasImpulseLearning: boolean;
+
+
+  /**
+   * ----------------------------------------------------------
+   * CONTINUIDADE CONTEXTUAL — 1D.7A
+   * ----------------------------------------------------------
+   *
+   * Indica se existem sinais pessoais que se repetem
+   * ao longo do histórico recente.
+   *
+   * Isto é apenas contexto.
+   * Não escolhe nenhuma ação.
+   */
+  continuity: {
+    /**
+     * Existe continuidade suficiente para enriquecer
+     * a resposta atual.
+     *
+     * Não representa diagnóstico nem escolhe ações.
+     */
+    hasRepeatedSignals: boolean;
+
+    /**
+     * Número de fontes independentes que apresentam
+     * continuidade: humor, check-in e Impulso.
+     */
+    signalCount: number;
+
+    /**
+     * Direção observada em vários registos recentes
+     * de humor.
+     */
+    moodDirection:
+      | "improving"
+      | "declining"
+      | "stable"
+      | "unknown";
+
+    moodRecordCount: number;
+
+    /**
+     * Necessidade repetida nos Daily Check-Ins.
+     */
+    repeatedCheckInNeed?: string;
+
+    repeatedCheckInNeedCount: number;
+
+    /**
+     * Necessidade/percurso repetido entre episódios
+     * eficazes do Impulso.
+     *
+     * Campo preservado por compatibilidade com
+     * a memória já utilizada pelo motor.
+     */
+    repeatedNeed?: "calm" | "mind" | "control" | "support";
+
+    repeatedNeedCount: number;
+
+    recentEffectiveImpulseCount: number;
+
+    recentImpulseAverageReduction?: number;
+  };
 
   /**
    * Utilização recente da aplicação.
@@ -308,6 +414,98 @@ function getMoodDirection(
 
 
 /**
+ * 1D.8A — CONTINUIDADE EMOCIONAL TRANSVERSAL
+ *
+ * Observa vários registos recentes de humor para perceber
+ * se existe uma direção suficientemente consistente.
+ *
+ * Não transforma pequenas oscilações em tendência.
+ * Não cria situação nem escolhe intenção.
+ */
+function getRecentMoodContinuity(
+  moods: ReactiveMemoryMood[]
+): {
+  direction: ReactiveMoodDirection;
+  recordCount: number;
+} {
+  const recent = moods.slice(-5);
+
+  if (recent.length < 3) {
+    return {
+      direction: "unknown",
+      recordCount: recent.length,
+    };
+  }
+
+  let risingSteps = 0;
+  let fallingSteps = 0;
+  let stableSteps = 0;
+
+  for (
+    let index = 1;
+    index < recent.length;
+    index += 1
+  ) {
+    const change =
+      recent[index].value -
+      recent[index - 1].value;
+
+    if (change >= 0.8) {
+      risingSteps += 1;
+    } else if (change <= -0.8) {
+      fallingSteps += 1;
+    } else {
+      stableSteps += 1;
+    }
+  }
+
+  const transitions =
+    recent.length - 1;
+
+  const requiredDirectionalSteps =
+    Math.max(
+      2,
+      Math.ceil(transitions * 0.6)
+    );
+
+  if (
+    risingSteps >= requiredDirectionalSteps &&
+    risingSteps > fallingSteps
+  ) {
+    return {
+      direction: "improving",
+      recordCount: recent.length,
+    };
+  }
+
+  if (
+    fallingSteps >= requiredDirectionalSteps &&
+    fallingSteps > risingSteps
+  ) {
+    return {
+      direction: "declining",
+      recordCount: recent.length,
+    };
+  }
+
+  if (
+    stableSteps >=
+    Math.ceil(transitions * 0.75)
+  ) {
+    return {
+      direction: "stable",
+      recordCount: recent.length,
+    };
+  }
+
+  return {
+    direction: "unknown",
+    recordCount: recent.length,
+  };
+}
+
+
+/**
  * Check-ins ordenados cronologicamente.
  */
 function getCheckIns(
@@ -379,6 +577,28 @@ function getRepeatedNeed(
 
 
 /**
+ * Conta quantas vezes a necessidade repetida aparece
+ * nos últimos três Daily Check-Ins.
+ */
+function getRepeatedNeedCount(
+  checkIns: ReactiveMemoryCheckIn[],
+  repeatedNeed?: string
+): number {
+  if (!repeatedNeed) {
+    return 0;
+  }
+
+  return checkIns
+    .slice(-3)
+    .filter(
+      (item) =>
+        item.need === repeatedNeed
+    )
+    .length;
+}
+
+
+/**
  * Normaliza um episódio do Impulso.
  */
 function normalizeImpulse(
@@ -397,6 +617,9 @@ function normalizeImpulse(
 
   return {
     date: episode.date,
+
+    need:
+      episode.need,
 
     initialIntensity:
       episode.intensity,
@@ -453,6 +676,22 @@ export function buildReactiveRecentMemory(
   const previousCheckIn =
     checkIns[checkIns.length - 2];
 
+  /**
+   * Sinais de continuidade derivados exclusivamente
+   * dos registos já existentes.
+   */
+  const recentMoodContinuity =
+    getRecentMoodContinuity(moods);
+
+  const repeatedCheckInNeed =
+    getRepeatedNeed(checkIns);
+
+  const repeatedCheckInNeedCount =
+    getRepeatedNeedCount(
+      checkIns,
+      repeatedCheckInNeed
+    );
+
 
   const impulses = sortByDate(
     data.impulse
@@ -480,6 +719,168 @@ export function buildReactiveRecentMemory(
     effectiveImpulses[
       effectiveImpulses.length - 1
     ];
+
+  /**
+   * ------------------------------------------------------------
+   * APRENDIZAGEM DO IMPULSO
+   * ------------------------------------------------------------
+   *
+   * A memória não escolhe o percurso.
+   *
+   * Apenas observa resultados já registados e procura
+   * consistência suficiente para reconhecer uma tendência.
+   */
+
+  const recentImpulses =
+    impulses.filter(
+      (item) =>
+        daysAgo(item.date) <= 30
+    );
+
+  const recentImpulseReductions =
+    recentImpulses
+      .map((item) => item.reduction)
+      .filter(
+        (value) =>
+          typeof value === "number"
+      );
+
+  const recentImpulseAverageReduction =
+    recentImpulseReductions.length > 0
+      ? recentImpulseReductions.reduce(
+          (sum, value) => sum + value,
+          0
+        ) / recentImpulseReductions.length
+      : undefined;
+
+  /**
+   * Conta quais as necessidades associadas
+   * aos episódios eficazes recentes.
+   */
+  const effectiveNeedCounts:
+    Record<string, number> = {};
+
+  effectiveImpulses.forEach(
+    (item) => {
+      if (!item.need) {
+        return;
+      }
+
+      effectiveNeedCounts[item.need] =
+        (effectiveNeedCounts[item.need] ?? 0) + 1;
+    }
+  );
+
+  let effectiveImpulseNeed:
+    | "calm"
+    | "mind"
+    | "control"
+    | "support"
+    | undefined;
+
+  let effectiveImpulseNeedCount = 0;
+
+  Object.entries(
+    effectiveNeedCounts
+  ).forEach(
+    ([need, count]) => {
+      if (count > effectiveImpulseNeedCount) {
+        effectiveImpulseNeedCount = count;
+
+        effectiveImpulseNeed =
+          need as
+            | "calm"
+            | "mind"
+            | "control"
+            | "support";
+      }
+    }
+  );
+
+  /**
+   * Só consideramos que existe aprendizagem
+   * quando há pelo menos dois episódios eficazes.
+   *
+   * Isto evita conclusões fortes baseadas
+   * numa única experiência.
+   */
+  const hasImpulseLearning =
+    effectiveImpulses.length >= 2;
+
+
+  /**
+   * ----------------------------------------------------------
+   * CONTINUIDADE EMOCIONAL TRANSVERSAL — 1D.8A
+   * ----------------------------------------------------------
+   *
+   * Agrega sinais provenientes de:
+   *
+   * - humor recente;
+   * - necessidades do Daily Check-In;
+   * - aprendizagem do Impulso.
+   *
+   * Não cria novas situações.
+   * Não escolhe intenções.
+   * Não escolhe percursos.
+   */
+
+  const repeatedNeedCount =
+    effectiveImpulseNeedCount;
+
+  const recentEffectiveImpulseCount =
+    effectiveImpulses.length;
+
+  const hasMoodContinuity =
+    recentMoodContinuity.direction !== "unknown";
+
+  const hasCheckInContinuity =
+    repeatedCheckInNeedCount >= 2;
+
+  const hasImpulseContinuity =
+    repeatedNeedCount >= 2 ||
+    recentEffectiveImpulseCount >= 2;
+
+  const signalCount = [
+    hasMoodContinuity,
+    hasCheckInContinuity,
+    hasImpulseContinuity,
+  ].filter(Boolean).length;
+
+  /**
+   * Uma fonte com repetição real já constitui continuidade.
+   *
+   * signalCount permite distinguir posteriormente
+   * continuidade isolada de convergência entre dimensões.
+   */
+  const hasRepeatedSignals =
+    signalCount >= 1;
+
+  const continuity = {
+    hasRepeatedSignals,
+
+    signalCount,
+
+    moodDirection:
+      recentMoodContinuity.direction,
+
+    moodRecordCount:
+      recentMoodContinuity.recordCount,
+
+    repeatedCheckInNeed,
+
+    repeatedCheckInNeedCount,
+
+    repeatedNeed:
+      repeatedNeedCount >= 2
+        ? effectiveImpulseNeed
+        : undefined,
+
+    repeatedNeedCount,
+
+    recentEffectiveImpulseCount,
+
+    recentImpulseAverageReduction,
+  };
 
 
   /**
@@ -548,9 +949,7 @@ export function buildReactiveRecentMemory(
       latestCheckIn?.need,
 
     repeatedNeed:
-      getRepeatedNeed(
-        checkIns
-      ),
+      repeatedCheckInNeed,
 
     latestImpulse,
 
@@ -558,6 +957,19 @@ export function buildReactiveRecentMemory(
 
     effectiveImpulseCount:
       effectiveImpulses.length,
+
+    recentImpulseCount:
+      recentImpulses.length,
+
+    recentImpulseAverageReduction,
+
+    effectiveImpulseNeed,
+
+    effectiveImpulseNeedCount,
+
+    hasImpulseLearning,
+
+    continuity,
 
     activeDaysLast7:
       activeDates.size,

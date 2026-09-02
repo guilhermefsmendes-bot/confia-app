@@ -60,7 +60,7 @@ function ForegroundGrass({
 }) {
   return (
     <div
-      className="absolute bottom-0 pointer-events-none origin-bottom z-[45]"
+      className="absolute bottom-0 pointer-events-none origin-bottom z-[28]"
       style={{
         left,
         height,

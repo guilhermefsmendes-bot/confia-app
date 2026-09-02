@@ -199,6 +199,14 @@ export const REACTIVE_INTENT_RULES: ReactiveIntentRule[] = [
     tags: ["objectives", "adjustment"],
   },
 
+  {
+    id: "objective_consistency",
+    intent: "recognize_consistency",
+    priority: 80,
+    situations: ["objectives_consistent"],
+    tags: ["objectives", "consistency"],
+  },
+
 
   // ==========================================================
   // PADRÕES

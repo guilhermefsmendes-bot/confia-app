@@ -1,54 +1,22 @@
 import React, { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { Pencil, Check } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { getEquipped } from "../storage/homeInventory";
 import { getPositions, savePositions } from "../storage/homePositions";
 import { homeItems } from "../data/homeItems";
 import { getWeeklyTrophies } from "../storage/weeklyTrophies";
-const AmbientParticles = React.memo(() => {
-  const particles = useMemo(() => {
-    return [...Array(15)].map((_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 60}%`,
-      animationDelay: `${i * 0.3}s`,
-    }));
-  }, []);
-
-  return (
-    <>
-      {particles.map((particle) => (
-        <div
-          key={particle.id}
-          className="absolute text-white/70 animate-pulse pointer-events-none"
-          style={{
-            left: particle.left,
-            top: particle.top,
-            animationDelay: particle.animationDelay,
-          }}
-        >
-          ✨
-        </div>
-      ))}
-    </>
-  );
-});
-import AtmosphereLayer from "./AtmosphereLayer";
 import Clouds from "./world/Clouds";
 import Butterflies from "./world/Butterflies";
 import { getRefugeLevel } from "../data/refugeProgress";
-import RefugeEvolution from "./world/RefugeEvolution";
-import FarmZones from "./world/FarmZones";
-import FarmCare from "./world/FarmCare";
-import GardenZone from "./world/GardenZone";
-import FarmAnimals from "./world/FarmAnimals";
-import HouseEvolution from "./world/HouseEvolution";
+import PremiumRefuge from "./world/PremiumRefuge";
 import { getWorld, careWorld } from "../storage/homeWorld";
 import { getGrowth, careItem } from "../storage/homeGrowth";
 import GrassDetails from "./world/GrassDetails";
 import GrassTexture from "./world/GrassTexture";
 import PremiumSky from "./world/PremiumSky";
 import PremiumVegetation from "./world/PremiumVegetation";
+import PremiumEnvironment from "./world/PremiumEnvironment";
 import PremiumDepth from "./world/PremiumDepth";
 import PremiumGround from "./world/PremiumGround";
 import PremiumPath from "./world/PremiumPath";
@@ -62,6 +30,7 @@ interface Props {
   morningRating: number;
   afternoonRating?: number;
   handlePetAvatar: () => void;
+  worldMood: "growing" | "settling" | "discovering" | "neutral";
 }
 
 const HomeWorld: React.FC<Props> = ({
@@ -71,13 +40,18 @@ const HomeWorld: React.FC<Props> = ({
   morningRating,
   afternoonRating,
   handlePetAvatar,
+  worldMood,
 }) => {
 
   const { t } = useTranslation();
   const [editMode, setEditMode] = useState(false);
-const [avatarPosition, setAvatarPosition] = useState({
-  x: 0,
-  y: 0
+const [avatarPosition, setAvatarPosition] = useState(() => {
+  const saved = getPositions().__avatar__;
+
+  return {
+    left: saved?.left ?? "50%",
+    top: saved?.top ?? "50%"
+  };
 });
 
 const [draggingAvatar, setDraggingAvatar] = useState(false);
@@ -88,6 +62,8 @@ const [growth, setGrowth] = useState(getGrowth());
   );
 
   const [dragging, setDragging] = useState<string | null>(null);
+
+const refugeLevel = getRefugeLevel(avatar.xp).level;
 
 const hour = new Date().getHours();
 
@@ -142,124 +118,91 @@ const isNight = hour >= 21 || hour < 7;
 >
 <div className="absolute top-4 right-4 z-50">
   <button
+    type="button"
     onClick={() => {
-
       if (editMode) {
         savePositions(objectPositions);
       }
 
       setEditMode(!editMode);
-
     }}
-    className={`px-4 py-2 rounded-xl font-bold shadow ${
-      editMode
-        ? "bg-green-500 text-white"
-        : "bg-white"
-    }`}
+    aria-pressed={editMode}
+    className={`
+      flex items-center gap-2
+      rounded-2xl border
+      px-3.5 py-2.5
+      text-xs font-bold
+      backdrop-blur-md
+      transition-all duration-200
+      active:scale-[0.97]
+      ${
+        editMode
+          ? "border-[#D99A7C]/45 bg-[#FFF5EF]/90 text-[#A9583E] shadow-[0_8px_24px_rgba(115,72,55,0.14)]"
+          : "border-white/60 bg-white/75 text-[#5E4840] shadow-[0_8px_24px_rgba(80,60,50,0.10)]"
+      }
+    `}
   >
-    {editMode
-      ? `✅ ${t("save")}`
-      : `✏️ ${t("edit")}`}
+    <span
+      className={`
+        flex h-7 w-7
+        items-center justify-center
+        rounded-xl
+        ${
+          editMode
+            ? "bg-[#F6DDCF] text-[#B86448]"
+            : "bg-[#FFF3EC] text-[#C97B5E]"
+        }
+      `}
+    >
+      {editMode ? (
+        <Check size={15} strokeWidth={2} />
+      ) : (
+        <Pencil size={14} strokeWidth={1.9} />
+      )}
+    </span>
+
+    <span>{editMode ? t("save") : t("edit")}</span>
   </button>
 </div>
+
+{/* ======================================================
+    CONFIA 4B — ATMOSFERA REATIVA
+
+    Uma única camada visual estática.
+    Não anima, não captura eventos e não mantém estado.
+====================================================== */}
+<div
+  aria-hidden="true"
+  className={`pointer-events-none absolute inset-0 z-[1] ${
+    worldMood === "growing"
+      ? "bg-gradient-to-b from-amber-50/10 via-transparent to-emerald-50/10"
+      : worldMood === "settling"
+        ? "bg-gradient-to-b from-rose-50/10 via-transparent to-orange-50/10"
+        : worldMood === "discovering"
+          ? "bg-gradient-to-b from-sky-50/10 via-transparent to-violet-50/10"
+          : "bg-transparent"
+  }`}
+/>
 
 <Clouds />
 <GrassTexture />
 <Butterflies />
-<RefugeEvolution xp={avatar.xp} />
-<FarmZones xp={avatar.xp} />
+<PremiumRefuge xp={avatar.xp} />
 <GrassDetails />
 
 {/* Céu cinematográfico premium */}
 <PremiumSky isNight={isNight} />
 <PremiumLighting isNight={isNight} />
-<AtmosphereLayer />
-{/* Brilho suave do sol */}
-<div
-  className="
-    absolute
-    top-[-80px]
-    left-[-80px]
-    w-72
-    h-72
-    rounded-full
-    bg-yellow-200/30
-    blur-3xl
-    z-10
-    pointer-events-none
-  "
-/>
+
 {/* Vegetação cinematográfica */}
 <PremiumDepth />
 <PremiumGround />
 <PremiumPath />
-<PremiumWater />
+{refugeLevel >= 3 && <PremiumWater />}
 <PremiumVegetation />
+<PremiumEnvironment level={refugeLevel} />
 
 {/* Relva evolutiva */}
-
-{equippedTrophies.map(trophy => (
-  <div
-    key={trophy.id}
-    className={`absolute z-30 select-none text-6xl transition-transform duration-300 ${
-      editMode
-        ? "cursor-move scale-110"
-        : "hover:scale-110"
-    }`}
-    style={{
-      touchAction: "none",
-      ...(objectPositions[trophy.id] ?? {
-        left: "50%",
-        top: "35%"
-      })
-    }}
-    onPointerDown={(e) => {
-      e.preventDefault();
-      e.currentTarget.setPointerCapture(e.pointerId);
-      setDragging(trophy.id);
-    }}
-    onPointerMove={(e) => {
-      if (dragging !== trophy.id) return;
-
-      e.preventDefault();
-
-      const rect =
-        e.currentTarget.parentElement!.getBoundingClientRect();
-
-      const left =
-        ((e.clientX - rect.left) / rect.width) * 100;
-
-      const top =
-        ((e.clientY - rect.top) / rect.height) * 100;
-
-      setObjectPositions(prev => ({
-        ...prev,
-        [trophy.id]: {
-          left: `${left}%`,
-          top: `${top}%`
-        }
-      }));
-    }}
-    onPointerUp={(e) => {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-
-      if (dragging === trophy.id) {
-        savePositions({
-          ...objectPositions,
-          [trophy.id]: objectPositions[trophy.id]
-        });
-
-        setDragging(null);
-      }
-    }}
-  >
-    <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-12 h-2 rounded-full bg-black/20 blur-sm" />
-
-    <div className="relative">
-      {trophy.emoji}
-    </div>
-  </div>
-))}
 
 {equippedItems.map(item => {
 
@@ -459,15 +402,18 @@ const isNight = hour >= 21 || hour < 7;
 {/* Avatar */}
 
 <div
-  className="absolute z-20 cursor-move"
+  className={`absolute z-[35] ${
+    editMode ? "cursor-move" : "cursor-pointer"
+  }`}
   style={{
-    left: `calc(50% + ${avatarPosition.x}px)`,
-    top: `calc(50% + ${avatarPosition.y}px)`,
+    left: avatarPosition.left,
+    top: avatarPosition.top,
     transform: "translate(-50%, -50%) scale(0.5)",
-    touchAction: "none"
+    touchAction: editMode ? "none" : "manipulation"
   }}
 
-  onPointerDown={(e)=>{
+  onPointerDown={(e) => {
+    if (!editMode) return;
 
     e.preventDefault();
 
@@ -476,30 +422,58 @@ const isNight = hour >= 21 || hour < 7;
     );
 
     setDraggingAvatar(true);
-
   }}
 
-  onPointerMove={(e)=>{
-
-    if(!draggingAvatar) return;
+  onPointerMove={(e) => {
+    if (!editMode || !draggingAvatar) return;
 
     e.preventDefault();
 
-    setAvatarPosition(prev => ({
-      x: prev.x + e.movementX,
-      y: prev.y + e.movementY
-    }));
+    const rect =
+      e.currentTarget.parentElement!.getBoundingClientRect();
 
-  }}
-
-  onPointerUp={(e)=>{
-
-    e.currentTarget.releasePointerCapture(
-      e.pointerId
+    const left = Math.max(
+      8,
+      Math.min(
+        92,
+        ((e.clientX - rect.left) / rect.width) * 100
+      )
     );
 
-    setDraggingAvatar(false);
+    const top = Math.max(
+      18,
+      Math.min(
+        82,
+        ((e.clientY - rect.top) / rect.height) * 100
+      )
+    );
 
+    setAvatarPosition({
+      left: `${left}%`,
+      top: `${top}%`
+    });
+  }}
+
+  onPointerUp={(e) => {
+    if (!editMode || !draggingAvatar) return;
+
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(
+        e.pointerId
+      );
+    }
+
+    const nextPositions = {
+      ...objectPositions,
+      __avatar__: {
+        left: avatarPosition.left,
+        top: avatarPosition.top
+      }
+    };
+
+    setObjectPositions(nextPositions);
+    savePositions(nextPositions);
+    setDraggingAvatar(false);
   }}
 >
 <div
@@ -521,7 +495,8 @@ const isNight = hour >= 21 || hour < 7;
   <Avatar
     onPet={handlePetAvatar}
     avatar={avatar}
-  />
+  companionWorldMood={worldMood}
+/>
 
 </div>
 

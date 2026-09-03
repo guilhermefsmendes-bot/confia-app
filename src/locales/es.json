@@ -61,7 +61,44 @@
   "impulseLastUsed": "Último uso: hace {{days}} día(s)",
   "impulseTotalUses": "Usos totales: {{count}}",
   "inventory": "Inventario",
+  "companionCustomization": {
+    "title": "Personaliza tu CONFIA",
+    "subtitle": "Elige pequeños detalles que hagan que tu CONFIA sea más tuya.",
+    "accessoriesTitle": "Accesorios de CONFIA",
+    "accessoriesSubtitle": "Los accesorios equipados aparecen en tu compañera.",
+    "accessoriesEmpty": "Todavía no tienes accesorios para tu CONFIA.",
+    "collectionTitle": "Tu colección",
+    "collectionSubtitle": "Los objetos que ya has conseguido siguen guardados aquí.",
+    "trophiesTitle": "Trofeos",
+    "objectiveCompleted": "Objetivo completado",
+    "equip": "Equipar",
+    "equipped": "Equipado",
+    "slots": {
+      "head": "Cabeza",
+      "neck": "Cuello",
+      "other": "Accesorio"
+    },
+    "items": {
+      "confia_bow_cream": "Lazo Crema",
+      "confia_scarf_terra": "Bufanda Terracota",
+      "confia_charm_gold": "Amuleto Dorado"
+    }
+  },
   "shop": "Tienda",
+  "companionShop": {
+    "title": "Tienda de CONFIA",
+    "subtitle": "Elige pequeños detalles para hacer que tu CONFIA sea aún más tuya.",
+    "xpAvailable": "XP disponible",
+    "accessoriesTitle": "Para tu CONFIA",
+    "accessoriesSubtitle": "Accesorios que puedes usar en tu compañera.",
+    "collectionTitle": "Otros objetos",
+    "collectionSubtitle": "Tu colección clásica sigue disponible.",
+    "buy": "Comprar",
+    "owned": "Ya lo tienes",
+    "notEnoughXp": "XP insuficiente",
+    "availableAtLevel": "Disponible en el nivel {{level}}",
+    "levelRequired": "Nivel {{level}}"
+  },
   "settings": "Configuración",
   "emotionalMemoryTitle": "Tu semana",
   "emotionalMemoryAverage": "Media semanal: {{average}}",
@@ -1426,5 +1463,64 @@
     "settling": "Encontrando equilibrio",
     "discovering": "Conociéndote",
     "neutral": "Aquí contigo"
+  },
+  "companionRelationalMemory": {
+    "learnedImpulse": "Ya te conozco un poco mejor: en varios momentos recientes, {{need}} apareció asociado a experiencias en las que terminaste algo más ligero.",
+    "effectiveImpulse": "Recuerdo una experiencia reciente en la que la intensidad pasó de {{before}} a {{after}}. Parece haberte ayudado en ese momento.",
+    "convergingSignals": "He observado algunas señales que se repiten en tus registros. Todavía las estamos conociendo, pero ya existe cierta continuidad.",
+    "repeatedNeed": "He observado que una necesidad parecida ha aparecido más de una vez en tus registros recientes.",
+    "moodImproving": "He seguido tus últimos registros. Poco a poco, tu estado de ánimo ha mostrado una dirección más favorable.",
+    "moodDeclining": "He seguido tus últimos registros. Últimamente, tu estado de ánimo ha mostrado una dirección un poco más difícil.",
+    "moodStable": "He seguido tus últimos registros. Tu estado de ánimo se ha mantenido en una dirección relativamente parecida.",
+    "consistency": "Te he visto por aquí con cierta regularidad. Cada registro me ayuda a conocer un poco mejor tu ritmo.",
+    "variants": {
+      "learned_impulse": {
+        "a": "Empiezo a reconocer algo en ti: ya ha habido más de una experiencia reciente en la que terminaste algo más ligero.",
+        "b": "He observado algo que estás aprendiendo sobre ti: ya ha habido varias experiencias recientes en las que terminaste más ligero.",
+        "c": "Ya hay algo que reconozco en tu recorrido: en varias experiencias recientes terminaste más ligero."
+      },
+      "effective_impulse": {
+        "a": "Hay una experiencia reciente que puedo guardar como referencia: la intensidad pasó de {{before}} a {{after}}.",
+        "b": "Recuerdo un momento reciente en el que pasaste de {{before}} a {{after}}. En ese momento, la experiencia pareció ayudarte.",
+        "c": "Una de tus experiencias recientes dejó una señal clara: la intensidad bajó de {{before}} a {{after}}."
+      },
+      "converging_signals": {
+        "a": "Empiezo a observar algunas señales que aparecen juntas en tus registros.",
+        "b": "Varias señales de tus registros empiezan a apuntar en una dirección parecida.",
+        "c": "Ya puedo reconocer cierta continuidad entre varias señales de tus registros, aunque sigo observándolas con cuidado."
+      },
+      "repeated_need": {
+        "a": "Hay una necesidad que ha empezado a aparecer de nuevo en tus registros.",
+        "b": "He observado que una necesidad parecida se ha repetido en tus últimos registros.",
+        "c": "Esta necesidad ya ha aparecido varias veces en tus registros. Merece la pena que sigamos observándola."
+      },
+      "mood_improving": {
+        "a": "Empiezo a notar una dirección algo más favorable en tu estado de ánimo.",
+        "b": "En tus últimos registros, tu estado de ánimo ha mostrado una dirección más favorable.",
+        "c": "Al seguir tus últimos registros, ya puedo reconocer una evolución más favorable en tu estado de ánimo."
+      },
+      "mood_declining": {
+        "a": "Empiezo a notar una dirección algo más difícil en tus últimos registros.",
+        "b": "En tus últimos registros, tu estado de ánimo ha mostrado una dirección algo más difícil.",
+        "c": "He seguido tus registros y hay una dirección más difícil a la que merece la pena prestar atención, sin sacar conclusiones precipitadas."
+      },
+      "mood_stable": {
+        "a": "Tu estado de ánimo parece haber mantenido una dirección parecida en los últimos registros.",
+        "b": "He observado cierta estabilidad en la dirección de tu estado de ánimo.",
+        "c": "Tus últimos registros muestran una continuidad relativamente estable en tu estado de ánimo."
+      },
+      "consistency": {
+        "a": "Te he visto por aquí con cierta regularidad. Eso me ayuda a conocer un poco mejor tu ritmo.",
+        "b": "Has estado bastante presente durante los últimos días. Cada registro añade algo a lo que voy conociendo de ti.",
+        "c": "Has estado presente durante toda esta semana. Ya existe una continuidad que me ayuda a comprender mejor tu ritmo."
+      }
+    },
+    "actions": {
+      "impulse": "Abrir Impulso",
+      "patterns": "Explorar mis patrones",
+      "progress": "Ver mi evolución",
+      "record": "Registrar cómo estoy"
+    },
+    "nextStep": "Dar el siguiente paso"
   }
 }

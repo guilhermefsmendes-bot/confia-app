@@ -61,7 +61,44 @@
   "impulseLastUsed": "Dernière utilisation : il y a {{days}} jour(s)",
   "impulseTotalUses": "Utilisations totales : {{count}}",
   "inventory": "Inventaire",
+  "companionCustomization": {
+    "title": "Personnalise ta CONFIA",
+    "subtitle": "Choisis de petits détails qui rendent ta CONFIA encore plus personnelle.",
+    "accessoriesTitle": "Accessoires de CONFIA",
+    "accessoriesSubtitle": "Les accessoires équipés apparaissent sur ta compagne.",
+    "accessoriesEmpty": "Tu n’as pas encore d’accessoires pour ta CONFIA.",
+    "collectionTitle": "Ta collection",
+    "collectionSubtitle": "Les objets que tu as déjà obtenus restent conservés ici.",
+    "trophiesTitle": "Trophées",
+    "objectiveCompleted": "Objectif accompli",
+    "equip": "Équiper",
+    "equipped": "Équipé",
+    "slots": {
+      "head": "Tête",
+      "neck": "Cou",
+      "other": "Accessoire"
+    },
+    "items": {
+      "confia_bow_cream": "Nœud Crème",
+      "confia_scarf_terra": "Écharpe Terracotta",
+      "confia_charm_gold": "Amulette Dorée"
+    }
+  },
   "shop": "Boutique",
+  "companionShop": {
+    "title": "Boutique CONFIA",
+    "subtitle": "Choisis de petits détails pour rendre ta CONFIA encore plus personnelle.",
+    "xpAvailable": "XP disponible",
+    "accessoriesTitle": "Pour ta CONFIA",
+    "accessoriesSubtitle": "Des accessoires que tu peux utiliser sur ta compagne.",
+    "collectionTitle": "Autres objets",
+    "collectionSubtitle": "Ta collection classique reste disponible.",
+    "buy": "Acheter",
+    "owned": "Déjà obtenu",
+    "notEnoughXp": "XP insuffisant",
+    "availableAtLevel": "Disponible au niveau {{level}}",
+    "levelRequired": "Niveau {{level}}"
+  },
   "settings": "Paramètres",
   "emotionalMemoryTitle": "Ta semaine",
   "emotionalMemoryAverage": "Moyenne hebdomadaire : {{average}}",
@@ -1424,5 +1461,64 @@
     "settling": "Trouver l’équilibre",
     "discovering": "Apprendre à te connaître",
     "neutral": "Ici avec toi"
+  },
+  "companionRelationalMemory": {
+    "learnedImpulse": "Je commence à mieux te connaître : récemment, {{need}} est apparu plusieurs fois dans des expériences où tu as terminé en te sentant plus léger.",
+    "effectiveImpulse": "Je me souviens d'une expérience récente où l'intensité est passée de {{before}} à {{after}}. Cela semble t'avoir aidé à ce moment-là.",
+    "convergingSignals": "J'ai remarqué quelques signaux qui se répètent dans tes notes. Nous apprenons encore à les connaître, mais une certaine continuité apparaît déjà.",
+    "repeatedNeed": "J'ai remarqué qu'un besoin similaire est apparu plus d'une fois dans tes notes récentes.",
+    "moodImproving": "J'ai suivi tes dernières notes. Petit à petit, ton humeur montre une direction plus favorable.",
+    "moodDeclining": "J'ai suivi tes dernières notes. Dernièrement, ton humeur montre une direction un peu plus difficile.",
+    "moodStable": "J'ai suivi tes dernières notes. Ton humeur est restée dans une direction relativement similaire.",
+    "consistency": "Je te vois ici assez régulièrement. Chaque note m'aide à mieux connaître ton rythme.",
+    "variants": {
+      "learned_impulse": {
+        "a": "Je commence à reconnaître quelque chose chez toi : plusieurs expériences récentes se sont déjà terminées en te laissant plus léger.",
+        "b": "J'ai remarqué quelque chose que tu apprends sur toi : plusieurs expériences récentes se sont déjà terminées en te laissant plus léger.",
+        "c": "Il y a maintenant quelque chose que je reconnais dans ton parcours : plusieurs expériences récentes t'ont laissé plus léger."
+      },
+      "effective_impulse": {
+        "a": "Il y a une expérience récente que je peux garder comme repère : l'intensité est passée de {{before}} à {{after}}.",
+        "b": "Je me souviens d'un moment récent où tu es passé de {{before}} à {{after}}. À ce moment-là, l'expérience semble t'avoir aidé.",
+        "c": "L'une de tes expériences récentes a laissé un signal clair : l'intensité est passée de {{before}} à {{after}}."
+      },
+      "converging_signals": {
+        "a": "Je commence à remarquer quelques signaux qui apparaissent ensemble dans tes notes.",
+        "b": "Plusieurs signaux dans tes notes commencent à aller dans une direction similaire.",
+        "c": "Je peux maintenant reconnaître une certaine continuité entre plusieurs signaux de tes notes, tout en continuant à les observer avec prudence."
+      },
+      "repeated_need": {
+        "a": "Il y a un besoin qui a commencé à réapparaître dans tes notes.",
+        "b": "J'ai remarqué qu'un besoin similaire s'est répété dans tes dernières notes.",
+        "c": "Ce besoin est déjà apparu plusieurs fois dans tes notes. Cela vaut la peine de continuer à l'observer ensemble."
+      },
+      "mood_improving": {
+        "a": "Je commence à remarquer une direction un peu plus favorable dans ton humeur.",
+        "b": "Dans tes dernières notes, ton humeur montre une direction plus favorable.",
+        "c": "En suivant tes dernières notes, je peux maintenant reconnaître une évolution plus favorable de ton humeur."
+      },
+      "mood_declining": {
+        "a": "Je commence à remarquer une direction un peu plus difficile dans tes dernières notes.",
+        "b": "Dans tes dernières notes, ton humeur montre une direction un peu plus difficile.",
+        "c": "J'ai suivi tes notes et une direction plus difficile mérite notre attention, sans tirer de conclusions trop vite."
+      },
+      "mood_stable": {
+        "a": "Ton humeur semble avoir gardé une direction similaire dans tes dernières notes.",
+        "b": "J'ai remarqué une certaine stabilité dans la direction de ton humeur.",
+        "c": "Tes dernières notes montrent une continuité relativement stable de ton humeur."
+      },
+      "consistency": {
+        "a": "Je te vois ici assez régulièrement. Cela m'aide à mieux connaître ton rythme.",
+        "b": "Tu as été assez présent ces derniers jours. Chaque note ajoute quelque chose à ce que j'apprends de toi.",
+        "c": "Tu as été présent tout au long de cette semaine. Il existe maintenant une continuité qui m'aide à mieux comprendre ton rythme."
+      }
+    },
+    "actions": {
+      "impulse": "Ouvrir Impulsion",
+      "patterns": "Explorer mes schémas",
+      "progress": "Voir mon évolution",
+      "record": "Indiquer comment je vais"
+    },
+    "nextStep": "Passer à l’étape suivante"
   }
 }

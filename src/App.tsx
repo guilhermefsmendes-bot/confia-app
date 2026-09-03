@@ -33,7 +33,7 @@ import HomeInventory from "./components/HomeInventory";
 import { createWeeklyTrophy } from "./storage/weeklyTrophies";
 import { deleteAllUserData } from "./storage/deleteUserData";
 import { initLanguage } from "./i18n/language";
-import HomeWorld from "./components/HomeWorld";
+import ConfiaCompanionHome from "./components/Companheiro/ConfiaCompanionHome";
 import HomeProgressSummary from "./components/HomeProgressSummary";
 import HomeShop from "./components/HomeShop";
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
@@ -454,6 +454,28 @@ const isEarlyLearning =
   ratings.length >= 1 &&
   ratings.length <= 2;
 
+/**
+ * A6.3 — memória relacional do companheiro.
+ *
+ * Reutiliza o mesmo modelo de memória do sistema reativo.
+ * Não persiste nada e não cria uma segunda fonte de verdade.
+ */
+const homeCompanionRelationalMemory = (() => {
+  if (
+    currentTab !== 0 ||
+    homeScreen !== "home"
+  ) {
+    return null;
+  }
+
+  try {
+    return collectReactiveRecentMemory();
+  } catch {
+    return null;
+  }
+})();
+
+
 const homeNowMemory = (() => {
   if (currentTab !== 0 || homeScreen !== "home") {
     return null;
@@ -606,6 +628,26 @@ const homeNowMemory = (() => {
 })();
 
 
+/**
+ * CONFIA A3.2 — cérebro reativo único do Principal.
+ *
+ * O resultado é calculado uma vez e partilhado entre:
+ * - ação inteligente;
+ * - companheiro;
+ * - balão;
+ * - expressão visual.
+ */
+const homeReactiveResult = (() => {
+  if (currentTab !== 0 || homeScreen !== "home") {
+    return null;
+  }
+
+  return analyzeReactiveState({
+    source: "general",
+  });
+})();
+
+
 const homeNowAction = (() => {
   if (currentTab !== 0 || homeScreen !== "home") {
     return null;
@@ -625,9 +667,7 @@ const homeNowAction = (() => {
   /*
    * 1D.4 — decisão normal do Reactive Engine.
    */
-  const result = analyzeReactiveState({
-    source: "general",
-  });
+  const result = homeReactiveResult;
 
   const intent = result?.intent;
 
@@ -2006,7 +2046,8 @@ className="flex items-center justify-center w-24 h-24 relative"
               {/* Interactive Amigo Panel */}
               <div className="space-y-4">
 
-<HomeWorld
+
+<ConfiaCompanionHome
   avatar={avatar}
   avatarCelebrating={avatarCelebrating}
   avatarMemoryMessage={avatarMemoryMessage}
@@ -2014,8 +2055,180 @@ className="flex items-center justify-center w-24 h-24 relative"
   afternoonRating={afternoonRating}
   handlePetAvatar={handlePetAvatar}
   worldMood={worldMood}
+  reactiveResult={homeReactiveResult}
+  relationalMemory={homeCompanionRelationalMemory}
 
+  onCompanionAction={(target) => {
+    if (target === "impulse") {
+      setHomeScreen("home");
+      setCurrentTab(3);
+      return;
+    }
+
+    if (target === "patterns") {
+      setHomeScreen("patterns");
+      setCurrentTab(0);
+      return;
+    }
+
+    if (target === "progress") {
+      setHomeScreen("progress");
+      setCurrentTab(0);
+      return;
+    }
+
+    if (target === "record") {
+      setHomeScreen("home");
+      setCurrentTab(0);
+    }
+  }}
 />
+
+{/* O teu espaço — navegação secundária premium */}
+{homeScreen === "home" && (
+  <section
+    className="relative overflow-hidden rounded-[30px] border border-[#E8DDD7]/70 bg-gradient-to-br from-white via-[#FFFDFC] to-[#FFF6F1] shadow-[0_12px_32px_rgba(92,64,52,0.055)]"
+    aria-label={t("homeSpace.title")}
+  >
+    {/* Cabeçalho */}
+    <div className="relative px-5 pb-4 pt-5">
+      <div
+        aria-hidden="true"
+        className="absolute left-5 top-0 h-px w-10 bg-[#E5A88B]/45"
+      />
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+        {t("homeSpace.title")}
+      </p>
+
+      <p className="mt-1 text-[11px] font-semibold text-slate-400">
+        {t("homeSpace.subtitle")}
+      </p>
+    </div>
+
+    {/* Amigo — protagonista */}
+    <div className="px-3">
+      <button
+        type="button"
+        onClick={() => setHomeScreen("companion")}
+        className="relative w-full overflow-hidden flex items-center justify-between gap-4 rounded-[24px] border border-[#E5A88B]/20 bg-gradient-to-br from-white via-white to-[#FFF3EC] px-4 py-4 text-left shadow-[0_8px_22px_rgba(92,64,52,0.055)] transition-colors duration-200 active:bg-[#FFF8F4]"
+      >
+        <div
+          aria-hidden="true"
+          className="absolute -right-7 -top-8 h-24 w-24 rounded-full bg-[#F4D8C9]/20"
+        />
+
+        <div className="relative flex min-w-0 items-center gap-3.5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#E5A88B]/15 bg-gradient-to-br from-[#FFF8F4] to-[#F3E2D8] shadow-[0_5px_14px_rgba(92,64,52,0.04)]">
+            <Sparkles
+              size={19}
+              strokeWidth={1.8}
+              className="text-[#C97B5E]"
+            />
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+              CONFIA
+            </p>
+
+            <p className="mt-0.5 text-sm font-black text-[#4E3B36]">
+              {t("companion")}
+            </p>
+          </div>
+        </div>
+
+        <span
+          aria-hidden="true"
+          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#E5A88B]/15 bg-white/90 text-base font-light text-[#C97B5E] shadow-sm"
+        >
+          →
+        </span>
+      </button>
+    </div>
+
+    {/* Áreas do espaço */}
+    <div className="mt-3 grid grid-cols-3 gap-2 px-3">
+      {/* Hábitos */}
+      <button
+        type="button"
+        onClick={() => {
+          setPatternsPage("menu");
+          setHomeScreen("patterns");
+        }}
+        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
+          <ChartNoAxesCombined
+            size={16}
+            strokeWidth={1.8}
+            className="text-[#C97B5E]"
+          />
+        </div>
+
+        <span className="text-[10px] font-bold text-[#6D5A53]">
+          {t("patternsPremium.habits")}
+        </span>
+      </button>
+
+      {/* Inventário */}
+      <button
+        type="button"
+        onClick={() => setHomeScreen("inventory")}
+        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
+          <Backpack
+            size={16}
+            strokeWidth={1.8}
+            className="text-[#C97B5E]"
+          />
+        </div>
+
+        <span className="text-[10px] font-bold text-[#6D5A53]">
+          {t("inventory")}
+        </span>
+      </button>
+
+      {/* Loja */}
+      <button
+        type="button"
+        onClick={() => setHomeScreen("shop")}
+        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
+          <Store
+            size={16}
+            strokeWidth={1.8}
+            className="text-[#C97B5E]"
+          />
+        </div>
+
+        <span className="text-[10px] font-bold text-[#6D5A53]">
+          {t("shop")}
+        </span>
+      </button>
+    </div>
+
+    {/* Definições — utilidade secundária */}
+    <div className="mx-4 mt-3 border-t border-[#E8DDD7]/55">
+      <button
+        type="button"
+        onClick={() => setHomeScreen("settings")}
+        className="flex w-full items-center justify-end gap-1.5 px-1 py-3.5 text-slate-400 transition-colors duration-200 active:text-[#C97B5E]"
+      >
+        <Settings
+          size={13}
+          strokeWidth={1.8}
+        />
+
+        <span className="text-[9px] font-bold">
+          {t("settings")}
+        </span>
+      </button>
+    </div>
+  </section>
+)}
+
 
 {/* ======================================================
     CONFIA 3C.1 — MOMENTO DE HOJE
@@ -2368,143 +2581,17 @@ className="flex items-center justify-center w-24 h-24 relative"
   </section>
 )}
 
-{reactiveMessageKey && (
-  <div
-    className={`mt-4 rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] to-white p-5 shadow-sm ${
-      homeNowAction ? "rounded-b-[22px]" : ""
-    }`}
-  >
-    <div className="flex items-start gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white border border-[#E5A88B]/15">
-        <Sparkles
-          size={18}
-          strokeWidth={1.8}
-          className="text-[#C97B5E]"
-        />
-      </div>
-
-      <div className="min-w-0">
-        <p className="text-xs font-black uppercase tracking-wider text-[#C97B5E] font-display">
-          {isEarlyLearning
-            ? t("earlyLearningInsight.eyebrow")
-            : t("reactiveInsightTitle")}
-        </p>
-
-        {isEarlyLearning && (
-          <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#8A6A5D]">
-            {t("earlyLearningInsight.text")}
-          </p>
-        )}
-
-        <p
-          className={`font-semibold leading-relaxed text-[#4E3B36] ${
-            isEarlyLearning
-              ? "mt-2 text-sm"
-              : "mt-1.5 text-sm"
-          }`}
-        >
-          {t(reactiveMessageKey)}
-        </p>
-      </div>
-    </div>
-  </div>
-)}
+{/* CONFIA A3.3 — a reação do Principal é agora
+    apresentada pela própria CONFIA através do seu balão.
+    reactiveMessageKey permanece ativo para os restantes
+    fluxos reativos e separadores. */}
 
   </>
 )}
 
-              {/* Para ti agora — ação contextual da CONFIA */}
-{homeScreen === "home" && homeNowAction && (
-  <div className={reactiveMessageKey || isFirstContact ? "-mt-2 pt-2" : ""}>
-    {(reactiveMessageKey || isFirstContact) && (
-      <div
-        aria-hidden="true"
-        className="mx-auto h-5 w-px bg-gradient-to-b from-[#E5A88B]/45 to-[#E5A88B]/10"
-      />
-    )}
-
-    <section
-      className={`rounded-[28px] border border-[#E5A88B]/20 bg-gradient-to-br from-[#FFF7F2] via-white to-[#FFFDFC] p-5 shadow-[0_10px_28px_rgba(92,64,52,0.05)] ${
-        reactiveMessageKey || isFirstContact ? "relative overflow-hidden" : ""
-      }`}
-      aria-label={t("homeNow.eyebrow")}
-    >
-      {(reactiveMessageKey || isFirstContact) && (
-        <div
-          aria-hidden="true"
-          className="absolute left-0 top-6 h-12 w-[3px] rounded-r-full bg-[#E5A88B]/55"
-        />
-      )}
-    <div className="flex items-start gap-3.5">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/15 bg-white text-[#C97B5E] shadow-sm">
-        <Compass
-          size={18}
-          strokeWidth={1.8}
-        />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
-          {homeNowContext?.kind === "impulseLearning"
-            ? t("impulseLearning.eyebrow")
-            : homeNowContext?.kind === "continuity"
-              ? t("homeNow.continuityMemory.eyebrow")
-              : t("homeNow.eyebrow")}
-        </p>
-
-        <h3 className="mt-1 text-sm font-black leading-snug text-[#4E3B36]">
-          {t(homeNowAction.titleKey)}
-        </h3>
-
-        {homeNowContext?.kind === "impulseLearning" && (
-          <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#8A6A5D]">
-            {t("impulseLearning.description", {
-              count: homeNowContext.memory.effectiveCount,
-              reduction:
-                homeNowContext.memory.averageReduction !== null
-                  ? Math.round(
-                      homeNowContext.memory.averageReduction * 10
-                    ) / 10
-                  : 0,
-            })}
-          </p>
-        )}
-
-        {/* 1D.8D — LINGUAGEM TRANSVERSAL */}
-        {homeNowContext?.kind === "continuity" && (
-          <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#8A6A5D]">
-            {homeNowContext.source === "mood"
-              ? t("homeNow.continuityMemory.mood")
-              : homeNowContext.source === "impulse"
-                ? t("homeNow.continuityMemory.impulse")
-                : homeNowContext.source === "cross"
-                  ? t("homeNow.continuityMemory.cross")
-                  : t("homeNow.continuityMemory.checkIn")}
-          </p>
-        )}
-
-        <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-slate-500">
-          {t(homeNowAction.textKey)}
-        </p>
-
-        <button
-          type="button"
-          onClick={handleHomeNowAction}
-          className="mt-3 inline-flex min-h-9 items-center gap-2 rounded-xl text-[10px] font-black text-[#C97B5E] transition-opacity active:opacity-70"
-        >
-          <span>
-            {t(homeNowAction.actionKey)}
-          </span>
-
-          <span aria-hidden="true">
-            →
-          </span>
-        </button>
-      </div>
-    </div>
-    </section>
-  </div>
-)}
+              {/* CONFIA — ação contextual integrada no cartão principal.
+                  O antigo cartão independente "Para ti agora" foi removido
+                  para evitar duplicação visual e repetição do mesmo CTA. */}
 
 {/* Hoje — resumo + registo diário */}
               <div className="mt-1">
@@ -2679,184 +2766,39 @@ className="flex items-center justify-center w-24 h-24 relative"
                 </section>
               </div>
 
-{/* O teu espaço — navegação secundária premium */}
-{homeScreen === "home" && (
-  <section
-    className="relative overflow-hidden rounded-[30px] border border-[#E8DDD7]/70 bg-gradient-to-br from-white via-[#FFFDFC] to-[#FFF6F1] shadow-[0_12px_32px_rgba(92,64,52,0.055)]"
-    aria-label={t("homeSpace.title")}
-  >
-    {/* Cabeçalho */}
-    <div className="relative px-5 pb-4 pt-5">
-      <div
-        aria-hidden="true"
-        className="absolute left-5 top-0 h-px w-10 bg-[#E5A88B]/45"
-      />
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
-        {t("homeSpace.title")}
-      </p>
-
-      <p className="mt-1 text-[11px] font-semibold text-slate-400">
-        {t("homeSpace.subtitle")}
-      </p>
-    </div>
-
-    {/* Amigo — protagonista */}
-    <div className="px-3">
-      <button
-        type="button"
-        onClick={() => setHomeScreen("companion")}
-        className="relative w-full overflow-hidden flex items-center justify-between gap-4 rounded-[24px] border border-[#E5A88B]/20 bg-gradient-to-br from-white via-white to-[#FFF3EC] px-4 py-4 text-left shadow-[0_8px_22px_rgba(92,64,52,0.055)] transition-colors duration-200 active:bg-[#FFF8F4]"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute -right-7 -top-8 h-24 w-24 rounded-full bg-[#F4D8C9]/20"
-        />
-
-        <div className="relative flex min-w-0 items-center gap-3.5">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#E5A88B]/15 bg-gradient-to-br from-[#FFF8F4] to-[#F3E2D8] shadow-[0_5px_14px_rgba(92,64,52,0.04)]">
-            <Sparkles
-              size={19}
-              strokeWidth={1.8}
-              className="text-[#C97B5E]"
-            />
-          </div>
-
-          <div className="min-w-0">
-            <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
-              CONFIA
-            </p>
-
-            <p className="mt-0.5 text-sm font-black text-[#4E3B36]">
-              {t("companion")}
-            </p>
-          </div>
-        </div>
-
-        <span
-          aria-hidden="true"
-          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#E5A88B]/15 bg-white/90 text-base font-light text-[#C97B5E] shadow-sm"
-        >
-          →
-        </span>
-      </button>
-    </div>
-
-    {/* Áreas do espaço */}
-    <div className="mt-3 grid grid-cols-3 gap-2 px-3">
-      {/* Hábitos */}
-      <button
-        type="button"
-        onClick={() => {
-          setPatternsPage("menu");
-          setHomeScreen("patterns");
-        }}
-        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
-      >
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
-          <ChartNoAxesCombined
-            size={16}
-            strokeWidth={1.8}
-            className="text-[#C97B5E]"
-          />
-        </div>
-
-        <span className="text-[10px] font-bold text-[#6D5A53]">
-          {t("patternsPremium.habits")}
-        </span>
-      </button>
-
-      {/* Inventário */}
-      <button
-        type="button"
-        onClick={() => setHomeScreen("inventory")}
-        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
-      >
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
-          <Backpack
-            size={16}
-            strokeWidth={1.8}
-            className="text-[#C97B5E]"
-          />
-        </div>
-
-        <span className="text-[10px] font-bold text-[#6D5A53]">
-          {t("inventory")}
-        </span>
-      </button>
-
-      {/* Loja */}
-      <button
-        type="button"
-        onClick={() => setHomeScreen("shop")}
-        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
-      >
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
-          <Store
-            size={16}
-            strokeWidth={1.8}
-            className="text-[#C97B5E]"
-          />
-        </div>
-
-        <span className="text-[10px] font-bold text-[#6D5A53]">
-          {t("shop")}
-        </span>
-      </button>
-    </div>
-
-    {/* Definições — utilidade secundária */}
-    <div className="mx-4 mt-3 border-t border-[#E8DDD7]/55">
-      <button
-        type="button"
-        onClick={() => setHomeScreen("settings")}
-        className="flex w-full items-center justify-end gap-1.5 px-1 py-3.5 text-slate-400 transition-colors duration-200 active:text-[#C97B5E]"
-      >
-        <Settings
-          size={13}
-          strokeWidth={1.8}
-        />
-
-        <span className="text-[9px] font-bold">
-          {t("settings")}
-        </span>
-      </button>
-    </div>
-  </section>
-)}
-
 {/* Apoio — acesso SOS discreto e sempre disponível */}
 <button
   type="button"
   onClick={() => setTriageOpen(true)}
-  className="group w-full rounded-[22px] border border-[#E8DDD7]/60 bg-white/45 px-4 py-3 text-left transition-colors duration-200 active:bg-[#FFF8F4]"
+  className="group w-full rounded-[22px] border border-[#8F433A]/35 bg-gradient-to-r from-[#A65349] to-[#93443C] px-4 py-3 text-left shadow-[0_8px_22px_rgba(130,58,50,0.16)] transition-all duration-200 active:scale-[0.99] active:opacity-95"
 >
   <div className="flex items-center gap-3">
-    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E5A88B]/20 bg-[#FFF8F4]">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10">
       <Brain
         size={16}
         strokeWidth={1.7}
-        className="text-[#C97B5E]"
+        className="text-white"
       />
     </div>
 
     <div className="min-w-0 flex-1">
-      <p className="text-xs font-black text-[#4E3B36] font-display">
+      <p className="text-xs font-black text-white font-display">
         {t("crisisQuestion")}
       </p>
 
-      <p className="mt-0.5 truncate text-[10px] font-semibold text-slate-400">
+      <p className="mt-0.5 truncate text-[10px] font-semibold text-white/70">
         {t("crisisStartSupport")}
       </p>
     </div>
 
     <div className="flex shrink-0 items-center gap-1.5">
-      <span className="text-[10px] font-black tracking-wide text-[#C97B5E]">
+      <span className="text-[10px] font-black tracking-wide text-white">
         SOS
       </span>
 
       <span
         aria-hidden="true"
-        className="text-sm font-light text-[#C97B5E]"
+        className="text-sm font-light text-white/90"
       >
         →
       </span>
@@ -2972,12 +2914,14 @@ className="flex items-center justify-center w-24 h-24 relative"
 <HomeShop
   onBack={() => setHomeScreen("home")}
   xp={avatar.xp}
+  companionLevel={avatar.level}
   spendXp={spendXp}
 />
 )}
 {currentTab === 0 && homeScreen === "inventory" && (
   <HomeInventory
     onBack={() => setHomeScreen("home")}
+    companionLevel={avatar.level}
   />
 )}
 {currentTab === 0 && homeScreen === "settings" && (

@@ -55,7 +55,44 @@
   "cycleMoreAnxiety": "Mais ansiedade",
   "cycleExplanation": "Quando procuramos garantias constantemente, o cérebro aprende que existe perigo e mantém o ciclo ativo.",
   "inventory": "Inventário",
+  "companionCustomization": {
+    "title": "Personaliza a tua CONFIA",
+    "subtitle": "Escolhe pequenos detalhes que tornam a tua CONFIA mais tua.",
+    "accessoriesTitle": "Acessórios da CONFIA",
+    "accessoriesSubtitle": "Os acessórios equipados aparecem na tua companheira.",
+    "accessoriesEmpty": "Ainda não tens acessórios para a tua CONFIA.",
+    "collectionTitle": "A tua coleção",
+    "collectionSubtitle": "Objetos que já conquistaste continuam guardados aqui.",
+    "trophiesTitle": "Troféus",
+    "objectiveCompleted": "Objetivo concluído",
+    "equip": "Equipar",
+    "equipped": "Equipado",
+    "slots": {
+      "head": "Cabeça",
+      "neck": "Pescoço",
+      "other": "Acessório"
+    },
+    "items": {
+      "confia_bow_cream": "Laço Creme",
+      "confia_scarf_terra": "Lenço Terracota",
+      "confia_charm_gold": "Amuleto Dourado"
+    }
+  },
   "shop": "Loja",
+  "companionShop": {
+    "title": "Loja da CONFIA",
+    "subtitle": "Escolhe pequenos detalhes para tornar a tua CONFIA ainda mais tua.",
+    "xpAvailable": "XP disponível",
+    "accessoriesTitle": "Para a tua CONFIA",
+    "accessoriesSubtitle": "Acessórios que podes usar na tua companheira.",
+    "collectionTitle": "Outros objetos",
+    "collectionSubtitle": "A tua coleção clássica continua disponível.",
+    "buy": "Comprar",
+    "owned": "Já tens",
+    "notEnoughXp": "XP insuficiente",
+    "availableAtLevel": "Disponível no nível {{level}}",
+    "levelRequired": "Nível {{level}}"
+  },
   "settings": "Definições",
   "impulseHistoryTitle": "🛡️ Historial de impulsos",
   "impulseLastUsed": "Última utilização: há {{days}} dia(s)",
@@ -1553,5 +1590,64 @@
     "settling": "A encontrar equilíbrio",
     "discovering": "A conhecer-te",
     "neutral": "Aqui contigo"
+  },
+  "companionRelationalMemory": {
+    "learnedImpulse": "Já te conheço um pouco melhor: em vários momentos recentes, {{need}} apareceu associado a experiências em que terminaste mais leve.",
+    "effectiveImpulse": "Lembro-me de uma experiência recente em que a intensidade passou de {{before}} para {{after}}. Parece ter-te ajudado nesse momento.",
+    "convergingSignals": "Tenho reparado em alguns sinais que se repetem nos teus registos. Ainda estamos a conhecê-los, mas já existe alguma continuidade.",
+    "repeatedNeed": "Tenho reparado que uma necessidade semelhante tem aparecido mais do que uma vez nos teus registos.",
+    "moodImproving": "Tenho acompanhado os teus últimos registos. Aos poucos, o teu humor tem mostrado uma direção mais favorável.",
+    "moodDeclining": "Tenho acompanhado os teus últimos registos. Ultimamente, o teu humor tem mostrado uma direção um pouco mais difícil.",
+    "moodStable": "Tenho acompanhado os teus últimos registos. O teu humor tem-se mantido numa direção relativamente semelhante.",
+    "consistency": "Tenho-te visto por aqui com alguma regularidade. Cada registo ajuda-me a conhecer melhor o teu ritmo.",
+    "variants": {
+      "learned_impulse": {
+        "a": "Começo a reconhecer algo em ti: já houve mais do que uma experiência recente em que terminaste mais leve.",
+        "b": "Tenho reparado numa aprendizagem tua: já houve várias experiências recentes em que terminaste mais leve.",
+        "c": "Já há algo que reconheço no teu percurso: em várias experiências recentes terminaste mais leve."
+      },
+      "effective_impulse": {
+        "a": "Há uma experiência recente que guardo como referência: a intensidade passou de {{before}} para {{after}}.",
+        "b": "Lembro-me de um momento recente em que passaste de {{before}} para {{after}}. Nesse momento, a experiência pareceu ajudar.",
+        "c": "Uma das tuas experiências recentes deixou um sinal claro: a intensidade desceu de {{before}} para {{after}}."
+      },
+      "converging_signals": {
+        "a": "Começo a notar alguns sinais que aparecem em conjunto nos teus registos.",
+        "b": "Há vários sinais nos teus registos que começam a apontar numa direção semelhante.",
+        "c": "Já consigo reconhecer continuidade entre vários sinais dos teus registos, embora continue a observá-los com cuidado."
+      },
+      "repeated_need": {
+        "a": "Há uma necessidade que começou a aparecer novamente nos teus registos.",
+        "b": "Tenho reparado que uma necessidade semelhante se tem repetido nos teus últimos registos.",
+        "c": "Esta necessidade já apareceu várias vezes nos teus registos. É algo que vale a pena continuarmos a observar."
+      },
+      "mood_improving": {
+        "a": "Começo a notar uma direção um pouco mais favorável no teu humor.",
+        "b": "Nos teus últimos registos, o humor tem mostrado uma direção mais favorável.",
+        "c": "Ao acompanhar os teus últimos registos, já consigo reconhecer uma evolução mais favorável no teu humor."
+      },
+      "mood_declining": {
+        "a": "Começo a notar uma direção um pouco mais difícil nos teus últimos registos.",
+        "b": "Nos teus últimos registos, o humor tem mostrado uma direção um pouco mais difícil.",
+        "c": "Tenho acompanhado os teus registos e há uma direção mais difícil que merece a nossa atenção, sem tirarmos conclusões precipitadas."
+      },
+      "mood_stable": {
+        "a": "O teu humor parece ter mantido uma direção semelhante nos últimos registos.",
+        "b": "Tenho reparado em alguma estabilidade na direção do teu humor.",
+        "c": "Os teus últimos registos mostram uma continuidade relativamente estável no humor."
+      },
+      "consistency": {
+        "a": "Tenho-te visto por aqui com alguma regularidade. Isso ajuda-me a conhecer melhor o teu ritmo.",
+        "b": "A tua presença tem sido bastante regular nos últimos dias. Cada registo acrescenta um pouco ao que vou conhecendo de ti.",
+        "c": "Estiveste presente ao longo de toda esta semana. Já existe uma continuidade que me ajuda a compreender melhor o teu ritmo."
+      }
+    },
+    "actions": {
+      "impulse": "Abrir Impulso",
+      "patterns": "Explorar os meus padrões",
+      "progress": "Ver a minha evolução",
+      "record": "Registar como estou"
+    },
+    "nextStep": "Dar o próximo passo"
   }
 }

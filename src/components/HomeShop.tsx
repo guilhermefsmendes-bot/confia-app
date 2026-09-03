@@ -45,11 +45,6 @@ const HomeShop: React.FC<HomeShopProps> = ({
   const companionItems =
     homeItems.filter(isCompanionAccessory);
 
-  const legacyItems =
-    homeItems.filter(
-      item => !isCompanionAccessory(item)
-    );
-
 
   /**
    * A5.6A
@@ -119,12 +114,22 @@ const HomeShop: React.FC<HomeShopProps> = ({
       !levelLocked &&
       xp >= item.cost;
 
+    const slotKey =
+      item.companionSlot === "head" ||
+      item.companionSlot === "face" ||
+      item.companionSlot === "neck" ||
+      item.companionSlot === "body" ||
+      item.companionSlot === "hand" ||
+      item.companionSlot === "aura" ||
+      item.companionSlot === "skin" ||
+      item.companionSlot === "mark" ||
+      item.companionSlot === "flame" ||
+      item.companionSlot === "eyes"
+        ? item.companionSlot
+        : "other";
+
     const slotLabel =
-      item.companionSlot === "head"
-        ? t("companionCustomization.slots.head")
-        : item.companionSlot === "neck"
-          ? t("companionCustomization.slots.neck")
-          : t("companionCustomization.slots.other");
+      t(`companionCustomization.slots.${slotKey}`);
 
     return (
       <div
@@ -369,39 +374,6 @@ const HomeShop: React.FC<HomeShopProps> = ({
 
             {companionItems.map(
               renderAccessory
-            )}
-
-          </div>
-
-        </section>
-
-      )}
-
-
-      {/* =====================================================
-          OBJETOS LEGACY
-      ===================================================== */}
-
-      {legacyItems.length > 0 && (
-
-        <section className="space-y-4">
-
-          <div className="px-1">
-
-            <h2 className="font-extrabold text-[#4E3B36]">
-              {t("companionShop.collectionTitle")}
-            </h2>
-
-            <p className="mt-1 text-sm leading-relaxed text-[#8A756D]">
-              {t("companionShop.collectionSubtitle")}
-            </p>
-
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-
-            {legacyItems.map(
-              renderLegacyItem
             )}
 
           </div>

@@ -26,10 +26,15 @@ export type CompanionItemKind =
 
 export type CompanionAccessorySlot =
   | "head"
+  | "face"
   | "neck"
   | "body"
   | "hand"
-  | "aura";
+  | "aura"
+  | "skin"
+  | "mark"
+  | "flame"
+  | "eyes";
 
 export interface HomeItem {
   id: string;
@@ -50,58 +55,7 @@ export interface HomeItem {
 }
 
 export const homeItems: HomeItem[] = [
-  // Flores
-  { id: "flower1", emoji: "🌼", cost: 5, category: "flowers" },
-  { id: "flower2", emoji: "🌸", cost: 10, category: "flowers" },
-  { id: "flower3", emoji: "🌺", cost: 15, category: "flowers" },
-  { id: "flower4", emoji: "🌷", cost: 20, category: "flowers" },
-  { id: "flower5", emoji: "🌹", cost: 25, category: "flowers" },
-  { id: "flower6", emoji: "🪻", cost: 30, category: "flowers" },
-
-  // Árvores e natureza
-  { id: "tree1", emoji: "🌳", cost: 45, category: "trees" },
-  { id: "tree2", emoji: "🌲", cost: 60, category: "trees" },
-  { id: "tree3", emoji: "🌴", cost: 75, category: "trees" },
-  { id: "tree4", emoji: "🍀", cost: 90, category: "trees" },
-  { id: "tree5", emoji: "🪵", cost: 110, category: "trees" },
-
-  // Animais do Refúgio
-  { id: "animal1", emoji: "🐰", cost: 120, category: "animals" },
-  { id: "animal2", emoji: "🦔", cost: 140, category: "animals" },
-  { id: "animal3", emoji: "🐿️", cost: 160, category: "animals" },
-  { id: "animal4", emoji: "🦆", cost: 180, category: "animals" },
-  { id: "animal5", emoji: "🪺", cost: 200, category: "animals" },
-  { id: "animal6", emoji: "🦋", cost: 220, category: "animals" },
-
-  // Zonas de calma
-  { id: "calm1", emoji: "🪷", cost: 240, category: "calm" },
-  { id: "calm2", emoji: "⛺", cost: 260, category: "calm" },
-  { id: "calm3", emoji: "🏮", cost: 280, category: "calm" },
-  { id: "calm4", emoji: "🕯️", cost: 300, category: "calm" },
-  { id: "calm5", emoji: "🌙", cost: 330, category: "calm" },
-
-  // Elementos mágicos
-  { id: "magic1", emoji: "🌫️", cost: 360, category: "magic" },
-  { id: "magic2", emoji: "💗", cost: 390, category: "magic" },
-  { id: "magic3", emoji: "✨", cost: 420, category: "magic" },
-  { id: "magic4", emoji: "☄️", cost: 460, category: "magic" },
-  { id: "magic5", emoji: "🌌", cost: 500, category: "magic" },
-  { id: "magic6", emoji: "🪐", cost: 550, category: "magic" },
-
-  // Água
-  { id: "water1", emoji: "💧", cost: 300, category: "water" },
-  { id: "water2", emoji: "🪷", cost: 340, category: "water" },
-  { id: "water3", emoji: "⛲", cost: 380, category: "water" },
-  { id: "water4", emoji: "🌊", cost: 420, category: "water" },
-
-  // Itens raros
-  { id: "rare1", emoji: "🍄", cost: 600, category: "rare" },
-  { id: "rare2", emoji: "🌻", cost: 650, category: "rare" },
-  { id: "rare3", emoji: "🦚", cost: 700, category: "rare" },
-  { id: "rare4", emoji: "🌈", cost: 800, category: "rare" },
-  { id: "rare5", emoji: "💎", cost: 900, category: "rare" },
-
-  // A5.2 — Acessórios da CONFIA
+  // B2.3 — personalização premium diversificada
   {
     id: "confia_bow_cream",
     emoji: "🎀",
@@ -110,6 +64,87 @@ export const homeItems: HomeItem[] = [
     companionKind: "accessory",
     companionSlot: "head",
     minCompanionLevel: 2
+  },
+  {
+    id: "confia_flower_daisy",
+    emoji: "🌼",
+    cost: 120,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "head",
+    minCompanionLevel: 3
+  },
+  {
+    id: "confia_beret_terra",
+    emoji: "🧢",
+    cost: 180,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "head",
+    minCompanionLevel: 4
+  },
+  {
+    id: "confia_beanie_cream",
+    emoji: "🧶",
+    cost: 220,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "head",
+    minCompanionLevel: 5
+  },
+  {
+    id: "confia_hat_garden",
+    emoji: "👒",
+    cost: 280,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "head",
+    minCompanionLevel: 6
+  },
+  {
+    id: "confia_crown_gold",
+    emoji: "👑",
+    cost: 600,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "head",
+    minCompanionLevel: 10
+  },
+  {
+    id: "confia_glasses_round",
+    emoji: "👓",
+    cost: 130,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "face",
+    minCompanionLevel: 3
+  },
+  {
+    id: "confia_glasses_gold",
+    emoji: "👓",
+    cost: 260,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "face",
+    minCompanionLevel: 6
+  },
+  {
+    id: "confia_glasses_sun",
+    emoji: "🕶️",
+    cost: 330,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "face",
+    minCompanionLevel: 7
+  },
+  {
+    id: "confia_glasses_heart",
+    emoji: "💗",
+    cost: 460,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "face",
+    minCompanionLevel: 9
   },
   {
     id: "confia_scarf_terra",
@@ -128,7 +163,259 @@ export const homeItems: HomeItem[] = [
     companionKind: "accessory",
     companionSlot: "neck",
     minCompanionLevel: 5
-  }
+  },
+  {
+    id: "confia_scarf_cream",
+    emoji: "🧣",
+    cost: 150,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "neck",
+    minCompanionLevel: 3
+  },
+  {
+    id: "confia_necklace_leaf",
+    emoji: "🌿",
+    cost: 200,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "neck",
+    minCompanionLevel: 4
+  },
+  {
+    id: "confia_pendant_moon",
+    emoji: "🌙",
+    cost: 500,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "neck",
+    minCompanionLevel: 9
+  },
+  {
+    id: "confia_bag_terra",
+    emoji: "👜",
+    cost: 240,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "body",
+    minCompanionLevel: 5
+  },
+  {
+    id: "confia_cape_cream",
+    emoji: "🧥",
+    cost: 300,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "body",
+    minCompanionLevel: 6
+  },
+  {
+    id: "confia_backpack_terra",
+    emoji: "🎒",
+    cost: 360,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "body",
+    minCompanionLevel: 7
+  },
+  {
+    id: "confia_hand_flower",
+    emoji: "🌼",
+    cost: 170,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "hand",
+    minCompanionLevel: 4
+  },
+  {
+    id: "confia_hand_book",
+    emoji: "📖",
+    cost: 340,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "hand",
+    minCompanionLevel: 7
+  },
+  {
+    id: "confia_hand_light",
+    emoji: "✨",
+    cost: 540,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "hand",
+    minCompanionLevel: 10
+  },
+  {
+    id: "confia_aura_soft",
+    emoji: "✨",
+    cost: 230,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "aura",
+    minCompanionLevel: 5
+  },
+  {
+    id: "confia_aura_stars",
+    emoji: "🌟",
+    cost: 320,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "aura",
+    minCompanionLevel: 6
+  },
+  {
+    id: "confia_aura_leaves",
+    emoji: "🍃",
+    cost: 400,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "aura",
+    minCompanionLevel: 7
+  },
+  {
+    id: "confia_aura_gold",
+    emoji: "✨",
+    cost: 700,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "aura",
+    minCompanionLevel: 10
+  },
+  {
+    id: "confia_skin_cream",
+    emoji: "🎨",
+    cost: 160,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "skin",
+    minCompanionLevel: 3
+  },
+  {
+    id: "confia_skin_peach",
+    emoji: "🎨",
+    cost: 220,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "skin",
+    minCompanionLevel: 4
+  },
+  {
+    id: "confia_skin_rose",
+    emoji: "🎨",
+    cost: 300,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "skin",
+    minCompanionLevel: 5
+  },
+  {
+    id: "confia_skin_terra",
+    emoji: "🎨",
+    cost: 400,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "skin",
+    minCompanionLevel: 7
+  },
+  {
+    id: "confia_skin_gold",
+    emoji: "🎨",
+    cost: 650,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "skin",
+    minCompanionLevel: 10
+  },
+  {
+    id: "confia_mark_heart",
+    emoji: "♥",
+    cost: 180,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "mark",
+    minCompanionLevel: 3
+  },
+  {
+    id: "confia_mark_star",
+    emoji: "★",
+    cost: 240,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "mark",
+    minCompanionLevel: 4
+  },
+  {
+    id: "confia_mark_leaf",
+    emoji: "🌿",
+    cost: 300,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "mark",
+    minCompanionLevel: 6
+  },
+  {
+    id: "confia_mark_moon",
+    emoji: "☾",
+    cost: 380,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "mark",
+    minCompanionLevel: 8
+  },
+  {
+    id: "confia_mark_sun",
+    emoji: "☀",
+    cost: 500,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "mark",
+    minCompanionLevel: 10
+  },
+  {
+    id: "confia_flame_pearl",
+    emoji: "🔥",
+    cost: 260,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "flame",
+    minCompanionLevel: 5
+  },
+  {
+    id: "confia_flame_rose",
+    emoji: "🔥",
+    cost: 360,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "flame",
+    minCompanionLevel: 7
+  },
+  {
+    id: "confia_flame_gold",
+    emoji: "🔥",
+    cost: 520,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "flame",
+    minCompanionLevel: 9
+  },
+  {
+    id: "confia_eyes_amber",
+    emoji: "👁️",
+    cost: 280,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "eyes",
+    minCompanionLevel: 6
+  },
+  {
+    id: "confia_eyes_honey",
+    emoji: "👁️",
+    cost: 420,
+    category: "companion",
+    companionKind: "accessory",
+    companionSlot: "eyes",
+    minCompanionLevel: 8
+  },
 ];
 
 /**

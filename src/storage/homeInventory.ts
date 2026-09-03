@@ -36,12 +36,29 @@ export function getInventory(): string[] {
   const saved = localStorage.getItem(INVENTORY_KEY);
 
   if (saved) {
-    return safeParseIdList(saved);
+    const inventory = safeParseIdList(saved);
+
+    // B1 — remove IDs pertencentes ao antigo mundo.
+    // Os acessórios CONFIA usam o prefixo "confia_".
+    const cleanedInventory = inventory.filter(
+      id => id.startsWith("confia_")
+    );
+
+    if (
+      cleanedInventory.length !== inventory.length
+    ) {
+      localStorage.setItem(
+        INVENTORY_KEY,
+        JSON.stringify(cleanedInventory)
+      );
+    }
+
+    return cleanedInventory;
   }
 
 
-  // Oferta inicial para novos utilizadores
-  const initialInventory = ["flower1"];
+  // B1 — novos utilizadores começam sem itens antigos.
+  const initialInventory: string[] = [];
 
   localStorage.setItem(
     INVENTORY_KEY,
@@ -86,7 +103,23 @@ export function getEquipped(): string[] {
 
   const saved = localStorage.getItem(EQUIPPED_KEY);
 
-  return safeParseIdList(saved);
+  const equipped = safeParseIdList(saved);
+
+  // B1 — remove equipamento pertencente ao antigo mundo.
+  const cleanedEquipped = equipped.filter(
+    id => id.startsWith("confia_")
+  );
+
+  if (
+    cleanedEquipped.length !== equipped.length
+  ) {
+    localStorage.setItem(
+      EQUIPPED_KEY,
+      JSON.stringify(cleanedEquipped)
+    );
+  }
+
+  return cleanedEquipped;
 
 }
 

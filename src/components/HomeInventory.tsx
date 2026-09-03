@@ -55,9 +55,6 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({
   const companionItems =
     items.filter(isCompanionAccessory);
 
-  const legacyItems =
-    items.filter(item => !isCompanionAccessory(item));
-
   const weeklyTrophies = getWeeklyTrophies();
 
   /**
@@ -100,20 +97,22 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({
   const getSlotLabel = (
     slot?: string
   ): string => {
-    if (slot === "head") {
-      return t(
-        "companionCustomization.slots.head"
-      );
-    }
-
-    if (slot === "neck") {
-      return t(
-        "companionCustomization.slots.neck"
-      );
-    }
+    const slotKey =
+      slot === "head" ||
+      slot === "face" ||
+      slot === "neck" ||
+      slot === "body" ||
+      slot === "hand" ||
+      slot === "aura" ||
+      slot === "skin" ||
+      slot === "mark" ||
+      slot === "flame" ||
+      slot === "eyes"
+        ? slot
+        : "other";
 
     return t(
-      "companionCustomization.slots.other"
+      `companionCustomization.slots.${slotKey}`
     );
   };
 

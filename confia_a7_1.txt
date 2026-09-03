@@ -1,0 +1,1207 @@
+==============================================================================
+CONFIA — A7.1 — DESCOBERTA VARIEDADE RELACIONAL
+==============================================================================
+
+==============================================================================
+src/data/reactive/companionRelationalMemory.ts
+==============================================================================
+
+--- linhas 19-78 ---
+  19:  * - lê localStorage;
+  20:  * - grava dados;
+  21:  * - cria timers;
+  22:  * - escolhe ferramentas;
+  23:  * - altera o reactiveEngine;
+  24:  * - inventa padrões;
+  25:  * - faz diagnóstico.
+  26:  */
+  27: 
+  28: 
+  29: export type CompanionRelationalMemoryKind =
+  30:   | "learned_impulse"
+  31:   | "effective_impulse"
+  32:   | "converging_signals"
+  33:   | "repeated_need"
+  34:   | "mood_improving"
+  35:   | "mood_declining"
+  36:   | "mood_stable"
+  37:   | "consistency";
+  38: 
+  39: 
+  40: export type CompanionRelationalMemoryStrength =
+  41:   | "soft"
+  42:   | "clear"
+  43:   | "strong";
+  44: 
+  45: 
+  46: export interface CompanionRelationalMemoryResult {
+  47:   kind: CompanionRelationalMemoryKind;
+  48: 
+  49:   /**
+  50:    * Quanto suporte factual existe para
+  51:    * a memória relacional apresentada.
+  52:    *
+  53:    * Não representa gravidade emocional.
+  54:    */
+  55:   strength: CompanionRelationalMemoryStrength;
+  56: 
+  57:   /**
+  58:    * Prioridade usada apenas para escolher
+  59:    * entre vários factos verdadeiros.
+  60:    */
+  61:   priority: number;
+  62: 
+  63:   /**
+  64:    * Chave preparada para a camada visual.
+  65:    *
+  66:    * As traduções serão ligadas no A6.3.
+  67:    */
+  68:   translationKey: string;
+  69: 
+  70:   /**
+  71:    * Valores factuais que poderão ser
+  72:    * interpolados pela tradução.
+  73:    */
+  74:   values?: Record<
+  75:     string,
+  76:     string | number
+  77:   >;
+  78: }
+
+--- linhas 97-157 ---
+  97:  * O resolver recebe a memória JÁ calculada
+  98:  * pelo sistema reativo.
+  99:  *
+ 100:  * Não recolhe dados por conta própria.
+ 101:  */
+ 102: export function resolveCompanionRelationalMemory(
+ 103:   memory:
+ 104:     | ReactiveRecentMemory
+ 105:     | null
+ 106:     | undefined
+ 107: ): CompanionRelationalMemoryResult | null {
+ 108: 
+ 109:   if (!memory) {
+ 110:     return null;
+ 111:   }
+ 112: 
+ 113: 
+ 114:   const candidates:
+ 115:     CompanionRelationalMemoryResult[] = [];
+ 116: 
+ 117: 
+ 118:   /**
+ 119:    * --------------------------------------------------------
+ 120:    * 1. APRENDIZAGEM DO IMPULSO
+ 121:    * --------------------------------------------------------
+ 122:    *
+ 123:    * É a memória pessoal mais forte:
+ 124:    * existe repetição de experiências eficazes
+ 125:    * e uma necessidade/percurso dominante.
+ 126:    */
+ 127: 
+ 128:   if (
+ 129:     memory.hasImpulseLearning &&
+ 130:     memory.effectiveImpulseNeed &&
+ 131:     memory.effectiveImpulseNeedCount >= 2
+ 132:   ) {
+ 133: 
+ 134:     candidates.push({
+ 135:       kind: "learned_impulse",
+ 136: 
+ 137:       strength:
+ 138:         memory.effectiveImpulseNeedCount >= 3
+ 139:           ? "strong"
+ 140:           : "clear",
+ 141: 
+ 142:       priority: 100,
+ 143: 
+ 144:       translationKey:
+ 145:         "companionRelationalMemory.learnedImpulse",
+ 146: 
+ 147:       values: {
+ 148:         need:
+ 149:           memory.effectiveImpulseNeed,
+ 150: 
+ 151:         count:
+ 152:           memory.effectiveImpulseNeedCount,
+ 153:       },
+ 154:     });
+ 155:   }
+ 156: 
+ 157: 
+
+--- linhas 169-199 ---
+ 169: 
+ 170:   if (
+ 171:     memory.continuity.hasRepeatedSignals &&
+ 172:     memory.continuity.signalCount >=
+ 173:       MIN_SIGNALS_FOR_CONVERGENCE
+ 174:   ) {
+ 175: 
+ 176:     candidates.push({
+ 177:       kind: "converging_signals",
+ 178: 
+ 179:       strength:
+ 180:         memory.continuity.signalCount >= 3
+ 181:           ? "strong"
+ 182:           : "clear",
+ 183: 
+ 184:       priority: 90,
+ 185: 
+ 186:       translationKey:
+ 187:         "companionRelationalMemory.convergingSignals",
+ 188: 
+ 189:       values: {
+ 190:         count:
+ 191:           memory.continuity.signalCount,
+ 192:       },
+ 193:     });
+ 194:   }
+ 195: 
+ 196: 
+ 197:   /**
+ 198:    * --------------------------------------------------------
+ 199:    * 3. EPISÓDIO RECENTE QUE AJUDOU
+
+--- linhas 206-250 ---
+ 206:    */
+ 207: 
+ 208:   const effectiveImpulse =
+ 209:     memory.recentEffectiveImpulse;
+ 210: 
+ 211:   if (
+ 212:     effectiveImpulse &&
+ 213:     effectiveImpulse.reduction >= 2
+ 214:   ) {
+ 215: 
+ 216:     const values:
+ 217:       Record<string, string | number> = {
+ 218:         before:
+ 219:           effectiveImpulse.initialIntensity,
+ 220: 
+ 221:         after:
+ 222:           effectiveImpulse.finalIntensity,
+ 223: 
+ 224:         reduction:
+ 225:           effectiveImpulse.reduction,
+ 226:       };
+ 227: 
+ 228:     if (effectiveImpulse.need) {
+ 229:       values.need =
+ 230:         effectiveImpulse.need;
+ 231:     }
+ 232: 
+ 233:     candidates.push({
+ 234:       kind: "effective_impulse",
+ 235: 
+ 236:       strength: "clear",
+ 237: 
+ 238:       priority: 80,
+ 239: 
+ 240:       translationKey:
+ 241:         "companionRelationalMemory.effectiveImpulse",
+ 242: 
+ 243:       values,
+ 244:     });
+ 245:   }
+ 246: 
+ 247: 
+ 248:   /**
+ 249:    * --------------------------------------------------------
+ 250:    * 4. NECESSIDADE REPETIDA NOS CHECK-INS
+
+--- linhas 255-286 ---
+ 255:    */
+ 256: 
+ 257:   if (
+ 258:     memory.continuity.repeatedCheckInNeed &&
+ 259:     memory.continuity.repeatedCheckInNeedCount >= 2
+ 260:   ) {
+ 261: 
+ 262:     candidates.push({
+ 263:       kind: "repeated_need",
+ 264: 
+ 265:       strength:
+ 266:         memory.continuity
+ 267:           .repeatedCheckInNeedCount >= 3
+ 268:           ? "clear"
+ 269:           : "soft",
+ 270: 
+ 271:       priority: 70,
+ 272: 
+ 273:       translationKey:
+ 274:         "companionRelationalMemory.repeatedNeed",
+ 275: 
+ 276:       values: {
+ 277:         need:
+ 278:           memory.continuity
+ 279:             .repeatedCheckInNeed,
+ 280: 
+ 281:         count:
+ 282:           memory.continuity
+ 283:             .repeatedCheckInNeedCount,
+ 284:       },
+ 285:     });
+ 286:   }
+
+--- linhas 303-370 ---
+ 303:       MIN_MOOD_RECORDS_FOR_RELATIONAL_TREND;
+ 304: 
+ 305: 
+ 306:   if (hasEnoughMoodHistory) {
+ 307: 
+ 308:     if (moodDirection === "improving") {
+ 309: 
+ 310:       candidates.push({
+ 311:         kind: "mood_improving",
+ 312: 
+ 313:         strength: "clear",
+ 314: 
+ 315:         priority: 60,
+ 316: 
+ 317:         translationKey:
+ 318:           "companionRelationalMemory.moodImproving",
+ 319: 
+ 320:         values: {
+ 321:           count:
+ 322:             memory.continuity.moodRecordCount,
+ 323:         },
+ 324:       });
+ 325:     }
+ 326: 
+ 327: 
+ 328:     if (moodDirection === "declining") {
+ 329: 
+ 330:       candidates.push({
+ 331:         kind: "mood_declining",
+ 332: 
+ 333:         strength: "clear",
+ 334: 
+ 335:         priority: 60,
+ 336: 
+ 337:         translationKey:
+ 338:           "companionRelationalMemory.moodDeclining",
+ 339: 
+ 340:         values: {
+ 341:           count:
+ 342:             memory.continuity.moodRecordCount,
+ 343:         },
+ 344:       });
+ 345:     }
+ 346: 
+ 347: 
+ 348:     if (moodDirection === "stable") {
+ 349: 
+ 350:       candidates.push({
+ 351:         kind: "mood_stable",
+ 352: 
+ 353:         strength: "soft",
+ 354: 
+ 355:         priority: 50,
+ 356: 
+ 357:         translationKey:
+ 358:           "companionRelationalMemory.moodStable",
+ 359: 
+ 360:         values: {
+ 361:           count:
+ 362:             memory.continuity.moodRecordCount,
+ 363:         },
+ 364:       });
+ 365:     }
+ 366:   }
+ 367: 
+ 368: 
+ 369:   /**
+ 370:    * --------------------------------------------------------
+
+--- linhas 378-408 ---
+ 378:    * suficiente para a Confia a conhecer melhor.
+ 379:    */
+ 380: 
+ 381:   if (
+ 382:     memory.activeDaysLast7 >= 5
+ 383:   ) {
+ 384: 
+ 385:     candidates.push({
+ 386:       kind: "consistency",
+ 387: 
+ 388:       strength:
+ 389:         memory.activeDaysLast7 >= 7
+ 390:           ? "clear"
+ 391:           : "soft",
+ 392: 
+ 393:       priority: 30,
+ 394: 
+ 395:       translationKey:
+ 396:         "companionRelationalMemory.consistency",
+ 397: 
+ 398:       values: {
+ 399:         days:
+ 400:           memory.activeDaysLast7,
+ 401:       },
+ 402:     });
+ 403:   }
+ 404: 
+ 405: 
+ 406:   if (candidates.length === 0) {
+ 407:     return null;
+ 408:   }
+
+--- linhas 414-425 ---
+ 414:    * Nada aleatório:
+ 415:    * o facto pessoal mais significativo vence.
+ 416:    */
+ 417: 
+ 418:   candidates.sort(
+ 419:     (a, b) =>
+ 420:       b.priority - a.priority
+ 421:   );
+ 422: 
+ 423: 
+ 424:   return candidates[0];
+ 425: }
+
+==============================================================================
+src/components/Companheiro/ConfiaCompanionHome.tsx
+==============================================================================
+
+--- linhas 1-32 ---
+   1: import React, { memo, useMemo } from "react";
+   2: import { Sparkles } from "lucide-react";
+   3: import { useTranslation } from "react-i18next";
+   4: 
+   5: import { Avatar } from "../Avatar";
+   6: import {
+   7:   resolveCompanionRelationalMemory,
+   8:   type CompanionRelationalMemoryResult,
+   9: } from "../../data/reactive/companionRelationalMemory";
+  10: import type {
+  11:   ReactiveRecentMemory,
+  12: } from "../../data/reactive/reactiveRecentMemory";
+  13: 
+  14: import type { AvatarState } from "../../types";
+  15: import type {
+  16:   ReactiveResult,
+  17: } from "../../data/reactive/reactiveTypes";
+  18: import {
+  19:   resolveCompanionReaction,
+  20: } from "../../data/reactive/companionReactionEngine";
+  21: import { getEquipped } from "../../storage/homeInventory";
+  22: 
+  23: interface ConfiaCompanionHomeProps {
+  24:   avatar: AvatarState;
+  25:   avatarCelebrating: boolean;
+  26:   avatarMemoryMessage: string;
+  27:   morningRating?: number;
+  28:   afternoonRating?: number;
+  29:   handlePetAvatar: () => void;
+  30:   reactiveResult: ReactiveResult | null;
+  31:   relationalMemory: ReactiveRecentMemory | null;
+  32:   worldMood:
+
+--- linhas 73-97 ---
+  73:    * A5.3 — acessórios visuais da CONFIA.
+  74:    *
+  75:    * home_equipped continua a ser a única fonte persistente.
+  76:    * IDs legacy e troféus são ignorados pela criatura.
+  77:    */
+  78:   const equippedAccessoryIds = getEquipped().filter(
+  79:     id =>
+  80:       id === "confia_bow_cream" ||
+  81:       id === "confia_scarf_terra" ||
+  82:       id === "confia_charm_gold"
+  83:   );
+  84: 
+  85:   const currentMoodRating = useMemo(() => {
+  86:     if (typeof afternoonRating === "number") {
+  87:       return afternoonRating;
+  88:     }
+  89: 
+  90:     if (typeof morningRating === "number") {
+  91:       return morningRating;
+  92:     }
+  93: 
+  94:     return undefined;
+  95:   }, [morningRating, afternoonRating]);
+  96: 
+  97:   const progress = useMemo(() => {
+
+--- linhas 108-273 ---
+ 108:         )
+ 109:       )
+ 110:     );
+ 111:   }, [avatar.xp, avatar.maxXp]);
+ 112: 
+ 113:   /**
+ 114:    * A3.2
+ 115:    *
+ 116:    * A criatura não volta a analisar dados.
+ 117:    * Apenas traduz o resultado já produzido pelo
+ 118:    * Reactive Engine.
+ 119:    */
+ 120:   const companionReaction = useMemo(() => {
+ 121:     if (!reactiveResult) {
+ 122:       return null;
+ 123:     }
+ 124: 
+ 125:     return resolveCompanionReaction(
+ 126:       reactiveResult
+ 127:     );
+ 128:   }, [reactiveResult]);
+ 129: 
+ 130:   /**
+ 131:    * A6.3 — memória relacional visível.
+ 132:    *
+ 133:    * Não volta a recolher dados e não cria memória.
+ 134:    * Recebe a mesma ReactiveRecentMemory já construída
+ 135:    * no Principal e transforma-a apenas numa possibilidade
+ 136:    * de fala da criatura.
+ 137:    */
+ 138:   const companionRelationalMemory:
+ 139:     CompanionRelationalMemoryResult | null =
+ 140:       useMemo(
+ 141:         () =>
+ 142:           resolveCompanionRelationalMemory(
+ 143:             relationalMemory
+ 144:           ),
+ 145:         [relationalMemory]
+ 146:       );
+ 147: 
+ 148:   /**
+ 149:    * Uma reação atual com prioridade >= 70 continua
+ 150:    * sempre à frente da memória relacional.
+ 151:    *
+ 152:    * Isto protege:
+ 153:    * - momentos difíceis;
+ 154:    * - regressos;
+ 155:    * - progresso relevante;
+ 156:    * - celebrações;
+ 157:    * - descobertas atuais.
+ 158:    *
+ 159:    * A memória relacional surge apenas quando existe
+ 160:    * espaço emocional para a CONFIA demonstrar
+ 161:    * continuidade da relação.
+ 162:    */
+ 163:   const canUseRelationalMemory =
+ 164:     Boolean(companionRelationalMemory) &&
+ 165:     (
+ 166:       !companionReaction ||
+ 167:       companionReaction.priority < 70
+ 168:     );
+ 169: 
+ 170:   const companionMessage = useMemo(() => {
+ 171:     /**
+ 172:      * A6.3 — HIERARQUIA DA VOZ
+ 173:      *
+ 174:      * 1. reação atual importante;
+ 175:      * 2. memória relacional factual;
+ 176:      * 3. resposta reativa de baixa prioridade;
+ 177:      * 4. fallbacks históricos existentes.
+ 178:      */
+ 179: 
+ 180:     if (
+ 181:       companionReaction?.response?.translationKey &&
+ 182:       companionReaction.priority >= 70
+ 183:     ) {
+ 184:       return t(
+ 185:         companionReaction.response.translationKey
+ 186:       );
+ 187:     }
+ 188: 
+ 189:     if (
+ 190:       canUseRelationalMemory &&
+ 191:       companionRelationalMemory
+ 192:     ) {
+ 193:       return t(
+ 194:         companionRelationalMemory.translationKey,
+ 195:         companionRelationalMemory.values ?? {}
+ 196:       );
+ 197:     }
+ 198: 
+ 199:     if (
+ 200:       companionReaction?.response?.translationKey
+ 201:     ) {
+ 202:       return t(
+ 203:         companionReaction.response.translationKey
+ 204:       );
+ 205:     }
+ 206: 
+ 207:     if (
+ 208:       avatarMemoryMessage &&
+ 209:       avatarMemoryMessage.trim().length > 0
+ 210:     ) {
+ 211:       return avatarMemoryMessage;
+ 212:     }
+ 213: 
+ 214:     if (
+ 215:       currentMoodRating !== undefined &&
+ 216:       currentMoodRating <= 3
+ 217:     ) {
+ 218:       return t("avatarLowMood");
+ 219:     }
+ 220: 
+ 221:     if (
+ 222:       currentMoodRating !== undefined &&
+ 223:       currentMoodRating >= 8
+ 224:     ) {
+ 225:       return t("avatarHighMood");
+ 226:     }
+ 227: 
+ 228:     if (avatar.level === 1) {
+ 229:       return t("avatarStageMessage1");
+ 230:     }
+ 231: 
+ 232:     if (avatar.level >= 10) {
+ 233:       return t("avatarStageMessage10");
+ 234:     }
+ 235: 
+ 236:     if (avatar.level >= 5) {
+ 237:       return t("avatarStageMessage5");
+ 238:     }
+ 239: 
+ 240:     return t("avatarWelcome");
+ 241:   }, [
+ 242:     avatar.level,
+ 243:     avatarMemoryMessage,
+ 244:     canUseRelationalMemory,
+ 245:     companionReaction,
+ 246:     companionRelationalMemory,
+ 247:     currentMoodRating,
+ 248:     t,
+ 249:   ]);
+ 250: 
+ 251:   /**
+ 252:    * A3.4 — apresentação contextual.
+ 253:    *
+ 254:    * A mesma decisão que controla a expressão da criatura
+ 255:    * controla também a atmosfera e o balão.
+ 256:    */
+ 257:   const reactionState =
+ 258:     companionReaction?.state ?? "neutral";
+ 259: 
+ 260:   const reactionIntensity =
+ 261:     companionReaction?.visualIntensity ?? "quiet";
+ 262: 
+ 263:   const atmosphereClass =
+ 264:     reactionState === "supportive"
+ 265:       ? "bg-[#F3DDD4]/30"
+ 266:       : reactionState === "curious"
+ 267:         ? "bg-[#F4E4C9]/30"
+ 268:         : reactionState === "welcoming"
+ 269:           ? "bg-[#F7DFD2]/34"
+ 270:           : reactionState === "celebrating"
+ 271:             ? "bg-[#F2D3C3]/38"
+ 272:             : "bg-[#F7DFD2]/25";
+ 273: 
+
+--- linhas 428-452 ---
+ 428:             size={11}
+ 429:             strokeWidth={2}
+ 430:             className="text-[#C97B5E]"
+ 431:           />
+ 432: 
+ 433:           <span
+ 434:             className="
+ 435:               text-[10px]
+ 436:               font-black
+ 437:               text-[#76584D]
+ 438:             "
+ 439:           >
+ 440:             {t("level")} {avatar.level}
+ 441:           </span>
+ 442:         </div>
+ 443:       </div>
+ 444: 
+ 445:       {/* ====================================================
+ 446:           CRIATURA LIVRE
+ 447:       ==================================================== */}
+ 448: 
+ 449:       <div
+ 450:         className="
+ 451:           relative
+ 452:           z-10
+
+--- linhas 469-497 ---
+ 469:             w-40
+ 470:             -translate-x-1/2
+ 471:             rounded-[50%]
+ 472:             bg-[#765143]/[0.055]
+ 473:             blur-lg
+ 474:           "
+ 475:         />
+ 476: 
+ 477:         <Avatar
+ 478:           avatar={avatar}
+ 479:           onPet={handlePetAvatar}
+ 480:           levelUpTrigger={avatarCelebrating}
+ 481:           moodRating={currentMoodRating}
+ 482:           memoryMessage={avatarMemoryMessage}
+ 483:           companionWorldMood={worldMood}
+ 484:           reactionState={
+ 485:             companionReaction?.state
+ 486:           }
+ 487:           equippedAccessoryIds={
+ 488:             equippedAccessoryIds
+ 489:           }
+ 490:         />
+ 491:       </div>
+ 492: 
+ 493:       {/* ====================================================
+ 494:           BALÃO DE FALA
+ 495: 
+ 496:           Esta será a principal superfície da voz da CONFIA.
+ 497:           No A3, o conteúdo passa a ser escolhido pelo motor
+
+--- linhas 536-560 ---
+ 536:             backdrop-blur-sm
+ 537:           "
+ 538:         >
+ 539:           <p
+ 540:             className="
+ 541:               text-center
+ 542:               text-[13px]
+ 543:               font-semibold
+ 544:               leading-[1.55]
+ 545:               text-[#674D44]
+ 546:             `}
+ 547:           >
+ 548:             {companionMessage}
+ 549:           </p>
+ 550:         </div>
+ 551:       </div>
+ 552: 
+ 553:       {/* ====================================================
+ 554:           EVOLUÇÃO
+ 555: 
+ 556:           Sem outro badge de nível.
+ 557:           Apenas progresso visual.
+ 558:       ==================================================== */}
+ 559: 
+ 560:       <div
+
+==============================================================================
+src/data/reactive/companionReactionEngine.ts
+==============================================================================
+
+--- linhas 29-321 ---
+  29:  * - substitui o Reactive Engine.
+  30:  */
+  31: 
+  32: import type {
+  33:   ReactiveResult,
+  34:   ReactiveSituation,
+  35: } from "./reactiveTypes";
+  36: 
+  37: export type CompanionReactionState =
+  38:   | "neutral"
+  39:   | "welcoming"
+  40:   | "supportive"
+  41:   | "curious"
+  42:   | "celebrating";
+  43: 
+  44: export type CompanionReactionKind =
+  45:   | "presence"
+  46:   | "discovery"
+  47:   | "support"
+  48:   | "encouragement"
+  49:   | "celebration"
+  50:   | "reflection"
+  51:   | "welcome_back";
+  52: 
+  53: export interface CompanionReaction {
+  54:   state: CompanionReactionState;
+  55: 
+  56:   kind: CompanionReactionKind;
+  57: 
+  58:   /**
+  59:    * 0–100.
+  60:    *
+  61:    * Serve apenas para a camada de apresentação decidir
+  62:    * quão expressiva pode ser a reação.
+  63:    */
+  64:   priority: number;
+  65: 
+  66:   /**
+  67:    * Intensidade VISUAL.
+  68:    *
+  69:    * Não representa intensidade psicológica.
+  70:    */
+  71:   visualIntensity:
+  72:     | "quiet"
+  73:     | "normal"
+  74:     | "strong";
+  75: 
+  76:   /**
+  77:    * Situação que originou a reação.
+  78:    *
+  79:    * Útil para debug e futura memória conversacional.
+  80:    */
+  81:   sourceSituation: ReactiveSituation;
+  82: 
+  83:   /**
+  84:    * A resposta continua a vir do Reactive Engine.
+  85:    *
+  86:    * Esta camada não cria uma segunda biblioteca de frases.
+  87:    */
+  88:   response: ReactiveResult["response"];
+  89: 
+  90:   confidence: number;
+  91: }
+  92: 
+  93: /**
+  94:  * Traduz uma situação já identificada pelo Reactive Engine
+  95:  * para comportamento do companheiro.
+  96:  */
+  97: function resolveReactionPresentation(
+  98:   situation: ReactiveSituation
+  99: ): Pick<
+ 100:   CompanionReaction,
+ 101:   "state" | "kind" | "priority" | "visualIntensity"
+ 102: > {
+ 103:   switch (situation) {
+ 104:     /*
+ 105:      * ========================================================
+ 106:      * APOIO
+ 107:      * ========================================================
+ 108:      *
+ 109:      * A CONFIA não imita tristeza.
+ 110:      * Mantém-se calma, próxima e disponível.
+ 111:      */
+ 112: 
+ 113:     case "mood_low":
+ 114:       return {
+ 115:         state: "supportive",
+ 116:         kind: "support",
+ 117:         priority: 100,
+ 118:         visualIntensity: "strong",
+ 119:       };
+ 120: 
+ 121:     case "mood_declining":
+ 122:       return {
+ 123:         state: "supportive",
+ 124:         kind: "support",
+ 125:         priority: 95,
+ 126:         visualIntensity: "normal",
+ 127:       };
+ 128: 
+ 129:     case "objectives_declining":
+ 130:       return {
+ 131:         state: "supportive",
+ 132:         kind: "encouragement",
+ 133:         priority: 84,
+ 134:         visualIntensity: "normal",
+ 135:       };
+ 136: 
+ 137:     case "impulse_not_effective":
+ 138:       return {
+ 139:         state: "supportive",
+ 140:         kind: "support",
+ 141:         priority: 98,
+ 142:         visualIntensity: "strong",
+ 143:       };
+ 144: 
+ 145:     case "impulse_partially_effective":
+ 146:       return {
+ 147:         state: "supportive",
+ 148:         kind: "encouragement",
+ 149:         priority: 90,
+ 150:         visualIntensity: "normal",
+ 151:       };
+ 152: 
+ 153:     /*
+ 154:      * ========================================================
+ 155:      * CELEBRAÇÃO
+ 156:      * ========================================================
+ 157:      */
+ 158: 
+ 159:     case "objective_completed":
+ 160:       return {
+ 161:         state: "celebrating",
+ 162:         kind: "celebration",
+ 163:         priority: 100,
+ 164:         visualIntensity: "strong",
+ 165:       };
+ 166: 
+ 167:     case "mood_high":
+ 168:       return {
+ 169:         state: "celebrating",
+ 170:         kind: "celebration",
+ 171:         priority: 88,
+ 172:         visualIntensity: "normal",
+ 173:       };
+ 174: 
+ 175:     case "mood_improving":
+ 176:       return {
+ 177:         state: "celebrating",
+ 178:         kind: "encouragement",
+ 179:         priority: 91,
+ 180:         visualIntensity: "normal",
+ 181:       };
+ 182: 
+ 183:     case "objectives_improving":
+ 184:       return {
+ 185:         state: "celebrating",
+ 186:         kind: "celebration",
+ 187:         priority: 90,
+ 188:         visualIntensity: "normal",
+ 189:       };
+ 190: 
+ 191:     case "objectives_consistent":
+ 192:       return {
+ 193:         state: "welcoming",
+ 194:         kind: "encouragement",
+ 195:         priority: 80,
+ 196:         visualIntensity: "quiet",
+ 197:       };
+ 198: 
+ 199:     case "impulse_effective":
+ 200:       return {
+ 201:         state: "celebrating",
+ 202:         kind: "encouragement",
+ 203:         priority: 94,
+ 204:         visualIntensity: "normal",
+ 205:       };
+ 206: 
+ 207:     case "consistent_use":
+ 208:       return {
+ 209:         state: "welcoming",
+ 210:         kind: "encouragement",
+ 211:         priority: 78,
+ 212:         visualIntensity: "quiet",
+ 213:       };
+ 214: 
+ 215:     /*
+ 216:      * ========================================================
+ 217:      * REGRESSO
+ 218:      * ========================================================
+ 219:      *
+ 220:      * Nunca culpabilizar.
+ 221:      * Nunca falar em "abandono".
+ 222:      * Nunca fazer o companheiro regredir.
+ 223:      */
+ 224: 
+ 225:     case "return_after_absence":
+ 226:       return {
+ 227:         state: "welcoming",
+ 228:         kind: "welcome_back",
+ 229:         priority: 96,
+ 230:         visualIntensity: "strong",
+ 231:       };
+ 232: 
+ 233:     /*
+ 234:      * ========================================================
+ 235:      * DESCOBERTA / CURIOSIDADE
+ 236:      * ========================================================
+ 237:      */
+ 238: 
+ 239:     case "first_mood_record":
+ 240:       return {
+ 241:         state: "curious",
+ 242:         kind: "discovery",
+ 243:         priority: 82,
+ 244:         visualIntensity: "normal",
+ 245:       };
+ 246: 
+ 247:     case "first_use":
+ 248:       return {
+ 249:         state: "welcoming",
+ 250:         kind: "discovery",
+ 251:         priority: 75,
+ 252:         visualIntensity: "normal",
+ 253:       };
+ 254: 
+ 255:     case "multiple_signals":
+ 256:       return {
+ 257:         state: "curious",
+ 258:         kind: "reflection",
+ 259:         priority: 70,
+ 260:         visualIntensity: "quiet",
+ 261:       };
+ 262: 
+ 263:     /*
+ 264:      * ========================================================
+ 265:      * CALMA / PRESENÇA
+ 266:      * ========================================================
+ 267:      */
+ 268: 
+ 269:     case "mood_stable":
+ 270:       return {
+ 271:         state: "neutral",
+ 272:         kind: "presence",
+ 273:         priority: 55,
+ 274:         visualIntensity: "quiet",
+ 275:       };
+ 276: 
+ 277:     case "no_data":
+ 278:       return {
+ 279:         state: "welcoming",
+ 280:         kind: "discovery",
+ 281:         priority: 50,
+ 282:         visualIntensity: "quiet",
+ 283:       };
+ 284: 
+ 285:     default:
+ 286:       return {
+ 287:         state: "neutral",
+ 288:         kind: "presence",
+ 289:         priority: 40,
+ 290:         visualIntensity: "quiet",
+ 291:       };
+ 292:   }
+ 293: }
+ 294: 
+ 295: /**
+ 296:  * Função pública.
+ 297:  *
+ 298:  * Recebe o resultado FINAL do Reactive Engine.
+ 299:  * Não volta a analisar os dados.
+ 300:  */
+ 301: export function resolveCompanionReaction(
+ 302:   reactiveResult: ReactiveResult
+ 303: ): CompanionReaction {
+ 304:   const presentation =
+ 305:     resolveReactionPresentation(
+ 306:       reactiveResult.situation
+ 307:     );
+ 308: 
+ 309:   return {
+ 310:     ...presentation,
+ 311: 
+ 312:     sourceSituation:
+ 313:       reactiveResult.situation,
+ 314: 
+ 315:     response:
+ 316:       reactiveResult.response,
+ 317: 
+ 318:     confidence:
+ 319:       reactiveResult.confidence,
+ 320:   };
+ 321: }
+
+==============================================================================
+src/data/reactive/reactiveTypes.ts
+==============================================================================
+
+--- linhas 1-11 ---
+   1: import { ReactiveIntent } from "./reactiveIntent";
+   2: import type { ReactiveRecentMemory } from "./reactiveRecentMemory";
+   3: 
+   4: /**
+   5:  * CONFIA — MOTOR REATIVO
+   6:  *
+   7:  * Tipos fundamentais do sistema de acompanhamento.
+   8:  *
+   9:  * Este ficheiro NÃO contém respostas.
+  10:  * Define apenas a estrutura que permite à Confia
+  11:  * interpretar o estado do utilizador e escolher
+
+--- linhas 46-66 ---
+  46:    * false:
+  47:    * o utilizador voltou a marcá-lo como pendente.
+  48:    *
+  49:    * undefined:
+  50:    * não existe uma ação atual de objetivo.
+  51:    */
+  52:   objectiveCompleted?: boolean;
+  53: }
+  54: 
+  55: 
+  56: export type ReactiveSituation =
+  57:   // Humor
+  58:   | "first_mood_record"
+  59:   | "mood_low"
+  60:   | "mood_high"
+  61:   | "mood_improving"
+  62:   | "mood_declining"
+  63:   | "mood_stable"
+  64:   | "morning_better"
+  65:   | "afternoon_better"
+  66: 
+
+--- linhas 154-174 ---
+ 154:   currentStreak?: number;
+ 155: 
+ 156:   daysSinceLastRecord?: number;
+ 157: };
+ 158: 
+ 159: 
+ 160: /**
+ 161:  * Contexto utilizado para decidir a resposta.
+ 162:  */
+ 163: export interface ReactiveContext {
+ 164:   situation: ReactiveSituation;
+ 165: 
+ 166:   metrics: ReactiveMetrics;
+ 167: 
+ 168:   /**
+ 169:    * Memória curta derivada dos registos reais.
+ 170:    *
+ 171:    * A ação atual continua a ter prioridade.
+ 172:    * A memória apenas enriquece o contexto.
+ 173:    */
+ 174:   memory: ReactiveRecentMemory;
+
+--- linhas 185-234 ---
+ 185: 
+ 186: /**
+ 187:  * Uma resposta possível da Confia.
+ 188:  *
+ 189:  * A resposta NÃO é escolhida diretamente pelo componente.
+ 190:  * O motor escolhe primeiro uma resposta através do ID.
+ 191:  */
+ 192: export interface ReactiveResponse {
+ 193:   id: string;
+ 194: 
+ 195:   situation: ReactiveSituation;
+ 196: 
+ 197:   /**
+ 198:    * Intenção que esta resposta executa.
+ 199:    *
+ 200:    * Permite que várias respostas pertençam à mesma
+ 201:    * situação, mas tenham objetivos comportamentais diferentes.
+ 202:    */
+ 203:   intent?: ReactiveIntent;
+ 204: 
+ 205:   priority: number;
+ 206: 
+ 207:   /**
+ 208:    * Permite evitar que a mesma resposta seja repetida
+ 209:    * demasiadas vezes.
+ 210:    */
+ 211:   cooldownDays?: number;
+ 212: 
+ 213:   /**
+ 214:    * Resposta curta para situações simples.
+ 215:    */
+ 216:   short?: boolean;
+ 217: 
+ 218:   /**
+ 219:    * Identificador das traduções.
+ 220:    *
+ 221:    * Exemplo:
+ 222:    * reactive.responses.moodImproving01
+ 223:    */
+ 224:   translationKey: string;
+ 225: 
+ 226:   /**
+ 227:    * Opcionalmente permite respostas mais personalizadas.
+ 228:    */
+ 229:   tags?: string[];
+ 230: 
+ 231:   /**
+ 232:    * Requisitos de memória necessários para esta resposta
+ 233:    * poder ser apresentada.
+ 234:    *
+
+--- linhas 244-281 ---
+ 244:       | "improving"
+ 245:       | "declining"
+ 246:       | "stable";
+ 247:   };
+ 248: };
+ 249: 
+ 250: 
+ 251: /**
+ 252:  * Resultado final produzido pelo motor reativo.
+ 253:  */
+ 254: export interface ReactiveResult {
+ 255:   situation: ReactiveSituation;
+ 256: 
+ 257:   /**
+ 258:    * Intenção comportamental escolhida pela Confia
+ 259:    * antes da seleção da resposta textual.
+ 260:    */
+ 261:   intent: ReactiveIntent;
+ 262: 
+ 263:   response: ReactiveResponse;
+ 264: 
+ 265:   metrics: ReactiveMetrics;
+ 266: 
+ 267:   /**
+ 268:    * Explicação interna do motivo pelo qual
+ 269:    * determinada resposta foi escolhida.
+ 270:    *
+ 271:    * Não precisa de ser mostrada ao utilizador.
+ 272:    */
+ 273:   reasoning: string;
+ 274: 
+ 275:   /**
+ 276:    * Nível de confiança da classificação.
+ 277:    * 0 = muito incerto
+ 278:    * 1 = muito claro
+ 279:    */
+ 280:   confidence: number;
+ 281: }
+
+==============================================================================
+TRADUÇÕES RELACIONAIS ATUAIS
+==============================================================================
+
+--- pt ---
+1594:   "companionRelationalMemory": {
+1595:     "learnedImpulse": "Já te conheço um pouco melhor: em vários momentos recentes, {{need}} apareceu associado a experiências em que terminaste mais leve.",
+1596:     "effectiveImpulse": "Lembro-me de uma experiência recente em que a intensidade passou de {{before}} para {{after}}. Parece ter-te ajudado nesse momento.",
+1597:     "convergingSignals": "Tenho reparado em alguns sinais que se repetem nos teus registos. Ainda estamos a conhecê-los, mas já existe alguma continuidade.",
+1598:     "repeatedNeed": "Tenho reparado que uma necessidade semelhante tem aparecido mais do que uma vez nos teus registos.",
+1599:     "moodImproving": "Tenho acompanhado os teus últimos registos. Aos poucos, o teu humor tem mostrado uma direção mais favorável.",
+1600:     "moodDeclining": "Tenho acompanhado os teus últimos registos. Ultimamente, o teu humor tem mostrado uma direção um pouco mais difícil.",
+1601:     "moodStable": "Tenho acompanhado os teus últimos registos. O teu humor tem-se mantido numa direção relativamente semelhante.",
+1602:     "consistency": "Tenho-te visto por aqui com alguma regularidade. Cada registo ajuda-me a conhecer melhor o teu ritmo."
+1603:   }
+1604: }
+
+--- en ---
+1567:   "companionRelationalMemory": {
+1568:     "learnedImpulse": "I'm getting to know you a little better: in several recent moments, {{need}} appeared alongside experiences where you ended feeling lighter.",
+1569:     "effectiveImpulse": "I remember a recent experience when the intensity went from {{before}} to {{after}}. It seems to have helped you in that moment.",
+1570:     "convergingSignals": "I've been noticing a few signals repeating across your records. We're still getting to know them, but there is already some continuity.",
+1571:     "repeatedNeed": "I've noticed that a similar need has appeared more than once in your recent records.",
+1572:     "moodImproving": "I've been following your recent records. Little by little, your mood has been moving in a more positive direction.",
+1573:     "moodDeclining": "I've been following your recent records. Lately, your mood has been moving in a slightly more difficult direction.",
+1574:     "moodStable": "I've been following your recent records. Your mood has remained in a relatively similar direction.",
+1575:     "consistency": "I've been seeing you here fairly regularly. Each record helps me understand your rhythm a little better."
+1576:   }
+1577: }
+
+--- es ---
+1467:   "companionRelationalMemory": {
+1468:     "learnedImpulse": "Ya te conozco un poco mejor: en varios momentos recientes, {{need}} apareció asociado a experiencias en las que terminaste algo más ligero.",
+1469:     "effectiveImpulse": "Recuerdo una experiencia reciente en la que la intensidad pasó de {{before}} a {{after}}. Parece haberte ayudado en ese momento.",
+1470:     "convergingSignals": "He observado algunas señales que se repiten en tus registros. Todavía las estamos conociendo, pero ya existe cierta continuidad.",
+1471:     "repeatedNeed": "He observado que una necesidad parecida ha aparecido más de una vez en tus registros recientes.",
+1472:     "moodImproving": "He seguido tus últimos registros. Poco a poco, tu estado de ánimo ha mostrado una dirección más favorable.",
+1473:     "moodDeclining": "He seguido tus últimos registros. Últimamente, tu estado de ánimo ha mostrado una dirección un poco más difícil.",
+1474:     "moodStable": "He seguido tus últimos registros. Tu estado de ánimo se ha mantenido en una dirección relativamente parecida.",
+1475:     "consistency": "Te he visto por aquí con cierta regularidad. Cada registro me ayuda a conocer un poco mejor tu ritmo."
+1476:   }
+1477: }
+
+--- fr ---
+1465:   "companionRelationalMemory": {
+1466:     "learnedImpulse": "Je commence à mieux te connaître : récemment, {{need}} est apparu plusieurs fois dans des expériences où tu as terminé en te sentant plus léger.",
+1467:     "effectiveImpulse": "Je me souviens d'une expérience récente où l'intensité est passée de {{before}} à {{after}}. Cela semble t'avoir aidé à ce moment-là.",
+1468:     "convergingSignals": "J'ai remarqué quelques signaux qui se répètent dans tes notes. Nous apprenons encore à les connaître, mais une certaine continuité apparaît déjà.",
+1469:     "repeatedNeed": "J'ai remarqué qu'un besoin similaire est apparu plus d'une fois dans tes notes récentes.",
+1470:     "moodImproving": "J'ai suivi tes dernières notes. Petit à petit, ton humeur montre une direction plus favorable.",
+1471:     "moodDeclining": "J'ai suivi tes dernières notes. Dernièrement, ton humeur montre une direction un peu plus difficile.",
+1472:     "moodStable": "J'ai suivi tes dernières notes. Ton humeur est restée dans une direction relativement similaire.",
+1473:     "consistency": "Je te vois ici assez régulièrement. Chaque note m'aide à mieux connaître ton rythme."
+1474:   }
+1475: }
+
+==============================================================================
+FIM DA DESCOBERTA A7.1
+==============================================================================
+
+APENAS LEITURA.
+
+Não altera:
+- Reactive Engine
+- memória
+- histórico
+- localStorage
+- traduções
+- companheiro
+- timers
+- XP

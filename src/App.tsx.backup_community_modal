@@ -1,0 +1,1474 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  Heart,
+  Sun,
+  Compass,ArrowUp,
+  Sparkles,
+ Moon,
+  Users,
+  AlertCircle,
+  Brain,
+  CheckCircle2,
+  Calendar,
+  Gift
+} from 'lucide-react';
+import { useTranslation } from "react-i18next";
+import i18n from "./i18n";
+import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove, increment, deleteDoc } from "firebase/firestore";
+import { db, auth, signInAnonymously } from "./firebase";
+import { initAnonymousAuth } from "./firebaseAuth";
+import HomeInventory from "./components/HomeInventory";
+import { createWeeklyTrophy } from "./storage/weeklyTrophies";
+import { deleteAllUserData } from "./storage/deleteUserData";
+import { initLanguage } from "./i18n/language";
+import Avatar from "./components/Avatar";
+import HomeWorld from "./components/HomeWorld";
+import HomeShop from "./components/HomeShop";
+import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
+import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
+import PatternsNew from './components/PatternsNew/PatternsNew';
+import HabitAssessment from './components/PatternsNew/HabitAssessment';
+import HabitDailyCheck from './components/PatternsNew/HabitDailyCheck';
+import HabitEvolution from './components/PatternsNew/HabitEvolution';
+import { PartilhaFeed } from "./components/PartilhaFeed";
+
+// Component imports
+import DailyCheckIn from "./components/DailyCheckIn";
+import { hasCompletedToday } from "./storage/dailyCheckInStorage";
+
+import { TriageModal } from './components/TriageModal';
+import { AbracoTimer } from './components/AbracoTimer';
+import { ObjectivosList } from './components/ObjectivosList';
+import { WeeklyGoalSection } from "./components/WeeklyGoalSection";
+import { ImpulsoSOS } from './components/ImpulsoSOS';
+import { ProgressoDashboard } from './components/ProgressoDashboard';
+import { FocoMente } from './components/FocoMente';
+import { StopMode } from './components/StopMode';
+import { CommunityChat } from './components/CommunityChat';
+const STORAGE_KEYS = {
+  AVATAR: 'confia_avatar_v2',
+  OBJECTIVES: 'confia_objectives_v2',
+OBJECTIVES_HISTORY: 'confia_objectives_history_v1',
+  RATINGS: 'confia_ratings_v2',
+  PET_COUNT: 'confia_pet_count_v2',
+  POSTS: 'confia_posts_v2',
+  LAST_PET_DATE: 'confia_last_pet_date_v2',
+LAST_IMPULSE_USE: 'confia_last_impulse_use_v1',
+IMPULSE_COUNT: 'confia_impulse_count_v1',
+
+};
+
+// Past few days logs so the progress graph is instantly drawn on first load
+
+
+// Past few days logs so the progress graph is instantly drawn on first load
+const PRE_LOGGED_RATINGS: DailyRating[] = [
+  { date: '2026-06-27', morning: 4, afternoon: 6, note: 'Tive picos de ansiedade de manhã, mas acalmei à tarde' },
+  { date: '2026-06-28', morning: 5, afternoon: 7, note: 'Um dia estável, o passeio ajudou imenso' },
+  { date: '2026-06-29', morning: 6, afternoon: 6, note: 'Senti-me bem de manhã, um pouco cansado à tarde' },
+  { date: '2026-06-30', morning: 7, afternoon: 8, note: 'Senti muito progresso na respiração lenta' }
+];
+
+export default function App() {
+const { t, i18n } = useTranslation();
+
+ useEffect(() => {
+    signInAnonymously(auth).catch((error) => {
+      console.error("Erro na autenticação anónima:", error);
+    });
+  }, []);
+const changeAppLanguage = (lang: string) => {
+    localStorage.setItem("confia_language", lang);
+    i18n.changeLanguage(lang);
+};
+
+useEffect(() => {
+    initLanguage();
+}, []);
+useEffect(() => {
+  initAnonymousAuth().catch((error) => {
+    console.error("Firebase Auth:", error);
+  });
+}, []);
+  // Global App States
+const [patternsPage, setPatternsPage] = useState("menu");
+const [homeScreen, setHomeScreen] = useState<
+"home" | "shop" | "inventory" | "settings"
+>("home");
+  const [avatar, setAvatar] = useState<AvatarState>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.AVATAR);
+    if (saved) return JSON.parse(saved);
+    return {
+      level: 1,
+      xp: 15,
+      maxXp: 100,
+      name: t("avatarName"),
+evolutionStage: t("avatarEvolutionStage"),
+      
+      points: 15
+    };
+  });
+const [inventory, setInventory] = useState<any[]>([]);
+const [objectivesHistory, setObjectivesHistory] = useState<
+  { date: string; completed: number }[]
+>(() => {
+  const saved = localStorage.getItem(STORAGE_KEYS.OBJECTIVES_HISTORY);
+  return saved ? JSON.parse(saved) : [];
+});
+const [weeklyGoal, setWeeklyGoal] = useState<WeeklyGoal | null>(() => {
+  const saved = localStorage.getItem('confia_weekly_goal_v1');
+
+  if (!saved) return null;
+
+  try {
+    return JSON.parse(saved);
+  } catch {
+    return null;
+  }
+});
+
+useEffect(() => {
+  if (weeklyGoal) {
+    localStorage.setItem(
+      'confia_weekly_goal_v1',
+      JSON.stringify(weeklyGoal)
+    );
+  } else {
+    localStorage.removeItem('confia_weekly_goal_v1');
+  }
+}, [weeklyGoal]);
+
+
+
+
+
+
+
+const [objectives, setObjectives] = useState<Objective[]>(() => {
+  const today = new Date().toISOString().split("T")[0];
+
+  const saved = localStorage.getItem(STORAGE_KEYS.OBJECTIVES);
+
+  if (saved) {
+    const parsed = JSON.parse(saved);
+
+    // Dados já guardados no novo formato diário
+if (parsed.date === today && parsed.items) {
+return parsed.items
+  .slice(0, INITIAL_OBJECTIVES.length)
+  .map((obj: Objective, index: number) => ({
+    ...INITIAL_OBJECTIVES[index],
+    completed: obj.completed,
+    isCustom: obj.isCustom,
+  }));
+}
+
+    // Compatibilidade com dados antigos (sem data)
+    const oldItems = Array.isArray(parsed) ? parsed : parsed.items;
+
+    if (oldItems) {
+      return oldItems.map((obj: Objective) => ({
+        ...obj,
+        completed: false
+      }));
+    }
+  }
+
+  return INITIAL_OBJECTIVES;
+});
+ const completedObjectivesCount = objectives.filter(o => o.completed).length;
+console.log("OBJECTIVOS:", objectives);
+  const [ratings, setRatings] = useState<DailyRating[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.RATINGS);
+    if (saved) return JSON.parse(saved);
+   return [];
+  });
+
+  const [posts, setPosts] = useState<SharePost[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.POSTS);
+    if (saved) return JSON.parse(saved);
+    return INITIAL_POSTS;
+  });
+
+  const [currentTab, setCurrentTab] = useState<number>(0);
+const stopAbracoRef = useRef<(() => void) | null>(null);
+const changeTab = (tab:number) => {
+  // Sempre que mudamos de separador, fechamos qualquer sub-ecrã
+  // aberto dentro do separador principal.
+  setHomeScreen("home");
+  setCurrentTab(tab);
+};
+  const [triageOpen, setTriageOpen] = useState(false);
+  const [levelUpOpen, setLevelUpOpen] = useState(false);
+const [avatarCelebrating, setAvatarCelebrating] = useState(false);
+const [avatarMemoryMessage, setAvatarMemoryMessage] = useState("");
+  const [prevLevel, setPrevLevel] = useState(avatar.level);
+  const [showSplash, setShowSplash] = useState(true);
+const [showStopMode, setShowStopMode] = useState(false);
+const [showCommunityTerms, setShowCommunityTerms] = useState(false);
+
+// Chat privado da comunidade
+const [chatPost, setChatPost] = useState<SharePost | null>(null);
+const [showDailyCheckIn, setShowDailyCheckIn] = useState(
+  () => !hasCompletedToday()
+);
+  // Open STOP mode from Android widget/deep link
+  useEffect(() => {
+    const handleStopLink = () => {
+      if (window.location.hash === "#stop") {
+        setShowStopMode(true);
+      }
+    };
+
+    handleStopLink();
+
+    window.addEventListener("hashchange", handleStopLink);
+
+    return () => {
+      window.removeEventListener("hashchange", handleStopLink);
+    };
+  }, []);
+  // Automatically dismiss splash screen after 2.8 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Today rating active inputs
+  const [morningRating, setMorningRating] = useState<number>(5);
+  const [afternoonRating, setAfternoonRating] = useState<number>(5);
+  const [todayLogged, setTodayLogged] = useState(false);
+  const [noteText, setNoteText] = useState('');
+const [selectedDate, setSelectedDate] = useState(
+  new Date().toISOString().split('T')[0]
+);
+  // Save states to localStorage on changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.AVATAR, JSON.stringify(avatar));
+  }, [avatar]);
+
+  useEffect(() => {
+   localStorage.setItem(
+  STORAGE_KEYS.OBJECTIVES,
+  JSON.stringify({
+    date: new Date().toISOString().split("T")[0],
+    items: objectives
+  })
+);
+  }, [objectives]);
+useEffect(() => {
+localStorage.setItem(
+  STORAGE_KEYS.OBJECTIVES_HISTORY,
+  JSON.stringify(objectivesHistory)
+);
+}, [objectivesHistory]);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.RATINGS, JSON.stringify(ratings));
+  }, [ratings]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
+  }, [posts]);
+
+useEffect(() => {
+  const postsQuery = collection(db, "posts");
+
+  const unsubscribe = onSnapshot(
+    postsQuery,
+    (snapshot) => {
+      const firestorePosts: SharePost[] = snapshot.docs
+.map(doc => {
+const data = doc.data();
+const userId = auth.currentUser?.uid;
+
+let userReaction: "yellow" | "green" | "red" | undefined;
+
+if (userId) {
+  if (Array.isArray(data.yellowLikedBy) && data.yellowLikedBy.includes(userId)) {
+    userReaction = "yellow";
+  } else if (Array.isArray(data.greenLikedBy) && data.greenLikedBy.includes(userId)) {
+    userReaction = "green";
+  } else if (Array.isArray(data.redLikedBy) && data.redLikedBy.includes(userId)) {
+    userReaction = "red";
+  }
+}
+
+return {
+  id: doc.id,
+  authorId: data.authorId || "",
+  userName: data.userName || "Guardião Anon",
+  feeling: data.feeling || "Calmo",
+  message: data.message || "",
+  timestamp: data.createdAt
+    ? data.createdAt.toDate().toLocaleString("pt-PT")
+    : t("justNow"),
+
+  yellowLikes: data.yellowLikes || 0,
+  greenLikes: data.greenLikes || 0,
+  redLikes: data.redLikes || 0,
+
+  redLikedBy: Array.isArray(data.redLikedBy)
+    ? data.redLikedBy
+    : [],
+
+  userReaction
+};
+})
+.sort((a, b) => {
+const dateA = snapshot.docs.find(doc => doc.id === a.id)?.data().createdAt;
+const dateB = snapshot.docs.find(doc => doc.id === b.id)?.data().createdAt;
+
+if (!dateA || !dateB) return 0;
+
+return dateB.toMillis() - dateA.toMillis();
+});
+
+  setPosts(firestorePosts);
+    },
+    (error) => {
+      console.error("Erro ao ouvir comunidade:", error);
+    }
+  );
+
+  return () => unsubscribe();
+}, []);
+
+// Check if selected date is already logged
+useEffect(() => {
+  const loggedDay = ratings.find(r => r.date === selectedDate);
+
+  if (loggedDay) {
+    setTodayLogged(true);
+    setMorningRating(loggedDay.morning);
+    setAfternoonRating(loggedDay.afternoon);
+    setNoteText(loggedDay.note || "");
+  } else {
+    setTodayLogged(false);
+    setMorningRating(5);
+    setAfternoonRating(5);
+    setNoteText("");
+  }
+}, [ratings, selectedDate]);
+useEffect(() => {
+  const today = ratings.find(r => r.date === selectedDate);
+
+  if (!today) {
+    setAvatarMemoryMessage("");
+    return;
+  }
+
+  const previous = ratings
+    .filter(r => r.date < selectedDate)
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+
+  if (!previous) {
+    setAvatarMemoryMessage("");
+    return;
+  }
+
+  const todayScore = ((today.morning ?? 5) + (today.afternoon ?? 5)) / 2;
+  const previousScore = ((previous.morning ?? 5) + (previous.afternoon ?? 5)) / 2;
+
+  if (todayScore - previousScore >= 2) {
+    setAvatarMemoryMessage(t("avatarImprovement"));
+  } else if (previousScore - todayScore >= 2) {
+    setAvatarMemoryMessage(t("avatarHardDay"));
+  } else {
+    setAvatarMemoryMessage("");
+  }
+
+}, [ratings, selectedDate]);
+  // Handle XP increments and level ups
+  const addXp = (amount: number) => {
+    setAvatar(prev => {
+      let nextXp = prev.xp + amount;
+      let nextLevel = prev.level;
+   let nextMaxXp = prev.maxXp;
+      let nextPoints = prev.points + Math.round(amount / 2);
+
+      while (nextXp >= nextMaxXp) {
+        nextXp -= nextMaxXp;
+        nextLevel += 1;
+        nextMaxXp = Math.round(nextMaxXp * 1.3);
+        nextPoints += 30; // bonus points for level up
+setPrevLevel(nextLevel);
+setLevelUpOpen(true);
+setAvatarCelebrating(true);
+
+setTimeout(() => {
+  setAvatarCelebrating(false);
+}, 2500);
+      }
+
+      return {
+        ...prev,
+        level: nextLevel,
+        xp: nextXp,
+        maxXp: nextMaxXp,
+        points: nextPoints
+      };
+    });
+  };
+
+const spendXp = (amount: number) => {
+  setAvatar(prev => ({
+    ...prev,
+    xp: prev.xp - amount
+  }));
+};
+
+const handleBuyItem = (item: any) => {
+  setInventory(prev => [
+    ...prev,
+    item
+  ]);
+};
+
+  // Pet Amigo (Interaction)
+  const handlePetAvatar = () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const lastPetDate = localStorage.getItem(STORAGE_KEYS.LAST_PET_DATE);
+    const petCountStr = localStorage.getItem(STORAGE_KEYS.PET_COUNT);
+    let petCount = petCountStr ? parseInt(petCountStr, 10) : 0;
+
+    if (lastPetDate !== todayStr) {
+      petCount = 0;
+      localStorage.setItem(STORAGE_KEYS.LAST_PET_DATE, todayStr);
+    }
+
+    if (petCount < 5) {
+     addXp(5); // +5 XP for the first 5 pets of the day
+      localStorage.setItem(STORAGE_KEYS.PET_COUNT, (petCount + 1).toString());
+    } else {
+      // Award only points beyond limit
+      setAvatar(prev => ({ ...prev, points: prev.points + 1 }));
+    }
+  };
+
+  // Log today mood ratings
+const handleSaveRatings = () => {
+  const nextRatings = [...ratings];
+  const existingIdx = nextRatings.findIndex(
+    r => r.date === selectedDate
+  );
+
+  const newRating: DailyRating = {
+    date: selectedDate,
+    morning: morningRating,
+    afternoon: afternoonRating,
+    note: noteText.trim() || undefined
+  };
+
+  if (existingIdx >= 0) {
+    nextRatings[existingIdx] = newRating;
+  } else {
+    nextRatings.push(newRating);
+
+    // Dá XP apenas quando é criado um novo registo
+    addXp(15);
+  }
+
+  setRatings(nextRatings);
+  setTodayLogged(true);
+};
+
+  // Toggle single objective completion
+
+  const handleToggleObjective = (id: string) => {
+    setObjectives(prev => {
+      const updatedObjectives = prev.map(obj => {
+        if (obj.id === id) {
+          const nextCompleted = !obj.completed;
+
+          if (nextCompleted) {
+            // Reward XP on check
+            addXp(obj.xpReward);
+          } else {
+            // Deduct points/XP if unchecked
+            setAvatar(a => ({
+              ...a,
+              points: Math.max(
+                0,
+                a.points - Math.round(obj.xpReward / 2)
+              )
+            }));
+          }
+
+          return { ...obj, completed: nextCompleted };
+        }
+
+        return obj;
+      });
+
+      // Save today's completed objectives count
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      const completedCount = updatedObjectives.filter(
+        obj => obj.completed
+      ).length;
+
+      setObjectivesHistory(prevHistory => {
+        const existing = prevHistory.findIndex(
+          item => item.date === todayStr
+        );
+
+        const updatedHistory = [...prevHistory];
+
+        const entry = {
+          date: todayStr,
+          completed: completedCount
+        };
+
+        if (existing >= 0) {
+          updatedHistory[existing] = entry;
+        } else {
+          updatedHistory.push(entry);
+        }
+
+        return updatedHistory;
+      });
+
+      return updatedObjectives;
+    });
+  };
+  // Create objective
+
+  const handleAddCustomObjective = (
+    text: string,
+    category: 'corporeo' | 'mental' | 'social' | 'nutricao'
+  ) => {
+    const newObj: Objective = {
+      id: `obj-custom-${Date.now()}`,
+      text,
+      category,
+      xpReward: 20,
+      completed: false,
+      isCustom: true
+    };
+
+    setObjectives(prev => [newObj, ...prev]);
+  };
+
+  const getLocalDateString = (date = new Date()) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const getMondayOfCurrentWeek = () => {
+    const date = new Date();
+    const day = date.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+
+    date.setDate(date.getDate() + diff);
+
+    return getLocalDateString(date);
+  };
+
+  const handleCreateWeeklyGoal = (title: string) => {
+    const cleanTitle = title.trim().slice(0, 20);
+
+    if (!cleanTitle) return;
+
+    setWeeklyGoal({
+      id: `weekly-${Date.now()}`,
+      title: cleanTitle,
+      weekStart: getMondayOfCurrentWeek(),
+      completedDays: [],
+      medalUnlocked: false,
+      dailyCredits: {}
+    });
+  };
+
+  const handleCompleteWeeklyDay = (
+    targetDate: string,
+    ease: number,
+    note: string,
+    recovery: boolean
+  ) => {
+    if (!weeklyGoal || weeklyGoal.medalUnlocked) return;
+
+    const today = getLocalDateString();
+    const alreadyCompleted = weeklyGoal.completedDays.includes(targetDate);
+
+    setWeeklyGoal(prev => {
+      if (!prev) return prev;
+
+      const credits = prev.dailyCredits ?? {};
+      const todayCredits = credits[today] ?? 0;
+
+      // Alterar uma avaliação já existente não consome novo crédito.
+      if (!alreadyCompleted && todayCredits >= 2) {
+        return prev;
+      }
+
+      const completedDays = alreadyCompleted
+        ? prev.completedDays
+        : [...prev.completedDays, targetDate];
+
+      const nextCredits = alreadyCompleted
+        ? credits
+        : {
+            ...credits,
+            [today]: todayCredits + 1
+          };
+
+      const dailyRatings = {
+        ...(prev.dailyRatings ?? {}),
+        [targetDate]: {
+          ease,
+          note
+        }
+      };
+
+      const medalUnlocked = completedDays.length >= 7;
+
+      if (
+        medalUnlocked &&
+        !prev.medalUnlocked
+      ) {
+        createWeeklyTrophy(
+          prev.id,
+          prev.title
+        );
+      }
+
+      return {
+        ...prev,
+        completedDays,
+        dailyCredits: nextCredits,
+        dailyRatings,
+        medalUnlocked
+      };
+    });
+  };
+
+  const handleDeleteAccountData = async () => {
+    const confirmed = window.confirm(
+      t("deleteDataConfirm")
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteAllUserData();
+
+      alert(t("deleteDataSuccess"));
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Erro ao apagar os dados:", error);
+      alert(t("deleteDataError"));
+    }
+  };
+
+
+  // Delete objective
+  const handleDeleteObjective = (id: string) => {
+    setObjectives(prev => prev.filter(o => o.id !== id));
+  };
+
+const handleDeleteAllUserData = async () => {
+  const confirmed = window.confirm(
+ t("deleteDataConfirm")
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await deleteAllUserData();
+
+    alert(t("deleteDataSuccess"));
+
+    window.location.reload();
+  } catch (error) {
+    console.error("Erro ao apagar os dados:", error);
+    alert(t("deleteDataError"));
+  }
+};
+const handleDeletePost = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, "posts", id));
+
+    setPosts(prev =>
+      prev.filter(post => post.id !== id)
+    );
+
+  } catch (error) {
+    console.error("Erro ao apagar publicação:", error);
+    alert("Não foi possível apagar esta publicação.");
+  }
+};
+// Denunciar publicação
+const handleReportPost = async (
+  post: SharePost,
+  reason: string
+) => {
+  try {
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+
+    await addDoc(collection(db, "reports"), {
+      postId: post.id,
+      reportedUserId: post.authorId,
+      reporterId: auth.currentUser!.uid,
+      reason,
+      createdAt: serverTimestamp()
+    });
+
+    alert("Obrigado. A denúncia foi enviada para análise.");
+    
+  } catch (error) {
+    console.error("Erro ao denunciar publicação:", error);
+    alert("Não foi possível enviar a denúncia.");
+  }
+};
+// Bloquear utilizador
+const handleBlockUser = async (blockedUserId: string) => {
+  try {
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+
+    if (auth.currentUser!.uid === blockedUserId) return;
+
+    await addDoc(collection(db, "blocks"), {
+      blockerId: auth.currentUser!.uid,
+      blockedUserId,
+      createdAt: serverTimestamp()
+    });
+
+    setPosts(prev =>
+      prev.filter(post => post.authorId !== blockedUserId)
+    );
+
+    alert("Utilizador bloqueado.");
+
+  } catch (error) {
+    console.error("Erro ao bloquear utilizador:", error);
+alert(t("blockError"));
+  }
+};
+  // Create Community Post
+const handleAddPost = async (feeling: string, message: string) => {
+  try {
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+
+    const userName = `Guardião Anon_${Math.floor(100 + Math.random() * 900)}`;
+
+    const docRef = await addDoc(collection(db, "posts"), {
+      authorId: auth.currentUser!.uid,
+      userName,
+      feeling,
+      message,
+      yellowLikes: 0,
+      greenLikes: 0,
+      redLikes: 0,
+      yellowLikedBy: [],
+      greenLikedBy: [],
+      redLikedBy: [],
+      createdAt: serverTimestamp()
+    });
+
+const newPost: SharePost = {
+  id: docRef.id,
+  authorId: auth.currentUser!.uid,
+  userName,
+      feeling,
+      message,
+      timestamp: t("justNow"),
+      yellowLikes: 0,
+      greenLikes: 0,
+      redLikes: 0,
+      userReaction: undefined
+    };
+
+    setPosts(prev => [newPost, ...prev]);
+
+    // Partilhar na comunidade = +10 XP
+    addXp(10);
+
+  } catch (error) {
+    console.error("Erro ao publicar na comunidade:", error);
+  }
+};
+
+  // Reações da comunidade
+const handleLikePost = async (
+  id: string,
+  reaction: "yellow" | "green" | "red"
+) => {
+  try {
+    const user = auth.currentUser;
+
+    if (!user) return;
+
+    console.log("REAÇÃO CLICADA:", id, reaction);
+    console.log("UTILIZADOR:", user.uid);
+
+    const postRef = doc(db, "posts", id);
+    const post = posts.find(p => p.id === id);
+
+    if (!post) return;
+
+    const currentReaction = post.userReaction;
+
+    // Se clicar novamente na mesma reação, remove-a
+    if (currentReaction === reaction) {
+      const field =
+        reaction === "yellow"
+          ? "yellowLikes"
+          : reaction === "green"
+          ? "greenLikes"
+          : "redLikes";
+
+      await updateDoc(postRef, {
+        [field]: increment(-1),
+        [`${reaction}LikedBy`]: arrayRemove(user.uid)
+      });
+
+      console.log("REAÇÃO REMOVIDA:", reaction);
+      return;
+    }
+
+    // Se já tinha outra reação, removemos primeiro essa reação
+    const updates: Record<string, any> = {};
+
+    if (currentReaction === "yellow") {
+      updates.yellowLikes = increment(-1);
+      updates.yellowLikedBy = arrayRemove(user.uid);
+    }
+
+    if (currentReaction === "green") {
+      updates.greenLikes = increment(-1);
+      updates.greenLikedBy = arrayRemove(user.uid);
+    }
+
+    if (currentReaction === "red") {
+      updates.redLikes = increment(-1);
+      updates.redLikedBy = arrayRemove(user.uid);
+    }
+
+    // Adiciona a nova reação
+    const newField =
+      reaction === "yellow"
+        ? "yellowLikes"
+        : reaction === "green"
+        ? "greenLikes"
+        : "redLikes";
+
+    updates[newField] = increment(1);
+    updates[`${reaction}LikedBy`] = arrayUnion(user.uid);
+
+    await updateDoc(postRef, updates);
+
+    console.log("REAÇÃO ADICIONADA:", reaction);
+  } catch (error) {
+    console.error("Erro ao atualizar reação:", error);
+  }
+};
+
+// Abre o chat privado associado a uma publicação
+const handleOpenChat = (post: SharePost) => {
+  setChatPost(post);
+};
+
+// Visual text helper for slider values (0-10)
+
+const getRatingLabel = (val: number) => {
+    if (val <= 2) return { text: t("moodVeryAgitated"), emoji: '🥺', color: 'text-[#C97B5E]' };
+    if (val <= 4) return { text: t("moodRestless"), emoji: '😐', color: 'text-[#C97B5E]' };
+    if (val <= 6) return { text: t("moodStable"), emoji: '🙂', color: 'text-[#8B5C4D]' };
+    if (val <= 8) return { text: t("moodCalm"), emoji: '🌿', color: 'text-[#8B5C4D]' };
+    return { text: t("moodVeryCalm"), emoji: '✨', color: 'text-[#8B5C4D]' };
+  };
+
+return (
+    <div className="min-h-screen bg-[#FAF5F0] flex flex-col antialiased text-[#4E3B36]">
+{showDailyCheckIn && (
+  <DailyCheckIn
+    onComplete={() => setShowDailyCheckIn(false)}
+  />
+)}
+
+      {/* Splash Welcome Screen Overlay */}
+      <AnimatePresence>
+        {showSplash && (
+<motion.div
+  key="splash-screen"
+  initial={{ opacity: 1 }}
+  exit={{ opacity: 0, transition: { duration: 0.5, ease: "easeInOut" } }}
+  className="fixed inset-0 z-[999] bg-white flex flex-col items-center justify-center p-6 cursor-pointer"
+  onClick={() => setShowSplash(false)}
+>
+  <div className="flex flex-col items-center space-y-6 max-w-sm text-center">
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: [0.8, 1.05, 1], opacity: 1 }}
+      transition={{ duration: 1.2, ease: "easeOut" }}
+className="flex items-center justify-center w-24 h-24 relative"
+    >
+      <motion.div
+        animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+        transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+        className="absolute inset-0 rounded-full border-2 border-[#E5A88B]/30"
+      />
+<img
+  src="/images/confia-icon.png"
+  alt="Confia"
+  className="w-16 h-16 rounded-2xl shadow-md"
+/>
+    </motion.div>
+
+    <motion.h2
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4, duration: 0.8 }}
+      className="text-2xl font-black text-[#4E3B36] font-display tracking-tight"
+    >
+      Confia
+    </motion.h2>
+  </div>
+</motion.div>
+)}
+      </AnimatePresence>
+  {/* App Top Brand Header */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5A88B]/15 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+<img
+  src="/images/confia-icon.png"
+  alt="Confia"
+  className="w-10 h-10 rounded-2xl shadow-md"
+/>
+          <h1 className="text-xl font-black tracking-tight bg-gradient-to-r from-[#E5A88B] to-[#C97B5E] bg-clip-text text-transparent font-display">
+            Confia
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Level badge quick indicator */}
+          <div className="flex items-center gap-1.5 bg-[#E5A88B]/10 text-[#C97B5E] px-3 py-1.5 rounded-xl border border-[#E5A88B]/25 text-xs font-black font-mono">
+            <Sparkles size={13} className="text-[#E5A88B] animate-pulse" />
+            {t("level")} {avatar.level}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Stage */}
+      <main className="flex-1 pb-24 px-4 max-w-lg mx-auto w-full pt-4">
+<AnimatePresence mode="wait">
+{currentTab === 0 && homeScreen === "home" && (
+          <motion.div
+
+              key="main-menu"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              {/* Interactive Amigo Panel */}
+              <div className="bg-white border border-[#E5A88B]/15 rounded-[32px] p-6 shadow-sm space-y-4">
+                {/* Logo da App */}
+                <div className="flex flex-col items-center justify-center pt-2 pb-1 text-center space-y-2 border-b border-slate-50 pb-4">
+<div className="flex items-center justify-center w-12 h-12">
+<img
+  src="/images/confia-icon.png"
+  alt="Confia"
+  className="w-12 h-12 rounded-2xl shadow-md"
+/>
+                  </div>
+                  <div className="space-y-0.5">
+                    <h2 className="text-base font-black tracking-tight text-[#4E3B36] font-display">
+                      Confia
+                    </h2>
+                    <p className="text-[9px] text-[#C97B5E] font-extrabold uppercase tracking-widest font-display">
+                     {t("tagline")}
+                    </p>
+                  </div>
+                </div>
+<div className="flex justify-center gap-2 py-2">
+  <button onClick={() => changeAppLanguage("pt")}>🇵🇹</button>
+  <button onClick={() => changeAppLanguage("en")}>🇬🇧</button>
+  <button onClick={() => changeAppLanguage("es")}>🇪🇸</button>
+  <button onClick={() => changeAppLanguage("fr")}>🇫🇷</button>
+</div>
+
+<HomeWorld
+  avatar={avatar}
+  avatarCelebrating={avatarCelebrating}
+  avatarMemoryMessage={avatarMemoryMessage}
+  morningRating={morningRating}
+  afternoonRating={afternoonRating}
+  handlePetAvatar={handlePetAvatar}
+/>
+
+{/* Botões do menu principal — só existem quando homeScreen === "home" */}
+{homeScreen === "home" && (
+  <div className="flex justify-center gap-6 py-4">
+
+    <button
+      onClick={() => setHomeScreen("inventory")}
+      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
+    >
+      <span className="text-5xl">🎒</span>
+    </button>
+
+    <button
+      onClick={() => setHomeScreen("shop")}
+      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
+    >
+      <span className="text-5xl">🏠</span>
+    </button>
+
+    <button
+      onClick={() => setHomeScreen("settings")}
+      className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center active:scale-95 transition hover:shadow-lg"
+    >
+      <span className="text-5xl">⚙️</span>
+    </button>
+
+  </div>
+)}
+
+              {/* Crisis Screening SOS Button */}
+              <button
+                onClick={() => setTriageOpen(true)}
+                className="w-full p-5 bg-[#FFF0E8] border border-[#E5A88B]/35 rounded-[32px] flex items-center justify-between group shadow-sm transition-all hover:bg-[#FFE8DE] cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-[#E5A88B] text-white rounded-2xl shadow-md shadow-[#E5A88B]/20 animate-pulse">
+                    <Brain size={20} />
+                  </div>
+
+                  <div className="text-left">
+                    <h3 className="text-sm font-black text-[#4E3B36] font-display">
+                      {t("crisisQuestion")}
+                    </h3>
+
+                    <p className="text-xs text-slate-500 mt-0.5 font-semibold">
+                      {t("crisisStartSupport")}
+                    </p>
+                  </div>
+
+                  <span className="text-xs font-black text-[#C97B5E] group-hover:translate-x-1 transition-transform font-display">
+                    SOS &rarr;
+                  </span>
+                </div>
+              </button>
+              {/* Day Rating Panel */}
+              <div className="bg-white border border-[#E5A88B]/15 rounded-[32px] p-6 shadow-sm space-y-5">
+<div className="space-y-2">
+  <label className="text-xs font-bold text-[#4E3B36]">
+   📅 {t("recordDate")}
+  </label>
+
+  <input
+    type="date"
+    value={selectedDate}
+    onChange={(e) => setSelectedDate(e.target.value)}
+    className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] font-bold text-[#4E3B36]"
+  />
+</div>
+                <div className="space-y-1">
+<h3 className="text-sm font-black text-[#4E3B36] flex items-center gap-1.5 font-display uppercase tracking-wider">
+  <Calendar size={15} className="text-[#E5A88B]" /> {t("classifyDay")}
+</h3>
+
+<p className="text-xs text-slate-500 font-semibold leading-relaxed">
+  {t("wellbeingDescription")}
+</p>
+                </div>
+
+                {/* Morning Slider */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-[#4E3B36]">
+                    <span className="flex items-center gap-1 text-[#C97B5E] font-display uppercase tracking-wider">
+                        <Sun size={15} /> {t("morning")}: {morningRating} / 10
+                    </span>
+                    <span className={`font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1 ${getRatingLabel(morningRating).color} font-display`}>
+                   <span>{getRatingLabel(morningRating).emoji}</span>
+                      <span>{getRatingLabel(morningRating).text}</span>
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    step="1"
+                    value={morningRating}
+                    onChange={(e) => setMorningRating(Number(e.target.value))}
+                    className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#E5A88B]"
+                  />
+                  <div className="flex justify-between text-[9px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
+                    <span>0 ({t("difficult")})</span>
+<span>10 ({t("peaceful")})</span>
+                    
+                  </div>
+                </div>
+
+                {/* Afternoon Slider */}
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <div className="flex items-center justify-between text-xs font-bold text-[#4E3B36]">
+                    <span className="flex items-center gap-1 text-[#C97B5E] font-display uppercase tracking-wider">
+                      <Moon size={15} /> {t("afternoon")}: {afternoonRating} / 10
+                    </span>
+                    <span className={`font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1 ${getRatingLabel(afternoonRating).color} font-display`}>
+                      <span>{getRatingLabel(afternoonRating).emoji}</span>
+                      <span>{getRatingLabel(afternoonRating).text}</span>
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    step="1"
+               value={afternoonRating}
+                    onChange={(e) => setAfternoonRating(Number(e.target.value))}
+                    className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#E5A88B]"
+                  />
+                  <div className="flex justify-between text-[9px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
+<span>0 ({t("difficult")})</span>
+<span>10 ({t("peaceful")})</span>
+                  </div>
+                </div>
+
+                {/* Diary commentary note */}
+                <div className="space-y-1.5 pt-2">
+                  <label className="text-xs font-bold text-[#4E3B36]">
+  {t("dailyNote")}
+</label>
+                  <input
+                    type="text"
+                    placeholder={t("dailyNotePlaceholder")}
+                    value={noteText}
+                    onChange={(e) => setNoteText(e.target.value)}
+                    maxLength={100}
+                    className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] font-bold text-[#4E3B36]"
+                  />
+                </div>
+
+                {/* Submit button */}
+                <button
+                  onClick={handleSaveRatings}
+                className="w-full py-4 bg-gradient-to-r from-[#E5A88B] to-[#D59375] hover:from-[#D59375] hover:to-[#C68060] text-white font-extrabold text-xs uppercase tracking-wider font-display rounded-2xl transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                  <CheckCircle2 size={15} />
+                 {todayLogged
+  ? t("updateTodayRecord")
+  : t("saveDailyRecord")}
+                </button>
+              </div>
+</div>
+{/* Conhece os teus Padrões */}
+
+{patternsPage === "menu" && (
+  <PatternsNew
+    onBack={() => setCurrentTab(0)}
+    onOpenAssessment={() => setPatternsPage("assessment")}
+    onOpenDaily={() => setPatternsPage("daily")}
+    onOpenEvolution={() => setPatternsPage("evolution")}
+  />
+)}
+
+{patternsPage === "assessment" && (
+  <HabitAssessment
+    onBack={() => setPatternsPage("menu")}
+  />
+)}
+
+{patternsPage === "daily" && (
+  <HabitDailyCheck
+    onBack={() => setPatternsPage("menu")}
+  />
+)}
+
+{patternsPage === "evolution" && (
+  <HabitEvolution
+    onBack={() => setPatternsPage("menu")}
+  />
+)}
+            </motion.div>
+          )}
+
+{currentTab === 0 && homeScreen === "shop" && (
+<HomeShop
+  onBack={() => setHomeScreen("home")}
+  xp={avatar.xp}
+  spendXp={spendXp}
+/>
+)}
+{currentTab === 0 && homeScreen === "inventory" && (
+  <HomeInventory
+    onBack={() => setHomeScreen("home")}
+  />
+)}
+{currentTab === 0 && homeScreen === "settings" && (
+  <motion.div
+    key="settings-screen"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    className="space-y-5"
+  >
+    <div className="flex items-center gap-3">
+      <button
+        onClick={() => setHomeScreen("home")}
+        className="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-lg"
+      >
+        ←
+      </button>
+
+      <h2 className="text-xl font-black text-[#4E3B36]">
+        {t("settings")}
+      </h2>
+    </div>
+
+<div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm">
+  <h3 className="text-sm font-black text-[#4E3B36] mb-2">
+    {t("communityTerms")}
+  </h3>
+
+  <p className="text-xs text-slate-500 leading-relaxed">
+    {t("communityGuidelinesDescription")}
+  </p>
+</div>
+
+
+<div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm mb-4">
+
+  <h3 className="text-sm font-black text-[#4E3B36] mb-1">
+    {t("communityTerms")}
+  </h3>
+
+  <p className="text-xs text-slate-500 leading-relaxed mb-4">
+    {t("communityGuidelinesShort")}
+  </p>
+
+  <button
+    onClick={() => setShowCommunityTerms(true)}
+    className="w-full py-3.5 rounded-2xl bg-[#FFF0E8] border border-[#E5A88B]/30 text-[#C97B5E] font-black text-xs uppercase tracking-wide"
+  >
+    {t("communityTermsButton")}
+  </button>
+
+</div>
+    <div className="bg-white border border-red-100 rounded-3xl p-5 shadow-sm">
+      <h3 className="text-sm font-black text-[#4E3B36] mb-1">
+        {t("deleteMyData")}
+      </h3>
+
+      <p className="text-xs text-slate-500 leading-relaxed mb-4">
+        {t("deleteMyDataDescription")}
+      </p>
+
+      <button
+        onClick={handleDeleteAccountData}
+        className="w-full py-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 font-black text-xs uppercase tracking-wide hover:bg-red-100 transition"
+      >
+        🗑️ {t("deleteMyData")}
+      </button>
+    </div>
+  </motion.div>
+)}
+
+
+
+
+
+          {currentTab === 1 && (
+            /* TAB 2: ABRAÇO (TIMER DE RESPIRAÇÃO) */
+            <motion.div
+              key="embrace-tab"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="bg-white border border-slate-100/80 rounded-[32px] p-6 shadow-sm">
+<AbracoTimer
+  onAddXp={addXp}
+  onRegisterStop={(fn) => {
+    stopAbracoRef.current = fn;
+  }}
+/>
+              </div>
+            </motion.div>
+          )}
+
+          {currentTab === 2 && (
+            /* TAB 3: OBJECTIVOS */
+            <motion.div
+              key="goals-tab"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="bg-white border border-slate-100/80 rounded-[32px] p-6 shadow-sm">
+                <ObjectivosList
+                  objectives={objectives}
+                  onToggleComplete={handleToggleObjective}
+                  onAddCustomObjective={handleAddCustomObjective}
+                  onDeleteObjective={handleDeleteObjective}
+                />
+
+                <WeeklyGoalSection
+                  weeklyGoal={weeklyGoal}
+                  onCreateGoal={handleCreateWeeklyGoal}
+                  onCompleteDay={handleCompleteWeeklyDay}
+                />
+              </div>
+            </motion.div>
+          )}
+
+{currentTab === 3 && (
+  /* TAB 4: IMPULSO SOS + COMUNIDADE */
+  <motion.div
+    key="impulso-tab"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    className="space-y-6"
+  >
+    <ImpulsoSOS onAddXp={addXp} />
+
+    <PartilhaFeed
+      posts={posts}
+      onAddPost={handleAddPost}
+      onLikePost={handleLikePost}
+      onOpenChat={handleOpenChat}
+  onDeletePost={handleDeletePost}
+ onReportPost={handleReportPost}
+onBlockUser={handleBlockUser}
+    />
+  </motion.div>
+)}
+
+          {currentTab === 4 && (
+            /* TAB 5: PROGRESSO */
+            <motion.div
+              key="progress-tab"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+<ProgressoDashboard
+  ratings={ratings}
+  avatarLevel={avatar.level}
+  avatarXp={avatar.xp}
+  completedObjectivesCount={completedObjectivesCount}
+  objectivesHistory={objectivesHistory}
+/>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* Triage / Screening Help Modal */}
+      <TriageModal
+        isOpen={triageOpen}
+      onClose={() => setTriageOpen(false)}
+        onAddXp={addXp}
+      />
+
+      {/* Celebratory Level Up Overlay */}
+      <AnimatePresence>
+        {levelUpOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-white rounded-[32px] p-7 text-center max-w-sm border border-[#E5A88B]/20 shadow-2xl space-y-4"
+            >
+              <div className="w-16 h-16 bg-[#FFF0E8] rounded-full flex items-center justify-center mx-auto text-[#C97B5E] animate-bounce">
+                <Gift size={32} />
+              </div>
+<div className="space-y-1.5">
+<h3 className="text-xl font-black text-[#4E3B36] font-display">
+  {t("companionEvolution")}
+</h3>
+
+<p className="text-xs text-slate-500 leading-relaxed font-semibold">
+  {t("guardianEvolution")}
+</p>
+
+<div className="py-2.5 px-4 bg-[#E5A88B]/15 text-[#C97B5E] border border-[#E5A88B]/30 rounded-2xl text-xs font-black font-display">
+  {t("levelReached", { level: prevLevel })} 🎉
+</div>
+
+<p className="text-[10px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
+  {t("extraReward")}
+
+              </p>
+</div>
+              <button
+            onClick={() => setLevelUpOpen(false)}
+                className="w-full py-3 bg-[#E5A88B] hover:bg-[#D59375] text-white shadow-lg shadow-[#E5A88B]/25 font-black text-xs uppercase tracking-wider font-display rounded-xl cursor-pointer"
+              >
+{t("continueWalking")}
+              </button>
+            </motion.div>
+          </div>
+        )}
+
+
+      </AnimatePresence>
+      {showStopMode && (
+        <StopMode
+          onStartImpulse={() => {
+            setShowStopMode(false);
+            setCurrentTab(4);
+          }}
+        />
+      )}
+      {chatPost && (
+        <CommunityChat
+          post={chatPost}
+          onClose={() => setChatPost(null)}
+        />
+      )}
+
+      {/* Global Tab Navigation Footer */}
+      {/* Global Tab Navigation Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5A88B]/15 px-4 py-3.5">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          {[
+           { label: t("home"), icon: '🏠', index: 0 },
+            { label: t("hug"), icon: '🫂', index: 1 },
+            { label: t("objectives"), icon: '🎯', index: 2 },
+            { label: t("impulse"), icon: '🆘', index: 3 },
+            { label: t("progress"), icon: '📈', index: 4 }
+          ].map(tab => (
+            <button
+              key={tab.index}
+onClick={() => {
+  window.dispatchEvent(new Event("stop-background-audio"));
+  setHomeScreen("home");
+  setCurrentTab(tab.index);
+}}
+              className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all relative cursor-pointer ${
+                currentTab === tab.index ? 'text-[#C97B5E] font-black' : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              {currentTab === tab.index && (
+                <motion.div
+                  layoutId="active-bar"
+                  className="absolute -top-3 w-10 h-1 rounded-full bg-[#E5A88B]"
+                />
+              )}
+
+              <span className="text-lg mb-0.5">{tab.icon}</span>
+              <span className="text-[10px] tracking-tight">{tab.label}</span>
+            </button>
+          ))}
+        </div>
+      </footer>     
+    </div>
+  );
+}

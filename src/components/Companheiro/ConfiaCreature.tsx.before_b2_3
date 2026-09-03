@@ -1,0 +1,1647 @@
+import React, { memo } from "react";
+
+export type ConfiaCreatureState =
+  | "neutral"
+  | "welcoming"
+  | "supportive"
+  | "curious"
+  | "celebrating";
+
+interface ConfiaCreatureProps {
+  level: number;
+  state?: ConfiaCreatureState;
+  reacting?: boolean;
+  equippedAccessoryIds?: string[];
+}
+
+/**
+ * ============================================================
+ * CONFIA — CRIATURA PREMIUM A2.2
+ * ============================================================
+ *
+ * Espécie visual própria da CONFIA.
+ *
+ * PERFORMANCE:
+ * - SVG puro
+ * - zero timers
+ * - zero intervalos
+ * - zero requestAnimationFrame
+ * - zero canvas
+ * - zero partículas
+ * - zero animações infinitas
+ *
+ * A sensação de vida é obtida através de:
+ * - expressão
+ * - postura
+ * - evolução
+ * - micro-reação acionada externamente
+ */
+
+function ConfiaCreature({
+  level,
+  state = "neutral",
+  reacting = false,
+  equippedAccessoryIds = [],
+}: ConfiaCreatureProps) {
+  const safeLevel = Math.max(
+    1,
+    Math.min(10, level)
+  );
+
+  /*
+   * 1       Ovo
+   * 2–3     Nascente
+   * 4–5     Pequena CONFIA
+   * 6–8     Jovem CONFIA
+   * 9–10    CONFIA adulta
+   */
+  const stage =
+    safeLevel === 1
+      ? 1
+      : safeLevel <= 3
+        ? 2
+        : safeLevel <= 5
+          ? 3
+          : safeLevel <= 8
+            ? 4
+            : 5;
+
+  const isEgg = stage === 1;
+
+  /**
+   * A5.3 — acessórios equipados.
+   *
+   * Apenas IDs conhecidos pela criatura produzem desenho.
+   * Itens legacy/troféus permanecem invisíveis aqui.
+   */
+  const hasCreamBow =
+    equippedAccessoryIds.includes(
+      "confia_bow_cream"
+    );
+
+  const hasTerraScarf =
+    equippedAccessoryIds.includes(
+      "confia_scarf_terra"
+    );
+
+  const hasGoldCharm =
+    equippedAccessoryIds.includes(
+      "confia_charm_gold"
+    );
+
+  /**
+   * B2.2 — consulta simples aos acessórios equipados.
+   *
+   * Sem estado React.
+   * Sem efeitos.
+   * Sem timers.
+   */
+  const hasAccessory = (id: string) =>
+    equippedAccessoryIds.includes(id);
+
+  const bodyScale =
+    stage === 2
+      ? 0.84
+      : stage === 3
+        ? 0.91
+        : stage === 4
+          ? 0.97
+          : 1.02;
+
+  /**
+   * ==========================================================
+   * B2.1 — ÂNCORAS ADAPTATIVAS DOS ACESSÓRIOS
+   * ==========================================================
+   *
+   * Um acessório mantém sempre o mesmo ID.
+   *
+   * Quando a CONFIA evolui, apenas mudam:
+   * - posição
+   * - escala
+   * - pequeno ajuste visual
+   *
+   * Não existe novo estado.
+   * Não existe animação.
+   * Não existe novo storage.
+   *
+   * As coordenadas continuam no mesmo viewBox da criatura.
+   */
+
+  const headAccessoryTransform =
+    stage === 2
+      ? "translate(110 82) scale(0.84) translate(-110 -82) translate(0 7)"
+      : stage === 3
+        ? "translate(110 82) scale(0.91) translate(-110 -82) translate(0 4)"
+        : stage === 4
+          ? "translate(110 82) scale(0.97) translate(-110 -82) translate(0 2)"
+          : "translate(110 82) scale(1.02) translate(-110 -82)";
+
+  const neckAccessoryTransform =
+    stage === 2
+      ? "translate(110 134) scale(0.84) translate(-110 -134) translate(0 -5)"
+      : stage === 3
+        ? "translate(110 134) scale(0.91) translate(-110 -134) translate(0 -3)"
+        : stage === 4
+          ? "translate(110 134) scale(0.97) translate(-110 -134) translate(0 -1)"
+          : "translate(110 134) scale(1.02) translate(-110 -134)";
+
+  const bodyAccessoryTransform =
+    stage === 2
+      ? "translate(110 151) scale(0.84) translate(-110 -151)"
+      : stage === 3
+        ? "translate(110 151) scale(0.91) translate(-110 -151)"
+        : stage === 4
+          ? "translate(110 151) scale(0.97) translate(-110 -151)"
+          : "translate(110 151) scale(1.02) translate(-110 -151)";
+
+  const handAccessoryTransform =
+    stage === 2
+      ? "translate(110 154) scale(0.84) translate(-110 -154)"
+      : stage === 3
+        ? "translate(110 154) scale(0.91) translate(-110 -154)"
+        : stage === 4
+          ? "translate(110 154) scale(0.97) translate(-110 -154)"
+          : "translate(110 154) scale(1.02) translate(-110 -154)";
+
+  const auraAccessoryTransform =
+    stage === 2
+      ? "translate(110 130) scale(0.88) translate(-110 -130)"
+      : stage === 3
+        ? "translate(110 130) scale(0.94) translate(-110 -130)"
+        : stage === 4
+          ? "translate(110 130) scale(0.99) translate(-110 -130)"
+          : "translate(110 130) scale(1.04) translate(-110 -130)";
+
+  /**
+   * ==========================================================
+   * A4.1 — ASSINATURA VISUAL DAS 5 FORMAS
+   * ==========================================================
+   *
+   * Não são cinco SVGs.
+   *
+   * A espécie continua a ser a mesma, mas cada etapa ganha
+   * proporções próprias.
+   *
+   * 1 — Ovo
+   * 2 — Nascente
+   * 3 — Pequena CONFIA
+   * 4 — Jovem CONFIA
+   * 5 — CONFIA Adulta
+   */
+
+  const evolutionHeadScale =
+    stage === 2
+      ? 1.055
+      : stage === 3
+        ? 1.025
+        : stage === 4
+          ? 0.99
+          : 0.965;
+
+  const evolutionBodyStretch =
+    stage === 2
+      ? 0.94
+      : stage === 3
+        ? 0.98
+        : stage === 4
+          ? 1.025
+          : 1.055;
+
+  const evolutionEarScale =
+    stage === 2
+      ? 0.82
+      : stage === 3
+        ? 0.92
+        : stage === 4
+          ? 1.03
+          : 1.10;
+
+  const evolutionEyeScale =
+    stage === 2
+      ? 1.08
+      : stage === 3
+        ? 1.04
+        : stage === 4
+          ? 1
+          : 0.97;
+
+  /**
+   * ==========================================================
+   * A4.3 — MICROPROGRESSÃO DOS 10 NÍVEIS
+   * ==========================================================
+   *
+   * As grandes mudanças continuam a ser as 5 formas.
+   * Estes valores dão apenas uma pequena recompensa visual
+   * entre níveis pertencentes à mesma forma.
+   */
+
+  const levelFlameBoost =
+    safeLevel === 3
+      ? 1.025
+      : safeLevel === 5
+        ? 1.035
+        : safeLevel === 7
+          ? 1.025
+          : safeLevel === 8
+            ? 1.055
+            : safeLevel === 10
+              ? 1.065
+              : 1;
+
+  const levelMarkOpacity =
+    safeLevel === 2
+      ? 0.30
+      : safeLevel === 3
+        ? 0.46
+        : safeLevel === 4
+          ? 0.30
+          : safeLevel === 5
+            ? 0.48
+            : safeLevel === 6
+              ? 0.36
+              : safeLevel === 7
+                ? 0.46
+                : safeLevel === 8
+                  ? 0.58
+                  : safeLevel === 9
+                    ? 0.48
+                    : safeLevel === 10
+                      ? 0.66
+                      : 0.38;
+
+  const levelTailBoost =
+    safeLevel === 5
+      ? 1.035
+      : safeLevel === 7
+        ? 1.025
+        : safeLevel === 8
+          ? 1.05
+          : safeLevel === 10
+            ? 1.045
+            : 1;
+
+  const eyeY =
+    state === "supportive"
+      ? 103
+      : state === "curious"
+        ? 99
+        : 101;
+
+  const eyeRY =
+    state === "supportive"
+      ? 7
+      : state === "curious"
+        ? 10
+        : 9;
+
+  const mouth =
+    state === "supportive"
+      ? "M101 119 Q110 116 119 119"
+      : state === "curious"
+        ? "M106 119 Q110 122 114 119"
+        : state === "celebrating"
+          ? "M99 116 Q110 128 121 116"
+          : state === "welcoming"
+            ? "M100 117 Q110 126 120 117"
+            : "M102 118 Q110 124 118 118";
+
+  const cheekOpacity =
+    state === "celebrating" ||
+    state === "welcoming"
+      ? 0.38
+      : state === "supportive"
+        ? 0.18
+        : 0.25;
+
+  /**
+   * A3.4 — linguagem corporal contextual.
+   *
+   * São transformações ESTÁTICAS.
+   * Mudam apenas quando muda o estado reativo.
+   * Não existe loop de animação.
+   */
+  const reactionTransform =
+    state === "supportive"
+      ? "translate(0 3)"
+      : state === "curious"
+        ? "translate(2 -2) rotate(1 110 110)"
+        : state === "welcoming"
+          ? "translate(0 -2)"
+          : state === "celebrating"
+            ? "translate(0 -4)"
+            : "translate(0 0)";
+
+  const reactionOpacity =
+    state === "supportive"
+      ? 0.97
+      : 1;
+
+  const flameReactionScale =
+    state === "celebrating"
+      ? 1.08
+      : state === "welcoming"
+        ? 1.04
+        : state === "supportive"
+          ? 0.96
+          : 1;
+
+  const flameScale =
+    stage === 2
+      ? 0.68
+      : stage === 3
+        ? 0.82
+        : stage === 4
+          ? 0.94
+          : 1.08;
+
+  return (
+    <div
+      style={{
+        transform:
+          state === "supportive"
+            ? "translateY(3px)"
+            : state === "curious"
+              ? "translate(2px, -2px) rotate(1deg)"
+              : state === "welcoming"
+                ? "translateY(-2px)"
+                : state === "celebrating"
+                  ? "translateY(-4px)"
+                  : "none",
+        opacity: reactionOpacity,
+        transformOrigin: "50% 80%",
+      }}
+      className={`
+        relative
+        flex
+        items-center
+        justify-center
+        transition-transform
+        duration-300
+        ease-out
+        will-change-auto
+        ${
+          reacting
+            ? "-translate-y-2 scale-[1.045]"
+            : ""
+        }
+      `}
+      aria-hidden="true"
+    >
+      <svg
+        viewBox="0 0 220 220"
+        className="
+          h-[245px]
+          w-[245px]
+          max-w-full
+          select-none
+          overflow-visible
+          drop-shadow-[0_16px_18px_rgba(105,65,50,0.13)]
+        "
+      >
+        <defs>
+          {/* Corpo quente e orgânico */}
+          <linearGradient
+            id="confiaBodyPremium"
+            x1="55"
+            y1="48"
+            x2="165"
+            y2="184"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop
+              offset="0"
+              stopColor="#F6D4C2"
+            />
+
+            <stop
+              offset="0.46"
+              stopColor="#E7A485"
+            />
+
+            <stop
+              offset="1"
+              stopColor="#C8735B"
+            />
+          </linearGradient>
+
+          {/* Luz subtil do rosto */}
+          <radialGradient
+            id="confiaFaceLight"
+            cx="42%"
+            cy="28%"
+            r="68%"
+          >
+            <stop
+              offset="0"
+              stopColor="#FFF8F1"
+              stopOpacity="0.58"
+            />
+
+            <stop
+              offset="1"
+              stopColor="#FFF8F1"
+              stopOpacity="0"
+            />
+          </radialGradient>
+
+          {/* Ventre */}
+          <linearGradient
+            id="confiaBellyPremium"
+            x1="90"
+            y1="118"
+            x2="132"
+            y2="169"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop
+              offset="0"
+              stopColor="#FFF9F3"
+            />
+
+            <stop
+              offset="1"
+              stopColor="#F3DCCF"
+            />
+          </linearGradient>
+
+          {/* Símbolo emocional */}
+          <linearGradient
+            id="confiaSoul"
+            x1="110"
+            y1="27"
+            x2="110"
+            y2="67"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop
+              offset="0"
+              stopColor="#FFE9A8"
+            />
+
+            <stop
+              offset="0.5"
+              stopColor="#E8A05F"
+            />
+
+            <stop
+              offset="1"
+              stopColor="#C66550"
+            />
+          </linearGradient>
+
+          <radialGradient
+            id="confiaEyePremium"
+            cx="35%"
+            cy="28%"
+            r="75%"
+          >
+            <stop
+              offset="0"
+              stopColor="#6C5149"
+            />
+
+            <stop
+              offset="1"
+              stopColor="#302725"
+            />
+          </radialGradient>
+        </defs>
+
+        {/* ===================================================
+            SOMBRA
+        =================================================== */}
+
+        <ellipse
+          cx="110"
+          cy="194"
+          rx={
+            stage <= 2
+              ? 45
+              : stage === 3
+                ? 51
+                : 57
+          }
+          ry="9"
+          fill="#765143"
+          opacity="0.085"
+        />
+
+        {/* ===================================================
+            OVO
+        =================================================== */}
+
+        {isEgg ? (
+          <g>
+            <ellipse
+              cx="110"
+              cy="116"
+              rx="58"
+              ry="73"
+              fill="url(#confiaBodyPremium)"
+              stroke="#AD6552"
+              strokeWidth="3"
+            />
+
+            {/* brilho frontal */}
+            <ellipse
+              cx="91"
+              cy="88"
+              rx="28"
+              ry="38"
+              fill="#FFF9F3"
+              opacity="0.18"
+            />
+
+            {/* ventre ainda embrionário */}
+            <ellipse
+              cx="110"
+              cy="136"
+              rx="38"
+              ry="39"
+              fill="#FFF6EF"
+              opacity="0.46"
+            />
+
+            {/* símbolo da CONFIA */}
+            <path
+              d="
+                M110 55
+                C100 65 101 75 110 83
+                C119 75 120 65 110 55
+                Z
+              "
+              fill="url(#confiaSoul)"
+              stroke="#B86750"
+              strokeWidth="1.8"
+            />
+
+            {/* olhos adormecidos */}
+            <path
+              d="M76 116 Q87 125 98 116"
+              fill="none"
+              stroke="#4A3833"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+
+            <path
+              d="M122 116 Q133 125 144 116"
+              fill="none"
+              stroke="#4A3833"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+
+            {/* faces */}
+            <ellipse
+              cx="72"
+              cy="134"
+              rx="9"
+              ry="5"
+              fill="#D87770"
+              opacity="0.22"
+            />
+
+            <ellipse
+              cx="148"
+              cy="134"
+              rx="9"
+              ry="5"
+              fill="#D87770"
+              opacity="0.22"
+            />
+
+            {/* fissura */}
+            <path
+              d="
+                M83 71
+                L94 80
+                L102 70
+                L111 82
+                L120 70
+                L135 78
+              "
+              fill="none"
+              stroke="#FFF7F0"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.78"
+            />
+          </g>
+        ) : (
+          /* =================================================
+             CRIATURA
+          ================================================= */
+          <g
+            transform={`
+              translate(
+                ${110 - 110 * bodyScale}
+                ${184 - 184 * bodyScale}
+              )
+              scale(${bodyScale})
+              translate(
+                0
+                ${184 - 184 * evolutionBodyStretch}
+              )
+              scale(
+                1
+                ${evolutionBodyStretch}
+              )
+            `}
+          >
+            {/* ===============================================
+                CAUDA — assinatura posterior
+            =============================================== */}
+
+            {stage >= 3 && (
+              <g
+                transform={`
+                  translate(
+                    ${160 - 160 * levelTailBoost}
+                    ${135 - 135 * levelTailBoost}
+                  )
+                  scale(${levelTailBoost})
+                `}
+              >
+              <path
+                d={
+                  stage === 3
+                    ? `
+                      M157 145
+                      C173 145 180 136 176 127
+                      C173 121 168 120 164 123
+                      C170 129 168 136 158 137
+                      Z
+                    `
+                    : stage === 4
+                      ? `
+                        M157 143
+                        C181 143 188 128 182 115
+                        C178 107 171 105 166 109
+                        C175 117 173 129 159 132
+                        Z
+                      `
+                      : `
+                        M157 142
+                        C184 142 193 123 184 109
+                        C179 101 171 100 166 104
+                        C177 113 175 126 160 129
+                        Z
+                      `
+                }
+                fill="url(#confiaBodyPremium)"
+                stroke="#A75D4B"
+                strokeWidth={
+                  stage === 3
+                    ? 2.6
+                    : 3
+                }
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              </g>
+            )}
+
+            {/* ===============================================
+                ORELHAS CONFIA
+
+                Curtas, abertas e arredondadas para fugir
+                da leitura visual de coelho.
+            =============================================== */}
+
+            <g
+              transform={`
+                translate(
+                  ${110 - 110 * evolutionEarScale}
+                  ${78 - 78 * evolutionEarScale}
+                )
+                scale(${evolutionEarScale})
+              `}
+            >
+            <path
+              d="
+                M75 79
+                C58 75 47 61 51 49
+                C55 38 68 41 77 51
+                C83 58 86 68 87 76
+                Z
+              "
+              fill="url(#confiaBodyPremium)"
+              stroke="#A75D4B"
+              strokeWidth="3"
+              strokeLinejoin="round"
+            />
+
+            <path
+              d="
+                M67 68
+                C59 64 55 56 58 51
+                C63 49 71 56 76 67
+                Z
+              "
+              fill="#F5BCAE"
+              opacity="0.9"
+            />
+
+            <path
+              d="
+                M145 79
+                C162 75 173 61 169 49
+                C165 38 152 41 143 51
+                C137 58 134 68 133 76
+                Z
+              "
+              fill="url(#confiaBodyPremium)"
+              stroke="#A75D4B"
+              strokeWidth="3"
+              strokeLinejoin="round"
+            />
+
+            <path
+              d="
+                M153 68
+                C161 64 165 56 162 51
+                C157 49 149 56 144 67
+                Z
+              "
+              fill="#F5BCAE"
+              opacity="0.9"
+            />
+
+            </g>
+
+
+            {/* ===============================================
+                B2.2 — ACESSÓRIOS TRASEIROS
+
+                Auras, capas e mochila ficam atrás do corpo.
+            =============================================== */}
+
+            {!isEgg && (
+              <g aria-hidden="true">
+
+                {hasAccessory("confia_aura_soft") && (
+                  <g transform={auraAccessoryTransform}>
+                    <ellipse
+                      cx="110"
+                      cy="126"
+                      rx="72"
+                      ry="82"
+                      fill="none"
+                      stroke="#F2D7BD"
+                      strokeWidth="5"
+                      opacity="0.32"
+                    />
+                  </g>
+                )}
+
+                {hasAccessory("confia_aura_stars") && (
+                  <g transform={auraAccessoryTransform}>
+                    <circle cx="48" cy="90" r="3" fill="#E5B85E" />
+                    <circle cx="169" cy="78" r="2.8" fill="#E5B85E" />
+                    <circle cx="178" cy="145" r="3.2" fill="#E5B85E" />
+                    <circle cx="43" cy="151" r="2.5" fill="#E5B85E" />
+                    <path d="M55 55 l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#F0D58A" />
+                  </g>
+                )}
+
+                {hasAccessory("confia_aura_leaves") && (
+                  <g transform={auraAccessoryTransform}>
+                    <ellipse cx="45" cy="108" rx="5" ry="10" fill="#A8B58A" transform="rotate(-35 45 108)" />
+                    <ellipse cx="175" cy="115" rx="5" ry="10" fill="#8EA474" transform="rotate(35 175 115)" />
+                    <ellipse cx="58" cy="165" rx="4" ry="8" fill="#B2BD96" transform="rotate(30 58 165)" />
+                    <ellipse cx="161" cy="54" rx="4" ry="8" fill="#9AAA7E" transform="rotate(-30 161 54)" />
+                  </g>
+                )}
+
+                {hasAccessory("confia_aura_moons") && (
+                  <g transform={auraAccessoryTransform}>
+                    <path d="M43 84 C35 75 39 62 50 59 C45 67 47 77 56 81 C51 86 47 87 43 84Z" fill="#E8D9AA" />
+                    <path d="M170 144 C162 135 166 122 177 119 C172 127 174 137 183 141 C178 146 174 147 170 144Z" fill="#E8D9AA" />
+                    <circle cx="168" cy="70" r="2.5" fill="#F0D58A" />
+                  </g>
+                )}
+
+                {hasAccessory("confia_aura_gold") && (
+                  <g transform={auraAccessoryTransform}>
+                    <ellipse
+                      cx="110"
+                      cy="126"
+                      rx="78"
+                      ry="88"
+                      fill="none"
+                      stroke="#D6AC52"
+                      strokeWidth="4"
+                      opacity="0.42"
+                    />
+                    <circle cx="42" cy="82" r="3.5" fill="#F1D37B" />
+                    <circle cx="177" cy="94" r="3.5" fill="#F1D37B" />
+                    <circle cx="161" cy="176" r="3" fill="#F1D37B" />
+                    <circle cx="59" cy="174" r="3" fill="#F1D37B" />
+                  </g>
+                )}
+
+                {hasAccessory("confia_cape_cream") && (
+                  <g transform={bodyAccessoryTransform}>
+                    <path
+                      d="M77 119 Q110 105 143 119 L151 174 Q110 193 69 174 Z"
+                      fill="#F5E5D4"
+                      stroke="#C48B72"
+                      strokeWidth="2"
+                    />
+                  </g>
+                )}
+
+                {hasAccessory("confia_backpack_terra") && (
+                  <g transform={bodyAccessoryTransform}>
+                    <rect
+                      x="132"
+                      y="125"
+                      width="31"
+                      height="43"
+                      rx="12"
+                      fill="#B96D57"
+                      stroke="#925040"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M135 137 Q147 126 160 137"
+                      fill="none"
+                      stroke="#F0C4AA"
+                      strokeWidth="2"
+                    />
+                  </g>
+                )}
+
+                {hasAccessory("confia_cape_star") && (
+                  <g transform={bodyAccessoryTransform}>
+                    <path
+                      d="M76 118 Q110 103 144 118 L154 176 Q110 196 66 176 Z"
+                      fill="#B98278"
+                      stroke="#855850"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M110 141 l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"
+                      fill="#F6E5AE"
+                    />
+                  </g>
+                )}
+
+              </g>
+            )}
+
+            {/* ===============================================
+                CORPO PRINCIPAL
+
+                Cabeça/corpo contínuos para criar uma
+                silhueta imediatamente reconhecível.
+            =============================================== */}
+
+            <path
+              d="
+                M110 61
+                C78 61 59 79 57 109
+
+                C54 132 62 154 77 168
+
+                C85 177 96 181 110 182
+
+                C124 181 135 177 143 168
+
+                C158 154 166 132 163 109
+
+                C161 79 142 61 110 61
+
+                Z
+              "
+              fill="url(#confiaBodyPremium)"
+              stroke="#A75D4B"
+              strokeWidth="3.2"
+              strokeLinejoin="round"
+            />
+
+            {/* luz no rosto */}
+            <ellipse
+              cx="98"
+              cy="93"
+              rx="43"
+              ry="40"
+              fill="url(#confiaFaceLight)"
+            />
+
+            {/* ===============================================
+                VENTRE / CORAÇÃO VISUAL
+            =============================================== */}
+
+            <path
+              d="
+                M110 126
+                C91 126 81 137 83 153
+                C85 169 96 176 110 177
+                C124 176 135 169 137 153
+                C139 137 129 126 110 126
+                Z
+              "
+              fill="url(#confiaBellyPremium)"
+              opacity="0.94"
+            />
+
+            {/* ===============================================
+                MARCA CONFIA NA TESTA
+            =============================================== */}
+
+            <g
+              transform={`
+                translate(
+                  ${110 - 110 * flameScale}
+                  ${58 - 58 * flameScale}
+                )
+                scale(${flameScale * flameReactionScale * levelFlameBoost})
+              `}
+            >
+              {/* pequena base integrada na testa */}
+              <ellipse
+                cx="110"
+                cy="62"
+                rx="8"
+                ry="4"
+                fill="#C46C55"
+                opacity="0.2"
+              />
+
+              <path
+                d="
+                  M110 28
+
+                  C101 38 99 46 102 53
+
+                  C104 58 107 62 110 65
+
+                  C113 62 116 58 118 53
+
+                  C121 46 119 38 110 28
+
+                  Z
+                "
+                fill="url(#confiaSoul)"
+                stroke="#B8614D"
+                strokeWidth="2"
+                strokeLinejoin="round"
+              />
+
+              {stage >= 4 && (
+                <path
+                  d="
+                    M110 37
+                    C106 43 106 49 110 54
+                    C114 49 114 43 110 37
+                    Z
+                  "
+                  fill="#FFF2BE"
+                  opacity="0.95"
+                />
+              )}
+
+              {stage === 4 && (
+                <circle
+                  cx="110"
+                  cy="48"
+                  r="1.35"
+                  fill="#FFF8D8"
+                  opacity="0.72"
+                />
+              )}
+
+              {stage === 5 && (
+                <circle
+                  cx="110"
+                  cy="47"
+                  r="2.3"
+                  fill="#FFFFFF"
+                  opacity="0.88"
+                />
+              )}
+            </g>
+
+            {/* ===============================================
+                SOBRANCELHAS / EXPRESSÃO
+            =============================================== */}
+
+            {state === "supportive" && (
+              <>
+                <path
+                  d="M78 88 Q88 84 97 89"
+                  fill="none"
+                  stroke="#8E574A"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />
+
+                <path
+                  d="M123 89 Q132 84 142 88"
+                  fill="none"
+                  stroke="#8E574A"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />
+              </>
+            )}
+
+            {state === "curious" && (
+              <path
+                d="M122 87 Q133 81 143 86"
+                fill="none"
+                stroke="#8E574A"
+                strokeWidth="2"
+                strokeLinecap="round"
+                opacity="0.75"
+              />
+            )}
+
+            {/* ===============================================
+                OLHOS
+            =============================================== */}
+
+            <ellipse
+              cx="87"
+              cy={eyeY}
+              rx={
+                (state === "curious"
+                  ? 8
+                  : 7.5) * evolutionEyeScale
+              }
+              ry={eyeRY * evolutionEyeScale}
+              fill="url(#confiaEyePremium)"
+            />
+
+            <ellipse
+              cx="133"
+              cy={eyeY}
+              rx={
+                (state === "curious"
+                  ? 8
+                  : 7.5) * evolutionEyeScale
+              }
+              ry={eyeRY * evolutionEyeScale}
+              fill="url(#confiaEyePremium)"
+            />
+
+            {/* reflexo principal */}
+            <circle
+              cx="84.5"
+              cy={eyeY - 3.2}
+              r="2.5"
+              fill="#FFFFFF"
+              opacity="0.94"
+            />
+
+            <circle
+              cx="130.5"
+              cy={eyeY - 3.2}
+              r="2.5"
+              fill="#FFFFFF"
+              opacity="0.94"
+            />
+
+            {/* reflexo secundário — níveis altos */}
+            {stage >= 4 && (
+              <>
+                <circle
+                  cx="89"
+                  cy={eyeY + 3}
+                  r="1"
+                  fill="#FFFFFF"
+                  opacity="0.42"
+                />
+
+                <circle
+                  cx="135"
+                  cy={eyeY + 3}
+                  r="1"
+                  fill="#FFFFFF"
+                  opacity="0.42"
+                />
+              </>
+            )}
+
+            {/* ===============================================
+                BOCA
+            =============================================== */}
+
+            <path
+              d={mouth}
+              fill="none"
+              stroke="#503934"
+              strokeWidth="2.7"
+              strokeLinecap="round"
+            />
+
+            {/* ===============================================
+                BOCHECHAS
+            =============================================== */}
+
+            <ellipse
+              cx="70"
+              cy="117"
+              rx="10"
+              ry="5.5"
+              fill="#D87570"
+              opacity={cheekOpacity}
+            />
+
+            <ellipse
+              cx="150"
+              cy="117"
+              rx="10"
+              ry="5.5"
+              fill="#D87570"
+              opacity={cheekOpacity}
+            />
+
+            {/* ===============================================
+                BRAÇOS
+            =============================================== */}
+
+            {stage >= 3 && (
+              <>
+                <path
+                  d={
+                    state === "welcoming" ||
+                    state === "celebrating"
+                      ? "M65 133 Q48 128 45 116"
+                      : "M66 134 Q53 140 58 151"
+                  }
+                  fill="none"
+                  stroke="#B96652"
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                />
+
+                <path
+                  d={
+                    state === "welcoming" ||
+                    state === "celebrating"
+                      ? "M155 133 Q172 128 175 116"
+                      : "M154 134 Q167 140 162 151"
+                  }
+                  fill="none"
+                  stroke="#B96652"
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                />
+              </>
+            )}
+
+            {/* ===============================================
+                PÉS
+            =============================================== */}
+
+            <ellipse
+              cx={
+                stage === 2
+                  ? 89
+                  : stage === 3
+                    ? 86
+                    : 84
+              }
+              cy={
+                stage === 2
+                  ? 175
+                  : 177
+              }
+              rx={
+                stage === 2
+                  ? 11
+                  : stage === 3
+                    ? 14
+                    : stage === 4
+                      ? 16
+                      : 17
+              }
+              ry={
+                stage === 2
+                  ? 6
+                  : stage === 3
+                    ? 6.8
+                    : 7.5
+              }
+              fill="#B76350"
+            />
+
+            <ellipse
+              cx={
+                stage === 2
+                  ? 131
+                  : stage === 3
+                    ? 134
+                    : 136
+              }
+              cy={
+                stage === 2
+                  ? 175
+                  : 177
+              }
+              rx={
+                stage === 2
+                  ? 11
+                  : stage === 3
+                    ? 14
+                    : stage === 4
+                      ? 16
+                      : 17
+              }
+              ry={
+                stage === 2
+                  ? 6
+                  : stage === 3
+                    ? 6.8
+                    : 7.5
+              }
+              fill="#B76350"
+            />
+
+            {/* A4.2/A4.3 — Nascente: identidade cresce com o nível */}
+            {stage === 2 && (
+              <circle
+                cx="110"
+                cy="158"
+                r={
+                  safeLevel === 3
+                    ? 2.35
+                    : 2
+                }
+                fill="#E6AE83"
+                opacity={levelMarkOpacity}
+              />
+            )}
+
+            {/* A4.2/A4.3 — Pequena CONFIA: marca amadurece */}
+            {stage === 3 && (
+              <path
+                d={
+                  safeLevel === 5
+                    ? "M96 153 Q110 161 124 153"
+                    : "M98 154 Q110 160 122 154"
+                }
+                fill="none"
+                stroke="#D99A78"
+                strokeWidth={
+                  safeLevel === 5
+                    ? 1.9
+                    : 1.7
+                }
+                strokeLinecap="round"
+                opacity={levelMarkOpacity}
+              />
+            )}
+
+            {/* ===============================================
+                MATURIDADE
+
+                Em vez de acessórios aleatórios, a própria
+                marca corporal amadurece.
+            =============================================== */}
+
+            {stage >= 4 && (
+              <>
+                <path
+                  d="M88 151 Q110 162 132 151"
+                  fill="none"
+                  stroke="#D49678"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  opacity={levelMarkOpacity}
+                />
+
+                <circle
+                  cx="110"
+                  cy="166"
+                  r="2.2"
+                  fill="#D49678"
+                  opacity="0.42"
+                />
+              </>
+            )}
+
+            {stage === 5 && (
+              <>
+                <path
+                  d="
+                    M91 158
+                    Q110 170 129 158
+                  "
+                  fill="none"
+                  stroke="#C77A5F"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  opacity="0.5"
+                />
+
+                <circle
+                  cx="110"
+                  cy="171"
+                  r="1.8"
+                  fill="#C77A5F"
+                  opacity="0.48"
+                />
+                              {/* A4.1 — assinatura final da espécie */}
+                {safeLevel === 10 && (
+                  <>
+<circle
+                  cx="101"
+                  cy="162"
+                  r="1.6"
+                  fill="#D99A72"
+                  opacity="0.55"
+                />
+
+                <circle
+                  cx="119"
+                  cy="162"
+                  r="1.6"
+                  fill="#D99A72"
+                  opacity="0.55"
+                />
+                  </>
+                )}
+
+</>
+            )}
+          </g>
+        )}
+
+        {/* ===================================================
+            B2.2 — ACESSÓRIOS FRONTAIS DA CONFIA
+
+            Todos usam SVG estático e âncoras adaptativas.
+        =================================================== */}
+
+        {!isEgg && (
+          <g aria-hidden="true">
+
+            {/* HEAD */}
+
+            {hasCreamBow && (
+              <g transform={`${headAccessoryTransform} translate(0 1)`}>
+                <path d="M78 55 C68 48 62 51 64 59 C66 66 72 68 80 62 Z" fill="#F6E6D7" stroke="#B86F5B" strokeWidth="2" />
+                <path d="M82 56 C91 49 97 52 95 60 C93 67 87 68 80 62 Z" fill="#F6E6D7" stroke="#B86F5B" strokeWidth="2" />
+                <ellipse cx="80" cy="60" rx="5.5" ry="5" fill="#D99A78" stroke="#B86F5B" strokeWidth="1.6" />
+              </g>
+            )}
+
+            {hasAccessory("confia_bow_terra") && (
+              <g transform={headAccessoryTransform}>
+                <path d="M137 57 C147 49 154 52 152 61 C150 67 144 69 136 63 Z" fill="#C97861" stroke="#9D5748" strokeWidth="2" />
+                <path d="M133 57 C124 50 118 53 120 61 C122 67 128 69 136 63 Z" fill="#D88C72" stroke="#9D5748" strokeWidth="2" />
+                <circle cx="136" cy="62" r="5" fill="#A95F4E" />
+              </g>
+            )}
+
+            {hasAccessory("confia_flower_daisy") && (
+              <g transform={headAccessoryTransform}>
+                <circle cx="74" cy="62" r="5" fill="#E4AD57" />
+                <circle cx="74" cy="53" r="5" fill="#FFF7E8" />
+                <circle cx="82" cy="58" r="5" fill="#FFF7E8" />
+                <circle cx="81" cy="67" r="5" fill="#FFF7E8" />
+                <circle cx="67" cy="67" r="5" fill="#FFF7E8" />
+                <circle cx="66" cy="58" r="5" fill="#FFF7E8" />
+              </g>
+            )}
+
+            {hasAccessory("confia_headband_cream") && (
+              <g transform={headAccessoryTransform}>
+                <path d="M70 71 Q110 43 150 71" fill="none" stroke="#F3E1CE" strokeWidth="6" strokeLinecap="round" />
+              </g>
+            )}
+
+            {hasAccessory("confia_beret_terra") && (
+              <g transform={headAccessoryTransform}>
+                <ellipse cx="105" cy="58" rx="37" ry="15" fill="#B96D57" stroke="#914C3F" strokeWidth="2" />
+                <path d="M104 48 Q108 40 116 44" fill="none" stroke="#914C3F" strokeWidth="3" strokeLinecap="round" />
+              </g>
+            )}
+
+            {hasAccessory("confia_beanie_cream") && (
+              <g transform={headAccessoryTransform}>
+                <path d="M73 66 Q75 39 110 38 Q145 39 147 66 Z" fill="#F0DDC8" stroke="#BA806A" strokeWidth="2" />
+                <rect x="72" y="60" width="76" height="12" rx="6" fill="#E7CBB4" />
+                <circle cx="110" cy="34" r="7" fill="#E7CBB4" />
+              </g>
+            )}
+
+            {hasAccessory("confia_hat_garden") && (
+              <g transform={headAccessoryTransform}>
+                <ellipse cx="110" cy="65" rx="52" ry="10" fill="#E5C78D" stroke="#AB8651" strokeWidth="2" />
+                <path d="M82 62 Q85 34 110 34 Q135 34 138 62 Z" fill="#EED8A6" stroke="#AB8651" strokeWidth="2" />
+                <path d="M134 50 Q145 45 151 53" fill="none" stroke="#9AA873" strokeWidth="3" />
+              </g>
+            )}
+
+            {hasAccessory("confia_tiara_star") && (
+              <g transform={headAccessoryTransform}>
+                <path d="M76 68 Q110 47 144 68" fill="none" stroke="#C89545" strokeWidth="3" />
+                <path d="M110 43 l4 8 9 1-7 6 2 9-8-4-8 4 2-9-7-6 9-1z" fill="#F1D17D" stroke="#B88735" strokeWidth="1.5" />
+              </g>
+            )}
+
+            {hasAccessory("confia_crown_leaf") && (
+              <g transform={headAccessoryTransform}>
+                <path d="M73 65 Q110 45 147 65" fill="none" stroke="#8C9D70" strokeWidth="3" />
+                <ellipse cx="85" cy="57" rx="5" ry="10" fill="#AAB98B" transform="rotate(-35 85 57)" />
+                <ellipse cx="100" cy="51" rx="5" ry="10" fill="#91A373" transform="rotate(-15 100 51)" />
+                <ellipse cx="120" cy="51" rx="5" ry="10" fill="#AAB98B" transform="rotate(15 120 51)" />
+                <ellipse cx="136" cy="57" rx="5" ry="10" fill="#91A373" transform="rotate(35 136 57)" />
+              </g>
+            )}
+
+            {hasAccessory("confia_crown_gold") && (
+              <g transform={headAccessoryTransform}>
+                <path d="M76 65 L84 39 L100 55 L110 32 L121 55 L138 39 L145 65 Z" fill="#E6BE62" stroke="#A97828" strokeWidth="2" />
+                <circle cx="110" cy="47" r="4" fill="#FFF2B8" />
+              </g>
+            )}
+
+            {/* FACE */}
+
+            {hasAccessory("confia_glasses_round") && (
+              <g transform={headAccessoryTransform}>
+                <circle cx="87" cy="91" r="12" fill="none" stroke="#6D514A" strokeWidth="2.5" />
+                <circle cx="133" cy="91" r="12" fill="none" stroke="#6D514A" strokeWidth="2.5" />
+                <path d="M99 91 Q110 86 121 91" fill="none" stroke="#6D514A" strokeWidth="2.5" />
+              </g>
+            )}
+
+            {hasAccessory("confia_glasses_terra") && (
+              <g transform={headAccessoryTransform}>
+                <rect x="73" y="81" width="28" height="20" rx="8" fill="none" stroke="#B96D57" strokeWidth="3" />
+                <rect x="119" y="81" width="28" height="20" rx="8" fill="none" stroke="#B96D57" strokeWidth="3" />
+                <path d="M101 89 Q110 85 119 89" fill="none" stroke="#B96D57" strokeWidth="3" />
+              </g>
+            )}
+
+            {hasAccessory("confia_glasses_gold") && (
+              <g transform={headAccessoryTransform}>
+                <circle cx="87" cy="91" r="13" fill="none" stroke="#C89A45" strokeWidth="3" />
+                <circle cx="133" cy="91" r="13" fill="none" stroke="#C89A45" strokeWidth="3" />
+                <path d="M100 91 H120" stroke="#C89A45" strokeWidth="3" />
+              </g>
+            )}
+
+            {hasAccessory("confia_glasses_sun") && (
+              <g transform={headAccessoryTransform}>
+                <path d="M72 82 H101 L98 101 Q86 108 76 99 Z" fill="#5B4946" stroke="#3F3331" strokeWidth="2" />
+                <path d="M119 82 H148 L144 99 Q134 108 122 101 Z" fill="#5B4946" stroke="#3F3331" strokeWidth="2" />
+                <path d="M101 88 Q110 84 119 88" fill="none" stroke="#3F3331" strokeWidth="3" />
+              </g>
+            )}
+
+            {hasAccessory("confia_glasses_heart") && (
+              <g transform={headAccessoryTransform}>
+                <path d="M87 102 C69 91 72 78 82 80 C87 81 89 86 89 86 C91 81 97 79 101 83 C108 91 99 99 87 102Z" fill="none" stroke="#C56F76" strokeWidth="3" />
+                <path d="M133 102 C115 91 118 78 128 80 C133 81 135 86 135 86 C137 81 143 79 147 83 C154 91 145 99 133 102Z" fill="none" stroke="#C56F76" strokeWidth="3" />
+                <path d="M102 88 H118" stroke="#C56F76" strokeWidth="3" />
+              </g>
+            )}
+
+            {/* NECK */}
+
+            {hasTerraScarf && (
+              <g transform={neckAccessoryTransform}>
+                <path d="M78 127 Q110 139 142 127 Q139 139 110 143 Q81 139 78 127 Z" fill="#C97861" stroke="#A85C4B" strokeWidth="2" />
+                <path d="M124 137 Q134 145 131 160 L121 154 Q125 145 124 137 Z" fill="#B96855" stroke="#A85C4B" strokeWidth="1.7" />
+              </g>
+            )}
+
+            {hasGoldCharm && (
+              <g transform={neckAccessoryTransform}>
+                <path d="M91 130 Q110 140 129 130" fill="none" stroke="#C79A45" strokeWidth="2" />
+                <circle cx="110" cy="141" r="6" fill="#F2D487" stroke="#B88735" strokeWidth="1.8" />
+              </g>
+            )}
+
+            {hasAccessory("confia_scarf_cream") && (
+              <g transform={neckAccessoryTransform}>
+                <path d="M79 127 Q110 139 141 127 Q137 140 110 143 Q83 140 79 127Z" fill="#F1DECB" stroke="#C58B74" strokeWidth="2" />
+                <path d="M96 139 Q88 149 91 160 L101 154 Q97 146 96 139Z" fill="#E6CDB8" stroke="#C58B74" strokeWidth="1.7" />
+              </g>
+            )}
+
+            {hasAccessory("confia_necklace_leaf") && (
+              <g transform={neckAccessoryTransform}>
+                <path d="M91 130 Q110 141 129 130" fill="none" stroke="#87966C" strokeWidth="2" />
+                <ellipse cx="110" cy="143" rx="5" ry="8" fill="#A7B58A" transform="rotate(25 110 143)" />
+              </g>
+            )}
+
+            {hasAccessory("confia_necklace_heart") && (
+              <g transform={neckAccessoryTransform}>
+                <path d="M91 130 Q110 141 129 130" fill="none" stroke="#B76D6E" strokeWidth="2" />
+                <path d="M110 149 C98 141 101 134 106 135 C109 135 110 138 110 138 C112 135 117 134 119 138 C122 143 116 147 110 149Z" fill="#D98082" />
+              </g>
+            )}
+
+            {hasAccessory("confia_medal_sun") && (
+              <g transform={neckAccessoryTransform}>
+                <path d="M92 129 Q110 140 128 129" fill="none" stroke="#B98335" strokeWidth="2" />
+                <circle cx="110" cy="143" r="7" fill="#E9B95E" stroke="#B98335" strokeWidth="2" />
+                <circle cx="110" cy="143" r="3" fill="#FFF1B1" />
+              </g>
+            )}
+
+            {hasAccessory("confia_collar_star") && (
+              <g transform={neckAccessoryTransform}>
+                <path d="M88 130 Q110 143 132 130" fill="none" stroke="#AD7F4B" strokeWidth="2.4" />
+                <path d="M110 138 l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#E8C46D" />
+              </g>
+            )}
+
+            {hasAccessory("confia_pendant_moon") && (
+              <g transform={neckAccessoryTransform}>
+                <path d="M92 129 Q110 141 128 129" fill="none" stroke="#AD9568" strokeWidth="2" />
+                <path d="M107 138 C101 143 103 152 111 154 C108 150 109 144 115 141 C112 138 110 137 107 138Z" fill="#E9D9A5" />
+              </g>
+            )}
+
+            {/* BODY */}
+
+            {hasAccessory("confia_sash_cream") && (
+              <g transform={bodyAccessoryTransform}>
+                <path d="M82 120 Q103 142 139 165" fill="none" stroke="#F0DCC8" strokeWidth="8" strokeLinecap="round" />
+              </g>
+            )}
+
+            {hasAccessory("confia_bag_terra") && (
+              <g transform={bodyAccessoryTransform}>
+                <path d="M137 133 Q151 145 151 162" fill="none" stroke="#8F5648" strokeWidth="3" />
+                <rect x="140" y="151" width="24" height="23" rx="7" fill="#B96D57" stroke="#8F5648" strokeWidth="2" />
+              </g>
+            )}
+
+            {hasAccessory("confia_sash_gold") && (
+              <g transform={bodyAccessoryTransform}>
+                <path d="M81 119 Q104 143 140 167" fill="none" stroke="#D6A94F" strokeWidth="8" strokeLinecap="round" />
+                <circle cx="137" cy="164" r="5" fill="#F4D987" />
+              </g>
+            )}
+
+            {/* HAND — só quando existem braços */}
+
+            {stage >= 3 && hasAccessory("confia_hand_flower") && (
+              <g transform={handAccessoryTransform}>
+                <path d="M163 147 Q171 135 172 123" fill="none" stroke="#779269" strokeWidth="2" />
+                <circle cx="173" cy="120" r="4" fill="#E4AD57" />
+                <circle cx="173" cy="113" r="4" fill="#FFF7E8" />
+                <circle cx="180" cy="120" r="4" fill="#FFF7E8" />
+                <circle cx="173" cy="127" r="4" fill="#FFF7E8" />
+                <circle cx="166" cy="120" r="4" fill="#FFF7E8" />
+              </g>
+            )}
+
+            {stage >= 3 && hasAccessory("confia_hand_heart") && (
+              <g transform={handAccessoryTransform}>
+                <path d="M169 143 C155 134 158 123 166 124 C170 124 172 129 172 129 C175 124 183 124 185 130 C188 137 179 142 169 143Z" fill="#D97D7D" stroke="#AC5D60" strokeWidth="1.5" />
+              </g>
+            )}
+
+            {stage >= 3 && hasAccessory("confia_hand_star") && (
+              <g transform={handAccessoryTransform}>
+                <path d="M171 121 l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z" fill="#E8C15F" stroke="#AA7D31" strokeWidth="1.5" />
+              </g>
+            )}
+
+            {stage >= 3 && hasAccessory("confia_hand_book") && (
+              <g transform={handAccessoryTransform}>
+                <path d="M151 139 Q163 134 174 141 L174 161 Q163 154 151 160Z" fill="#E7D3B8" stroke="#9F7258" strokeWidth="2" />
+                <path d="M174 141 Q185 134 195 139 L195 160 Q184 154 174 161Z" fill="#F3E3CD" stroke="#9F7258" strokeWidth="2" />
+              </g>
+            )}
+
+            {stage >= 3 && hasAccessory("confia_hand_gift") && (
+              <g transform={handAccessoryTransform}>
+                <rect x="158" y="137" width="28" height="25" rx="4" fill="#D58D73" stroke="#9F5D4B" strokeWidth="2" />
+                <path d="M172 137 V162 M158 147 H186" stroke="#F3D8BD" strokeWidth="3" />
+                <path d="M172 137 Q162 128 164 124 Q172 124 174 134 Q177 124 184 125 Q185 131 172 137Z" fill="#F0C7AE" />
+              </g>
+            )}
+
+            {stage >= 3 && hasAccessory("confia_hand_light") && (
+              <g transform={handAccessoryTransform}>
+                <circle cx="171" cy="137" r="11" fill="#F5D987" opacity="0.65" />
+                <circle cx="171" cy="137" r="5" fill="#FFF3B5" />
+                <path d="M171 116 V123 M171 151 V158 M150 137 H157 M185 137 H192" stroke="#E8BA58" strokeWidth="2" strokeLinecap="round" />
+              </g>
+            )}
+
+          </g>
+        )}
+
+      </svg>
+    </div>
+  );
+}
+
+export default memo(ConfiaCreature);

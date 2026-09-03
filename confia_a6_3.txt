@@ -1,0 +1,1114 @@
+==============================================================================
+CONFIA — A6.3 — DESCOBERTA DA FALA RELACIONAL
+==============================================================================
+
+==============================================================================
+src/components/ConfiaCompanionHome.tsx
+==============================================================================
+NÃO ENCONTRADO
+
+==============================================================================
+src/components/Avatar.tsx
+==============================================================================
+   1: import React, { useState, useEffect } from 'react';
+   2: import { useTranslation } from "react-i18next";
+   3: import { motion } from 'motion/react';
+   4: import { ShieldCheck, Flame, Sparkles, MessageCircleCode } from 'lucide-react';
+   5: import { AvatarState } from '../types';
+   6: import ConfiaCreature, { type ConfiaCreatureState } from "./Companheiro/ConfiaCreature";
+   7: import type {
+   8:   CompanionReactionState,
+   9: } from "../data/reactive/companionReactionEngine";
+  10: interface AvatarProps {
+  11:   avatar: AvatarState;
+  12:   onPet: () => void;
+  13:   compact?: boolean;
+  14:   celebrating?: boolean;
+  15:   levelUpTrigger?: boolean;
+  16:   moodRating?: number;
+  17:   memoryMessage?: string;
+  18:   companionWorldMood?: "growing" | "settling" | "discovering" | "neutral";
+  19:   reactionState?: CompanionReactionState;
+  20:   equippedAccessoryIds?: string[];
+  21: }
+  22: const AvatarComponent: React.FC<AvatarProps> = ({
+  23:   avatar,
+  24:   onPet,
+  25:   compact,
+  26:   celebrating,
+  27:   levelUpTrigger,
+  28:   moodRating,
+  29:   memoryMessage,
+  30:   companionWorldMood = "neutral",
+  31:   reactionState,
+  32:   equippedAccessoryIds = []
+  33: }) => {
+  34: 
+  35: 
+  36: const { t } = useTranslation();
+  37:   const [isJumping, setIsJumping] = useState(false);
+  38: 
+  39: 
+  40: 
+  41: 
+  42:   const handleInteraction = () => {
+  43:     if (isJumping) return;
+  44:     setIsJumping(true);
+  45:     onPet();
+  46: 
+  47:     setTimeout(() => {
+  48:       setIsJumping(false);
+  49:     }, 800);
+  50: 
+  51:   };
+  52: 
+  53:   // Determine colors and stage details
+  54:   const getStageDetails = (level: number) => {
+  55:     if (level === 1) {
+  56:       return {
+  57:       name: t("stage1Name"),
+  58:         color: "from-teal-100 to-emerald-200",
+  59:         borderColor: "border-teal-300",
+  60:        desc: t("stage1Desc")
+  61:       };
+  62:     } else if (level === 2) {
+  63:       return {
+  64:        name: t("stage2Name"),
+  65: 
+  66:         color: "from-emerald-200 to-green-300",
+  67:         borderColor: "border-emerald-300",
+  68:        desc: t("stage2Desc")
+  69:       };
+  70:     } else if (level === 3) {
+  71:       return {
+  72:        name: t("stage3Name"),
+  73:         color: "from-emerald-200 to-cyan-300",
+  74:         borderColor: "border-cyan-300",
+  75:        desc: t("stage3Desc")
+  76:       };
+  77:     } else if (level === 4) {
+  78:       return {
+  79:        name: t("stage4Name"),
+  80:         color: "from-sky-200 to-indigo-200",
+  81:         borderColor: "border-sky-300",
+  82:        desc: t("stage4Desc")
+  83:       };
+  84:     } else {
+  85:       return {
+  86:        name: t("stage5Name"),
+  87:         color: "from-indigo-200 via-purple-200 to-pink-200",
+  88:         borderColor: "border-purple-300",
+  89:        desc: t("stage5Desc")
+  90:       };
+  91:     }
+  92:   };
+  93: const stageDetails = getStageDetails(avatar.level);
+  94: const stage = Math.min(10, avatar.level);
+  95: 
+  96: /**
+  97:  * ==========================================================
+  98:  * CONFIA 4C — COMPANION VIVO
+  99:  * ==========================================================
+ 100:  *
+ 101:  * Estado puramente visual derivado do worldMood existente.
+ 102:  * Não interpreta, não guarda e não cria comportamento.
+ 103:  */
+ 104: /**
+ 105:  * ==========================================================
+ 106:  * A4.4 — MOMENTO DE GRANDE EVOLUÇÃO
+ 107:  * ==========================================================
+ 108:  *
+ 109:  * Reutiliza levelUpTrigger já existente.
+ 110:  * Não cria estado nem timer.
+ 111:  *
+ 112:  * Novas formas começam nos níveis 2, 4, 6 e 9.
+ 113:  */
+ 114: const isMajorEvolution =
+ 115:   Boolean(levelUpTrigger) &&
+ 116:   (
+ 117:     avatar.level === 2 ||
+ 118:     avatar.level === 4 ||
+ 119:     avatar.level === 6 ||
+ 120:     avatar.level === 9
+ 121:   );
+ 122: 
+ 123: const creatureState: ConfiaCreatureState =
+ 124:     levelUpTrigger || celebrating
+ 125:       ? "celebrating"
+ 126:       : reactionState ??
+ 127:         (
+ 128:           moodRating !== undefined && moodRating <= 3
+ 129:             ? "supportive"
+ 130:             : companionWorldMood === "discovering"
+ 131:               ? "curious"
+ 132:               : companionWorldMood === "growing"
+ 133:                 ? "welcoming"
+ 134:                 : "neutral"
+ 135:         );
+ 136: 
+ 137: 
+ 138: 
+ 139: return (
+ 140:   <div className="relative flex items-center justify-center">
+ 141: 
+ 142:       {/* Interactive Avatar Container */}
+ 143: 
+ 144:       <div
+ 145:         onClick={handleInteraction}
+ 146:         className="relative flex items-center justify-center cursor-pointer select-none"
+ 147:         style={{ touchAction: 'manipulation' }}
+ 148:       >
+ 149: <motion.div
+ 150:   animate={
+ 151:     isJumping
+ 152:       ? {
+ 153:           y: [-30, 0],
+ 154:           scaleY: [0.9, 1.1, 1],
+ 155:           scaleX: [1.1, 0.9, 1]
+ 156:         }
+ 157:       : isMajorEvolution
+ 158:         ? {
+ 159:             y: [0, -10, -4, 0],
+ 160:             scale: [1, 1.08, 1.035, 1],
+ 161:             rotate: [0, -1.5, 1.5, 0]
+ 162:           }
+ 163:         : levelUpTrigger || celebrating
+ 164:           ? {
+ 165:               y: [0, -5, 0],
+ 166:               scale: [1, 1.035, 1]
+ 167:             }
+ 168:           : {}
+ 169:   }
+ 170:   transition={
+ 171:     isMajorEvolution
+ 172:       ? {
+ 173:           duration: 1.15,
+ 174:           ease: "easeOut"
+ 175:         }
+ 176:       : {
+ 177:           duration: 0.6,
+ 178:           ease: "easeOut"
+ 179:         }
+ 180:   }
+ 181:   className="relative flex flex-col items-center"
+ 182: >
+ 183:   {isMajorEvolution && (
+ 184:     <motion.div
+ 185:       aria-hidden="true"
+ 186:       initial={{
+ 187:         opacity: 0,
+ 188:         scale: 0.72
+ 189:       }}
+ 190:       animate={{
+ 191:         opacity: [0, 0.34, 0.18],
+ 192:         scale: [0.72, 1.08, 1]
+ 193:       }}
+ 194:       transition={{
+ 195:         duration: 1.1,
+ 196:         ease: "easeOut"
+ 197:       }}
+ 198:       className="
+ 199:         pointer-events-none
+ 200:         absolute
+ 201:         left-1/2
+ 202:         top-1/2
+ 203:         h-[205px]
+ 204:         w-[205px]
+ 205:         -translate-x-1/2
+ 206:         -translate-y-1/2
+ 207:         rounded-full
+ 208:         bg-[radial-gradient(circle,rgba(255,238,190,0.62)_0%,rgba(229,168,139,0.22)_48%,rgba(255,255,255,0)_72%)]
+ 209:         blur-[2px]
+ 210:       "
+ 211:     />
+ 212:   )}
+ 213: 
+ 214:   {/* A4.4 — halo de evolução */}
+ 215:   <ConfiaCreature
+ 216:     level={avatar.level}
+ 217:     state={creatureState}
+ 218:     reacting={isJumping}
+ 219:     equippedAccessoryIds={equippedAccessoryIds}
+ 220:   />
+ 221: </motion.div>
+ 222: 
+ 223: 
+ 224:       </div>
+ 225: 
+ 226: 
+ 227: 
+ 228:     </div>
+ 229:   );
+ 230: };
+ 231: 
+ 232: export const Avatar = React.memo(AvatarComponent);
+ 233: export default Avatar;
+
+==============================================================================
+src/data/reactive/companionReactionEngine.ts
+==============================================================================
+   1: /**
+   2:  * ============================================================
+   3:  * CONFIA — COMPANION REACTION ENGINE A3.1
+   4:  * ============================================================
+   5:  *
+   6:  * Esta camada NÃO analisa novamente o utilizador.
+   7:  *
+   8:  * O Reactive Engine continua a ser a fonte de verdade.
+   9:  *
+  10:  * Responsabilidade desta camada:
+  11:  *
+  12:  *   ReactiveResult
+  13:  *        ↓
+  14:  *   comportamento visível da CONFIA
+  15:  *
+  16:  * Define:
+  17:  * - estado visual;
+  18:  * - postura emocional;
+  19:  * - tipo de reação;
+  20:  * - prioridade;
+  21:  * - intensidade visual.
+  22:  *
+  23:  * Não:
+  24:  * - grava dados;
+  25:  * - lê localStorage;
+  26:  * - cria timers;
+  27:  * - calcula padrões;
+  28:  * - diagnostica o utilizador;
+  29:  * - substitui o Reactive Engine.
+  30:  */
+  31: 
+  32: import type {
+  33:   ReactiveResult,
+  34:   ReactiveSituation,
+  35: } from "./reactiveTypes";
+  36: 
+  37: export type CompanionReactionState =
+  38:   | "neutral"
+  39:   | "welcoming"
+  40:   | "supportive"
+  41:   | "curious"
+  42:   | "celebrating";
+  43: 
+  44: export type CompanionReactionKind =
+  45:   | "presence"
+  46:   | "discovery"
+  47:   | "support"
+  48:   | "encouragement"
+  49:   | "celebration"
+  50:   | "reflection"
+  51:   | "welcome_back";
+  52: 
+  53: export interface CompanionReaction {
+  54:   state: CompanionReactionState;
+  55: 
+  56:   kind: CompanionReactionKind;
+  57: 
+  58:   /**
+  59:    * 0–100.
+  60:    *
+  61:    * Serve apenas para a camada de apresentação decidir
+  62:    * quão expressiva pode ser a reação.
+  63:    */
+  64:   priority: number;
+  65: 
+  66:   /**
+  67:    * Intensidade VISUAL.
+  68:    *
+  69:    * Não representa intensidade psicológica.
+  70:    */
+  71:   visualIntensity:
+  72:     | "quiet"
+  73:     | "normal"
+  74:     | "strong";
+  75: 
+  76:   /**
+  77:    * Situação que originou a reação.
+  78:    *
+  79:    * Útil para debug e futura memória conversacional.
+  80:    */
+  81:   sourceSituation: ReactiveSituation;
+  82: 
+  83:   /**
+  84:    * A resposta continua a vir do Reactive Engine.
+  85:    *
+  86:    * Esta camada não cria uma segunda biblioteca de frases.
+  87:    */
+  88:   response: ReactiveResult["response"];
+  89: 
+  90:   confidence: number;
+  91: }
+  92: 
+  93: /**
+  94:  * Traduz uma situação já identificada pelo Reactive Engine
+  95:  * para comportamento do companheiro.
+  96:  */
+  97: function resolveReactionPresentation(
+  98:   situation: ReactiveSituation
+  99: ): Pick<
+ 100:   CompanionReaction,
+ 101:   "state" | "kind" | "priority" | "visualIntensity"
+ 102: > {
+ 103:   switch (situation) {
+ 104:     /*
+ 105:      * ========================================================
+ 106:      * APOIO
+ 107:      * ========================================================
+ 108:      *
+ 109:      * A CONFIA não imita tristeza.
+ 110:      * Mantém-se calma, próxima e disponível.
+ 111:      */
+ 112: 
+ 113:     case "mood_low":
+ 114:       return {
+ 115:         state: "supportive",
+ 116:         kind: "support",
+ 117:         priority: 100,
+ 118:         visualIntensity: "strong",
+ 119:       };
+ 120: 
+ 121:     case "mood_declining":
+ 122:       return {
+ 123:         state: "supportive",
+ 124:         kind: "support",
+ 125:         priority: 95,
+ 126:         visualIntensity: "normal",
+ 127:       };
+ 128: 
+ 129:     case "objectives_declining":
+ 130:       return {
+ 131:         state: "supportive",
+ 132:         kind: "encouragement",
+ 133:         priority: 84,
+ 134:         visualIntensity: "normal",
+ 135:       };
+ 136: 
+ 137:     case "impulse_not_effective":
+ 138:       return {
+ 139:         state: "supportive",
+ 140:         kind: "support",
+ 141:         priority: 98,
+ 142:         visualIntensity: "strong",
+ 143:       };
+ 144: 
+ 145:     case "impulse_partially_effective":
+ 146:       return {
+ 147:         state: "supportive",
+ 148:         kind: "encouragement",
+ 149:         priority: 90,
+ 150:         visualIntensity: "normal",
+ 151:       };
+ 152: 
+ 153:     /*
+ 154:      * ========================================================
+ 155:      * CELEBRAÇÃO
+ 156:      * ========================================================
+ 157:      */
+ 158: 
+ 159:     case "objective_completed":
+ 160:       return {
+ 161:         state: "celebrating",
+ 162:         kind: "celebration",
+ 163:         priority: 100,
+ 164:         visualIntensity: "strong",
+ 165:       };
+ 166: 
+ 167:     case "mood_high":
+ 168:       return {
+ 169:         state: "celebrating",
+ 170:         kind: "celebration",
+ 171:         priority: 88,
+ 172:         visualIntensity: "normal",
+ 173:       };
+ 174: 
+ 175:     case "mood_improving":
+ 176:       return {
+ 177:         state: "celebrating",
+ 178:         kind: "encouragement",
+ 179:         priority: 91,
+ 180:         visualIntensity: "normal",
+ 181:       };
+ 182: 
+ 183:     case "objectives_improving":
+ 184:       return {
+ 185:         state: "celebrating",
+ 186:         kind: "celebration",
+ 187:         priority: 90,
+ 188:         visualIntensity: "normal",
+ 189:       };
+ 190: 
+ 191:     case "objectives_consistent":
+ 192:       return {
+ 193:         state: "welcoming",
+ 194:         kind: "encouragement",
+ 195:         priority: 80,
+ 196:         visualIntensity: "quiet",
+ 197:       };
+ 198: 
+ 199:     case "impulse_effective":
+ 200:       return {
+ 201:         state: "celebrating",
+ 202:         kind: "encouragement",
+ 203:         priority: 94,
+ 204:         visualIntensity: "normal",
+ 205:       };
+ 206: 
+ 207:     case "consistent_use":
+ 208:       return {
+ 209:         state: "welcoming",
+ 210:         kind: "encouragement",
+ 211:         priority: 78,
+ 212:         visualIntensity: "quiet",
+ 213:       };
+ 214: 
+ 215:     /*
+ 216:      * ========================================================
+ 217:      * REGRESSO
+ 218:      * ========================================================
+ 219:      *
+ 220:      * Nunca culpabilizar.
+ 221:      * Nunca falar em "abandono".
+ 222:      * Nunca fazer o companheiro regredir.
+ 223:      */
+ 224: 
+ 225:     case "return_after_absence":
+ 226:       return {
+ 227:         state: "welcoming",
+ 228:         kind: "welcome_back",
+ 229:         priority: 96,
+ 230:         visualIntensity: "strong",
+ 231:       };
+ 232: 
+ 233:     /*
+ 234:      * ========================================================
+ 235:      * DESCOBERTA / CURIOSIDADE
+ 236:      * ========================================================
+ 237:      */
+ 238: 
+ 239:     case "first_mood_record":
+ 240:       return {
+ 241:         state: "curious",
+ 242:         kind: "discovery",
+ 243:         priority: 82,
+ 244:         visualIntensity: "normal",
+ 245:       };
+ 246: 
+ 247:     case "first_use":
+ 248:       return {
+ 249:         state: "welcoming",
+ 250:         kind: "discovery",
+ 251:         priority: 75,
+ 252:         visualIntensity: "normal",
+ 253:       };
+ 254: 
+ 255:     case "multiple_signals":
+ 256:       return {
+ 257:         state: "curious",
+ 258:         kind: "reflection",
+ 259:         priority: 70,
+ 260:         visualIntensity: "quiet",
+ 261:       };
+ 262: 
+ 263:     /*
+ 264:      * ========================================================
+ 265:      * CALMA / PRESENÇA
+ 266:      * ========================================================
+ 267:      */
+ 268: 
+ 269:     case "mood_stable":
+ 270:       return {
+ 271:         state: "neutral",
+ 272:         kind: "presence",
+ 273:         priority: 55,
+ 274:         visualIntensity: "quiet",
+ 275:       };
+ 276: 
+ 277:     case "no_data":
+ 278:       return {
+ 279:         state: "welcoming",
+ 280:         kind: "discovery",
+ 281:         priority: 50,
+ 282:         visualIntensity: "quiet",
+ 283:       };
+ 284: 
+ 285:     default:
+ 286:       return {
+ 287:         state: "neutral",
+ 288:         kind: "presence",
+ 289:         priority: 40,
+ 290:         visualIntensity: "quiet",
+ 291:       };
+ 292:   }
+ 293: }
+ 294: 
+ 295: /**
+ 296:  * Função pública.
+ 297:  *
+ 298:  * Recebe o resultado FINAL do Reactive Engine.
+ 299:  * Não volta a analisar os dados.
+ 300:  */
+ 301: export function resolveCompanionReaction(
+ 302:   reactiveResult: ReactiveResult
+ 303: ): CompanionReaction {
+ 304:   const presentation =
+ 305:     resolveReactionPresentation(
+ 306:       reactiveResult.situation
+ 307:     );
+ 308: 
+ 309:   return {
+ 310:     ...presentation,
+ 311: 
+ 312:     sourceSituation:
+ 313:       reactiveResult.situation,
+ 314: 
+ 315:     response:
+ 316:       reactiveResult.response,
+ 317: 
+ 318:     confidence:
+ 319:       reactiveResult.confidence,
+ 320:   };
+ 321: }
+
+==============================================================================
+src/App.tsx
+==============================================================================
+
+--- linhas 24-55 ---
+  24:   Store,
+  25:   Settings
+  26: } from 'lucide-react';
+  27: import { useTranslation } from "react-i18next";
+  28: import i18n from "./i18n";
+  29: import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove, increment, deleteDoc } from "firebase/firestore";
+  30: import { db, auth, signInAnonymously } from "./firebase";
+  31: import { initAnonymousAuth } from "./firebaseAuth";
+  32: import HomeInventory from "./components/HomeInventory";
+  33: import { createWeeklyTrophy } from "./storage/weeklyTrophies";
+  34: import { deleteAllUserData } from "./storage/deleteUserData";
+  35: import { initLanguage } from "./i18n/language";
+  36: import ConfiaCompanionHome from "./components/Companheiro/ConfiaCompanionHome";
+  37: import HomeProgressSummary from "./components/HomeProgressSummary";
+  38: import HomeShop from "./components/HomeShop";
+  39: import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
+  40: import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
+  41: import PatternsNew from './components/PatternsNew/PatternsNew';
+  42: import HabitAssessment from './components/PatternsNew/HabitAssessment';
+  43: import HabitDailyCheck from './components/PatternsNew/HabitDailyCheck';
+  44: import HabitEvolution from './components/PatternsNew/HabitEvolution';
+  45: import { PartilhaFeed } from "./components/PartilhaFeed";
+  46: import {
+  47:   analyzeReactiveState,
+  48: } from "./data/reactive/reactiveEngine";
+  49: import {
+  50:   recordReactiveResponse,
+  51: } from "./data/reactive/reactiveHistoryStorage";
+  52: import {
+  53:   collectReactiveRecentMemory,
+  54: } from "./data/reactive/reactiveRecentMemory";
+  55: 
+
+--- linhas 445-476 ---
+ 445:  * a experiência como se a CONFIA já conhecesse padrões
+ 446:  * consolidados do utilizador.
+ 447:  *
+ 448:  * Esta camada é apenas de apresentação.
+ 449:  * O Reactive Engine continua a decidir a resposta.
+ 450:  */
+ 451: const isEarlyLearning =
+ 452:   currentTab === 0 &&
+ 453:   homeScreen === "home" &&
+ 454:   ratings.length >= 1 &&
+ 455:   ratings.length <= 2;
+ 456: 
+ 457: const homeNowMemory = (() => {
+ 458:   if (currentTab !== 0 || homeScreen !== "home") {
+ 459:     return null;
+ 460:   }
+ 461: 
+ 462:   try {
+ 463:     const memory = collectReactiveRecentMemory();
+ 464: 
+ 465:     const effectiveImpulse =
+ 466:       memory?.recentEffectiveImpulse ?? null;
+ 467: 
+ 468:     const continuity =
+ 469:       memory?.continuity ?? null;
+ 470: 
+ 471:     /*
+ 472:      * 1D.6C — HIERARQUIA DA MEMÓRIA
+ 473:      *
+ 474:      * Primeiro verificamos se existe aprendizagem pessoal
+ 475:      * suficiente para apresentar um padrão observado.
+ 476:      *
+
+--- linhas 606-667 ---
+ 606: })();
+ 607: 
+ 608: 
+ 609: /**
+ 610:  * CONFIA A3.2 — cérebro reativo único do Principal.
+ 611:  *
+ 612:  * O resultado é calculado uma vez e partilhado entre:
+ 613:  * - ação inteligente;
+ 614:  * - companheiro;
+ 615:  * - balão;
+ 616:  * - expressão visual.
+ 617:  */
+ 618: const homeReactiveResult = (() => {
+ 619:   if (currentTab !== 0 || homeScreen !== "home") {
+ 620:     return null;
+ 621:   }
+ 622: 
+ 623:   return analyzeReactiveState({
+ 624:     source: "general",
+ 625:   });
+ 626: })();
+ 627: 
+ 628: 
+ 629: const homeNowAction = (() => {
+ 630:   if (currentTab !== 0 || homeScreen !== "home") {
+ 631:     return null;
+ 632:   }
+ 633: 
+ 634:   /*
+ 635:    * 1D.6D — separação entre MEMÓRIA e AÇÃO.
+ 636:    *
+ 637:    * A memória contextual não deve decidir sozinha
+ 638:    * qual é a próxima ação do utilizador.
+ 639:    *
+ 640:    * Ela informa o Principal sobre experiências anteriores.
+ 641:    * O Reactive Engine continua a ser responsável
+ 642:    * pela decisão da ação atual.
+ 643:    */
+ 644: 
+ 645:   /*
+ 646:    * 1D.4 — decisão normal do Reactive Engine.
+ 647:    */
+ 648:   const result = homeReactiveResult;
+ 649: 
+ 650:   const intent = result?.intent;
+ 651: 
+ 652:   if (!intent) {
+ 653:     return null;
+ 654:   }
+ 655: 
+ 656:   switch (intent) {
+ 657:     // Regulação / momento difícil
+ 658:     case "calm":
+ 659:     case "ground":
+ 660:     case "encourage_regulation":
+ 661:     case "support_difficult_moment":
+ 662:     case "gentle_check":
+ 663:       return {
+ 664:         kind: "impulse" as const,
+ 665:         titleKey: "homeNow.impulse.title",
+ 666:         textKey: "homeNow.impulse.text",
+ 667:         actionKey: "homeNow.impulse.action",
+
+--- linhas 800-850 ---
+ 800:     state = "already_here_today";
+ 801:   }
+ 802: 
+ 803:   /**
+ 804:    * --------------------------------------------------------
+ 805:    * MEMÓRIA
+ 806:    * --------------------------------------------------------
+ 807:    *
+ 808:    * Reutilizamos apenas a memória que a Principal já
+ 809:    * considerou suficientemente sólida para apresentar.
+ 810:    */
+ 811:   const memoryKind =
+ 812:     homeNowMemory?.kind ?? null;
+ 813: 
+ 814:   const hasImpulseLearning =
+ 815:     memoryKind === "impulseLearning";
+ 816: 
+ 817:   const hasImpulseMemory =
+ 818:     memoryKind === "impulseMemory";
+ 819: 
+ 820:   const hasContinuityMemory =
+ 821:     memoryKind === "continuity";
+ 822: 
+ 823:   /**
+ 824:    * --------------------------------------------------------
+ 825:    * CONFIA 3E.1 — CONTINUIDADE INTELIGENTE
+ 826:    * --------------------------------------------------------
+ 827:    *
+ 828:    * Este nível NÃO representa uma nova memória.
+ 829:    *
+ 830:    * É apenas uma classificação da memória que já foi
+ 831:    * recolhida por homeNowMemory.
+ 832:    *
+ 833:    * A ordem é deliberadamente conservadora:
+ 834:    *
+ 835:    * learned_impulse
+ 836:    *   = aprendizagem sustentada por múltiplos episódios.
+ 837:    *
+ 838:    * effective_impulse
+ 839:    *   = uma experiência eficaz conhecida, ainda sem
+ 840:    *     evidência suficiente para afirmar um padrão.
+ 841:    *
+ 842:    * repeated_signals
+ 843:    *   = existem sinais repetidos de continuidade.
+ 844:    *
+ 845:    * early_learning
+ 846:    *   = existem poucos registos e a CONFIA ainda está
+ 847:    *     a aprender.
+ 848:    *
+ 849:    * none
+ 850:    *   = não existe evidência suficiente para comunicar
+
+--- linhas 942-1093 ---
+ 942:   | "discovering"
+ 943:   | "neutral" =
+ 944:   dailyContext?.dailyLearningLevel === "learned_impulse" ||
+ 945:   dailyContext?.dailyLearningLevel === "repeated_signals"
+ 946:     ? "growing"
+ 947:     : dailyContext?.dailyLearningLevel === "effective_impulse"
+ 948:       ? "settling"
+ 949:       : dailyContext?.dailyLearningLevel === "early_learning"
+ 950:         ? "discovering"
+ 951:         : "neutral";
+ 952: 
+ 953: const homeNowContext = (() => {
+ 954:   if (!homeNowAction || !homeNowMemory) {
+ 955:     return null;
+ 956:   }
+ 957: 
+ 958:   /**
+ 959:    * ----------------------------------------------------------
+ 960:    * IMPULSO
+ 961:    * ----------------------------------------------------------
+ 962:    */
+ 963:   if (homeNowAction.kind === "impulse") {
+ 964:     if (homeNowMemory.kind === "impulseLearning") {
+ 965:       return {
+ 966:         kind: "impulseLearning" as const,
+ 967:         memory: homeNowMemory,
+ 968:       };
+ 969:     }
+ 970: 
+ 971:     if (
+ 972:       homeNowMemory.kind === "impulseMemory" &&
+ 973:       homeNowMemory.continuity?.hasRepeatedSignals &&
+ 974:       (
+ 975:         homeNowMemory.continuity.repeatedNeedCount >= 2 ||
+ 976:         homeNowMemory.continuity.recentEffectiveImpulseCount >= 2
+ 977:       )
+ 978:     ) {
+ 979:       return {
+ 980:         kind: "continuity" as const,
+ 981:         source: "impulse" as const,
+ 982:         count: Math.max(
+ 983:           homeNowMemory.continuity.repeatedNeedCount,
+ 984:           homeNowMemory.continuity.recentEffectiveImpulseCount
+ 985:         ),
+ 986:       };
+ 987:     }
+ 988: 
+ 989:     if (
+ 990:       homeNowMemory.kind === "continuity" &&
+ 991:       (
+ 992:         homeNowMemory.repeatedNeedCount >= 2 ||
+ 993:         homeNowMemory.recentEffectiveImpulseCount >= 2
+ 994:       )
+ 995:     ) {
+ 996:       return {
+ 997:         kind: "continuity" as const,
+ 998:         source: "impulse" as const,
+ 999:         count: Math.max(
+1000:           homeNowMemory.repeatedNeedCount,
+1001:           homeNowMemory.recentEffectiveImpulseCount
+1002:         ),
+1003:       };
+1004:     }
+1005: 
+1006:     return null;
+1007:   }
+1008: 
+1009:   /**
+1010:    * ----------------------------------------------------------
+1011:    * PADRÕES / REFLEXÃO
+1012:    * ----------------------------------------------------------
+1013:    *
+1014:    * Aqui a convergência entre duas ou mais fontes é útil:
+1015:    * há algo recorrente que vale a pena observar.
+1016:    *
+1017:    * Não dizemos que uma coisa causou a outra.
+1018:    */
+1019:   if (
+1020:     homeNowAction.kind === "patterns" &&
+1021:     homeNowMemory.kind === "continuity"
+1022:   ) {
+1023:     /**
+1024:      * 1D.8E — CHECK-IN VISÍVEL
+1025:      *
+1026:      * Quando existem duas ou mais fontes de continuidade,
+1027:      * mostramos primeiro a convergência transversal.
+1028:      */
+1029:     if (homeNowMemory.signalCount >= 2) {
+1030:       return {
+1031:         kind: "continuity" as const,
+1032:         source: "cross" as const,
+1033:         count: homeNowMemory.signalCount,
+1034:       };
+1035:     }
+1036: 
+1037:     /**
+1038:      * Sem convergência entre fontes, uma necessidade repetida
+1039:      * nos últimos Check-Ins pode contextualizar uma ação
+1040:      * que o Reactive Engine já decidiu como reflexão/padrões.
+1041:      *
+1042:      * A memória continua sem escolher a ação.
+1043:      */
+1044:     if (
+1045:       homeNowMemory.repeatedCheckInNeed &&
+1046:       homeNowMemory.repeatedCheckInNeedCount >= 2
+1047:     ) {
+1048:       return {
+1049:         kind: "continuity" as const,
+1050:         source: "checkIn" as const,
+1051:         count: homeNowMemory.repeatedCheckInNeedCount,
+1052:       };
+1053:     }
+1054: 
+1055:     return null;
+1056:   }
+1057: 
+1058:   /**
+1059:    * ----------------------------------------------------------
+1060:    * PROGRESSO
+1061:    * ----------------------------------------------------------
+1062:    *
+1063:    * Só mostramos memória emocional quando a direção
+1064:    * transversal observada é de melhoria.
+1065:    */
+1066:   if (
+1067:     homeNowAction.kind === "progress" &&
+1068:     homeNowMemory.kind === "continuity" &&
+1069:     homeNowMemory.moodDirection === "improving"
+1070:   ) {
+1071:     return {
+1072:       kind: "continuity" as const,
+1073:       source: "mood" as const,
+1074:       count: homeNowMemory.moodRecordCount,
+1075:     };
+1076:   }
+1077: 
+1078:   /**
+1079:    * Objetivos e Registo não recebem contexto histórico
+1080:    * artificial nesta fase.
+1081:    */
+1082:   return null;
+1083: })();
+1084: 
+1085: 
+1086: const handleHomeNowAction = () => {
+1087:   if (!homeNowAction) {
+1088:     return;
+1089:   }
+1090: 
+1091:   switch (homeNowAction.kind) {
+1092:     case "impulse":
+1093:       changeTab(3);
+
+--- linhas 2015-2054 ---
+2015:       </header>
+2016: 
+2017:       {/* Main Content Stage */}
+2018:       <main className="flex-1 pb-24 px-4 max-w-lg mx-auto w-full pt-4">
+2019: {currentTab === 0 && homeScreen === "home" && (
+2020:           <div
+2021:               key="main-menu"
+2022:               className="space-y-5"
+2023:             >
+2024:               {/* Interactive Amigo Panel */}
+2025:               <div className="space-y-4">
+2026: 
+2027: <ConfiaCompanionHome
+2028:   avatar={avatar}
+2029:   avatarCelebrating={avatarCelebrating}
+2030:   avatarMemoryMessage={avatarMemoryMessage}
+2031:   morningRating={morningRating}
+2032:   afternoonRating={afternoonRating}
+2033:   handlePetAvatar={handlePetAvatar}
+2034:   worldMood={worldMood}
+2035:   reactiveResult={homeReactiveResult}
+2036: />
+2037: 
+2038: {/* O teu espaço — navegação secundária premium */}
+2039: {homeScreen === "home" && (
+2040:   <section
+2041:     className="relative overflow-hidden rounded-[30px] border border-[#E8DDD7]/70 bg-gradient-to-br from-white via-[#FFFDFC] to-[#FFF6F1] shadow-[0_12px_32px_rgba(92,64,52,0.055)]"
+2042:     aria-label={t("homeSpace.title")}
+2043:   >
+2044:     {/* Cabeçalho */}
+2045:     <div className="relative px-5 pb-4 pt-5">
+2046:       <div
+2047:         aria-hidden="true"
+2048:         className="absolute left-5 top-0 h-px w-10 bg-[#E5A88B]/45"
+2049:       />
+2050:       <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+2051:         {t("homeSpace.title")}
+2052:       </p>
+2053: 
+2054:       <p className="mt-1 text-[11px] font-semibold text-slate-400">
+
+--- linhas 2280-2343 ---
+2280:               className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#E5A88B]/20 bg-[#FFF9F5]"
+2281:             >
+2282:               <span className="h-1.5 w-1.5 rounded-full bg-[#C97B5E]/70" />
+2283:             </div>
+2284: 
+2285:             <div className="min-w-0">
+2286:               <p className="text-[8px] font-black uppercase tracking-[0.14em] text-[#B79587]">
+2287:                 {t("dailyMoment.evolvingInsight.eyebrow")}
+2288:               </p>
+2289: 
+2290:               <p className="mt-0.5 text-[10px] font-bold leading-relaxed text-[#806D65]">
+2291:                 {/* CONFIA 5E.2 — CURIOSIDADE CONCRETA */}
+2292:                 {homeNowMemory?.kind === "impulseLearning" &&
+2293:                  homeNowMemory.need &&
+2294:                  homeNowMemory.needCount >= 2
+2295:                   ? t(
+2296:                       `dailyMoment.concreteInsight.impulse.${homeNowMemory.need}`
+2297:                     )
+2298:                   : homeNowMemory?.kind === "continuity" &&
+2299:                       homeNowMemory.repeatedNeed &&
+2300:                       homeNowMemory.repeatedNeedCount >= 2
+2301:                     ? t(
+2302:                         `dailyMoment.concreteInsight.impulse.${homeNowMemory.repeatedNeed}`
+2303:                       )
+2304:                     : homeNowMemory?.kind === "continuity" &&
+2305:                         homeNowMemory.repeatedCheckInNeed &&
+2306:                         homeNowMemory.repeatedCheckInNeedCount >= 2
+2307:                       ? t(
+2308:                           "dailyMoment.concreteInsight.checkIn"
+2309:                         )
+2310:                       : homeNowMemory?.kind === "continuity" &&
+2311:                           homeNowMemory.moodRecordCount >= 3 &&
+2312:                           homeNowMemory.moodDirection === "improving"
+2313:                         ? t(
+2314:                             "dailyMoment.concreteInsight.moodImproving"
+2315:                           )
+2316:                         : homeNowMemory?.kind === "continuity" &&
+2317:                             homeNowMemory.moodRecordCount >= 3 &&
+2318:                             homeNowMemory.moodDirection === "declining"
+2319:                           ? t(
+2320:                               "dailyMoment.concreteInsight.moodDeclining"
+2321:                             )
+2322:                           : homeNowMemory?.kind === "continuity" &&
+2323:                               homeNowMemory.moodRecordCount >= 3 &&
+2324:                               homeNowMemory.moodDirection === "stable"
+2325:                             ? t(
+2326:                                 "dailyMoment.concreteInsight.moodStable"
+2327:                               )
+2328:                             : dailyContext.dailyLearningLevel === "learned_impulse"
+2329:                               ? t("dailyMoment.evolvingInsight.learnedImpulse")
+2330:                               : dailyContext.dailyLearningLevel === "effective_impulse"
+2331:                                 ? t("dailyMoment.evolvingInsight.effectiveImpulse")
+2332:                                 : dailyContext.dailyLearningLevel === "repeated_signals"
+2333:                                   ? t("dailyMoment.evolvingInsight.repeatedSignals")
+2334:                                   : t("dailyMoment.evolvingInsight.early")}
+2335:               </p>
+2336:             </div>
+2337:           </div>
+2338:         )}
+2339: 
+2340:         {/* ======================================================
+2341:             CONFIA 5C — CONTINUIDADE DO REGRESSO
+2342: 
+2343:             Reconhece continuidade temporal confirmada entre
+
+--- linhas 2420-2503 ---
+2420:                 →
+2421:               </span>
+2422:             </button>
+2423:           </div>
+2424:         )}
+2425:       </div>
+2426:     </div>
+2427:   </section>
+2428: )}
+2429: 
+2430: {homeScreen === "home" && (
+2431:   <>
+2432:   {homeNowMemory?.kind === "impulseLearning" &&
+2433:   !homeNowAction && (
+2434:   <div className="mt-4 overflow-hidden rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC] shadow-[0_10px_30px_rgba(92,64,52,0.06)]">
+2435:     <div className="px-5 pt-5 pb-4">
+2436:       <div className="flex items-start gap-3">
+2437:         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/20 bg-white">
+2438:           <Sparkles
+2439:             size={18}
+2440:             strokeWidth={1.8}
+2441:             className="text-[#C97B5E]"
+2442:           />
+2443:         </div>
+2444: 
+2445:         <div className="min-w-0">
+2446:           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+2447:             {t("impulseLearning.eyebrow")}
+2448:           </p>
+2449: 
+2450:           <h3 className="mt-1 text-base font-black leading-tight text-[#4E3B36]">
+2451:             {t("impulseLearning.title")}
+2452:           </h3>
+2453: 
+2454:           <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-500">
+2455:             {t("impulseLearning.description", {
+2456:               count: homeNowMemory.effectiveCount,
+2457:               reduction:
+2458:                 homeNowMemory.averageReduction !== null
+2459:                   ? Math.round(
+2460:                       homeNowMemory.averageReduction * 10
+2461:                     ) / 10
+2462:                   : 0,
+2463:             })}
+2464:           </p>
+2465:         </div>
+2466:       </div>
+2467: 
+2468:       {homeNowMemory.need && (
+2469:         <div className="mt-4 flex items-center justify-between gap-3 rounded-[20px] border border-[#E8DDD7]/60 bg-white/80 px-4 py-3">
+2470:           <div>
+2471:             <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">
+2472:               {t("impulseLearning.patternLabel")}
+2473:             </p>
+2474: 
+2475:             <p className="mt-1 text-sm font-black text-[#4E3B36]">
+2476:               {t(
+2477:                 `impulsePremium.${homeNowMemory.need}Title`
+2478:               )}
+2479:             </p>
+2480:           </div>
+2481: 
+2482:           <div className="rounded-full bg-[#FFF3EC] px-3 py-1.5 text-[9px] font-black text-[#C97B5E]">
+2483:             {t("impulseLearning.observed", {
+2484:               count: homeNowMemory.needCount,
+2485:             })}
+2486:           </div>
+2487:         </div>
+2488:       )}
+2489: 
+2490:       <p className="mt-3 text-[10px] font-semibold leading-relaxed text-slate-400">
+2491:         {t("impulseLearning.disclaimer")}
+2492:       </p>
+2493:     </div>
+2494:   </div>
+2495: )}
+2496: 
+2497: {isFirstContact && (
+2498:   <section
+2499:     className={`relative mt-4 overflow-hidden rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC] p-5 shadow-[0_10px_28px_rgba(92,64,52,0.05)] ${
+2500:       homeNowAction ? "rounded-b-[22px]" : ""
+2501:     }`}
+2502:     aria-label={t("firstContactInsight.eyebrow")}
+2503:   >
+
+==============================================================================
+FIM DA DESCOBERTA A6.3
+==============================================================================
+
+APENAS LEITURA.
+Nenhum ficheiro foi alterado.

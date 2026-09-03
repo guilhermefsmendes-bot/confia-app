@@ -1,0 +1,111 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================
+    // PUBLICAÇÕES DA COMUNIDADE
+    // =========================
+    match /posts/{postId} {
+
+      // Utilizadores autenticados podem ler publicações
+      allow read: if request.auth != null;
+
+      // Utilizadores autenticados podem criar publicações
+      allow create: if request.auth != null
+        && request.resource.data.authorId == request.auth.uid;
+
+      // Utilizadores autenticados podem alterar apenas as reações
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'yellowLikes',
+            'greenLikes',
+            'redLikes',
+            'yellowLikedBy',
+            'greenLikedBy',
+            'redLikedBy'
+          ]);
+
+      // Apenas moderadores podem apagar publicações
+// O autor pode apagar a própria publicação.
+// Moderadores também podem apagar publicações.
+allow delete: if request.auth != null
+&& (
+  request.auth.uid == resource.data.authorId
+  || request.auth.token.moderator == true
+);
+    }
+
+
+    // =========================
+    // CHATS PRIVADOS
+    // =========================
+    match /chats/{chatId} {
+
+      // Só participantes podem ler a conversa
+      allow read: if request.auth != null
+        && request.auth.uid in resource.data.participants;
+
+      // Um utilizador autenticado pode iniciar uma conversa
+      allow create: if request.auth != null
+        && request.auth.uid in request.resource.data.participants
+        && request.resource.data.participants.size() == 2
+        && request.resource.data.postId is string
+        && request.resource.data.authorId ==
+          get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.authorId;
+
+      // Participantes podem atualizar apenas informações de estado
+      // da conversa.
+      allow update: if request.auth != null
+        && request.auth.uid in resource.data.participants
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'lastMessage',
+            'lastMessageAt'
+          ]);
+
+// Participantes podem apagar a conversa ao eliminar a conta
+allow delete: if request.auth != null
+&& request.auth.uid in resource.data.participants;
+
+      // =========================
+      // MENSAGENS DO CHAT
+      // =========================
+      match /messages/{messageId} {
+
+        // Só participantes podem ler mensagens
+        allow read: if request.auth != null
+          && request.auth.uid in
+            get(/databases/$(database)/documents/chats/$(chatId))
+              .data.participants;
+
+        // Só um participante autenticado pode enviar
+        // uma mensagem em seu próprio nome.
+        allow create: if request.auth != null
+          && request.resource.data.senderId == request.auth.uid
+          && request.auth.uid in
+            get(/databases/$(database)/documents/chats/$(chatId))
+              .data.participants
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 2000;
+
+        // Mensagens não podem ser alteradas
+        allow update: if false;
+
+// Participantes podem apagar mensagens ao eliminar a conta
+allow delete: if request.auth != null
+&& request.auth.uid ==
+get(/databases/$(database)/documents/chats/$(chatId)).data.participants[0]
+|| request.auth.uid ==
+get(/databases/$(database)/documents/chats/$(chatId)).data.participants[1]
+|| request.auth.token.moderator == true;
+
+
+
+
+      }
+    }
+  }
+}

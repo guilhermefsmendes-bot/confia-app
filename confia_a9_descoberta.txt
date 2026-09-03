@@ -1,0 +1,1259 @@
+============================================================================
+CONFIA — A9 — DESCOBERTA FINAL DO COMPANHEIRO
+============================================================================
+
+----------------------------------------------------------------------------
+1. HIERARQUIA DA FALA — COMPANION HOME
+----------------------------------------------------------------------------
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:130]
+  126:    * A criatura não volta a analisar dados.
+  127:    * Apenas traduz o resultado já produzido pelo
+  128:    * Reactive Engine.
+  129:    */
+  130:   const companionReaction = useMemo(() => {
+  131:     if (!reactiveResult) {
+  132:       return null;
+  133:     }
+  134: 
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:148]
+  144:    * Recebe a mesma ReactiveRecentMemory já construída
+  145:    * no Principal e transforma-a apenas numa possibilidade
+  146:    * de fala da criatura.
+  147:    */
+  148:   const companionRelationalMemory:
+  149:     CompanionRelationalMemoryResult | null =
+  150:       useMemo(
+  151:         () =>
+  152:           resolveCompanionRelationalMemory(
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:177]
+  173:   const canUseRelationalMemory =
+  174:     Boolean(companionRelationalMemory) &&
+  175:     (
+  176:       !companionReaction ||
+  177:       companionReaction.priority < 70
+  178:     );
+  179: 
+  180:   /**
+  181:    * A7.2
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:187]
+  183:    * A memória já foi escolhida pelo A6.
+  184:    * Aqui escolhemos apenas a forma linguística
+  185:    * dessa mesma memória.
+  186:    */
+  187:   const companionRelationalExpression =
+  188:     useMemo(
+  189:       () =>
+  190:         resolveCompanionRelationalExpression(
+  191:           companionRelationalMemory
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:211]
+  207:    *
+  208:    * Reações prioritárias >= 70 permanecem protegidas.
+  209:    */
+  210: 
+  211:   const companionRelationalAction =
+  212:     companionReaction &&
+  213:     companionReaction.priority < 70
+  214:       ? resolveCompanionRelationalAction(
+  215:           companionRelationalExpression?.kind ??
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:213]
+  209:    */
+  210: 
+  211:   const companionRelationalAction =
+  212:     companionReaction &&
+  213:     companionReaction.priority < 70
+  214:       ? resolveCompanionRelationalAction(
+  215:           companionRelationalExpression?.kind ??
+  216:             companionReaction.kind
+  217:         )
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:236]
+  232:    * - a memória
+  233:    * - a navegação
+  234:    */
+  235: 
+  236:   const companionRelationalNextStep =
+  237:     companionRelationalAction
+  238:       ? {
+  239:           target:
+  240:             companionRelationalAction.target,
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:246]
+  242:             companionRelationalAction.translationKey,
+  243:         }
+  244:       : null;
+  245: 
+  246:   const companionMessage = useMemo(() => {
+  247:     /**
+  248:      * A6.3 — HIERARQUIA DA VOZ
+  249:      *
+  250:      * 1. reação atual importante;
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:258]
+  254:      */
+  255: 
+  256:     if (
+  257:       companionReaction?.response?.translationKey &&
+  258:       companionReaction.priority >= 70
+  259:     ) {
+  260:       return t(
+  261:         companionReaction.response.translationKey
+  262:       );
+
+----------------------------------------------------------------------------
+2. BOTÃO / AÇÃO CONTEXTUAL
+----------------------------------------------------------------------------
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:34]
+   30:   afternoonRating?: number;
+   31:   handlePetAvatar: () => void;
+   32:   reactiveResult: ReactiveResult | null;
+   33:   relationalMemory: ReactiveRecentMemory | null;
+   34:   onCompanionAction: (
+   35:     target:
+   36:       | "impulse"
+   37:       | "patterns"
+   38:       | "progress"
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:77]
+   73:   afternoonRating,
+   74:   handlePetAvatar,
+   75:   reactiveResult,
+   76:   relationalMemory,
+   77:   onCompanionAction,
+   78:   worldMood,
+   79: }: ConfiaCompanionHomeProps) {
+   80:   const { t } = useTranslation();
+   81: 
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:240]
+  236:   const companionRelationalNextStep =
+  237:     companionRelationalAction
+  238:       ? {
+  239:           target:
+  240:             companionRelationalAction.target,
+  241:           translationKey:
+  242:             companionRelationalAction.translationKey,
+  243:         }
+  244:       : null;
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:242]
+  238:       ? {
+  239:           target:
+  240:             companionRelationalAction.target,
+  241:           translationKey:
+  242:             companionRelationalAction.translationKey,
+  243:         }
+  244:       : null;
+  245: 
+  246:   const companionMessage = useMemo(() => {
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:646]
+  642:             <div className="mt-3 flex justify-center">
+  643:               <button
+  644:                 type="button"
+  645:                 onClick={() =>
+  646:                   onCompanionAction(
+  647:                     companionRelationalAction.target
+  648:                   )
+  649:                 }
+  650:                 className="
+
+[src/components/Companheiro/ConfiaCompanionHome.tsx:647]
+  643:               <button
+  644:                 type="button"
+  645:                 onClick={() =>
+  646:                   onCompanionAction(
+  647:                     companionRelationalAction.target
+  648:                   )
+  649:                 }
+  650:                 className="
+  651:                   rounded-full
+
+----------------------------------------------------------------------------
+3. MEMÓRIA RELACIONAL
+----------------------------------------------------------------------------
+
+[src/data/reactive/companionRelationalMemory.ts:57]
+   54: 
+   55: 
+   56: export interface CompanionRelationalMemoryResult {
+   57:   kind: CompanionRelationalMemoryKind;
+   58: 
+   59:   /**
+   60:    * Quanto suporte factual existe para
+
+[src/data/reactive/companionRelationalMemory.ts:71]
+   68:    * Prioridade usada apenas para escolher
+   69:    * entre vários factos verdadeiros.
+   70:    */
+   71:   priority: number;
+   72: 
+   73:   /**
+   74:    * Chave preparada para a camada visual.
+
+[src/data/reactive/companionRelationalMemory.ts:124]
+  121:   translationKey: string;
+  122: }
+  123: 
+  124: export function resolveCompanionRelationalMemory(
+  125:   memory:
+  126:     | ReactiveRecentMemory
+  127:     | null
+
+[src/data/reactive/companionRelationalMemory.ts:157]
+  154:   ) {
+  155: 
+  156:     candidates.push({
+  157:       kind: "learned_impulse",
+  158: 
+  159:       strength:
+  160:         memory.effectiveImpulseNeedCount >= 3
+
+[src/data/reactive/companionRelationalMemory.ts:164]
+  161:           ? "strong"
+  162:           : "clear",
+  163: 
+  164:       priority: 100,
+  165: 
+  166:       translationKey:
+  167:         "companionRelationalMemory.learnedImpulse",
+
+[src/data/reactive/companionRelationalMemory.ts:199]
+  196:   ) {
+  197: 
+  198:     candidates.push({
+  199:       kind: "converging_signals",
+  200: 
+  201:       strength:
+  202:         memory.continuity.signalCount >= 3
+
+[src/data/reactive/companionRelationalMemory.ts:206]
+  203:           ? "strong"
+  204:           : "clear",
+  205: 
+  206:       priority: 90,
+  207: 
+  208:       translationKey:
+  209:         "companionRelationalMemory.convergingSignals",
+
+[src/data/reactive/companionRelationalMemory.ts:256]
+  253:     }
+  254: 
+  255:     candidates.push({
+  256:       kind: "effective_impulse",
+  257: 
+  258:       strength: "clear",
+  259: 
+
+[src/data/reactive/companionRelationalMemory.ts:260]
+  257: 
+  258:       strength: "clear",
+  259: 
+  260:       priority: 80,
+  261: 
+  262:       translationKey:
+  263:         "companionRelationalMemory.effectiveImpulse",
+
+[src/data/reactive/companionRelationalMemory.ts:285]
+  282:   ) {
+  283: 
+  284:     candidates.push({
+  285:       kind: "repeated_need",
+  286: 
+  287:       strength:
+  288:         memory.continuity
+
+[src/data/reactive/companionRelationalMemory.ts:293]
+  290:           ? "clear"
+  291:           : "soft",
+  292: 
+  293:       priority: 70,
+  294: 
+  295:       translationKey:
+  296:         "companionRelationalMemory.repeatedNeed",
+
+[src/data/reactive/companionRelationalMemory.ts:333]
+  330:     if (moodDirection === "improving") {
+  331: 
+  332:       candidates.push({
+  333:         kind: "mood_improving",
+  334: 
+  335:         strength: "clear",
+  336: 
+
+[src/data/reactive/companionRelationalMemory.ts:337]
+  334: 
+  335:         strength: "clear",
+  336: 
+  337:         priority: 60,
+  338: 
+  339:         translationKey:
+  340:           "companionRelationalMemory.moodImproving",
+
+[src/data/reactive/companionRelationalMemory.ts:353]
+  350:     if (moodDirection === "declining") {
+  351: 
+  352:       candidates.push({
+  353:         kind: "mood_declining",
+  354: 
+  355:         strength: "clear",
+  356: 
+
+[src/data/reactive/companionRelationalMemory.ts:357]
+  354: 
+  355:         strength: "clear",
+  356: 
+  357:         priority: 60,
+  358: 
+  359:         translationKey:
+  360:           "companionRelationalMemory.moodDeclining",
+
+[src/data/reactive/companionRelationalMemory.ts:373]
+  370:     if (moodDirection === "stable") {
+  371: 
+  372:       candidates.push({
+  373:         kind: "mood_stable",
+  374: 
+  375:         strength: "soft",
+  376: 
+
+[src/data/reactive/companionRelationalMemory.ts:377]
+  374: 
+  375:         strength: "soft",
+  376: 
+  377:         priority: 50,
+  378: 
+  379:         translationKey:
+  380:           "companionRelationalMemory.moodStable",
+
+[src/data/reactive/companionRelationalMemory.ts:408]
+  405:   ) {
+  406: 
+  407:     candidates.push({
+  408:       kind: "consistency",
+  409: 
+  410:       strength:
+  411:         memory.activeDaysLast7 >= 7
+
+[src/data/reactive/companionRelationalMemory.ts:415]
+  412:           ? "clear"
+  413:           : "soft",
+  414: 
+  415:       priority: 30,
+  416: 
+  417:       translationKey:
+  418:         "companionRelationalMemory.consistency",
+
+[src/data/reactive/companionRelationalMemory.ts:442]
+  439: 
+  440:   candidates.sort(
+  441:     (a, b) =>
+  442:       b.priority - a.priority
+  443:   );
+  444: 
+  445: 
+
+[src/data/reactive/companionRelationalMemory.ts:472]
+  469:  *
+  470:  * A mesma evidência produz sempre a mesma variante.
+  471:  */
+  472: export function resolveCompanionRelationalExpression(
+  473:   memory:
+  474:     | CompanionRelationalMemoryResult
+  475:     | null
+
+[src/data/reactive/companionRelationalMemory.ts:555]
+  552: 
+  553: 
+  554: 
+  555: export function resolveCompanionRelationalAction(
+  556:   kind: string | undefined
+  557: ): CompanionRelationalAction | null {
+  558:   switch (kind) {
+
+[src/data/reactive/companionRelationalMemory.ts:556]
+  553: 
+  554: 
+  555: export function resolveCompanionRelationalAction(
+  556:   kind: string | undefined
+  557: ): CompanionRelationalAction | null {
+  558:   switch (kind) {
+  559:     case "learned_impulse":
+
+----------------------------------------------------------------------------
+4. AVATAR — ACESSÓRIOS E REAÇÃO
+----------------------------------------------------------------------------
+
+[src/components/Avatar.tsx:6]
+    3: import { motion } from 'motion/react';
+    4: import { ShieldCheck, Flame, Sparkles, MessageCircleCode } from 'lucide-react';
+    5: import { AvatarState } from '../types';
+    6: import ConfiaCreature, { type ConfiaCreatureState } from "./Companheiro/ConfiaCreature";
+    7: import type {
+    8:   CompanionReactionState,
+    9: } from "../data/reactive/companionReactionEngine";
+
+[src/components/Avatar.tsx:18]
+   15:   levelUpTrigger?: boolean;
+   16:   moodRating?: number;
+   17:   memoryMessage?: string;
+   18:   companionWorldMood?: "growing" | "settling" | "discovering" | "neutral";
+   19:   reactionState?: CompanionReactionState;
+   20:   equippedAccessoryIds?: string[];
+   21: }
+
+[src/components/Avatar.tsx:19]
+   16:   moodRating?: number;
+   17:   memoryMessage?: string;
+   18:   companionWorldMood?: "growing" | "settling" | "discovering" | "neutral";
+   19:   reactionState?: CompanionReactionState;
+   20:   equippedAccessoryIds?: string[];
+   21: }
+   22: const AvatarComponent: React.FC<AvatarProps> = ({
+
+[src/components/Avatar.tsx:20]
+   17:   memoryMessage?: string;
+   18:   companionWorldMood?: "growing" | "settling" | "discovering" | "neutral";
+   19:   reactionState?: CompanionReactionState;
+   20:   equippedAccessoryIds?: string[];
+   21: }
+   22: const AvatarComponent: React.FC<AvatarProps> = ({
+   23:   avatar,
+
+[src/components/Avatar.tsx:30]
+   27:   levelUpTrigger,
+   28:   moodRating,
+   29:   memoryMessage,
+   30:   companionWorldMood = "neutral",
+   31:   reactionState,
+   32:   equippedAccessoryIds = []
+   33: }) => {
+
+[src/components/Avatar.tsx:31]
+   28:   moodRating,
+   29:   memoryMessage,
+   30:   companionWorldMood = "neutral",
+   31:   reactionState,
+   32:   equippedAccessoryIds = []
+   33: }) => {
+   34: 
+
+[src/components/Avatar.tsx:32]
+   29:   memoryMessage,
+   30:   companionWorldMood = "neutral",
+   31:   reactionState,
+   32:   equippedAccessoryIds = []
+   33: }) => {
+   34: 
+   35: 
+
+[src/components/Avatar.tsx:47]
+   44:     setIsJumping(true);
+   45:     onPet();
+   46: 
+   47:     setTimeout(() => {
+   48:       setIsJumping(false);
+   49:     }, 800);
+   50: 
+
+[src/components/Avatar.tsx:123]
+  120:     avatar.level === 9
+  121:   );
+  122: 
+  123: const creatureState: ConfiaCreatureState =
+  124:     levelUpTrigger || celebrating
+  125:       ? "celebrating"
+  126:       : reactionState ??
+
+[src/components/Avatar.tsx:126]
+  123: const creatureState: ConfiaCreatureState =
+  124:     levelUpTrigger || celebrating
+  125:       ? "celebrating"
+  126:       : reactionState ??
+  127:         (
+  128:           moodRating !== undefined && moodRating <= 3
+  129:             ? "supportive"
+
+[src/components/Avatar.tsx:130]
+  127:         (
+  128:           moodRating !== undefined && moodRating <= 3
+  129:             ? "supportive"
+  130:             : companionWorldMood === "discovering"
+  131:               ? "curious"
+  132:               : companionWorldMood === "growing"
+  133:                 ? "welcoming"
+
+[src/components/Avatar.tsx:132]
+  129:             ? "supportive"
+  130:             : companionWorldMood === "discovering"
+  131:               ? "curious"
+  132:               : companionWorldMood === "growing"
+  133:                 ? "welcoming"
+  134:                 : "neutral"
+  135:         );
+
+[src/components/Avatar.tsx:215]
+  212:   )}
+  213: 
+  214:   {/* A4.4 — halo de evolução */}
+  215:   <ConfiaCreature
+  216:     level={avatar.level}
+  217:     state={creatureState}
+  218:     reacting={isJumping}
+
+[src/components/Avatar.tsx:219]
+  216:     level={avatar.level}
+  217:     state={creatureState}
+  218:     reacting={isJumping}
+  219:     equippedAccessoryIds={equippedAccessoryIds}
+  220:   />
+  221: </motion.div>
+  222: 
+
+----------------------------------------------------------------------------
+5. CONFIA CREATURE — ACESSÓRIOS
+----------------------------------------------------------------------------
+
+[src/components/Companheiro/ConfiaCreature.tsx:14]
+   11:   level: number;
+   12:   state?: ConfiaCreatureState;
+   13:   reacting?: boolean;
+   14:   equippedAccessoryIds?: string[];
+   15: }
+   16: 
+   17: /**
+
+[src/components/Companheiro/ConfiaCreature.tsx:44]
+   41:   level,
+   42:   state = "neutral",
+   43:   reacting = false,
+   44:   equippedAccessoryIds = [],
+   45: }: ConfiaCreatureProps) {
+   46:   const safeLevel = Math.max(
+   47:     1,
+
+[src/components/Companheiro/ConfiaCreature.tsx:78]
+   75:    * Itens legacy/troféus permanecem invisíveis aqui.
+   76:    */
+   77:   const hasCreamBow =
+   78:     equippedAccessoryIds.includes(
+   79:       "confia_bow_cream"
+   80:     );
+   81: 
+
+[src/components/Companheiro/ConfiaCreature.tsx:79]
+   76:    */
+   77:   const hasCreamBow =
+   78:     equippedAccessoryIds.includes(
+   79:       "confia_bow_cream"
+   80:     );
+   81: 
+   82:   const hasTerraScarf =
+
+[src/components/Companheiro/ConfiaCreature.tsx:83]
+   80:     );
+   81: 
+   82:   const hasTerraScarf =
+   83:     equippedAccessoryIds.includes(
+   84:       "confia_scarf_terra"
+   85:     );
+   86: 
+
+[src/components/Companheiro/ConfiaCreature.tsx:84]
+   81: 
+   82:   const hasTerraScarf =
+   83:     equippedAccessoryIds.includes(
+   84:       "confia_scarf_terra"
+   85:     );
+   86: 
+   87:   const hasGoldCharm =
+
+[src/components/Companheiro/ConfiaCreature.tsx:88]
+   85:     );
+   86: 
+   87:   const hasGoldCharm =
+   88:     equippedAccessoryIds.includes(
+   89:       "confia_charm_gold"
+   90:     );
+   91: 
+
+[src/components/Companheiro/ConfiaCreature.tsx:89]
+   86: 
+   87:   const hasGoldCharm =
+   88:     equippedAccessoryIds.includes(
+   89:       "confia_charm_gold"
+   90:     );
+   91: 
+   92:   const bodyScale =
+
+----------------------------------------------------------------------------
+6. APP — INTEGRAÇÃO DO COMPANHEIRO
+----------------------------------------------------------------------------
+
+[src/App.tsx:463]
+  458:  * A6.3 — memória relacional do companheiro.
+  459:  *
+  460:  * Reutiliza o mesmo modelo de memória do sistema reativo.
+  461:  * Não persiste nada e não cria uma segunda fonte de verdade.
+  462:  */
+  463: const homeCompanionRelationalMemory = (() => {
+  464:   if (
+  465:     currentTab !== 0 ||
+  466:     homeScreen !== "home"
+  467:   ) {
+  468:     return null;
+
+[src/App.tsx:2050]
+ 2045:             >
+ 2046:               {/* Interactive Amigo Panel */}
+ 2047:               <div className="space-y-4">
+ 2048: 
+ 2049: 
+ 2050: const handleCompanionAction = (
+ 2051:   target:
+ 2052:     | "impulse"
+ 2053:     | "patterns"
+ 2054:     | "progress"
+ 2055:     | "record"
+
+[src/App.tsx:2081]
+ 2076:     setHomeScreen("home");
+ 2077:     setCurrentTab(0);
+ 2078:   }
+ 2079: };
+ 2080: 
+ 2081: <ConfiaCompanionHome
+ 2082:   avatar={avatar}
+ 2083:   avatarCelebrating={avatarCelebrating}
+ 2084:   avatarMemoryMessage={avatarMemoryMessage}
+ 2085:   morningRating={morningRating}
+ 2086:   afternoonRating={afternoonRating}
+
+[src/App.tsx:2090]
+ 2085:   morningRating={morningRating}
+ 2086:   afternoonRating={afternoonRating}
+ 2087:   handlePetAvatar={handlePetAvatar}
+ 2088:   worldMood={worldMood}
+ 2089:   reactiveResult={homeReactiveResult}
+ 2090:   relationalMemory={homeCompanionRelationalMemory}
+ 2091: 
+ 2092:   onCompanionAction={handleCompanionAction}
+ 2093: />
+ 2094: 
+ 2095: {/* O teu espaço — navegação secundária premium */}
+
+[src/App.tsx:2092]
+ 2087:   handlePetAvatar={handlePetAvatar}
+ 2088:   worldMood={worldMood}
+ 2089:   reactiveResult={homeReactiveResult}
+ 2090:   relationalMemory={homeCompanionRelationalMemory}
+ 2091: 
+ 2092:   onCompanionAction={handleCompanionAction}
+ 2093: />
+ 2094: 
+ 2095: {/* O teu espaço — navegação secundária premium */}
+ 2096: {homeScreen === "home" && (
+ 2097:   <section
+
+============================================================================
+7. PROCURAR ELEMENTOS POTENCIALMENTE REPETITIVOS
+============================================================================
+
+avatarMemoryMessage:
+    3x  src/App.tsx.backup_home_botoes
+    3x  src/App.tsx.motion-backup
+    3x  src/App.tsx.backup_botoes_menu
+    3x  src/App.tsx.backup_i18n_definicoes_v2
+    3x  src/App.tsx.backup_companion_avatar
+    3x  src/App.tsx
+    3x  src/App.tsx.backup_community_modal
+    3x  src/App.tsx.backup_primeiro_separador
+    3x  src/App.tsx.backup_titulo_definicoes
+    3x  src/App.tsx.backup_navegacao_home
+    3x  src/App.tsx.backup_i18n_definicoes
+    3x  src/App.tsx.backup_companion_base_20260814_082150
+    3x  src/App.tsx.backup_reset_homescreen
+    2x  src/components/HomeWorld.tsx
+    2x  src/components/HomeWorld.tsx.bak
+    2x  src/components/HomeWorld.tsx.performance2-backup
+    2x  src/components/HomeWorld.tsx.ground-backup
+    2x  src/components/HomeWorld.tsx.before-cleanup
+    2x  src/components/HomeWorld.tsx.premium-backup
+    2x  src/components/HomeWorld.tsx.backup
+    2x  src/components/HomeWorld.tsx.performance-backup
+    2x  src/components/HomeWorld.tsx.lighting-backup
+    2x  src/components/HomeWorld.tsx.memo-backup
+    2x  src/components/HomeWorld.tsx.water-backup
+    7x  src/components/Companheiro/ConfiaCompanionHome.tsx
+
+avatarWelcome:
+    1x  src/locales/pt.json.bak
+    1x  src/locales/pt_backup_erro.json
+    1x  src/locales/en_base_pt.json
+    1x  src/locales/pt.json
+    1x  src/locales/es.json.backup_definicoes
+    1x  src/locales/es_corrompido.json
+    1x  src/locales/fr.json.backup_progresso
+    1x  src/locales/en.json.backup_community_modal
+    1x  src/locales/fr.json
+    1x  src/locales/fr.json.corrupt
+    1x  src/locales/es.json.backup_objectives_20260814_090308
+    1x  src/locales/en_old.json
+    1x  src/locales/es.json.backup_community_modal
+    1x  src/locales/pt.json.backup_definicoes
+    1x  src/locales/en.json.backup_definicoes
+    1x  src/locales/en.json.backup_progresso
+    1x  src/locales/fr_base_pt.json
+    1x  src/locales/pt.json.backup_objectives_20260814_090308
+    1x  src/locales/es_old.json
+    1x  src/locales/pt_corrompido_patternsNew.json
+    1x  src/locales/pt.json.backup_community_modal
+    1x  src/locales/es_base_pt.json
+    1x  src/locales/en.json.corrupt
+    1x  src/locales/es.json
+    1x  src/locales/fr_corrompido.json
+    1x  src/locales/en_corrompido.json
+    1x  src/locales/pt_old.json
+    1x  src/locales/en_pt_base.json
+    1x  src/locales/pt_corrompido_backup.json
+    1x  src/locales/fr.json.backup_community_modal
+    1x  src/locales/en.json
+    1x  src/locales/fr.json.backup_objectives_20260814_090308
+    1x  src/locales/pt.json.backup_progresso
+    1x  src/locales/fr_before_manual_fix.json
+    1x  src/locales/en.json.backup_objectives_20260814_090308
+    1x  src/locales/es.json.backup_progresso
+    1x  src/locales/fr_old.json
+    1x  src/locales/fr.json.backup_definicoes
+    1x  src/locales/es.json.corrupt
+    2x  src/components/Avatar.tsx.performance-backup
+    2x  src/components/Avatar.tsx.memo-backup
+    2x  src/components/Avatar.tsx.performance2-backup
+    2x  src/components/Avatar.tsx.export-backup
+    2x  src/components/Avatar.tsx.backup_companion_avatar
+    1x  src/locales/backup_before_patterns_fix/pt_backup_erro.json
+    1x  src/locales/backup_before_patterns_fix/en_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/pt.json
+    1x  src/locales/backup_before_patterns_fix/es_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/fr.json
+    1x  src/locales/backup_before_patterns_fix/en_old.json
+    1x  src/locales/backup_before_patterns_fix/fr_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es_old.json
+    1x  src/locales/backup_before_patterns_fix/es_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es.json
+    1x  src/locales/backup_before_patterns_fix/fr_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/en_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/pt_old.json
+    1x  src/locales/backup_before_patterns_fix/en_pt_base.json
+    1x  src/locales/backup_before_patterns_fix/pt_corrompido_backup.json
+    1x  src/locales/backup_before_patterns_fix/en.json
+    1x  src/locales/backup_before_patterns_fix/fr_old.json
+    1x  src/components/Companheiro/ConfiaCompanionHome.tsx
+
+avatarImprovement:
+    1x  src/App.tsx.backup_home_botoes
+    1x  src/App.tsx.motion-backup
+    1x  src/App.tsx.backup_botoes_menu
+    1x  src/App.tsx.backup_i18n_definicoes_v2
+    1x  src/App.tsx.backup_companion_avatar
+    1x  src/App.tsx
+    1x  src/App.tsx.backup_community_modal
+    1x  src/App.tsx.backup_primeiro_separador
+    1x  src/App.tsx.backup_titulo_definicoes
+    1x  src/App.tsx.backup_navegacao_home
+    1x  src/App.tsx.backup_i18n_definicoes
+    1x  src/App.tsx.backup_companion_base_20260814_082150
+    1x  src/App.tsx.backup_reset_homescreen
+    1x  src/locales/pt.json.bak
+    1x  src/locales/pt_backup_erro.json
+    1x  src/locales/en_base_pt.json
+    1x  src/locales/pt.json
+    1x  src/locales/es.json.backup_definicoes
+    1x  src/locales/es_corrompido.json
+    1x  src/locales/fr.json.backup_progresso
+    1x  src/locales/en.json.backup_community_modal
+    1x  src/locales/fr.json
+    1x  src/locales/fr.json.corrupt
+    1x  src/locales/es.json.backup_objectives_20260814_090308
+    1x  src/locales/en_old.json
+    1x  src/locales/es.json.backup_community_modal
+    1x  src/locales/pt.json.backup_definicoes
+    1x  src/locales/en.json.backup_definicoes
+    1x  src/locales/en.json.backup_progresso
+    1x  src/locales/fr_base_pt.json
+    1x  src/locales/pt.json.backup_objectives_20260814_090308
+    1x  src/locales/es_old.json
+    1x  src/locales/pt_corrompido_patternsNew.json
+    1x  src/locales/pt.json.backup_community_modal
+    1x  src/locales/es_base_pt.json
+    1x  src/locales/en.json.corrupt
+    1x  src/locales/es.json
+    1x  src/locales/fr_corrompido.json
+    1x  src/locales/en_corrompido.json
+    1x  src/locales/pt_old.json
+    1x  src/locales/en_pt_base.json
+    1x  src/locales/pt_corrompido_backup.json
+    1x  src/locales/fr.json.backup_community_modal
+    1x  src/locales/en.json
+    1x  src/locales/fr.json.backup_objectives_20260814_090308
+    1x  src/locales/pt.json.backup_progresso
+    1x  src/locales/fr_before_manual_fix.json
+    1x  src/locales/en.json.backup_objectives_20260814_090308
+    1x  src/locales/es.json.backup_progresso
+    1x  src/locales/fr_old.json
+    1x  src/locales/fr.json.backup_definicoes
+    1x  src/locales/es.json.corrupt
+    1x  src/locales/backup_before_patterns_fix/pt_backup_erro.json
+    1x  src/locales/backup_before_patterns_fix/en_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/pt.json
+    1x  src/locales/backup_before_patterns_fix/es_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/fr.json
+    1x  src/locales/backup_before_patterns_fix/en_old.json
+    1x  src/locales/backup_before_patterns_fix/fr_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es_old.json
+    1x  src/locales/backup_before_patterns_fix/es_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es.json
+    1x  src/locales/backup_before_patterns_fix/fr_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/en_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/pt_old.json
+    1x  src/locales/backup_before_patterns_fix/en_pt_base.json
+    1x  src/locales/backup_before_patterns_fix/pt_corrompido_backup.json
+    1x  src/locales/backup_before_patterns_fix/en.json
+    1x  src/locales/backup_before_patterns_fix/fr_old.json
+
+avatarHardDay:
+    1x  src/App.tsx.backup_home_botoes
+    1x  src/App.tsx.motion-backup
+    1x  src/App.tsx.backup_botoes_menu
+    1x  src/App.tsx.backup_i18n_definicoes_v2
+    1x  src/App.tsx.backup_companion_avatar
+    1x  src/App.tsx
+    1x  src/App.tsx.backup_community_modal
+    1x  src/App.tsx.backup_primeiro_separador
+    1x  src/App.tsx.backup_titulo_definicoes
+    1x  src/App.tsx.backup_navegacao_home
+    1x  src/App.tsx.backup_i18n_definicoes
+    1x  src/App.tsx.backup_companion_base_20260814_082150
+    1x  src/App.tsx.backup_reset_homescreen
+    1x  src/locales/pt.json.bak
+    1x  src/locales/pt_backup_erro.json
+    1x  src/locales/en_base_pt.json
+    1x  src/locales/pt.json
+    1x  src/locales/es.json.backup_definicoes
+    1x  src/locales/es_corrompido.json
+    1x  src/locales/fr.json.backup_progresso
+    1x  src/locales/en.json.backup_community_modal
+    1x  src/locales/fr.json
+    1x  src/locales/fr.json.corrupt
+    1x  src/locales/es.json.backup_objectives_20260814_090308
+    1x  src/locales/en_old.json
+    1x  src/locales/es.json.backup_community_modal
+    1x  src/locales/pt.json.backup_definicoes
+    1x  src/locales/en.json.backup_definicoes
+    1x  src/locales/en.json.backup_progresso
+    1x  src/locales/fr_base_pt.json
+    1x  src/locales/pt.json.backup_objectives_20260814_090308
+    1x  src/locales/es_old.json
+    1x  src/locales/pt_corrompido_patternsNew.json
+    1x  src/locales/pt.json.backup_community_modal
+    1x  src/locales/es_base_pt.json
+    1x  src/locales/en.json.corrupt
+    1x  src/locales/es.json
+    1x  src/locales/fr_corrompido.json
+    1x  src/locales/en_corrompido.json
+    1x  src/locales/pt_old.json
+    1x  src/locales/en_pt_base.json
+    1x  src/locales/pt_corrompido_backup.json
+    1x  src/locales/fr.json.backup_community_modal
+    1x  src/locales/en.json
+    1x  src/locales/fr.json.backup_objectives_20260814_090308
+    1x  src/locales/pt.json.backup_progresso
+    1x  src/locales/fr_before_manual_fix.json
+    1x  src/locales/en.json.backup_objectives_20260814_090308
+    1x  src/locales/es.json.backup_progresso
+    1x  src/locales/fr_old.json
+    1x  src/locales/fr.json.backup_definicoes
+    1x  src/locales/es.json.corrupt
+    1x  src/locales/backup_before_patterns_fix/pt_backup_erro.json
+    1x  src/locales/backup_before_patterns_fix/en_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/pt.json
+    1x  src/locales/backup_before_patterns_fix/es_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/fr.json
+    1x  src/locales/backup_before_patterns_fix/en_old.json
+    1x  src/locales/backup_before_patterns_fix/fr_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es_old.json
+    1x  src/locales/backup_before_patterns_fix/es_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es.json
+    1x  src/locales/backup_before_patterns_fix/fr_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/en_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/pt_old.json
+    1x  src/locales/backup_before_patterns_fix/en_pt_base.json
+    1x  src/locales/backup_before_patterns_fix/pt_corrompido_backup.json
+    1x  src/locales/backup_before_patterns_fix/en.json
+    1x  src/locales/backup_before_patterns_fix/fr_old.json
+
+avatarLowMood:
+    1x  src/locales/pt.json.bak
+    1x  src/locales/pt_backup_erro.json
+    1x  src/locales/en_base_pt.json
+    1x  src/locales/pt.json
+    1x  src/locales/es.json.backup_definicoes
+    1x  src/locales/es_corrompido.json
+    1x  src/locales/fr.json.backup_progresso
+    1x  src/locales/en.json.backup_community_modal
+    1x  src/locales/fr.json
+    1x  src/locales/fr.json.corrupt
+    1x  src/locales/es.json.backup_objectives_20260814_090308
+    1x  src/locales/en_old.json
+    1x  src/locales/es.json.backup_community_modal
+    1x  src/locales/pt.json.backup_definicoes
+    1x  src/locales/en.json.backup_definicoes
+    1x  src/locales/en.json.backup_progresso
+    1x  src/locales/fr_base_pt.json
+    1x  src/locales/pt.json.backup_objectives_20260814_090308
+    1x  src/locales/es_old.json
+    1x  src/locales/pt_corrompido_patternsNew.json
+    1x  src/locales/pt.json.backup_community_modal
+    1x  src/locales/es_base_pt.json
+    1x  src/locales/en.json.corrupt
+    1x  src/locales/es.json
+    1x  src/locales/fr_corrompido.json
+    1x  src/locales/en_corrompido.json
+    1x  src/locales/pt_old.json
+    1x  src/locales/en_pt_base.json
+    1x  src/locales/pt_corrompido_backup.json
+    1x  src/locales/fr.json.backup_community_modal
+    1x  src/locales/en.json
+    1x  src/locales/fr.json.backup_objectives_20260814_090308
+    1x  src/locales/pt.json.backup_progresso
+    1x  src/locales/fr_before_manual_fix.json
+    1x  src/locales/en.json.backup_objectives_20260814_090308
+    1x  src/locales/es.json.backup_progresso
+    1x  src/locales/fr_old.json
+    1x  src/locales/fr.json.backup_definicoes
+    1x  src/locales/es.json.corrupt
+    1x  src/components/Avatar.tsx.performance-backup
+    1x  src/components/Avatar.tsx.memo-backup
+    1x  src/components/Avatar.tsx.performance2-backup
+    1x  src/components/Avatar.tsx.export-backup
+    1x  src/components/Avatar.tsx.backup_companion_avatar
+    1x  src/locales/backup_before_patterns_fix/pt_backup_erro.json
+    1x  src/locales/backup_before_patterns_fix/en_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/pt.json
+    1x  src/locales/backup_before_patterns_fix/es_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/fr.json
+    1x  src/locales/backup_before_patterns_fix/en_old.json
+    1x  src/locales/backup_before_patterns_fix/fr_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es_old.json
+    1x  src/locales/backup_before_patterns_fix/es_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es.json
+    1x  src/locales/backup_before_patterns_fix/fr_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/en_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/pt_old.json
+    1x  src/locales/backup_before_patterns_fix/en_pt_base.json
+    1x  src/locales/backup_before_patterns_fix/pt_corrompido_backup.json
+    1x  src/locales/backup_before_patterns_fix/en.json
+    1x  src/locales/backup_before_patterns_fix/fr_old.json
+    1x  src/components/Companheiro/ConfiaCompanionHome.tsx
+
+avatarHighMood:
+    1x  src/locales/pt.json.bak
+    1x  src/locales/pt_backup_erro.json
+    1x  src/locales/en_base_pt.json
+    1x  src/locales/pt.json
+    1x  src/locales/es.json.backup_definicoes
+    1x  src/locales/es_corrompido.json
+    1x  src/locales/fr.json.backup_progresso
+    1x  src/locales/en.json.backup_community_modal
+    1x  src/locales/fr.json
+    1x  src/locales/fr.json.corrupt
+    1x  src/locales/es.json.backup_objectives_20260814_090308
+    1x  src/locales/en_old.json
+    1x  src/locales/es.json.backup_community_modal
+    1x  src/locales/pt.json.backup_definicoes
+    1x  src/locales/en.json.backup_definicoes
+    1x  src/locales/en.json.backup_progresso
+    1x  src/locales/fr_base_pt.json
+    1x  src/locales/pt.json.backup_objectives_20260814_090308
+    1x  src/locales/es_old.json
+    1x  src/locales/pt_corrompido_patternsNew.json
+    1x  src/locales/pt.json.backup_community_modal
+    1x  src/locales/es_base_pt.json
+    1x  src/locales/en.json.corrupt
+    1x  src/locales/es.json
+    1x  src/locales/fr_corrompido.json
+    1x  src/locales/en_corrompido.json
+    1x  src/locales/pt_old.json
+    1x  src/locales/en_pt_base.json
+    1x  src/locales/pt_corrompido_backup.json
+    1x  src/locales/fr.json.backup_community_modal
+    1x  src/locales/en.json
+    1x  src/locales/fr.json.backup_objectives_20260814_090308
+    1x  src/locales/pt.json.backup_progresso
+    1x  src/locales/fr_before_manual_fix.json
+    1x  src/locales/en.json.backup_objectives_20260814_090308
+    1x  src/locales/es.json.backup_progresso
+    1x  src/locales/fr_old.json
+    1x  src/locales/fr.json.backup_definicoes
+    1x  src/locales/es.json.corrupt
+    1x  src/components/Avatar.tsx.performance-backup
+    1x  src/components/Avatar.tsx.memo-backup
+    1x  src/components/Avatar.tsx.performance2-backup
+    1x  src/components/Avatar.tsx.export-backup
+    1x  src/components/Avatar.tsx.backup_companion_avatar
+    1x  src/locales/backup_before_patterns_fix/pt_backup_erro.json
+    1x  src/locales/backup_before_patterns_fix/en_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/pt.json
+    1x  src/locales/backup_before_patterns_fix/es_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/fr.json
+    1x  src/locales/backup_before_patterns_fix/en_old.json
+    1x  src/locales/backup_before_patterns_fix/fr_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es_old.json
+    1x  src/locales/backup_before_patterns_fix/es_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es.json
+    1x  src/locales/backup_before_patterns_fix/fr_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/en_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/pt_old.json
+    1x  src/locales/backup_before_patterns_fix/en_pt_base.json
+    1x  src/locales/backup_before_patterns_fix/pt_corrompido_backup.json
+    1x  src/locales/backup_before_patterns_fix/en.json
+    1x  src/locales/backup_before_patterns_fix/fr_old.json
+    1x  src/components/Companheiro/ConfiaCompanionHome.tsx
+
+avatarStageMessage1:
+    2x  src/locales/pt.json.bak
+    2x  src/locales/pt_backup_erro.json
+    2x  src/locales/en_base_pt.json
+    2x  src/locales/pt.json
+    2x  src/locales/es.json.backup_definicoes
+    2x  src/locales/es_corrompido.json
+    2x  src/locales/fr.json.backup_progresso
+    2x  src/locales/en.json.backup_community_modal
+    2x  src/locales/fr.json
+    2x  src/locales/fr.json.corrupt
+    2x  src/locales/es.json.backup_objectives_20260814_090308
+    2x  src/locales/en_old.json
+    2x  src/locales/es.json.backup_community_modal
+    2x  src/locales/pt.json.backup_definicoes
+    2x  src/locales/en.json.backup_definicoes
+    2x  src/locales/en.json.backup_progresso
+    2x  src/locales/fr_base_pt.json
+    2x  src/locales/pt.json.backup_objectives_20260814_090308
+    2x  src/locales/es_old.json
+    2x  src/locales/pt_corrompido_patternsNew.json
+    2x  src/locales/pt.json.backup_community_modal
+    2x  src/locales/es_base_pt.json
+    2x  src/locales/en.json.corrupt
+    2x  src/locales/es.json
+    2x  src/locales/fr_corrompido.json
+    2x  src/locales/en_corrompido.json
+    2x  src/locales/pt_old.json
+    2x  src/locales/en_pt_base.json
+    2x  src/locales/pt_corrompido_backup.json
+    2x  src/locales/fr.json.backup_community_modal
+    2x  src/locales/en.json
+    2x  src/locales/fr.json.backup_objectives_20260814_090308
+    2x  src/locales/pt.json.backup_progresso
+    2x  src/locales/fr_before_manual_fix.json
+    2x  src/locales/en.json.backup_objectives_20260814_090308
+    2x  src/locales/es.json.backup_progresso
+    2x  src/locales/fr_old.json
+    2x  src/locales/fr.json.backup_definicoes
+    2x  src/locales/es.json.corrupt
+    2x  src/components/Avatar.tsx.performance-backup
+    2x  src/components/Avatar.tsx.memo-backup
+    2x  src/components/Avatar.tsx.performance2-backup
+    2x  src/components/Avatar.tsx.export-backup
+    2x  src/components/Avatar.tsx.backup_companion_avatar
+    2x  src/locales/backup_before_patterns_fix/pt_backup_erro.json
+    2x  src/locales/backup_before_patterns_fix/en_base_pt.json
+    2x  src/locales/backup_before_patterns_fix/pt.json
+    2x  src/locales/backup_before_patterns_fix/es_corrompido.json
+    2x  src/locales/backup_before_patterns_fix/fr.json
+    2x  src/locales/backup_before_patterns_fix/en_old.json
+    2x  src/locales/backup_before_patterns_fix/fr_base_pt.json
+    2x  src/locales/backup_before_patterns_fix/es_old.json
+    2x  src/locales/backup_before_patterns_fix/es_base_pt.json
+    2x  src/locales/backup_before_patterns_fix/es.json
+    2x  src/locales/backup_before_patterns_fix/fr_corrompido.json
+    2x  src/locales/backup_before_patterns_fix/en_corrompido.json
+    2x  src/locales/backup_before_patterns_fix/pt_old.json
+    2x  src/locales/backup_before_patterns_fix/en_pt_base.json
+    2x  src/locales/backup_before_patterns_fix/pt_corrompido_backup.json
+    2x  src/locales/backup_before_patterns_fix/en.json
+    2x  src/locales/backup_before_patterns_fix/fr_old.json
+    2x  src/components/Companheiro/ConfiaCompanionHome.tsx
+
+avatarStageMessage5:
+    1x  src/locales/pt.json.bak
+    1x  src/locales/pt_backup_erro.json
+    1x  src/locales/en_base_pt.json
+    1x  src/locales/pt.json
+    1x  src/locales/es.json.backup_definicoes
+    1x  src/locales/es_corrompido.json
+    1x  src/locales/fr.json.backup_progresso
+    1x  src/locales/en.json.backup_community_modal
+    1x  src/locales/fr.json
+    1x  src/locales/fr.json.corrupt
+    1x  src/locales/es.json.backup_objectives_20260814_090308
+    1x  src/locales/en_old.json
+    1x  src/locales/es.json.backup_community_modal
+    1x  src/locales/pt.json.backup_definicoes
+    1x  src/locales/en.json.backup_definicoes
+    1x  src/locales/en.json.backup_progresso
+    1x  src/locales/fr_base_pt.json
+    1x  src/locales/pt.json.backup_objectives_20260814_090308
+    1x  src/locales/es_old.json
+    1x  src/locales/pt_corrompido_patternsNew.json
+    1x  src/locales/pt.json.backup_community_modal
+    1x  src/locales/es_base_pt.json
+    1x  src/locales/en.json.corrupt
+    1x  src/locales/es.json
+    1x  src/locales/fr_corrompido.json
+    1x  src/locales/en_corrompido.json
+    1x  src/locales/pt_old.json
+    1x  src/locales/en_pt_base.json
+    1x  src/locales/pt_corrompido_backup.json
+    1x  src/locales/fr.json.backup_community_modal
+    1x  src/locales/en.json
+    1x  src/locales/fr.json.backup_objectives_20260814_090308
+    1x  src/locales/pt.json.backup_progresso
+    1x  src/locales/fr_before_manual_fix.json
+    1x  src/locales/en.json.backup_objectives_20260814_090308
+    1x  src/locales/es.json.backup_progresso
+    1x  src/locales/fr_old.json
+    1x  src/locales/fr.json.backup_definicoes
+    1x  src/locales/es.json.corrupt
+    1x  src/components/Avatar.tsx.performance-backup
+    1x  src/components/Avatar.tsx.memo-backup
+    1x  src/components/Avatar.tsx.performance2-backup
+    1x  src/components/Avatar.tsx.export-backup
+    1x  src/components/Avatar.tsx.backup_companion_avatar
+    1x  src/locales/backup_before_patterns_fix/pt_backup_erro.json
+    1x  src/locales/backup_before_patterns_fix/en_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/pt.json
+    1x  src/locales/backup_before_patterns_fix/es_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/fr.json
+    1x  src/locales/backup_before_patterns_fix/en_old.json
+    1x  src/locales/backup_before_patterns_fix/fr_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es_old.json
+    1x  src/locales/backup_before_patterns_fix/es_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es.json
+    1x  src/locales/backup_before_patterns_fix/fr_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/en_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/pt_old.json
+    1x  src/locales/backup_before_patterns_fix/en_pt_base.json
+    1x  src/locales/backup_before_patterns_fix/pt_corrompido_backup.json
+    1x  src/locales/backup_before_patterns_fix/en.json
+    1x  src/locales/backup_before_patterns_fix/fr_old.json
+    1x  src/components/Companheiro/ConfiaCompanionHome.tsx
+
+avatarStageMessage10:
+    1x  src/locales/pt.json.bak
+    1x  src/locales/pt_backup_erro.json
+    1x  src/locales/en_base_pt.json
+    1x  src/locales/pt.json
+    1x  src/locales/es.json.backup_definicoes
+    1x  src/locales/es_corrompido.json
+    1x  src/locales/fr.json.backup_progresso
+    1x  src/locales/en.json.backup_community_modal
+    1x  src/locales/fr.json
+    1x  src/locales/fr.json.corrupt
+    1x  src/locales/es.json.backup_objectives_20260814_090308
+    1x  src/locales/en_old.json
+    1x  src/locales/es.json.backup_community_modal
+    1x  src/locales/pt.json.backup_definicoes
+    1x  src/locales/en.json.backup_definicoes
+    1x  src/locales/en.json.backup_progresso
+    1x  src/locales/fr_base_pt.json
+    1x  src/locales/pt.json.backup_objectives_20260814_090308
+    1x  src/locales/es_old.json
+    1x  src/locales/pt_corrompido_patternsNew.json
+    1x  src/locales/pt.json.backup_community_modal
+    1x  src/locales/es_base_pt.json
+    1x  src/locales/en.json.corrupt
+    1x  src/locales/es.json
+    1x  src/locales/fr_corrompido.json
+    1x  src/locales/en_corrompido.json
+    1x  src/locales/pt_old.json
+    1x  src/locales/en_pt_base.json
+    1x  src/locales/pt_corrompido_backup.json
+    1x  src/locales/fr.json.backup_community_modal
+    1x  src/locales/en.json
+    1x  src/locales/fr.json.backup_objectives_20260814_090308
+    1x  src/locales/pt.json.backup_progresso
+    1x  src/locales/fr_before_manual_fix.json
+    1x  src/locales/en.json.backup_objectives_20260814_090308
+    1x  src/locales/es.json.backup_progresso
+    1x  src/locales/fr_old.json
+    1x  src/locales/fr.json.backup_definicoes
+    1x  src/locales/es.json.corrupt
+    1x  src/components/Avatar.tsx.performance-backup
+    1x  src/components/Avatar.tsx.memo-backup
+    1x  src/components/Avatar.tsx.performance2-backup
+    1x  src/components/Avatar.tsx.export-backup
+    1x  src/components/Avatar.tsx.backup_companion_avatar
+    1x  src/locales/backup_before_patterns_fix/pt_backup_erro.json
+    1x  src/locales/backup_before_patterns_fix/en_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/pt.json
+    1x  src/locales/backup_before_patterns_fix/es_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/fr.json
+    1x  src/locales/backup_before_patterns_fix/en_old.json
+    1x  src/locales/backup_before_patterns_fix/fr_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es_old.json
+    1x  src/locales/backup_before_patterns_fix/es_base_pt.json
+    1x  src/locales/backup_before_patterns_fix/es.json
+    1x  src/locales/backup_before_patterns_fix/fr_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/en_corrompido.json
+    1x  src/locales/backup_before_patterns_fix/pt_old.json
+    1x  src/locales/backup_before_patterns_fix/en_pt_base.json
+    1x  src/locales/backup_before_patterns_fix/pt_corrompido_backup.json
+    1x  src/locales/backup_before_patterns_fix/en.json
+    1x  src/locales/backup_before_patterns_fix/fr_old.json
+    1x  src/components/Companheiro/ConfiaCompanionHome.tsx
+
+companionMessage:
+    6x  src/locales/pt.json
+    6x  src/locales/fr.json
+    6x  src/locales/es.json.backup_objectives_20260814_090308
+    6x  src/locales/pt.json.backup_objectives_20260814_090308
+    6x  src/locales/es.json
+    6x  src/locales/en.json
+    6x  src/locales/fr.json.backup_objectives_20260814_090308
+    6x  src/locales/en.json.backup_objectives_20260814_090308
+    1x  src/components/Companheiro/Companion.tsx
+    2x  src/components/Companheiro/ConfiaCompanionHome.tsx
+    1x  src/components/Companheiro/Companion.tsx.performance-backup
+
+============================================================================
+8. ELEMENTOS PROIBIDOS / PERFORMANCE
+============================================================================
+Math.random: 0
+setInterval: 0
+requestAnimationFrame: 2
+localStorage.setItem: 0
+
+============================================================================
+9. ESTADO DO A9
+============================================================================
+
+ESTE SCRIPT É APENAS DE LEITURA.
+Não altera ficheiros.
+
+Objetivo:
+- confirmar a hierarquia final da voz
+- encontrar duplicações
+- confirmar integração do avatar
+- confirmar acessórios
+- confirmar ação contextual
+- identificar apenas o que ainda merece polimento
+
+============================================================================
+FIM DA DESCOBERTA A9
+============================================================================

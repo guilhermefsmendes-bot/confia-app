@@ -199,5 +199,11 @@ export function toggleCompanionAccessory(
     EQUIPPED_KEY,
     JSON.stringify(equipped)
   );
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new Event("confia:equipment-changed")
+    );
+  }
 }
 

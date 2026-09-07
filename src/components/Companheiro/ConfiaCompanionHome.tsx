@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo, useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -20,7 +20,12 @@ import type {
 import {
   resolveCompanionReaction,
 } from "../../data/reactive/companionReactionEngine";
+import {
+  markCompanionDecisionShown,
+  type CompanionBrainDecision,
+} from "../../data/reactive/companionBrain";
 import { getEquipped } from "../../storage/homeInventory";
+import { getCompanionAccessories } from "../../data/homeItems";
 
 interface ConfiaCompanionHomeProps {
   avatar: AvatarState;
@@ -30,6 +35,7 @@ interface ConfiaCompanionHomeProps {
   afternoonRating?: number;
   handlePetAvatar: () => void;
   reactiveResult: ReactiveResult | null;
+  companionBrainDecision: CompanionBrainDecision | null;
   relationalMemory: ReactiveRecentMemory | null;
   onCompanionAction: (
     target:
@@ -73,6 +79,7 @@ function ConfiaCompanionHome({
   afternoonRating,
   handlePetAvatar,
   reactiveResult,
+  companionBrainDecision,
   relationalMemory,
   onCompanionAction,
   worldMood,
@@ -80,17 +87,99 @@ function ConfiaCompanionHome({
   const { t } = useTranslation();
 
   /**
+   * ==========================================================
+   * CONFIA — COMPANION VIVO
+   * FASE 14 — LIVE AUDIT
+   * ==========================================================
+   *
+   * Instrumentação exclusivamente de desenvolvimento.
+   *
+   * Não altera decisões.
+   * Não altera memória.
+   * Não altera cooldowns.
+   * Não altera a UI de produção.
+   */
+  const companionLiveAudit = (
+    event: string,
+    data?: Record<string, unknown>
+  ) => {
+    if (!import.meta.env.DEV) {
+      return;
+    }
+
+    console.log(
+      `[CONFIA COMPANION LIVE] ${event}`,
+      {
+        at: new Date().toISOString(),
+        ...data,
+      }
+    );
+  };
+
+  /**
    * A5.3 — acessórios visuais da CONFIA.
    *
    * home_equipped continua a ser a única fonte persistente.
    * IDs legacy e troféus são ignorados pela criatura.
    */
-  const equippedAccessoryIds = getEquipped().filter(
-    id =>
-      id === "confia_bow_cream" ||
-      id === "confia_scarf_terra" ||
-      id === "confia_charm_gold"
+  // CONFIA_ACCESSORIES_V4B
+  // O catálogo é a fonte de verdade para acessórios visuais.
+  const readEquippedAccessoryIds = () => {
+    const equipped = getEquipped();
+
+    return getCompanionAccessories()
+      .filter(accessory =>
+        equipped.includes(accessory.id)
+      )
+      .map(accessory => accessory.id);
+  };
+
+  const [
+    equippedAccessoryIds,
+    setEquippedAccessoryIds
+  ] = useState<string[]>(
+    () => readEquippedAccessoryIds()
   );
+
+  useEffect(() => {
+    const refreshEquippedAccessories = () => {
+      setEquippedAccessoryIds(
+        readEquippedAccessoryIds()
+      );
+    };
+
+    window.addEventListener(
+      "confia:equipment-changed",
+      refreshEquippedAccessories
+    );
+
+    window.addEventListener(
+      "storage",
+      refreshEquippedAccessories
+    );
+
+    window.addEventListener(
+      "focus",
+      refreshEquippedAccessories
+    );
+
+    return () => {
+      window.removeEventListener(
+        "confia:equipment-changed",
+        refreshEquippedAccessories
+      );
+
+      window.removeEventListener(
+        "storage",
+        refreshEquippedAccessories
+      );
+
+      window.removeEventListener(
+        "focus",
+        refreshEquippedAccessories
+      );
+    };
+  }, []);
 
   const currentMoodRating = useMemo(() => {
     if (typeof afternoonRating === "number") {
@@ -243,7 +332,7 @@ function ConfiaCompanionHome({
         }
       : null;
 
-  const companionMessage = useMemo(() => {
+  const proposedCompanionMessage = useMemo(() => {
     /**
      * A6.3 — HIERARQUIA DA VOZ
      *
@@ -337,6 +426,501 @@ function ConfiaCompanionHome({
     currentMoodRating,
     t,
   ]);
+
+  /**
+   * ============================================================
+   * CONFIA — COMPANION VIVO
+   * FASE 8A — CURRENT UTTERANCE
+   * ============================================================
+   *
+   * proposedCompanionMessage é apenas aquilo que o sistema
+   * histórico diria neste momento.
+   *
+   * currentUtterance é aquilo que a criatura está realmente
+   * a dizer.
+   *
+   * Uma mensagem do Companion Brain fica estável mesmo que
+   * exista um novo render da Home.
+   */
+  const [
+    currentUtterance,
+    setCurrentUtterance
+  ] = useState<{
+    text: string;
+    source: "fallback" | "brain";
+    decisionId?: string;
+
+    /**
+     * Momento em que esta fala entrou realmente
+     * no balão.
+     */
+    shownAt?: number;
+
+    /**
+     * Até quando esta fala fica protegida contra
+     * substituições normais.
+     */
+    protectedUntil?: number;
+
+    /**
+     * Prioridade da decisão que originou esta fala.
+     *
+     * Permite decidir se uma nova mensagem tem
+     * importância suficiente para interrompê-la.
+     */
+    priority?: number;
+
+    /**
+     * Momento em que esta fala deixa de ser considerada
+     * atual e pode regressar ao fallback.
+     */
+    expiresAt?: number;
+  }>(() => ({
+    text: proposedCompanionMessage,
+    source: "fallback",
+  }));
+
+  /**
+   * Enquanto estivermos numa fala de fallback,
+   * o sistema histórico pode continuar a atualizá-la
+   * normalmente.
+   *
+   * Se o cérebro estiver a falar, um simples render
+   * não pode substituir essa fala.
+   */
+  useEffect(() => {
+    setCurrentUtterance(current => {
+      if (current.source === "brain") {
+        return current;
+      }
+
+      if (
+        current.text === proposedCompanionMessage
+      ) {
+        return current;
+      }
+
+      return {
+        text: proposedCompanionMessage,
+        source: "fallback",
+      };
+    });
+  }, [proposedCompanionMessage]);
+
+  /**
+   * ==========================================================
+   * CONFIA — COMPANION VIVO
+   * FASE 10A — TEMPO MÍNIMO DE EXPOSIÇÃO
+   * ==========================================================
+   *
+   * Quanto mais importante for a mensagem,
+   * mais tempo permanece protegida no balão.
+   */
+  function getCompanionMinimumDisplayMs(
+    category?: string
+  ): number {
+    switch (category) {
+      case "emotional_followup":
+        return 12000;
+
+      case "impulse_followup":
+        return 12000;
+
+      case "symptom":
+        return 10000;
+
+      case "mood_change":
+        return 10000;
+
+      case "progress":
+        return 8000;
+
+      case "objective":
+        return 7000;
+
+      case "missing_checkin":
+        return 6000;
+
+      case "discovery":
+        return 6000;
+
+      case "community":
+        return 5000;
+
+      case "casual":
+      default:
+        return 4000;
+    }
+  }
+
+
+
+  /**
+   * ==========================================================
+   * CONFIA — COMPANION VIVO
+   * FASE 10C — TEMPO TOTAL DE VIDA DA FALA
+   * ==========================================================
+   *
+   * A proteção mínima impede substituições precoces.
+   * O lifetime define quando a fala deixa de ser atual.
+   */
+  function getCompanionUtteranceLifetimeMs(
+    category?: string
+  ): number {
+    switch (category) {
+      case "emotional_followup":
+        return 30000;
+
+      case "impulse_followup":
+        return 30000;
+
+      case "symptom":
+        return 25000;
+
+      case "mood_change":
+        return 25000;
+
+      case "progress":
+        return 20000;
+
+      case "objective":
+        return 20000;
+
+      case "missing_checkin":
+        return 18000;
+
+      case "discovery":
+        return 18000;
+
+      case "community":
+        return 15000;
+
+      case "casual":
+      default:
+        return 12000;
+    }
+  }
+
+  /**
+   * Guarda apenas a decisão atualmente processada.
+   *
+   * Isto impede que o mesmo render volte a apresentar
+   * e registar repetidamente a mesma decisão.
+   */
+  const lastProcessedBrainDecisionRef =
+    React.useRef<string | null>(null);
+
+  // CONFIA_COMPANION_BRAIN_SHOWN_EFFECT
+  useEffect(() => {
+    const candidate =
+      companionBrainDecision?.candidate;
+
+    // CONFIA_FASE10B_PRIORITY_INTERRUPTION_GUARD
+    /**
+     * ========================================================
+     * FASE 10B — INTERRUPÇÃO POR PRIORIDADE
+     * ========================================================
+     *
+     * Enquanto uma fala estiver protegida:
+     *
+     * - prioridade menor ou igual → espera
+     * - prioridade superior → pode interromper
+     *
+     * Assim, uma micro-interação nunca apaga uma fala
+     * emocional importante, mas uma nova situação realmente
+     * mais relevante pode entrar imediatamente.
+     */
+    if (
+      candidate &&
+      currentUtterance.source === "brain" &&
+      typeof currentUtterance.protectedUntil ===
+        "number" &&
+      Date.now() <
+        currentUtterance.protectedUntil &&
+      candidate.id !==
+        currentUtterance.decisionId
+    ) {
+      const currentPriority =
+        currentUtterance.priority ?? 0;
+
+      const newPriority =
+        candidate.priority ?? 0;
+
+      if (
+        newPriority <=
+          currentPriority
+      ) {
+        companionLiveAudit(
+          "DECISION_BLOCKED_BY_PROTECTION",
+          {
+            currentDecisionId:
+              currentUtterance.decisionId,
+            currentPriority,
+            candidateId:
+              candidate.id,
+            candidateCategory:
+              candidate.category,
+            candidatePriority:
+              newPriority,
+            protectedUntil:
+              currentUtterance.protectedUntil,
+          }
+        );
+
+        return;
+      }
+
+      companionLiveAudit(
+        "DECISION_INTERRUPTS_PROTECTED_UTTERANCE",
+        {
+          previousDecisionId:
+            currentUtterance.decisionId,
+          previousPriority:
+            currentPriority,
+          candidateId:
+            candidate.id,
+          candidateCategory:
+            candidate.category,
+          candidatePriority:
+            newPriority,
+        }
+      );
+    }
+
+    if (
+      !candidate?.translationKey
+    ) {
+      /**
+       * Quando a decisão desaparece por cooldown ou
+       * mudança de contexto, libertamos o identificador.
+       *
+       * Assim, a mesma intenção poderá voltar a ser
+       * utilizada legitimamente no futuro.
+       */
+      lastProcessedBrainDecisionRef.current =
+        null;
+
+      return;
+    }
+
+    const brainKey =
+      candidate.translationKey;
+
+    const translated =
+      t(brainKey);
+
+    if (
+      !translated ||
+      translated === brainKey
+    ) {
+      companionLiveAudit(
+        "DECISION_TRANSLATION_MISSING",
+        {
+          candidateId:
+            candidate.id,
+          translationKey:
+            brainKey,
+        }
+      );
+
+      return;
+    }
+
+    if (
+      lastProcessedBrainDecisionRef.current ===
+      candidate.id
+    ) {
+      return;
+    }
+
+    lastProcessedBrainDecisionRef.current =
+      candidate.id;
+
+    /**
+     * A decisão transforma-se agora numa fala real.
+     */
+    const nowMs =
+      Date.now();
+
+    const minimumDisplayMs =
+      getCompanionMinimumDisplayMs(
+        candidate.category
+      );
+
+    const utteranceLifetimeMs =
+      getCompanionUtteranceLifetimeMs(
+        candidate.category
+      );
+
+    const protectedUntil =
+      nowMs + minimumDisplayMs;
+
+    const utteranceExpiresAt =
+      nowMs + utteranceLifetimeMs;
+
+    setCurrentUtterance({
+      text: translated,
+      source: "brain",
+      decisionId: candidate.id,
+      shownAt: nowMs,
+      protectedUntil,
+      priority:
+        candidate.priority,
+      expiresAt:
+        utteranceExpiresAt,
+    });
+
+    companionLiveAudit(
+      "UTTERANCE_SHOWN",
+      {
+        candidateId:
+          candidate.id,
+        category:
+          candidate.category,
+        priority:
+          candidate.priority,
+        emotion:
+          candidate.emotion,
+        reason:
+          candidate.reason,
+        translationKey:
+          candidate.translationKey,
+        text:
+          translated,
+        shownAt:
+          new Date(
+            nowMs
+          ).toISOString(),
+        protectedUntil:
+          new Date(
+            protectedUntil
+          ).toISOString(),
+        expiresAt:
+          new Date(
+            utteranceExpiresAt
+          ).toISOString(),
+        previousSource:
+          currentUtterance.source,
+        previousDecisionId:
+          currentUtterance.decisionId,
+      }
+    );
+
+    /**
+     * Só agora marcamos a decisão como mostrada.
+     */
+    markCompanionDecisionShown(
+      companionBrainDecision,
+      "home_opened"
+    );
+
+    companionLiveAudit(
+      "DECISION_MARKED_SHOWN",
+      {
+        candidateId:
+          candidate.id,
+        category:
+          candidate.category,
+      }
+    );
+  }, [
+    companionBrainDecision?.candidate.id,
+    companionBrainDecision?.candidate.translationKey,
+    currentUtterance.source,
+    currentUtterance.decisionId,
+    currentUtterance.protectedUntil,
+    currentUtterance.priority,
+    t,
+  ]);
+
+
+  // CONFIA_FASE10C_UTTERANCE_EXPIRATION
+  /**
+   * ==========================================================
+   * EXPIRAÇÃO NATURAL DA FALA
+   * ==========================================================
+   *
+   * Uma fala do cérebro não deve permanecer para sempre.
+   * Quando termina o seu lifetime, regressamos ao fallback
+   * atualmente válido.
+   */
+  useEffect(() => {
+    if (
+      currentUtterance.source !== "brain" ||
+      typeof currentUtterance.expiresAt !==
+        "number"
+    ) {
+      return;
+    }
+
+    const remainingMs =
+      currentUtterance.expiresAt -
+      Date.now();
+
+    if (remainingMs <= 0) {
+      setCurrentUtterance({
+        text: proposedCompanionMessage,
+        source: "fallback",
+      });
+
+      return;
+    }
+
+    const timeoutId =
+      window.setTimeout(() => {
+        setCurrentUtterance(current => {
+          /**
+           * Se entretanto entrou outra fala,
+           * este timeout antigo não lhe toca.
+           */
+          if (
+            current.source !== "brain" ||
+            current.decisionId !==
+              currentUtterance.decisionId
+          ) {
+            return current;
+          }
+
+          companionLiveAudit(
+            "UTTERANCE_EXPIRED",
+            {
+              candidateId:
+                current.decisionId,
+              previousText:
+                current.text,
+              fallbackText:
+                proposedCompanionMessage,
+            }
+          );
+
+          return {
+            text: proposedCompanionMessage,
+            source: "fallback",
+          };
+        });
+      }, remainingMs);
+
+    return () => {
+      window.clearTimeout(
+        timeoutId
+      );
+    };
+  }, [
+    currentUtterance.source,
+    currentUtterance.decisionId,
+    currentUtterance.expiresAt,
+    proposedCompanionMessage,
+  ]);
+
+  /**
+   * O restante componente continua a consumir
+   * companionMessage normalmente.
+   *
+   * A diferença é que agora a mensagem vem de uma
+   * fala persistente e não diretamente de cada render.
+   */
+  const companionMessage =
+    currentUtterance.text;
 
   /**
    * A3.4 — apresentação contextual.

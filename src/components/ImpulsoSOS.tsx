@@ -33,6 +33,8 @@ import {
 import {
   recordReactiveResponse,
 } from "../data/reactive/reactiveHistoryStorage";
+import { emitCompanionBrainEvent } from "../data/reactive/companionBrain";
+
 interface ImpulsoSOSProps {
   onAddXp: (amount: number) => void;
 }
@@ -278,6 +280,20 @@ const getPsychoeducationMessage = () => {
       completed: true,
       xpEarned: 30,
     });
+
+    // CONFIA_COMPANION_EVENT_IMPULSE_COMPLETED
+    emitCompanionBrainEvent(
+      "impulse_completed",
+      {
+        need: impulseNeed ?? undefined,
+        initialIntensity: intensity,
+        finalIntensity,
+        trigger: trigger ?? undefined,
+        emotion: emotion ?? undefined,
+        hasThought:
+          Boolean(thought && thought.trim().length > 0),
+      }
+    );
 
     const reactiveResult = analyzeReactiveState({
       source: "impulse",

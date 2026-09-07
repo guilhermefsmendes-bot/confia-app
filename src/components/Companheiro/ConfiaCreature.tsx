@@ -1495,7 +1495,7 @@ function ConfiaCreature({
               </g>
             )}
 
-            {hasAccessory("confia_bow_terra") && (
+            {(hasAccessory("confia_bow_terra") || hasAccessory("confia_bow_cream")) && (
               <g transform={headAccessoryTransform}>
                 <path d="M137 57 C147 49 154 52 152 61 C150 67 144 69 136 63 Z" fill="#C97861" stroke="#9D5748" strokeWidth="2" />
                 <path d="M133 57 C124 50 118 53 120 61 C122 67 128 69 136 63 Z" fill="#D88C72" stroke="#9D5748" strokeWidth="2" />
@@ -1625,7 +1625,7 @@ function ConfiaCreature({
               </g>
             )}
 
-            {hasAccessory("confia_scarf_cream") && (
+            {(hasAccessory("confia_scarf_cream") || hasAccessory("confia_scarf_terra")) && (
               <g transform={neckAccessoryTransform}>
                 <path d="M79 127 Q110 139 141 127 Q137 140 110 143 Q83 140 79 127Z" fill="#F1DECB" stroke="#C58B74" strokeWidth="2" />
                 <path d="M96 139 Q88 149 91 160 L101 154 Q97 146 96 139Z" fill="#E6CDB8" stroke="#C58B74" strokeWidth="1.7" />
@@ -1646,7 +1646,7 @@ function ConfiaCreature({
               </g>
             )}
 
-            {hasAccessory("confia_medal_sun") && (
+            {(hasAccessory("confia_medal_sun") || hasAccessory("confia_charm_gold")) && (
               <g transform={neckAccessoryTransform}>
                 <path d="M92 129 Q110 140 128 129" fill="none" stroke="#B98335" strokeWidth="2" />
                 <circle cx="110" cy="143" r="7" fill="#E9B95E" stroke="#B98335" strokeWidth="2" />

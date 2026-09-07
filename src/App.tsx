@@ -1,3 +1,10 @@
+import {
+  getLastCompanionShownMessage,
+} from "./data/reactive/companionBrain";
+import { buildCompanionCrossMemory } from "./data/reactive/companionBrain";
+import { collectCompanionData } from "./data/companionData";
+import { buildCompanionLongitudinalImpulseMemory } from "./data/reactive/companionBrain";
+import { buildCompanionLongitudinalMoodMemory } from "./data/reactive/companionBrain";
 import React, { useState, useEffect, useRef } from 'react';
 import {
   motion,
@@ -68,6 +75,16 @@ import { FocoMente } from './components/FocoMente';
 import { StopMode } from './components/StopMode';
 import { CommunityChat } from './components/CommunityChat';
 import { Avatar } from "./components/Avatar";
+import {
+  buildCompanionBrainContext,
+  evaluateCompanionContext,
+  diagnoseCompanionContext,
+  hasRecentCompanionBrainEvent,
+  countRecentCompanionBrainEvents,
+} from "./data/reactive/companionBrain";
+
+import { emitCompanionBrainEvent } from "./data/reactive/companionBrain";
+import { getRecentCompanionBrainEvents } from "./data/reactive/companionBrain";
 const STORAGE_KEYS = {
   AVATAR: 'confia_avatar_v2',
   OBJECTIVES: 'confia_objectives_v2',
@@ -278,6 +295,7 @@ evolutionStage: t("avatarEvolutionStage"),
       points: 15
     };
   });
+
 const [inventory, setInventory] = useState<any[]>([]);
 const [objectivesHistory, setObjectivesHistory] = useState<
   { date: string; completed: number }[]
@@ -1382,7 +1400,184 @@ useEffect(() => {
   }
 
 }, [ratings, selectedDate]);
-  // Handle XP increments and level ups
+  
+  /**
+   * ==========================================================
+   * CONFIA — COMPANION BRAIN
+   * FASE 4 — contexto real da Home
+   * ==========================================================
+   *
+   * O DailyRating atual guarda manhã e tarde em conjunto.
+   * Nesta fase só usamos informação que podemos afirmar
+   * com segurança.
+   */
+  const homeCompanionBrainDecision = (() => {
+    if (
+      currentTab !== 0 ||
+      homeScreen !== "home"
+    ) {
+      return null;
+    }
+
+    const now = new Date();
+
+    const localToday = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, "0"),
+      String(now.getDate()).padStart(2, "0"),
+    ].join("-");
+
+    /**
+     * Não produzir mensagens temporais sobre hoje
+     * quando o utilizador está a consultar outro dia.
+     */
+    if (selectedDate !== localToday) {
+      return null;
+    }
+
+  const companionCollectedData =
+    collectCompanionData();
+
+    const context =
+      buildCompanionBrainContext({
+      previousShownMessage:
+        getLastCompanionShownMessage(),
+
+        now,
+
+        currentTab,
+        homeScreen,
+
+        /**
+         * A estrutura atual só sabe que o registo
+         * completo do dia foi guardado.
+         */
+        morningCompleted: todayLogged,
+        afternoonCompleted: todayLogged,
+
+        morningRating:
+          todayLogged
+            ? morningRating
+            : undefined,
+
+        afternoonRating:
+          todayLogged
+            ? afternoonRating
+            : undefined,
+
+        /**
+         * Contexto comportamental real vindo da
+         * memória de eventos do Companion Brain.
+         */
+        recentImpulse:
+          hasRecentCompanionBrainEvent(
+            "impulse_completed",
+            30
+          ),
+
+    /**
+     * CONFIA — COMPANION VIVO 8C
+     *
+     * Última interação humana relevante dos
+     * últimos 10 minutos.
+     *
+     * O ID do evento distingue um clique verdadeiro
+     * de um simples render do React.
+     */
+    latestInteractionEvent:
+      getRecentCompanionBrainEvents(10)
+        .filter(event =>
+          event.type === "avatar_tapped" ||
+          event.type === "home_returned"
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.timestamp).getTime() -
+            new Date(a.timestamp).getTime()
+        )[0],
+
+    /**
+     * Janela de memória comportamental da sessão.
+     *
+     * 30 minutos é suficiente para reconhecer
+     * sequências sem transformar acontecimentos
+     * antigos em contexto atual.
+     */
+    recentEvents:
+      getRecentCompanionBrainEvents(30),
+
+    longitudinalMood:
+      buildCompanionLongitudinalMoodMemory(
+        ratings,
+        now
+      ),
+
+    longitudinalImpulse:
+      buildCompanionLongitudinalImpulseMemory(
+        companionCollectedData.impulse,
+        now
+      ),
+
+    crossMemory:
+      buildCompanionCrossMemory(
+        ratings,
+        companionCollectedData.impulse,
+        now
+      ),
+
+
+        sessionActivityCount:
+          countRecentCompanionBrainEvents(
+            60
+          ),
+      });
+
+    const decision =
+      evaluateCompanionContext(context);
+
+    /**
+     * CONFIA_COMPANION_BRAIN_HOME_DIAGNOSTIC
+     *
+     * Apenas diagnóstico em desenvolvimento.
+     * Não altera comportamento nem memória.
+     */
+    if (import.meta.env.DEV) {
+      const diagnostic =
+        diagnoseCompanionContext(context);
+
+      console.groupCollapsed(
+        "[CONFIA Companion Brain]",
+        diagnostic.decision?.candidate?.id
+          ?? "SILÊNCIO"
+      );
+
+      console.log(
+        "Contexto:",
+        diagnostic.context
+      );
+
+      console.log(
+        "Candidatos brutos:",
+        diagnostic.rawCandidates
+      );
+
+      console.log(
+        "Candidatos resolvidos:",
+        diagnostic.resolvedCandidates
+      );
+
+      console.log(
+        "Decisão:",
+        diagnostic.decision
+      );
+
+      console.groupEnd();
+    }
+
+    return decision;
+  })();
+
+// Handle XP increments and level ups
   const addXp = (amount: number) => {
     setAvatar(prev => {
       let nextXp = prev.xp + amount;
@@ -1430,6 +1625,14 @@ const handleBuyItem = (item: any) => {
 
   // Pet Amigo (Interaction)
   const handlePetAvatar = () => {
+    // CONFIA_COMPANION_EVENT_AVATAR_TAPPED
+    emitCompanionBrainEvent(
+      "avatar_tapped",
+      {
+        source: "home_companion",
+      }
+    );
+
     const todayStr = new Date().toISOString().split('T')[0];
     const lastPetDate = localStorage.getItem(STORAGE_KEYS.LAST_PET_DATE);
     const petCountStr = localStorage.getItem(STORAGE_KEYS.PET_COUNT);
@@ -1485,6 +1688,18 @@ const handleSaveRatings = () => {
 
   setRatings(nextRatings);
   setTodayLogged(true);
+
+  // CONFIA_COMPANION_EVENT_MOOD_SAVED
+  emitCompanionBrainEvent(
+    "mood_saved",
+    {
+      date: selectedDate,
+      morningRating,
+      afternoonRating,
+      hasNote: noteText.trim().length > 0,
+      wasExistingRecord: existingIdx >= 0,
+    }
+  );
 
   /**
    * Analisar imediatamente o novo estado do utilizador.
@@ -2056,6 +2271,7 @@ className="flex items-center justify-center w-24 h-24 relative"
   handlePetAvatar={handlePetAvatar}
   worldMood={worldMood}
   reactiveResult={homeReactiveResult}
+  companionBrainDecision={homeCompanionBrainDecision}
   relationalMemory={homeCompanionRelationalMemory}
 
   onCompanionAction={(target) => {
@@ -2072,6 +2288,16 @@ className="flex items-center justify-center w-24 h-24 relative"
     }
 
     if (target === "progress") {
+      // CONFIA_COMPANION_OPEN_PROGRESS
+      emitCompanionBrainEvent(
+        "context_changed",
+        {
+          from: "home",
+          to: "progress",
+          source: "companion_action",
+        }
+      );
+
       setHomeScreen("progress");
       setCurrentTab(0);
       return;
@@ -2152,6 +2378,15 @@ className="flex items-center justify-center w-24 h-24 relative"
       <button
         type="button"
         onClick={() => {
+          // CONFIA_COMPANION_OPEN_PATTERNS
+          emitCompanionBrainEvent(
+            "context_changed",
+            {
+              from: "home",
+              to: "patterns",
+            }
+          );
+
           setPatternsPage("menu");
           setHomeScreen("patterns");
         }}
@@ -2821,7 +3056,17 @@ className="flex items-center justify-center w-24 h-24 relative"
     <div className="mb-4 flex items-center gap-3">
       <button
         type="button"
-        onClick={() => setHomeScreen("home")}
+        onClick={() => {
+          // CONFIA_COMPANION_HOME_RETURNED_PROGRESS
+          emitCompanionBrainEvent(
+            "home_returned",
+            {
+              from: "progress",
+            }
+          );
+
+          setHomeScreen("home");
+        }}
         aria-label={t("back")}
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E8DDD7]/80 bg-white text-[#C97B5E] shadow-sm transition-transform active:scale-95"
       >
@@ -2858,6 +3103,14 @@ className="flex items-center justify-center w-24 h-24 relative"
     {patternsPage === "menu" && (
       <PatternsNew
         onBack={() => {
+          // CONFIA_COMPANION_HOME_RETURNED_PATTERNS
+          emitCompanionBrainEvent(
+            "home_returned",
+            {
+              from: "patterns",
+            }
+          );
+
           setPatternsPage("menu");
           setHomeScreen("home");
         }}
@@ -2895,7 +3148,17 @@ className="flex items-center justify-center w-24 h-24 relative"
     <div className="max-w-md mx-auto">
 
       <button
-        onClick={() => setHomeScreen("home")}
+        onClick={() => {
+          // CONFIA_COMPANION_HOME_RETURNED_COMPANION
+          emitCompanionBrainEvent(
+            "home_returned",
+            {
+              from: "companion",
+            }
+          );
+
+          setHomeScreen("home");
+        }}
         className="mb-4 text-xs font-bold text-[#C97B5E]"
       >
         ← {t("back")}
@@ -2912,7 +3175,17 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 {currentTab === 0 && homeScreen === "shop" && (
 <HomeShop
-  onBack={() => setHomeScreen("home")}
+  onBack={() => {
+    // CONFIA_COMPANION_HOME_RETURNED_SHOP
+    emitCompanionBrainEvent(
+      "home_returned",
+      {
+        from: "shop",
+      }
+    );
+
+    setHomeScreen("home");
+  }}
   xp={avatar.xp}
   companionLevel={avatar.level}
   spendXp={spendXp}
@@ -2920,7 +3193,17 @@ className="flex items-center justify-center w-24 h-24 relative"
 )}
 {currentTab === 0 && homeScreen === "inventory" && (
   <HomeInventory
-    onBack={() => setHomeScreen("home")}
+    onBack={() => {
+      // CONFIA_COMPANION_HOME_RETURNED_INVENTORY
+      emitCompanionBrainEvent(
+        "home_returned",
+        {
+          from: "inventory",
+        }
+      );
+
+      setHomeScreen("home");
+    }}
     companionLevel={avatar.level}
   />
 )}

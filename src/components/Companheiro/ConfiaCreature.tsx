@@ -168,6 +168,19 @@ function ConfiaCreature({
           ? "translate(110 82) scale(0.97) translate(-110 -82) translate(0 2)"
           : "translate(110 82) scale(1.02) translate(-110 -82)";
 
+  /*
+   * CONFIA — alinhamento fino dos acessórios.
+   *
+   * A transformação base continua responsável pela evolução
+   * e escala da criatura. Estas duas âncoras apenas ajustam
+   * verticalmente cada família visual.
+   */
+  const headTopAccessoryTransform =
+    `${headAccessoryTransform} translate(0 6)`;
+
+  const faceAccessoryTransform =
+    `${headAccessoryTransform} translate(0 7)`;
+
   const neckAccessoryTransform =
     stage === 2
       ? "translate(110 134) scale(0.84) translate(-110 -134) translate(0 -5)"
@@ -1488,7 +1501,7 @@ function ConfiaCreature({
             {/* HEAD */}
 
             {hasCreamBow && (
-              <g transform={`${headAccessoryTransform} translate(0 1)`}>
+              <g transform={`${headTopAccessoryTransform} translate(0 1)`}>
                 <path d="M78 55 C68 48 62 51 64 59 C66 66 72 68 80 62 Z" fill="#F6E6D7" stroke="#B86F5B" strokeWidth="2" />
                 <path d="M82 56 C91 49 97 52 95 60 C93 67 87 68 80 62 Z" fill="#F6E6D7" stroke="#B86F5B" strokeWidth="2" />
                 <ellipse cx="80" cy="60" rx="5.5" ry="5" fill="#D99A78" stroke="#B86F5B" strokeWidth="1.6" />
@@ -1496,7 +1509,7 @@ function ConfiaCreature({
             )}
 
             {(hasAccessory("confia_bow_terra") || hasAccessory("confia_bow_cream")) && (
-              <g transform={headAccessoryTransform}>
+              <g transform={headTopAccessoryTransform}>
                 <path d="M137 57 C147 49 154 52 152 61 C150 67 144 69 136 63 Z" fill="#C97861" stroke="#9D5748" strokeWidth="2" />
                 <path d="M133 57 C124 50 118 53 120 61 C122 67 128 69 136 63 Z" fill="#D88C72" stroke="#9D5748" strokeWidth="2" />
                 <circle cx="136" cy="62" r="5" fill="#A95F4E" />
@@ -1504,7 +1517,7 @@ function ConfiaCreature({
             )}
 
             {hasAccessory("confia_flower_daisy") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={headTopAccessoryTransform}>
                 <circle cx="74" cy="62" r="5" fill="#E4AD57" />
                 <circle cx="74" cy="53" r="5" fill="#FFF7E8" />
                 <circle cx="82" cy="58" r="5" fill="#FFF7E8" />
@@ -1515,20 +1528,20 @@ function ConfiaCreature({
             )}
 
             {hasAccessory("confia_headband_cream") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={headTopAccessoryTransform}>
                 <path d="M70 71 Q110 43 150 71" fill="none" stroke="#F3E1CE" strokeWidth="6" strokeLinecap="round" />
               </g>
             )}
 
             {hasAccessory("confia_beret_terra") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={headTopAccessoryTransform}>
                 <ellipse cx="105" cy="58" rx="37" ry="15" fill="#B96D57" stroke="#914C3F" strokeWidth="2" />
                 <path d="M104 48 Q108 40 116 44" fill="none" stroke="#914C3F" strokeWidth="3" strokeLinecap="round" />
               </g>
             )}
 
             {hasAccessory("confia_beanie_cream") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={headTopAccessoryTransform}>
                 <path d="M73 66 Q75 39 110 38 Q145 39 147 66 Z" fill="#F0DDC8" stroke="#BA806A" strokeWidth="2" />
                 <rect x="72" y="60" width="76" height="12" rx="6" fill="#E7CBB4" />
                 <circle cx="110" cy="34" r="7" fill="#E7CBB4" />
@@ -1536,7 +1549,7 @@ function ConfiaCreature({
             )}
 
             {hasAccessory("confia_hat_garden") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={headTopAccessoryTransform}>
                 <ellipse cx="110" cy="65" rx="52" ry="10" fill="#E5C78D" stroke="#AB8651" strokeWidth="2" />
                 <path d="M82 62 Q85 34 110 34 Q135 34 138 62 Z" fill="#EED8A6" stroke="#AB8651" strokeWidth="2" />
                 <path d="M134 50 Q145 45 151 53" fill="none" stroke="#9AA873" strokeWidth="3" />
@@ -1544,14 +1557,14 @@ function ConfiaCreature({
             )}
 
             {hasAccessory("confia_tiara_star") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={headTopAccessoryTransform}>
                 <path d="M76 68 Q110 47 144 68" fill="none" stroke="#C89545" strokeWidth="3" />
                 <path d="M110 43 l4 8 9 1-7 6 2 9-8-4-8 4 2-9-7-6 9-1z" fill="#F1D17D" stroke="#B88735" strokeWidth="1.5" />
               </g>
             )}
 
             {hasAccessory("confia_crown_leaf") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={headTopAccessoryTransform}>
                 <path d="M73 65 Q110 45 147 65" fill="none" stroke="#8C9D70" strokeWidth="3" />
                 <ellipse cx="85" cy="57" rx="5" ry="10" fill="#AAB98B" transform="rotate(-35 85 57)" />
                 <ellipse cx="100" cy="51" rx="5" ry="10" fill="#91A373" transform="rotate(-15 100 51)" />
@@ -1561,7 +1574,7 @@ function ConfiaCreature({
             )}
 
             {hasAccessory("confia_crown_gold") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={headTopAccessoryTransform}>
                 <path d="M76 65 L84 39 L100 55 L110 32 L121 55 L138 39 L145 65 Z" fill="#E6BE62" stroke="#A97828" strokeWidth="2" />
                 <circle cx="110" cy="47" r="4" fill="#FFF2B8" />
               </g>
@@ -1570,7 +1583,7 @@ function ConfiaCreature({
             {/* FACE */}
 
             {hasAccessory("confia_glasses_round") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={faceAccessoryTransform}>
                 <circle cx="87" cy="91" r="12" fill="none" stroke="#6D514A" strokeWidth="2.5" />
                 <circle cx="133" cy="91" r="12" fill="none" stroke="#6D514A" strokeWidth="2.5" />
                 <path d="M99 91 Q110 86 121 91" fill="none" stroke="#6D514A" strokeWidth="2.5" />
@@ -1578,7 +1591,7 @@ function ConfiaCreature({
             )}
 
             {hasAccessory("confia_glasses_terra") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={faceAccessoryTransform}>
                 <rect x="73" y="81" width="28" height="20" rx="8" fill="none" stroke="#B96D57" strokeWidth="3" />
                 <rect x="119" y="81" width="28" height="20" rx="8" fill="none" stroke="#B96D57" strokeWidth="3" />
                 <path d="M101 89 Q110 85 119 89" fill="none" stroke="#B96D57" strokeWidth="3" />
@@ -1586,7 +1599,7 @@ function ConfiaCreature({
             )}
 
             {hasAccessory("confia_glasses_gold") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={faceAccessoryTransform}>
                 <circle cx="87" cy="91" r="13" fill="none" stroke="#C89A45" strokeWidth="3" />
                 <circle cx="133" cy="91" r="13" fill="none" stroke="#C89A45" strokeWidth="3" />
                 <path d="M100 91 H120" stroke="#C89A45" strokeWidth="3" />
@@ -1594,7 +1607,7 @@ function ConfiaCreature({
             )}
 
             {hasAccessory("confia_glasses_sun") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={faceAccessoryTransform}>
                 <path d="M72 82 H101 L98 101 Q86 108 76 99 Z" fill="#5B4946" stroke="#3F3331" strokeWidth="2" />
                 <path d="M119 82 H148 L144 99 Q134 108 122 101 Z" fill="#5B4946" stroke="#3F3331" strokeWidth="2" />
                 <path d="M101 88 Q110 84 119 88" fill="none" stroke="#3F3331" strokeWidth="3" />
@@ -1602,7 +1615,7 @@ function ConfiaCreature({
             )}
 
             {hasAccessory("confia_glasses_heart") && (
-              <g transform={headAccessoryTransform}>
+              <g transform={faceAccessoryTransform}>
                 <path d="M87 102 C69 91 72 78 82 80 C87 81 89 86 89 86 C91 81 97 79 101 83 C108 91 99 99 87 102Z" fill="none" stroke="#C56F76" strokeWidth="3" />
                 <path d="M133 102 C115 91 118 78 128 80 C133 81 135 86 135 86 C137 81 143 79 147 83 C154 91 145 99 133 102Z" fill="none" stroke="#C56F76" strokeWidth="3" />
                 <path d="M102 88 H118" stroke="#C56F76" strokeWidth="3" />

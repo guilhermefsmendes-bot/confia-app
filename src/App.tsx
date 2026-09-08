@@ -43,6 +43,7 @@ import { initLanguage } from "./i18n/language";
 import ConfiaCompanionHome from "./components/Companheiro/ConfiaCompanionHome";
 import HomeProgressSummary from "./components/HomeProgressSummary";
 import HomeShop from "./components/HomeShop";
+import InnerCanvas from "./components/InnerCanvas/InnerCanvas";
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 import PatternsNew from './components/PatternsNew/PatternsNew';
@@ -280,10 +281,22 @@ useEffect(() => {
   // Global App States
 const [patternsPage, setPatternsPage] = useState("menu");
 const [homeScreen, setHomeScreen] = useState<
-  "home" | "companion" | "patterns" | "shop" | "inventory" | "settings" | "progress"
+  "home" | "companion" | "patterns" | "shop" | "inventory" | "settings" | "progress" | "innerCanvas"
 >("home");
   const [avatar, setAvatar] = useState<AvatarState>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AVATAR);
+    if (saved) return JSON.parse(saved);
+
+    return {
+      level: 1,
+      xp: 15,
+      maxXp: 100,
+      name: t("avatarName"),
+      evolutionStage: t("avatarEvolutionStage"),
+      points: 15
+    };
+
+    /* TEMP TEST — código normal preservado abaixo
     if (saved) return JSON.parse(saved);
     return {
       level: 1,
@@ -294,6 +307,7 @@ evolutionStage: t("avatarEvolutionStage"),
 
       points: 15
     };
+    */
   });
 
 const [inventory, setInventory] = useState<any[]>([]);
@@ -3001,6 +3015,50 @@ className="flex items-center justify-center w-24 h-24 relative"
                 </section>
               </div>
 
+{/* CONFIA — 60 SEGUNDOS / AÇÃO PRINCIPAL ACIMA DO SOS */}
+    <div className="mb-3">
+      <button
+        type="button"
+        onClick={() => setHomeScreen("innerCanvas")}
+        className="relative w-full overflow-hidden rounded-[24px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#4E3B36] via-[#6E5148] to-[#9A6758] px-4 py-4 text-left shadow-[0_10px_26px_rgba(78,59,54,0.16)] transition-transform active:scale-[0.99]"
+      >
+        <div
+          aria-hidden="true"
+          className="absolute -right-7 -top-9 h-28 w-28 rounded-full bg-white/10 blur-xl"
+        />
+
+        <div className="relative flex items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3.5">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-white/15 bg-white/10">
+              <Sparkles
+                size={19}
+                strokeWidth={1.8}
+                className="text-[#FFE9DC]"
+              />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-[0.17em] text-[#F2C3AC]">
+                {t("innerCanvas.homeTitle")}
+              </p>
+
+              <p className="mt-0.5 text-sm font-black text-white">
+                {t("innerCanvas.homeSubtitle")}
+              </p>
+            </div>
+          </div>
+
+          <span
+            aria-hidden="true"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-base font-light text-white"
+          >
+            →
+          </span>
+        </div>
+      </button>
+    </div>
+
+
 {/* Apoio — acesso SOS discreto e sempre disponível */}
 <button
   type="button"
@@ -3093,6 +3151,18 @@ className="flex items-center justify-center w-24 h-24 relative"
       avatarXp={avatar.xp}
       completedObjectivesCount={completedObjectivesCount}
       objectivesHistory={objectivesHistory}
+    />
+  </div>
+)}
+
+{/* CONFIA — QUADRO INTERIOR / 60 SEGUNDOS */}
+{currentTab === 0 && homeScreen === "innerCanvas" && (
+  <div
+    key="inner-canvas-screen"
+    className="flex-1"
+  >
+    <InnerCanvas
+      onBack={() => setHomeScreen("home")}
     />
   </div>
 )}

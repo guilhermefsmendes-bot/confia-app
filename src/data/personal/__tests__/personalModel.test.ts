@@ -34,3 +34,29 @@ test("confidence avoids false precision", () => {
   assert.equal(calculateInsightConfidence(1, 1, 1, 1, 1, 1), "low");
   assert.equal(calculateInsightConfidence(10, 1, 1, 1, 1, 1), "high");
 });
+
+import { buildPersonalPatterns } from "../personalPatterns";
+
+test("habit pattern needs repeated paired days", () => {
+  const events = [];
+  for (let i = 0; i < 8; i++) {
+    const date = `2026-09-${String(i + 1).padStart(2, "0")}`;
+    events.push(event(`m${i}`, date, i < 5 ? 8 : 3));
+    if (i < 5) events.push(makePersonalEvent({
+      id: `h${i}`, type: "habit", timestamp: `${date}T09:00:00.000Z`, localDate: date,
+      source: "habit_daily", value: 1, metadata: { habitId: "walk", habitName: "Caminhada", completed: true },
+    }));
+  }
+  const patterns = buildPersonalPatterns(events);
+  assert.ok(patterns.some(pattern => pattern.type === "habit_association" && pattern.label === "Caminhada"));
+});
+
+test("repeated need becomes a pattern without inventing causality", () => {
+  const events = [1, 2, 3, 4].map(i => makePersonalEvent({
+    id: `c${i}`, type: "checkin", timestamp: `2026-09-${String(i).padStart(2, "0")}T12:00:00.000Z`,
+    localDate: `2026-09-${String(i).padStart(2, "0")}`, source: "daily_checkin", value: 5,
+    metadata: { need: "calm" },
+  }));
+  const patterns = buildPersonalPatterns(events);
+  assert.equal(patterns.filter(pattern => pattern.type === "repeated_need").length, 1);
+});

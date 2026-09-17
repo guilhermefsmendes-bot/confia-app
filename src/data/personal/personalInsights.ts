@@ -1,4 +1,5 @@
 import type { PersonalEvent } from "./personalEvent";
+import { buildPersonalPatterns, describePersonalPattern } from "./personalPatterns";
 
 export type InsightType = "trend" | "time_of_day" | "weekday" | "habit_association" | "intervention_effect" | "recovery_pattern" | "repeated_need" | "personal_change" | "pattern_disappearance";
 export type InsightStatus = "emerging" | "possible" | "consistent" | "weakened" | "changed" | "disappeared";
@@ -91,6 +92,19 @@ export function buildPersonalInsights(events: PersonalEvent[], now = new Date())
   const interventionEvents = events.filter(validTimestamp).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   const intervention = buildInterventionInsight(interventionEvents, now);
   if (intervention) insights.push(intervention);
+
+  for (const pattern of buildPersonalPatterns(events)) {
+    if (pattern.status === "emerging") continue;
+    insights.push({
+      id: `insight_${pattern.id}`, type: pattern.type, generatedAt: now.toISOString(),
+      periodStart: pattern.firstSeen, periodEnd: pattern.lastSeen, evidenceCount: pattern.evidenceCount,
+      confidence: pattern.confidence, direction: pattern.effect > 0.25 ? "up" : pattern.effect < -0.25 ? "down" : "stable",
+      variables: [pattern.label], status: pattern.status, fingerprint: pattern.fingerprint,
+      firstSeen: pattern.firstSeen, lastSeen: pattern.lastSeen, timesShown: 0, novelty: "new",
+      actionability: pattern.type === "repeated_need" ? "medium" : "high", supportingEventIds: pattern.supportingEventIds,
+      message: describePersonalPattern(pattern),
+    });
+  }
   return insights;
 }
 

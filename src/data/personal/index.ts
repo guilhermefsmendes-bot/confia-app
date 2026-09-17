@@ -5,3 +5,4 @@ export * from "./personalModel";
 export * from "./personalInsights";
 export * from "./syncPersonalEvents";
 export * from "./personalAnalytics";
+export * from "./personalPatterns";

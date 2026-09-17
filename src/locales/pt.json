@@ -1819,7 +1819,6 @@
     "learning": "A CONFIA ainda está a aprender. Continua a registar para descobrires padrões teus.",
     "needObserved": "A necessidade “{{need}}” aparece {{count}} vezes nos registos.",
     "discoveries": "Descobertas",
-
     "personalInsights": {
       "trendUp": "Nos teus registos recentes, o teu estado médio tem subido.",
       "trendDown": "Nos teus registos recentes, o teu estado médio tem descido.",
@@ -1828,7 +1827,7 @@
       "timeOfDay": "Nos teus registos, o estado médio tende a variar em {{label}}.",
       "repeatedNeed": "A necessidade “{{label}}” aparece repetidamente nos teus registos."
     },
-"analogousTitle": "Já estiveste aqui",
+    "analogousTitle": "Já estiveste aqui",
     "analogousSubtitle": "Momentos anteriores com um estado semelhante ao de agora.",
     "noDiscoveries": "Ainda não há uma descoberta sustentada. Quando houver evidência suficiente, ela aparece aqui.",
     "explainable": "Cada descoberta aponta para as observações que a sustentam.",
@@ -1837,7 +1836,18 @@
       "down": "Nos teus registos recentes, o estado médio está abaixo do teu período de referência.",
       "stable": "Os teus registos recentes estão relativamente estáveis.",
       "unknown": "Ainda não há referência suficiente."
-    }
+    },
+    "eyebrow": "mapa pessoal",
+    "pulseEyebrow": "pulso longitudinal",
+    "pulseTitle": "O teu ritmo, ao longo do tempo",
+    "needEyebrow": "sinal recorrente",
+    "needTitle": "Algo que tem pedido atenção",
+    "new": "novo",
+    "feedbackPrompt": "Isto fez sentido?",
+    "feedbackThanks": "Registado. A CONFIA aprende contigo.",
+    "useful": "Marcar descoberta como útil",
+    "dismiss": "Marcar descoberta como pouco útil",
+    "pulseAria": "Evolução recente dos teus registos emocionais"
   },
   "companionPresence": {
     "present": "Presença CONFIA",

@@ -1690,7 +1690,6 @@
     "learning": "CONFIA is still learning. Keep recording to discover your patterns.",
     "needObserved": "The need “{{need}}” appears {{count}} times in your records.",
     "discoveries": "Discoveries",
-
     "personalInsights": {
       "trendUp": "Dans tes registres récents, ton état moyen a augmenté.",
       "trendDown": "Dans tes registres récents, ton état moyen a diminué.",
@@ -1699,7 +1698,7 @@
       "timeOfDay": "Dans tes registres, l’état moyen varie davantage en {{label}}.",
       "repeatedNeed": "Le besoin « {{label}} » apparaît à plusieurs reprises dans tes registres."
     },
-"analogousTitle": "Tu es déjà passé par là",
+    "analogousTitle": "Tu es déjà passé par là",
     "analogousSubtitle": "Des moments précédents avec un état proche de celui-ci.",
     "noDiscoveries": "There is not enough evidence for a supported discovery yet.",
     "explainable": "Each discovery points to the observations behind it.",
@@ -1708,7 +1707,18 @@
       "down": "Your recent average is below your reference period.",
       "stable": "Your recent records are relatively stable.",
       "unknown": "There is not enough reference yet."
-    }
+    },
+    "eyebrow": "carte personnelle",
+    "pulseEyebrow": "pouls longitudinal",
+    "pulseTitle": "Ton rythme dans le temps",
+    "needEyebrow": "signal récurrent",
+    "needTitle": "Quelque chose qui demande de l’attention",
+    "new": "nouveau",
+    "feedbackPrompt": "Est-ce que cela t’a été utile ?",
+    "feedbackThanks": "Enregistré. CONFIA apprend avec toi.",
+    "useful": "Marquer la découverte comme utile",
+    "dismiss": "Marquer la découverte comme peu utile",
+    "pulseAria": "Évolution récente de tes relevés émotionnels"
   },
   "companionPresence": {
     "present": "Présence CONFIA",

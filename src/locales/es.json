@@ -1692,7 +1692,6 @@
     "learning": "CONFIA is still learning. Keep recording to discover your patterns.",
     "needObserved": "The need “{{need}}” appears {{count}} times in your records.",
     "discoveries": "Discoveries",
-
     "personalInsights": {
       "trendUp": "En tus registros recientes, tu estado medio ha subido.",
       "trendDown": "En tus registros recientes, tu estado medio ha bajado.",
@@ -1701,7 +1700,7 @@
       "timeOfDay": "En tus registros, el estado medio tiende a variar en {{label}}.",
       "repeatedNeed": "La necesidad “{{label}}” aparece repetidamente en tus registros."
     },
-"analogousTitle": "Ya estuviste aquí",
+    "analogousTitle": "Ya estuviste aquí",
     "analogousSubtitle": "Momentos anteriores con un estado parecido al de ahora.",
     "noDiscoveries": "There is not enough evidence for a supported discovery yet.",
     "explainable": "Each discovery points to the observations behind it.",
@@ -1710,7 +1709,18 @@
       "down": "Your recent average is below your reference period.",
       "stable": "Your recent records are relatively stable.",
       "unknown": "There is not enough reference yet."
-    }
+    },
+    "eyebrow": "mapa personal",
+    "pulseEyebrow": "pulso longitudinal",
+    "pulseTitle": "Tu ritmo a lo largo del tiempo",
+    "needEyebrow": "señal recurrente",
+    "needTitle": "Algo que pide atención",
+    "new": "nuevo",
+    "feedbackPrompt": "¿Te resultó útil?",
+    "feedbackThanks": "Guardado. CONFIA aprende contigo.",
+    "useful": "Marcar descubrimiento como útil",
+    "dismiss": "Marcar descubrimiento como poco útil",
+    "pulseAria": "Evolución reciente de tus registros emocionales"
   },
   "companionPresence": {
     "present": "Presencia CONFIA",

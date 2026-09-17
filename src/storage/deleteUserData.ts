@@ -4,6 +4,7 @@ import {
   query,
   where,
   writeBatch,
+  deleteField,
   type WriteBatch,
 } from "firebase/firestore";
 import { deleteUser } from "firebase/auth";
@@ -64,13 +65,16 @@ export async function deleteAllUserData(): Promise<void> {
   const queueDelete = (ref: Parameters<WriteBatch["delete"]>[0]) => operations.push(batch => batch.delete(ref));
   const queueUpdate = (ref: Parameters<WriteBatch["update"]>[0], data: Record<string, unknown>) => operations.push(batch => batch.update(ref, data));
 
+  const ownedPostIds = new Set(postsSnapshot.docs.map(postDoc => postDoc.id));
   postsSnapshot.forEach(postDoc => queueDelete(postDoc.ref));
 
   const reactionSnapshots = [yellowSnapshot, greenSnapshot, redSnapshot];
   const processedPosts = new Set<string>();
   reactionSnapshots.forEach(snapshot => {
     snapshot.forEach(postDoc => {
-      if (processedPosts.has(postDoc.id)) return;
+      // A post owned by the user is already queued for deletion. Never queue
+      // an update for the same document in the same batch.
+      if (ownedPostIds.has(postDoc.id) || processedPosts.has(postDoc.id)) return;
       processedPosts.add(postDoc.id);
       const data = postDoc.data();
       const updates: Record<string, unknown> = {};
@@ -90,8 +94,26 @@ export async function deleteAllUserData(): Promise<void> {
 
   for (const chatDoc of chatsSnapshot.docs) {
     const messagesSnapshot = await getDocs(collection(db, "chats", chatDoc.id, "messages"));
-    messagesSnapshot.forEach(messageDoc => queueDelete(messageDoc.ref));
-    queueDelete(chatDoc.ref);
+    messagesSnapshot.forEach(messageDoc => {
+      if (messageDoc.data().senderId === uid) queueDelete(messageDoc.ref);
+    });
+
+    const data = chatDoc.data();
+    const participants = Array.isArray(data.participants) ? data.participants : [];
+    const remainingParticipants = participants.filter((participant: unknown) => participant !== uid);
+
+    if (remainingParticipants.length === 0) {
+      queueDelete(chatDoc.ref);
+      continue;
+    }
+
+    const updates: Record<string, unknown> = {
+      participants: remainingParticipants,
+      lastMessage: "",
+      lastMessageAt: null,
+    };
+    if (data.authorId === uid) updates.authorId = deleteField();
+    queueUpdate(chatDoc.ref, updates);
   }
 
   for (let start = 0; start < operations.length; start += 400) {

@@ -104,16 +104,8 @@ LAST_APP_OPEN_DATE: 'confia_last_app_open_date_v1',
 
 };
 
-// Past few days logs so the progress graph is instantly drawn on first load
-
-
-// Past few days logs so the progress graph is instantly drawn on first load
-const PRE_LOGGED_RATINGS: DailyRating[] = [
-  { date: '2026-06-27', morning: 4, afternoon: 6, note: 'Tive picos de ansiedade de manhã, mas acalmei à tarde' },
-  { date: '2026-06-28', morning: 5, afternoon: 7, note: 'Um dia estável, o passeio ajudou imenso' },
-  { date: '2026-06-29', morning: 6, afternoon: 6, note: 'Senti-me bem de manhã, um pouco cansado à tarde' },
-  { date: '2026-06-30', morning: 7, afternoon: 8, note: 'Senti muito progresso na respiração lenta' }
-];
+// O histórico visual nasce exclusivamente dos registos reais do utilizador.
+// Não existe seed emocional nem histórico fictício: a CONFIA nunca deve fingir memória.
 
 export default function App() {
 const { t, i18n } = useTranslation();
@@ -390,7 +382,6 @@ return parsed.items
   return INITIAL_OBJECTIVES;
 });
  const completedObjectivesCount = objectives.filter(o => o.completed).length;
-console.log("OBJECTIVOS:", objectives);
   const [ratings, setRatings] = useState<DailyRating[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.RATINGS);
     if (saved) return JSON.parse(saved);
@@ -3315,8 +3306,10 @@ className="flex items-center justify-center w-24 h-24 relative"
   >
     <div className="flex items-center gap-3">
       <button
+        type="button"
         onClick={() => setHomeScreen("home")}
-        className="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-lg"
+        aria-label={t("back")}
+        className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C97B5E]"
       >
         ←
       </button>
@@ -3632,8 +3625,8 @@ className="flex items-center justify-center w-24 h-24 relative"
 
       {/* Global Tab Navigation Footer */}
       {/* Global Tab Navigation Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5A88B]/15 px-4 py-3.5">
-        <div className="max-w-lg mx-auto flex items-center justify-between">
+      <footer className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#E5A88B]/15 bg-white/95 px-4 pb-[calc(.75rem+env(safe-area-inset-bottom))] pt-3.5 backdrop-blur-md" aria-label={t("mainNavigation") }>
+        <div className="mx-auto flex max-w-lg items-center justify-between">
           {[
            { label: t("home"), icon: House, index: 0 },
            { label: t("hug"), icon: Wind, index: 1 },
@@ -3646,14 +3639,16 @@ className="flex items-center justify-center w-24 h-24 relative"
             return (
             <button
               key={tab.index}
-onClick={() => {
+              type="button"
+              aria-current={currentTab === tab.index ? "page" : undefined}
+              className={`flex min-h-11 flex-1 flex-col items-center justify-center rounded-xl py-1 transition-all relative cursor-pointer ${
+                currentTab === tab.index ? 'text-[#C97B5E] font-black' : 'text-slate-400 hover:text-slate-600'
+              }`}
+              onClick={() => {
   window.dispatchEvent(new Event("stop-background-audio"));
   setHomeScreen("home");
   setCurrentTab(tab.index);
 }}
-              className={`flex-1 flex flex-col items-center justify-center py-1 rounded-xl transition-all relative cursor-pointer ${
-                currentTab === tab.index ? 'text-[#C97B5E] font-black' : 'text-slate-400 hover:text-slate-600'
-              }`}
             >
               {currentTab === tab.index && (
                 <motion.div

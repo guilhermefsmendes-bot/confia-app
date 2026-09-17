@@ -4,7 +4,7 @@ import {
   query,
   where,
   writeBatch,
-  doc
+  type WriteBatch,
 } from "firebase/firestore";
 import { deleteUser } from "firebase/auth";
 import { db, auth } from "../firebase";
@@ -57,87 +57,48 @@ export async function deleteAllUserData(): Promise<void> {
 
   const chatsSnapshot = await getDocs(chatsQuery);
 
-  // 4. Usar batches para apagar/alterar os documentos
-  const batch = writeBatch(db);
+  // 4–6. Preparar operações e executá-las em lotes seguros.
+  // Firestore limita cada batch a 500 operações; 400 deixa margem para
+  // futuras alterações e impede que a eliminação falhe com contas grandes.
+  const operations: Array<(batch: WriteBatch) => void> = [];
+  const queueDelete = (ref: Parameters<WriteBatch["delete"]>[0]) => operations.push(batch => batch.delete(ref));
+  const queueUpdate = (ref: Parameters<WriteBatch["update"]>[0], data: Record<string, unknown>) => operations.push(batch => batch.update(ref, data));
 
-  // Apagar publicações criadas pelo utilizador
-  postsSnapshot.forEach((postDoc) => {
-    batch.delete(postDoc.ref);
-  });
+  postsSnapshot.forEach(postDoc => queueDelete(postDoc.ref));
 
-  // Retirar reações do utilizador
-  const reactionSnapshots = [
-    yellowSnapshot,
-    greenSnapshot,
-    redSnapshot
-  ];
-
+  const reactionSnapshots = [yellowSnapshot, greenSnapshot, redSnapshot];
   const processedPosts = new Set<string>();
-
-  reactionSnapshots.forEach((snapshot) => {
-    snapshot.forEach((postDoc) => {
+  reactionSnapshots.forEach(snapshot => {
+    snapshot.forEach(postDoc => {
       if (processedPosts.has(postDoc.id)) return;
-
       processedPosts.add(postDoc.id);
-
       const data = postDoc.data();
-
       const updates: Record<string, unknown> = {};
 
-      if (Array.isArray(data.yellowLikedBy)) {
-        const users = data.yellowLikedBy.filter(
-          (id: string) => id !== uid
-        );
-
-        if (users.length !== data.yellowLikedBy.length) {
-          updates.yellowLikedBy = users;
-          updates.yellowLikes = users.length;
+      for (const reaction of ["yellow", "green", "red"] as const) {
+        const users = data[`${reaction}LikedBy`];
+        if (!Array.isArray(users)) continue;
+        const filtered = users.filter((id: unknown) => id !== uid);
+        if (filtered.length !== users.length) {
+          updates[`${reaction}LikedBy`] = filtered;
+          updates[`${reaction}Likes`] = filtered.length;
         }
       }
-
-      if (Array.isArray(data.greenLikedBy)) {
-        const users = data.greenLikedBy.filter(
-          (id: string) => id !== uid
-        );
-
-        if (users.length !== data.greenLikedBy.length) {
-          updates.greenLikedBy = users;
-          updates.greenLikes = users.length;
-        }
-      }
-
-      if (Array.isArray(data.redLikedBy)) {
-        const users = data.redLikedBy.filter(
-          (id: string) => id !== uid
-        );
-
-        if (users.length !== data.redLikedBy.length) {
-          updates.redLikedBy = users;
-          updates.redLikes = users.length;
-        }
-      }
-
-      if (Object.keys(updates).length > 0) {
-        batch.update(postDoc.ref, updates);
-      }
+      if (Object.keys(updates).length) queueUpdate(postDoc.ref, updates);
     });
   });
 
-  // 5. Apagar mensagens e chats
   for (const chatDoc of chatsSnapshot.docs) {
-    const messagesSnapshot = await getDocs(
-      collection(db, "chats", chatDoc.id, "messages")
-    );
-
-    messagesSnapshot.forEach((messageDoc) => {
-      batch.delete(messageDoc.ref);
-    });
-
-    batch.delete(chatDoc.ref);
+    const messagesSnapshot = await getDocs(collection(db, "chats", chatDoc.id, "messages"));
+    messagesSnapshot.forEach(messageDoc => queueDelete(messageDoc.ref));
+    queueDelete(chatDoc.ref);
   }
 
-  // 6. Executar todas as alterações no Firestore
-  await batch.commit();
+  for (let start = 0; start < operations.length; start += 400) {
+    const batch = writeBatch(db);
+    operations.slice(start, start + 400).forEach(operation => operation(batch));
+    await batch.commit();
+  }
 
   // 7. Limpar dados locais da aplicação
   localStorage.clear();

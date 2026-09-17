@@ -1,6 +1,6 @@
 import type { PersonalInsight } from "./personalInsights";
 
-type InsightHistory = Record<string, { firstSeen: string; lastSeen: string; timesShown: number; status: PersonalInsight["status"]; type?: PersonalInsight["type"] }>;
+type InsightHistory = Record<string, { firstSeen: string; lastSeen: string; lastShownAt?: string; timesShown: number; status: PersonalInsight["status"]; type?: PersonalInsight["type"] }>;
 const KEY = "confia_personal_insight_lifecycle_v1";
 
 function read(): InsightHistory {
@@ -59,10 +59,15 @@ export function markInsightsShown(insights: PersonalInsight[]): void {
   const history = read();
   const now = new Date().toISOString();
   for (const insight of insights) {
-    const previous = history[insight.fingerprint];
-    history[insight.fingerprint] = {
+    const fingerprint = insight.type === "pattern_disappearance"
+      ? insight.fingerprint.replace(/^disappearance:/, "")
+      : insight.fingerprint;
+    const previous = history[fingerprint];
+    history[fingerprint] = {
       firstSeen: previous?.firstSeen ?? insight.firstSeen,
-      lastSeen: now,
+      // lastSeen is the last observation in the user's data, not the last UI visit.
+      lastSeen: insight.lastSeen,
+      lastShownAt: now,
       timesShown: (previous?.timesShown ?? 0) + 1,
       status: insight.status,
       type: insight.type,

@@ -142,6 +142,7 @@
     "levelRequired": "Level {{level}}"
   },
   "settings": "Settings",
+  "mainNavigation": "Main navigation",
   "home": "Home",
   "impulseHistoryTitle": "🛡️ Impulse History",
   "impulseLastUsed": "Last use: {{days}} day(s) ago",

@@ -5,7 +5,7 @@ import { buildCompanionCrossMemory } from "./data/reactive/companionBrain";
 import { collectCompanionData } from "./data/companionData";
 import { buildCompanionLongitudinalImpulseMemory } from "./data/reactive/companionBrain";
 import { buildCompanionLongitudinalMoodMemory } from "./data/reactive/companionBrain";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useRef } from 'react';
 import {
   motion,
   AnimatePresence } from 'motion/react';
@@ -45,8 +45,8 @@ import ConfiaCompanionHome from "./components/Companheiro/ConfiaCompanionHome";
 import HomeProgressSummary from "./components/HomeProgressSummary";
 import HomeShop from "./components/HomeShop";
 import InnerCanvas from "./components/InnerCanvas/InnerCanvas";
-import PersonalMap from "./components/PersonalMap";
-import PersonalExperiments from "./components/PersonalExperiments";
+const PersonalMap = lazy(() => import("./components/PersonalMap"));
+const PersonalExperiments = lazy(() => import("./components/PersonalExperiments"));
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 import { syncPersonalEventsFromLegacySources } from "./data/personal";
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
@@ -3180,11 +3180,11 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 {/* CONFIA — QUADRO INTERIOR / 60 SEGUNDOS */}
 {currentTab === 0 && homeScreen === "map" && (
-  <PersonalMap onBack={() => setHomeScreen("home")} />
+  <Suspense fallback={<ScreenLoading label={t("loading")} />}><PersonalMap onBack={() => setHomeScreen("home")} /></Suspense>
 )}
 
 {currentTab === 0 && homeScreen === "experiments" && (
-  <PersonalExperiments onBack={() => setHomeScreen("home")} />
+  <Suspense fallback={<ScreenLoading label={t("loading")} />}><PersonalExperiments onBack={() => setHomeScreen("home")} /></Suspense>
 )}
 
 {currentTab === 0 && homeScreen === "innerCanvas" && (
@@ -3675,4 +3675,9 @@ onClick={() => {
       </footer>
     </div>
   );
+}
+
+
+function ScreenLoading({ label }: { label: string }) {
+  return <div className="flex min-h-[40vh] items-center justify-center"><div role="status" aria-live="polite" className="rounded-full border border-[#E8DDD4] bg-white/90 px-4 py-2 text-xs font-bold text-[#795B50] shadow-sm">{label}</div></div>;
 }

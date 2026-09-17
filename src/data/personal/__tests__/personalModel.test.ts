@@ -20,6 +20,7 @@ test("personal model compares recent data with the person's own baseline", () =>
   assert.equal(model.observationCount, 6);
   assert.equal(model.moodDirection, "up");
   assert.equal(model.currentMood, 8);
+  assert.equal(model.dataQuality, "low");
 });
 
 test("insight needs repeated evidence", () => {

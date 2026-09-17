@@ -5,6 +5,7 @@ export interface PersonalModel {
   observationCount: number;
   activeDays: number;
   completeness: number;
+  dataQuality: "low" | "moderate" | "high";
   currentMood?: number;
   recentAverageMood?: number;
   baselineAverageMood?: number;
@@ -41,6 +42,9 @@ export function buildPersonalModel(events: PersonalEvent[], now = new Date()): P
   const daysObserved = Math.min(30, Math.max(1, Math.ceil((now.getTime() - (sorted[0] ? new Date(sorted[0].timestamp).getTime() : now.getTime())) / 86400000) + 1));
   const completeness = Math.min(1, activeDays / daysObserved);
 
+  const moodDays = new Set(moodEvents.map(event => event.localDate)).size;
+  const dataQuality: PersonalModel["dataQuality"] = moodEvents.length >= 20 && moodDays >= 14 ? "high" : moodEvents.length >= 8 && moodDays >= 5 ? "moderate" : "low";
+
   let moodDirection: PersonalModel["moodDirection"] = "unknown";
   if (recentAverage !== undefined && baselineAverage !== undefined) {
     const delta = recentAverage - baselineAverage;
@@ -52,6 +56,7 @@ export function buildPersonalModel(events: PersonalEvent[], now = new Date()): P
     observationCount: sorted.length,
     activeDays,
     completeness,
+    dataQuality,
     currentMood: last ? moodValue(last) : undefined,
     recentAverageMood: recentAverage,
     baselineAverageMood: baselineAverage,

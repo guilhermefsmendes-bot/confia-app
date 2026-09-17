@@ -2,6 +2,7 @@ import type { PersonalEvent } from "./personalEvent";
 
 const STORAGE_KEY = "confia_personal_events_v1";
 const MAX_EVENTS = 5000;
+export const PERSONAL_EVENTS_UPDATED_EVENT = "confia:personal-events-updated";
 
 function available(): boolean {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -38,12 +39,16 @@ export function appendPersonalEvents(events: PersonalEvent[]): PersonalEvent[] {
   const ids = new Set(existing.map(event => event.id));
   const next = [...existing, ...events.filter(event => !ids.has(event.id))];
   writePersonalEvents(next);
+  if (typeof window !== "undefined" && next.length !== existing.length) {
+    window.dispatchEvent(new Event(PERSONAL_EVENTS_UPDATED_EVENT));
+  }
   return next;
 }
 
 export function clearPersonalEvents(): void {
   if (!available()) return;
   window.localStorage.removeItem(STORAGE_KEY);
+  window.dispatchEvent(new Event(PERSONAL_EVENTS_UPDATED_EVENT));
 }
 
 export function getPersonalEventStorageKey(): string {

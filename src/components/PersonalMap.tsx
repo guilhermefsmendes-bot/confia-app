@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Compass, Info, Sparkles, ThumbsDown, ThumbsUp } from "lucide-react";
-import { readPersonalEvents, appendPersonalEvents } from "../data/personal/personalEventStorage";
+import { readPersonalEvents, appendPersonalEvents, PERSONAL_EVENTS_UPDATED_EVENT } from "../data/personal/personalEventStorage";
 import { buildPersonalModel, findAnalogousMoments } from "../data/personal/personalModel";
 import { buildPersonalInsights, explainInsight } from "../data/personal/personalInsights";
 import { recordPersonalAnalytics } from "../data/personal/personalAnalytics";
@@ -13,7 +13,13 @@ type Props = { onBack: () => void };
 
 export default function PersonalMap({ onBack }: Props) {
   const { t } = useTranslation();
-  const events = useMemo(() => readPersonalEvents(), []);
+  const [personalEventRevision, setPersonalEventRevision] = useState(0);
+  useEffect(() => {
+    const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
+    window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+    return () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+  }, []);
+  const events = useMemo(() => readPersonalEvents(), [personalEventRevision]);
   const model = useMemo(() => buildPersonalModel(events), [events]);
   const moodSeries = useMemo(() => events.filter(e => (e.type === "mood" || e.type === "checkin") && typeof e.value === "number").slice(-18), [events]);
   const analogous = useMemo(() => {

@@ -48,7 +48,7 @@ import InnerCanvas from "./components/InnerCanvas/InnerCanvas";
 const PersonalMap = lazy(() => import("./components/PersonalMap"));
 const PersonalExperiments = lazy(() => import("./components/PersonalExperiments"));
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
-import { syncPersonalEventsFromLegacySources, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle } from "./data/personal";
+import { syncPersonalEventsFromLegacySources, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle, PERSONAL_EVENTS_UPDATED_EVENT } from "./data/personal";
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 import PatternsNew from './components/PatternsNew/PatternsNew';
 import HabitAssessment from './components/PatternsNew/HabitAssessment';
@@ -370,6 +370,14 @@ return parsed.items
       return readStoredJson<DailyRating[]>(STORAGE_KEYS.RATINGS, []);
   });
 
+  const [personalEventRevision, setPersonalEventRevision] = useState(0);
+
+  useEffect(() => {
+    const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
+    window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+    return () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+  }, []);
+
   const personalDiscovery = React.useMemo(() => {
     const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
     return insights
@@ -380,7 +388,7 @@ return parsed.items
         const actionability = { high: 3, medium: 2, low: 1 };
         return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
       })[0];
-  }, [ratings]);
+  }, [ratings, personalEventRevision]);
 
   const [posts, setPosts] = useState<SharePost[]>(() =>
     readStoredJson<SharePost[]>(STORAGE_KEYS.POSTS, INITIAL_POSTS)

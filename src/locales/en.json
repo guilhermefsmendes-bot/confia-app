@@ -1859,6 +1859,8 @@
     },
     "weekday": "Your records show a recurring difference on one weekday.",
     "recoveryPattern": "When a record was lower, there are occasions where your following records show a meaningful recovery.",
+    "goalAssociationUp": "In your records, days with completed goals have coincided with a higher average state.",
+    "goalAssociationDown": "In your records, days with completed goals have coincided with a lower average state.",
     "personalChange": "Your recent pattern is different from the previous period, based on your own records."
   }
 }

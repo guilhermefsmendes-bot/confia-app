@@ -1886,6 +1886,8 @@
     },
     "weekday": "Os teus registos mostram uma diferença recorrente num dia da semana.",
     "recoveryPattern": "Quando um registo esteve mais baixo, há ocasiões em que os registos seguintes mostram uma recuperação significativa.",
+    "goalAssociationUp": "Nos teus registos, os dias com objetivos concluídos têm coincidido com um estado médio mais alto.",
+    "goalAssociationDown": "Nos teus registos, os dias com objetivos concluídos têm coincidido com um estado médio mais baixo.",
     "personalChange": "O teu padrão recente está diferente do período anterior, segundo os teus próprios registos."
   }
 }

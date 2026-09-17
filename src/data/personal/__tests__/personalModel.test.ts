@@ -127,3 +127,16 @@ test("personal change compares adjacent periods rather than population norms", (
   const insights = buildPersonalInsights(events, new Date("2026-09-17T12:00:00Z"));
   assert.ok(insights.some(insight => insight.type === "personal_change"));
 });
+
+test("goal association needs repeated goal and comparison days", () => {
+  const events = [];
+  for (let i = 0; i < 10; i++) {
+    const goalDate = new Date(Date.UTC(2026, 8, 1 + i * 2)).toISOString().slice(0, 10);
+    const comparisonDate = new Date(Date.UTC(2026, 8, 2 + i * 2)).toISOString().slice(0, 10);
+    events.push(event(`goalMood${i}`, goalDate, 8));
+    events.push(makePersonalEvent({ id: `goal${i}`, type: "goal", timestamp: `${goalDate}T18:00:00.000Z`, localDate: goalDate, source: "objective", value: true, metadata: { completedCount: 1, total: 1, action: "completed" } }));
+    events.push(event(`comparisonMood${i}`, comparisonDate, 5));
+  }
+  const insights = buildPersonalInsights(events, new Date("2026-09-21T12:00:00Z"));
+  assert.ok(insights.some(insight => insight.type === "goal_association"));
+});

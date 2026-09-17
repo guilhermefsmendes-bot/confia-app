@@ -1757,6 +1757,8 @@
     },
     "weekday": "Tes relevés montrent une différence récurrente un jour de la semaine.",
     "recoveryPattern": "Lorsqu’un relevé était plus bas, les relevés suivants montrent parfois une récupération significative.",
+    "goalAssociationUp": "Dans tes données, les jours où des objectifs ont été accomplis ont coïncidé avec un état moyen plus élevé.",
+    "goalAssociationDown": "Dans tes données, les jours où des objectifs ont été accomplis ont coïncidé avec un état moyen plus bas.",
     "personalChange": "Ton profil récent diffère de la période précédente, selon tes propres relevés."
   }
 }

@@ -48,7 +48,7 @@ import InnerCanvas from "./components/InnerCanvas/InnerCanvas";
 const PersonalMap = lazy(() => import("./components/PersonalMap"));
 const PersonalExperiments = lazy(() => import("./components/PersonalExperiments"));
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
-import { syncPersonalEventsFromLegacySources, readPersonalEvents, buildPersonalInsights } from "./data/personal";
+import { syncPersonalEventsFromLegacySources, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle } from "./data/personal";
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 import PatternsNew from './components/PatternsNew/PatternsNew';
 import HabitAssessment from './components/PatternsNew/HabitAssessment';
@@ -371,7 +371,7 @@ return parsed.items
   });
 
   const personalDiscovery = React.useMemo(() => {
-    const insights = buildPersonalInsights(readPersonalEvents(), new Date());
+    const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
     return insights
       .filter(insight => insight.status === "consistent" || insight.status === "possible")
       .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")

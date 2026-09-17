@@ -1759,6 +1759,8 @@
     },
     "weekday": "Tus registros muestran una diferencia recurrente en un día de la semana.",
     "recoveryPattern": "Cuando un registro estuvo más bajo, en algunas ocasiones los siguientes muestran una recuperación significativa.",
+    "goalAssociationUp": "En tus registros, los días con objetivos completados han coincidido con un estado medio más alto.",
+    "goalAssociationDown": "En tus registros, los días con objetivos completados han coincidido con un estado medio más bajo.",
     "personalChange": "Tu patrón reciente es diferente del período anterior, según tus propios registros."
   }
 }

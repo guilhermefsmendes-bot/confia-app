@@ -1,7 +1,7 @@
 import type { PersonalEvent } from "./personalEvent";
 import { buildPersonalPatterns, describePersonalPattern } from "./personalPatterns";
 
-export type InsightType = "trend" | "time_of_day" | "weekday" | "habit_association" | "intervention_effect" | "recovery_pattern" | "repeated_need" | "personal_change" | "pattern_disappearance";
+export type InsightType = "trend" | "time_of_day" | "weekday" | "habit_association" | "goal_association" | "intervention_effect" | "recovery_pattern" | "repeated_need" | "personal_change" | "pattern_disappearance";
 export type InsightStatus = "emerging" | "possible" | "consistent" | "weakened" | "changed" | "disappeared";
 
 export interface PersonalInsight {
@@ -61,6 +61,64 @@ function buildTrendInsight(valid: PersonalEvent[], now: Date): PersonalInsight |
     novelty: "new", actionability: "medium", supportingEventIds: recent.map(event => event.id),
     message: direction === "up" ? "Nos teus registos recentes, o teu estado médio tem subido." : "Nos teus registos recentes, o teu estado médio tem descido.",
     messageKey: direction === "up" ? "personalInsights.trendUp" : "personalInsights.trendDown",
+  };
+}
+
+function buildGoalAssociationInsight(events: PersonalEvent[], now: Date): PersonalInsight | undefined {
+  const cutoff = now.getTime() - 90 * 86400000;
+  const recent = events.filter(event => validTimestamp(event) && new Date(event.timestamp).getTime() >= cutoff);
+  const moodsByDay = new Map<string, PersonalEvent[]>();
+  for (const event of recent) {
+    if (mood(event) === undefined) continue;
+    const day = moodsByDay.get(event.localDate) ?? [];
+    day.push(event);
+    moodsByDay.set(event.localDate, day);
+  }
+  const goalDays = new Set(
+    recent.filter(event => event.type === "goal" && event.value === true).map(event => event.localDate),
+  );
+  const paired = [...goalDays].filter(day => moodsByDay.has(day));
+  const unpaired = [...moodsByDay.keys()].filter(day => !goalDays.has(day));
+  if (paired.length < 5 || unpaired.length < 5) return undefined;
+
+  const pairedValues = paired.flatMap(day => moodsByDay.get(day)!.map(event => mood(event)!));
+  const unpairedValues = unpaired.flatMap(day => moodsByDay.get(day)!.map(event => mood(event)!));
+  const delta = avg(pairedValues)! - avg(unpairedValues)!;
+  if (Math.abs(delta) < 0.8) return undefined;
+
+  const lastDate = recent[recent.length - 1]?.localDate;
+  if (!lastDate) return undefined;
+  const confidence = calculateInsightConfidence(
+    paired.length + unpaired.length,
+    Math.min(1, Math.abs(delta) / 2),
+    Math.min(1, paired.length / 10),
+    Math.min(1, Math.min(paired.length, unpaired.length) / 10),
+    Math.abs(delta) / 2,
+    Math.min(1, moodsByDay.size / 30),
+  );
+  return {
+    id: `insight_goal_association_${lastDate}`,
+    type: "goal_association",
+    generatedAt: now.toISOString(),
+    periodStart: [...moodsByDay.keys()].sort()[0],
+    periodEnd: lastDate,
+    evidenceCount: paired.length + unpaired.length,
+    confidence,
+    direction: delta > 0 ? "up" : "down",
+    variables: ["goal_completion", "mood"],
+    status: paired.length >= 8 && unpaired.length >= 8 ? "consistent" : "possible",
+    fingerprint: `goal_association:mood:${delta > 0 ? "up" : "down"}`,
+    firstSeen: [...moodsByDay.keys()].sort()[0],
+    lastSeen: lastDate,
+    timesShown: 0,
+    novelty: "new",
+    actionability: "medium",
+    supportingEventIds: recent.filter(event => goalDays.has(event.localDate) || mood(event) !== undefined).map(event => event.id),
+    message: delta > 0
+      ? "Nos teus registos, os dias com objetivos concluídos têm coincidido com um estado médio mais alto."
+      : "Nos teus registos, os dias com objetivos concluídos têm coincidido com um estado médio mais baixo.",
+    messageKey: delta > 0 ? "personalInsights.goalAssociationUp" : "personalInsights.goalAssociationDown",
+    messageValues: { pairedDays: paired.length, comparisonDays: unpaired.length },
   };
 }
 
@@ -162,6 +220,8 @@ export function buildPersonalInsights(events: PersonalEvent[], now = new Date())
   if (recovery) insights.push(recovery);
   const change = buildPersonalChangeInsight(valid, now);
   if (change) insights.push(change);
+  const goalAssociation = buildGoalAssociationInsight(events, now);
+  if (goalAssociation) insights.push(goalAssociation);
   const interventionEvents = events.filter(validTimestamp).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   const intervention = buildInterventionInsight(interventionEvents, now);
   if (intervention) insights.push(intervention);

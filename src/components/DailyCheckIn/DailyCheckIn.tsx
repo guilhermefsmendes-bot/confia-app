@@ -7,6 +7,8 @@ import {
 import {
   recordReactiveResponse,
 } from "../../data/reactive/reactiveHistoryStorage";
+import { syncPersonalEventsFromLegacySources } from "../../data/personal/syncPersonalEvents";
+import { recordPersonalAnalytics } from "../../data/personal/personalAnalytics";
 
 interface Props {
   onComplete?: () => void;
@@ -57,6 +59,9 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
      * analise os dados acabados de registar.
      */
     saveDailyCheckIn(mood, need);
+    // Atualiza imediatamente o modelo longitudinal, sem esperar pelo próximo arranque.
+    syncPersonalEventsFromLegacySources();
+    recordPersonalAnalytics("check_in_completed");
 
     const reactiveResult = analyzeReactiveState({
       source: "daily_checkin",

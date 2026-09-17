@@ -1819,7 +1819,16 @@
     "learning": "A CONFIA ainda está a aprender. Continua a registar para descobrires padrões teus.",
     "needObserved": "A necessidade “{{need}}” aparece {{count}} vezes nos registos.",
     "discoveries": "Descobertas",
-    "analogousTitle": "Já estiveste aqui",
+
+    "personalInsights": {
+      "trendUp": "Nos teus registos recentes, o teu estado médio tem subido.",
+      "trendDown": "Nos teus registos recentes, o teu estado médio tem descido.",
+      "interventionEffect": "Nos teus episódios registados, a intensidade baixou depois de algumas intervenções.",
+      "habitAssociation": "Nos teus registos, {{label}} tem coincidido com estados médios diferentes.",
+      "timeOfDay": "Nos teus registos, o estado médio tende a variar em {{label}}.",
+      "repeatedNeed": "A necessidade “{{label}}” aparece repetidamente nos teus registos."
+    },
+"analogousTitle": "Já estiveste aqui",
     "analogousSubtitle": "Momentos anteriores com um estado semelhante ao de agora.",
     "noDiscoveries": "Ainda não há uma descoberta sustentada. Quando houver evidência suficiente, ela aparece aqui.",
     "explainable": "Cada descoberta aponta para as observações que a sustentam.",

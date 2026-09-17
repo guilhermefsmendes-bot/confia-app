@@ -1792,7 +1792,16 @@
     "learning": "CONFIA is still learning. Keep recording to discover your patterns.",
     "needObserved": "The need “{{need}}” appears {{count}} times in your records.",
     "discoveries": "Discoveries",
-    "analogousTitle": "You have been here before",
+
+    "personalInsights": {
+      "trendUp": "In your recent records, your average state has risen.",
+      "trendDown": "In your recent records, your average state has fallen.",
+      "interventionEffect": "In your recorded episodes, intensity has decreased after some interventions.",
+      "habitAssociation": "In your records, {{label}} has coincided with different average states.",
+      "timeOfDay": "In your records, average state tends to vary in {{label}}.",
+      "repeatedNeed": "The need “{{label}}” appears repeatedly in your records."
+    },
+"analogousTitle": "You have been here before",
     "analogousSubtitle": "Earlier moments with a state similar to now.",
     "noDiscoveries": "There is not enough evidence for a supported discovery yet.",
     "explainable": "Each discovery points to the observations behind it.",

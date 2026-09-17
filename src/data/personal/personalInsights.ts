@@ -24,6 +24,8 @@ export interface PersonalInsight {
   supportingEventIds: string[];
   supersedesInsightId?: string;
   message: string;
+  messageKey?: string;
+  messageValues?: Record<string, string | number>;
 }
 
 const mood = (event: PersonalEvent) => event.type === "mood" || event.type === "checkin" ? typeof event.value === "number" ? event.value : undefined : undefined;
@@ -58,6 +60,7 @@ function buildTrendInsight(valid: PersonalEvent[], now: Date): PersonalInsight |
     fingerprint: `trend:mood:30d:${direction}`, firstSeen: recent[0].localDate, lastSeen: recent[recent.length - 1].localDate, timesShown: 0,
     novelty: "new", actionability: "medium", supportingEventIds: recent.map(event => event.id),
     message: direction === "up" ? "Nos teus registos recentes, o teu estado médio tem subido." : "Nos teus registos recentes, o teu estado médio tem descido.",
+    messageKey: direction === "up" ? "personalInsights.trendUp" : "personalInsights.trendDown",
   };
 }
 
@@ -81,6 +84,7 @@ function buildInterventionInsight(valid: PersonalEvent[], now: Date): PersonalIn
     fingerprint: "intervention:impulso:intensity_change", firstSeen: first.localDate, lastSeen: last.localDate,
     timesShown: 0, novelty: "new", actionability: "high", supportingEventIds: recent.map(event => event.id),
     message: "Nos teus episódios registados, a intensidade baixou depois de algumas intervenções.",
+    messageKey: "personalInsights.interventionEffect",
   };
 }
 
@@ -103,6 +107,8 @@ export function buildPersonalInsights(events: PersonalEvent[], now = new Date())
       firstSeen: pattern.firstSeen, lastSeen: pattern.lastSeen, timesShown: 0, novelty: "new",
       actionability: pattern.type === "repeated_need" ? "medium" : "high", supportingEventIds: pattern.supportingEventIds,
       message: describePersonalPattern(pattern),
+      messageKey: pattern.type === "habit_association" ? "personalInsights.habitAssociation" : pattern.type === "time_of_day" ? "personalInsights.timeOfDay" : "personalInsights.repeatedNeed",
+      messageValues: { label: pattern.label },
     });
   }
   return insights;

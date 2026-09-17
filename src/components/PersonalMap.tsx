@@ -48,7 +48,7 @@ export default function PersonalMap({ onBack }: Props) {
       )}
       <section className="mt-4 rounded-[26px] border border-[#E8DDD4] bg-white p-5 shadow-sm">
         <div className="flex items-center gap-2"><Sparkles size={17} className="text-[#C97B5E]" aria-hidden="true" /><h2 className="font-black text-[#4A352F]">{t("personalMap.discoveries")}</h2></div>
-        {insights.length === 0 ? <p className="mt-3 text-sm leading-6 text-[#806D65]">{t("personalMap.noDiscoveries")}</p> : insights.map(insight => <article key={insight.id} className="mt-4 rounded-2xl bg-[#FFF8F4] p-4"><p className="text-sm font-bold text-[#4A352F]">{insight.message}</p><p className="mt-2 text-xs leading-5 text-[#806D65]">{explainInsight(insight)}</p></article>)}
+        {insights.length === 0 ? <p className="mt-3 text-sm leading-6 text-[#806D65]">{t("personalMap.noDiscoveries")}</p> : insights.map(insight => <article key={insight.id} className="mt-4 rounded-2xl bg-[#FFF8F4] p-4"><p className="text-sm font-bold text-[#4A352F]">{insight.messageKey ? t(insight.messageKey, insight.messageValues) : insight.message}</p><p className="mt-2 text-xs leading-5 text-[#806D65]">{explainInsight(insight)}</p></article>)}
         {events.length > 0 && <div className="mt-4 flex gap-2 text-xs text-[#806D65]"><Info size={14} aria-hidden="true" /> {t("personalMap.explainable")}</div>}
       </section>
     </div>

@@ -114,7 +114,18 @@ export function buildPersonalInsights(events: PersonalEvent[], now = new Date())
   return insights;
 }
 
-export function explainInsight(insight: PersonalInsight): string {
+export function explainInsight(
+  insight: PersonalInsight,
+  translate?: (key: string, values?: Record<string, unknown>) => string,
+): string {
+  if (translate) {
+    return translate("personalInsights.evidenceExplanation", {
+      confidence: translate(`personalInsights.confidence.${insight.confidence}`),
+      count: insight.evidenceCount,
+      start: insight.periodStart,
+      end: insight.periodEnd,
+    });
+  }
   const confidence = insight.confidence === "high" ? "há evidência consistente" : insight.confidence === "moderate" ? "há alguns sinais repetidos" : "há sinais iniciais";
   return `${insight.message} ${confidence} em ${insight.evidenceCount} observações entre ${insight.periodStart} e ${insight.periodEnd}. Isto descreve uma associação observada, não uma causa.`;
 }

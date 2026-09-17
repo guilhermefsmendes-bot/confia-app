@@ -1848,6 +1848,12 @@
     "cancel": "Cancel"
   },
   "personalInsights": {
-    "patternDisappearance": "A pattern that appeared before has stopped showing up in your recent records."
+    "patternDisappearance": "A pattern that appeared before has stopped showing up in your recent records.",
+    "evidenceExplanation": "{{confidence}} across {{count}} observations between {{start}} and {{end}}. This describes an observed association, not a cause.",
+    "confidence": {
+      "low": "There are early signals",
+      "moderate": "There are repeated signals",
+      "high": "There is consistent evidence"
+    }
   }
 }

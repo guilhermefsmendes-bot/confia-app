@@ -93,16 +93,25 @@ import { getRecentCompanionBrainEvents } from "./data/reactive/companionBrain";
 const STORAGE_KEYS = {
   AVATAR: 'confia_avatar_v2',
   OBJECTIVES: 'confia_objectives_v2',
-OBJECTIVES_HISTORY: 'confia_objectives_history_v1',
+  OBJECTIVES_HISTORY: 'confia_objectives_history_v1',
   RATINGS: 'confia_ratings_v2',
   PET_COUNT: 'confia_pet_count_v2',
   POSTS: 'confia_posts_v2',
   LAST_PET_DATE: 'confia_last_pet_date_v2',
-LAST_IMPULSE_USE: 'confia_last_impulse_use_v1',
-IMPULSE_COUNT: 'confia_impulse_count_v1',
-LAST_APP_OPEN_DATE: 'confia_last_app_open_date_v1',
-
+  LAST_IMPULSE_USE: 'confia_last_impulse_use_v1',
+  IMPULSE_COUNT: 'confia_impulse_count_v1',
+  LAST_APP_OPEN_DATE: 'confia_last_app_open_date_v1',
 };
+
+function readStoredJson<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
 
 // O histórico visual nasce exclusivamente dos registos reais do utilizador.
 // Não existe seed emocional nem histórico fictício: a CONFIA nunca deve fingir memória.
@@ -287,8 +296,8 @@ const [homeScreen, setHomeScreen] = useState<
   "home" | "companion" | "patterns" | "shop" | "inventory" | "settings" | "progress" | "innerCanvas" | "map" | "experiments"
 >("home");
   const [avatar, setAvatar] = useState<AvatarState>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.AVATAR);
-    if (saved) return JSON.parse(saved);
+    const saved = readStoredJson<AvatarState | null>(STORAGE_KEYS.AVATAR, null);
+    if (saved) return saved;
 
     return {
       level: 1,
@@ -298,39 +307,15 @@ const [homeScreen, setHomeScreen] = useState<
       evolutionStage: t("avatarEvolutionStage"),
       points: 15
     };
-
-    /* TEMP TEST — código normal preservado abaixo
-    if (saved) return JSON.parse(saved);
-    return {
-      level: 1,
-      xp: 15,
-      maxXp: 100,
-      name: t("avatarName"),
-evolutionStage: t("avatarEvolutionStage"),
-
-      points: 15
-    };
-    */
   });
 
 const [inventory, setInventory] = useState<any[]>([]);
 const [objectivesHistory, setObjectivesHistory] = useState<
   { date: string; completed: number }[]
->(() => {
-  const saved = localStorage.getItem(STORAGE_KEYS.OBJECTIVES_HISTORY);
-  return saved ? JSON.parse(saved) : [];
-});
-const [weeklyGoal, setWeeklyGoal] = useState<WeeklyGoal | null>(() => {
-  const saved = localStorage.getItem('confia_weekly_goal_v1');
-
-  if (!saved) return null;
-
-  try {
-    return JSON.parse(saved);
-  } catch {
-    return null;
-  }
-});
+>(() => readStoredJson(STORAGE_KEYS.OBJECTIVES_HISTORY, []));
+const [weeklyGoal, setWeeklyGoal] = useState<WeeklyGoal | null>(() =>
+  readStoredJson<WeeklyGoal | null>('confia_weekly_goal_v1', null)
+);
 
 useEffect(() => {
   if (weeklyGoal) {
@@ -352,10 +337,9 @@ useEffect(() => {
 const [objectives, setObjectives] = useState<Objective[]>(() => {
   const today = new Date().toISOString().split("T")[0];
 
-  const saved = localStorage.getItem(STORAGE_KEYS.OBJECTIVES);
+  const parsed = readStoredJson<{ date?: string; items?: Objective[] } | Objective[] | null>(STORAGE_KEYS.OBJECTIVES, null);
 
-  if (saved) {
-    const parsed = JSON.parse(saved);
+  if (parsed && !Array.isArray(parsed)) {
 
     // Dados já guardados no novo formato diário
 if (parsed.date === today && parsed.items) {
@@ -383,16 +367,12 @@ return parsed.items
 });
  const completedObjectivesCount = objectives.filter(o => o.completed).length;
   const [ratings, setRatings] = useState<DailyRating[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.RATINGS);
-    if (saved) return JSON.parse(saved);
-   return [];
+      return readStoredJson<DailyRating[]>(STORAGE_KEYS.RATINGS, []);
   });
 
-  const [posts, setPosts] = useState<SharePost[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.POSTS);
-    if (saved) return JSON.parse(saved);
-    return INITIAL_POSTS;
-  });
+  const [posts, setPosts] = useState<SharePost[]>(() =>
+    readStoredJson<SharePost[]>(STORAGE_KEYS.POSTS, INITIAL_POSTS)
+  );
 
   const [currentTab, setCurrentTab] = useState<number>(0);
 const stopAbracoRef = useRef<(() => void) | null>(null);
@@ -3478,36 +3458,20 @@ className="flex items-center justify-center w-24 h-24 relative"
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="bg-white border border-slate-100/80 rounded-[32px] p-6 shadow-sm">
-                {currentTab === 1 && reactiveMessageKey && (
-                  <section
-                    className="mb-4 overflow-hidden rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FFFDFC] shadow-[0_12px_32px_rgba(92,64,52,0.06)]"
-                  >
+                {currentTab === 2 && reactiveMessageKey && (
+                  <section className="mb-4 overflow-hidden rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FFFDFC] shadow-[0_12px_32px_rgba(92,64,52,0.06)]">
                     <div className="flex items-start gap-3.5 p-5">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/15 bg-white text-[#C97B5E] shadow-sm">
-                        <Sparkles
-                          size={18}
-                          strokeWidth={1.8}
-                        />
+                        <Sparkles size={18} strokeWidth={1.8} aria-hidden="true" />
                       </div>
-                
                       <div className="min-w-0 flex-1">
-                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
-                          {t("homeNow.eyebrow")}
-                        </p>
-                
-                        <p className="mt-1.5 text-sm font-semibold leading-relaxed text-[#4E3B36]">
-                          {t(reactiveMessageKey)}
-                        </p>
+                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">{t("homeNow.eyebrow")}</p>
+                        <p className="mt-1.5 text-sm font-semibold leading-relaxed text-[#4E3B36]">{t(reactiveMessageKey)}</p>
                       </div>
                     </div>
-                
-                    <div
-                      aria-hidden="true"
-                      className="h-[3px] w-full bg-gradient-to-r from-[#E5A88B]/10 via-[#C97B5E]/45 to-[#E5A88B]/10"
-                    />
+                    <div aria-hidden="true" className="h-[3px] w-full bg-gradient-to-r from-[#E5A88B]/10 via-[#C97B5E]/45 to-[#E5A88B]/10" />
                   </section>
                 )}
-
                 <ObjectivosList
                   objectives={objectives}
                   onToggleComplete={handleToggleObjective}

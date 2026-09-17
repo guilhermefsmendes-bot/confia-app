@@ -1875,6 +1875,12 @@
     "cancel": "Cancelar"
   },
   "personalInsights": {
-    "patternDisappearance": "Um padrão que aparecia antes deixou de surgir nos registos recentes."
+    "patternDisappearance": "Um padrão que aparecia antes deixou de surgir nos registos recentes.",
+    "evidenceExplanation": "{{confidence}} em {{count}} observações entre {{start}} e {{end}}. Esta leitura descreve uma associação observada, não uma causa.",
+    "confidence": {
+      "low": "Há sinais iniciais",
+      "moderate": "Há alguns sinais repetidos",
+      "high": "Há evidência consistente"
+    }
   }
 }

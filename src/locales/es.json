@@ -1737,17 +1737,23 @@
   },
   "experiments": {
     "title": "Microexperimentos",
-    "subtitle": "Test one of your hypotheses and measure what changes.",
-    "hypothesisPlaceholder": "My hypothesis…",
-    "metricPlaceholder": "What I will observe…",
-    "start": "Start experiment",
-    "complete": "Record outcome",
-    "completed": "Experiment completed",
-    "metric": "Metric: {{metric}}",
-    "outcomePrompt": "What did you observe?",
+    "subtitle": "Prueba una hipótesis tuya y mide qué cambia.",
+    "hypothesisPlaceholder": "Mi hipótesis…",
+    "metricPlaceholder": "Qué voy a observar…",
+    "start": "Empezar experimento",
+    "complete": "Registrar resultado",
+    "completed": "Experimento completado",
+    "metric": "Métrica: {{metric}}",
+    "outcomePrompt": "¿Qué observaste?",
     "cancel": "Cancelar"
   },
   "personalInsights": {
-    "patternDisappearance": "Un patrón que aparecía antes ha dejado de aparecer en tus registros recientes."
+    "patternDisappearance": "Un patrón que aparecía antes ha dejado de aparecer en tus registros recientes.",
+    "evidenceExplanation": "{{confidence}} en {{count}} observaciones entre {{start}} y {{end}}. Esto describe una asociación observada, no una causa.",
+    "confidence": {
+      "low": "Hay señales iniciales",
+      "moderate": "Hay señales repetidas",
+      "high": "Hay evidencia consistente"
+    }
   }
 }

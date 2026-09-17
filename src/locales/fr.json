@@ -1735,17 +1735,23 @@
   },
   "experiments": {
     "title": "Micro-expériences",
-    "subtitle": "Test one of your hypotheses and measure what changes.",
-    "hypothesisPlaceholder": "My hypothesis…",
-    "metricPlaceholder": "What I will observe…",
-    "start": "Start experiment",
-    "complete": "Record outcome",
-    "completed": "Experiment completed",
-    "metric": "Metric: {{metric}}",
-    "outcomePrompt": "What did you observe?",
+    "subtitle": "Teste une de tes hypothèses et mesure ce qui change.",
+    "hypothesisPlaceholder": "Mon hypothèse…",
+    "metricPlaceholder": "Ce que je vais observer…",
+    "start": "Commencer l’expérience",
+    "complete": "Enregistrer le résultat",
+    "completed": "Expérience terminée",
+    "metric": "Mesure : {{metric}}",
+    "outcomePrompt": "Qu’as-tu observé ?",
     "cancel": "Annuler"
   },
   "personalInsights": {
-    "patternDisappearance": "Un schéma qui apparaissait auparavant ne ressort plus dans tes relevés récents."
+    "patternDisappearance": "Un schéma qui apparaissait auparavant ne ressort plus dans tes relevés récents.",
+    "evidenceExplanation": "{{confidence}} sur {{count}} observations entre {{start}} et {{end}}. Cette lecture décrit une association observée, pas une cause.",
+    "confidence": {
+      "low": "Des signaux précoces apparaissent",
+      "moderate": "Des signaux se répètent",
+      "high": "Les éléments sont cohérents"
+    }
   }
 }

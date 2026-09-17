@@ -292,7 +292,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
         <button
           type="button"
           onClick={onBack}
-          aria-label="Back"
+          aria-label={t("back")}
           className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[#E7D8CC] bg-white/80 text-xl text-[#654A42] shadow-sm"
         >
           ←

@@ -37,24 +37,39 @@ import i18n from "./i18n";
 import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove, increment, deleteDoc } from "firebase/firestore";
 import { db, auth, signInAnonymously } from "./firebase";
 import { initAnonymousAuth } from "./firebaseAuth";
-import HomeInventory from "./components/HomeInventory";
+
 import { createWeeklyTrophy } from "./storage/weeklyTrophies";
 import { deleteAllUserData } from "./storage/deleteUserData";
 import { initLanguage } from "./i18n/language";
-import ConfiaCompanionHome from "./components/Companheiro/ConfiaCompanionHome";
+
 import HomeProgressSummary from "./components/HomeProgressSummary";
-import HomeShop from "./components/HomeShop";
-import InnerCanvas from "./components/InnerCanvas/InnerCanvas";
+
 const PersonalMap = lazy(() => import("./components/PersonalMap"));
 const PersonalExperiments = lazy(() => import("./components/PersonalExperiments"));
+import ConfiaCompanionHome from "./components/Companheiro/ConfiaCompanionHome";
+import DailyCheckIn from "./components/DailyCheckIn/DailyCheckIn";
+import Companion from "./components/Companheiro/Companion";
+const InnerCanvas = lazy(() => import("./components/InnerCanvas/InnerCanvas"));
+const PatternsNew = lazy(() => import("./components/PatternsNew/PatternsNew"));
+const HabitAssessment = lazy(() => import("./components/PatternsNew/HabitAssessment"));
+const HabitDailyCheck = lazy(() => import("./components/PatternsNew/HabitDailyCheck"));
+const HabitEvolution = lazy(() => import("./components/PatternsNew/HabitEvolution"));
+const HomeInventory = lazy(() => import("./components/HomeInventory"));
+const HomeShop = lazy(() => import("./components/HomeShop"));
+const PartilhaFeed = lazy(() => import("./components/PartilhaFeed").then(m => ({ default: m.PartilhaFeed })));
+const ObjectivosList = lazy(() => import("./components/ObjectivosList").then(m => ({ default: m.ObjectivosList })));
+const WeeklyGoalSection = lazy(() => import("./components/WeeklyGoalSection").then(m => ({ default: m.WeeklyGoalSection })));
+const ImpulsoSOS = lazy(() => import("./components/ImpulsoSOS").then(m => ({ default: m.ImpulsoSOS })));
+const ProgressoDashboard = lazy(() => import("./components/ProgressoDashboard").then(m => ({ default: m.ProgressoDashboard })));
+const StopMode = lazy(() => import("./components/StopMode").then(m => ({ default: m.StopMode })));
+const CommunityChat = lazy(() => import("./components/CommunityChat").then(m => ({ default: m.CommunityChat })));
+const TriageModal = lazy(() => import("./components/TriageModal").then(m => ({ default: m.TriageModal })));
+const AbracoTimer = lazy(() => import("./components/AbracoTimer").then(m => ({ default: m.AbracoTimer })));
+
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 import { syncPersonalEventsFromLegacySources, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle, PERSONAL_EVENTS_UPDATED_EVENT } from "./data/personal";
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
-import PatternsNew from './components/PatternsNew/PatternsNew';
-import HabitAssessment from './components/PatternsNew/HabitAssessment';
-import HabitDailyCheck from './components/PatternsNew/HabitDailyCheck';
-import HabitEvolution from './components/PatternsNew/HabitEvolution';
-import { PartilhaFeed } from "./components/PartilhaFeed";
+
 import {
   analyzeReactiveState,
 } from "./data/reactive/reactiveEngine";
@@ -66,20 +81,9 @@ import {
 } from "./data/reactive/reactiveRecentMemory";
 
 // Component imports
-import DailyCheckIn from "./components/DailyCheckIn/DailyCheckIn";
-import Companion from "./components/Companheiro/Companion";
+
 import { hasCompletedToday } from "./storage/dailyCheckInStorage";
 
-import { TriageModal } from './components/TriageModal';
-import { AbracoTimer } from './components/AbracoTimer';
-import { ObjectivosList } from './components/ObjectivosList';
-import { WeeklyGoalSection } from "./components/WeeklyGoalSection";
-import { ImpulsoSOS } from './components/ImpulsoSOS';
-import { ProgressoDashboard } from './components/ProgressoDashboard';
-import { FocoMente } from './components/FocoMente';
-import { StopMode } from './components/StopMode';
-import { CommunityChat } from './components/CommunityChat';
-import { Avatar } from "./components/Avatar";
 import {
   buildCompanionBrainContext,
   evaluateCompanionContext,
@@ -2161,6 +2165,7 @@ const getRatingLabel = (val: number) => {
   };
 
 return (
+    <Suspense fallback={<ScreenLoading label={t("loading")} />}>
     <div className="min-h-screen bg-[#FAF5F0] flex flex-col antialiased text-[#4E3B36]">
 {showDailyCheckIn && (
   <DailyCheckIn
@@ -3619,6 +3624,7 @@ className="flex items-center justify-center w-24 h-24 relative"
         </div>
       </footer>
     </div>
+    </Suspense>
   );
 }
 

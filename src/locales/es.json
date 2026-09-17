@@ -1701,6 +1701,17 @@
       "unknown": "There is not enough reference yet."
     }
   },
+  "companionPresence": {
+    "present": "Presencia CONFIA",
+    "learning": "Aprendiendo tu ritmo sin sacar conclusiones demasiado rápido.",
+    "supportive": "Aquí contigo",
+    "celebrating": "Celebrándolo contigo",
+    "discovering": "Descubriendo contigo",
+    "growing": "Acompañando tu crecimiento",
+    "lowSignal": "Ahora hay una señal más pesada.",
+    "highSignal": "Ahora hay una señal más luminosa.",
+    "steadySignal": "La señal actual parece estable."
+  },
   "experiments": {
     "title": "Microexperimentos",
     "subtitle": "Test one of your hypotheses and measure what changes.",

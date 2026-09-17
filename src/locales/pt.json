@@ -1828,6 +1828,17 @@
       "unknown": "Ainda não há referência suficiente."
     }
   },
+  "companionPresence": {
+    "present": "Presença CONFIA",
+    "learning": "A conhecer o teu ritmo, sem tirar conclusões à pressa.",
+    "supportive": "Aqui contigo",
+    "celebrating": "A celebrar contigo",
+    "discovering": "A descobrir contigo",
+    "growing": "A acompanhar o teu crescimento",
+    "lowSignal": "Há um sinal mais pesado neste momento.",
+    "highSignal": "Há um sinal luminoso neste momento.",
+    "steadySignal": "O sinal atual parece estável."
+  },
   "experiments": {
     "title": "Microexperimentos",
     "subtitle": "Testa uma hipótese tua e mede o que muda, sem procurar certezas rápidas.",

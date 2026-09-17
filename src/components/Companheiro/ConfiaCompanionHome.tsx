@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Heart, CircleDot } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "../Avatar";
@@ -972,6 +972,26 @@ function ConfiaCompanionHome({
           ? "bg-sky-400"
           : "bg-[#D89A80]";
 
+  const presenceLabel =
+    companionReaction?.state === "supportive"
+      ? t("companionPresence.supportive")
+      : companionReaction?.state === "celebrating"
+        ? t("companionPresence.celebrating")
+        : worldMood === "discovering"
+          ? t("companionPresence.discovering")
+          : worldMood === "growing"
+            ? t("companionPresence.growing")
+            : t("companionPresence.present");
+
+  const presenceDetail =
+    currentMoodRating === undefined
+      ? t("companionPresence.learning")
+      : currentMoodRating <= 3
+        ? t("companionPresence.lowSignal")
+        : currentMoodRating >= 8
+          ? t("companionPresence.highSignal")
+          : t("companionPresence.steadySignal");
+
   return (
     <section
       className="
@@ -1114,6 +1134,23 @@ function ConfiaCompanionHome({
             {t("level")} {avatar.level}
           </span>
         </div>
+      </div>
+
+      {/* ====================================================
+          PRESENÇA — estado vivo derivado do contexto atual
+      ==================================================== */}
+      <div className="relative z-20 mx-3 mb-1 flex items-center justify-between rounded-full border border-white/80 bg-white/60 px-3 py-2 shadow-[0_8px_24px_rgba(89,58,45,0.045)] backdrop-blur-md">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FFF4EC]">
+            <CircleDot size={14} className="text-[#C97B5E]" />
+            <span aria-hidden="true" className={`absolute right-0.5 top-0.5 h-2 w-2 rounded-full ${statusDot} ring-2 ring-white`} />
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-[10px] font-black uppercase tracking-[0.13em] text-[#76584D]">{presenceLabel}</p>
+            <p className="truncate text-[10px] text-[#9A8177]">{presenceDetail}</p>
+          </div>
+        </div>
+        <Heart size={14} className="shrink-0 text-[#D79A82]" aria-hidden="true" />
       </div>
 
       {/* ====================================================

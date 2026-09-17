@@ -1,7 +1,7 @@
 import type { PersonalEvent } from "./personalEvent";
 
 export type InsightType = "trend" | "time_of_day" | "weekday" | "habit_association" | "intervention_effect" | "recovery_pattern" | "repeated_need" | "personal_change" | "pattern_disappearance";
-export type InsightStatus = "active" | "weakened" | "changed" | "disappeared";
+export type InsightStatus = "emerging" | "possible" | "consistent" | "weakened" | "changed" | "disappeared";
 
 export interface PersonalInsight {
   id: string;
@@ -14,6 +14,10 @@ export interface PersonalInsight {
   direction: "up" | "down" | "mixed" | "stable";
   variables: string[];
   status: InsightStatus;
+  fingerprint: string;
+  firstSeen: string;
+  lastSeen: string;
+  timesShown: number;
   novelty: "new" | "known" | "returning";
   actionability: "low" | "medium" | "high";
   supportingEventIds: string[];
@@ -57,7 +61,11 @@ export function buildPersonalInsights(events: PersonalEvent[], now = new Date())
     confidence,
     direction,
     variables: ["mood"],
-    status: "active",
+    status: recent.length >= 6 ? "consistent" : "possible",
+    fingerprint: `trend:mood:30d:${direction}`,
+    firstSeen: recent[0].localDate,
+    lastSeen: recent[recent.length - 1].localDate,
+    timesShown: 0,
     novelty: "new",
     actionability: "medium",
     supportingEventIds: recent.map(event => event.id),

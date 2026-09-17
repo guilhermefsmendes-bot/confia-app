@@ -50,7 +50,7 @@ function PatternsNew({
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FFF9F4] via-[#FAF5F0] to-[#F3ECE5] p-5 pb-12">
 
-      <button
+      <button type="button"
         onClick={onBack}
         className="mb-5 flex items-center gap-2 text-[#795B50] font-semibold"
       >
@@ -100,7 +100,7 @@ function PatternsNew({
       </div>
 
       {/* MAIN ACTION */}
-      <button
+      <button type="button"
         onClick={onOpenAssessment}
         className="w-full text-left rounded-[25px] p-5 mb-4 bg-white shadow-md border border-[#E8DDD4] active:scale-[0.99] transition"
       >
@@ -124,7 +124,7 @@ function PatternsNew({
       </button>
 
       {/* DAILY */}
-      <button
+      <button type="button"
         onClick={onOpenDaily}
         className="w-full text-left rounded-[25px] p-5 mb-4 bg-white shadow-md border border-[#E8DDD4] active:scale-[0.99] transition"
       >
@@ -148,7 +148,7 @@ function PatternsNew({
       </button>
 
       {/* EVOLUTION */}
-      <button
+      <button type="button"
         onClick={onOpenEvolution}
         className="w-full text-left rounded-[25px] p-5 mb-5 bg-gradient-to-br from-[#FFFDFB] to-[#F2E9E1] shadow-md border border-[#E1D2C7] active:scale-[0.99] transition"
       >

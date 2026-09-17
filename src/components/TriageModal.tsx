@@ -127,7 +127,7 @@ const { t } = useTranslation();
                 <p className="text-[9px] text-[#C97B5E] font-extrabold tracking-widest uppercase font-display">{t("guidedAnxietyRescue")}</p>
               </div>
             </div>
-            <button
+            <button type="button"
               onClick={handleReset}
               className="p-1.5 rounded-full text-slate-400 hover:text-[#4E3B36] hover:bg-slate-100 transition-colors cursor-pointer"
             >
@@ -167,7 +167,7 @@ const { t } = useTranslation();
                      {t("friendConnectionReward")} <strong className="text-[#C97B5E]">+25 XP</strong> {t("evolutionProgress")}
                     </p>
                   </div>
-                  <button
+                  <button type="button"
                     onClick={handleReset}
                     className="w-full py-4 bg-[#C97B5E] hover:bg-[#B56A4F] text-white rounded-2xl font-black text-xs uppercase tracking-wider font-display transition-all shadow-lg shadow-[#C97B5E]/20 cursor-pointer"
                   >
@@ -196,7 +196,7 @@ const { t } = useTranslation();
 
                   {/* Branch Menu Options */}
                   <div className="space-y-2.5 pt-1">
-                    <button
+                    <button type="button"
                       onClick={() => handleSelectBranch('terra')}
                       className="w-full p-4 bg-white hover:bg-[#FFF0E8]/30 border border-[#E5A88B]/15 hover:border-[#E5A88B]/40 rounded-2xl transition-all flex items-start gap-3.5 text-left group cursor-pointer"
                     >
@@ -209,7 +209,7 @@ const { t } = useTranslation();
                       </div>
                     </button>
 
-                    <button
+                    <button type="button"
                       onClick={() => handleSelectBranch('vento')}
                       className="w-full p-4 bg-white hover:bg-[#FFF0E8]/30 border border-[#E5A88B]/15 hover:border-[#E5A88B]/40 rounded-2xl transition-all flex items-start gap-3.5 text-left group cursor-pointer"
                     >
@@ -222,7 +222,7 @@ const { t } = useTranslation();
                       </div>
                     </button>
 
-                    <button
+                    <button type="button"
                       onClick={() => handleSelectBranch('agua')}
                       className="w-full p-4 bg-white hover:bg-[#FFF0E8]/30 border border-[#E5A88B]/15 hover:border-[#E5A88B]/40 rounded-2xl transition-all flex items-start gap-3.5 text-left group cursor-pointer"
                     >
@@ -235,7 +235,7 @@ const { t } = useTranslation();
                       </div>
                     </button>
 
-                    <button
+                    <button type="button"
                       onClick={() => handleSelectBranch('sol')}
                       className="w-full p-4 bg-white hover:bg-[#FFF0E8]/30 border border-[#E5A88B]/15 hover:border-[#E5A88B]/40 rounded-2xl transition-all flex items-start gap-3.5 text-left group cursor-pointer"
                     >
@@ -412,7 +412,7 @@ const { t } = useTranslation();
                       </div>
 
                       <div className="space-y-2.5 pt-1">
-                        <button
+                        <button type="button"
                           onClick={() => setWaterSplashed(!waterSplashed)}
                           className={`w-full p-4 border rounded-2xl flex items-center justify-between text-left transition-all cursor-pointer ${
                             waterSplashed
@@ -431,7 +431,7 @@ const { t } = useTranslation();
                           </span>
                         </button>
 
-                        <button
+                        <button type="button"
                           onClick={() => setWaterSip(!waterSip)}
                           className={`w-full p-4 border rounded-2xl flex items-center justify-between text-left transition-all cursor-pointer ${
                             waterSip
@@ -499,7 +499,7 @@ const { t } = useTranslation();
                             <p className="text-xs font-bold text-[#4E3B36]">{t("jawInstruction")}</p>
                           </div>
                           {solStep === 1 ? (
-                            <button
+                            <button type="button"
                               onClick={() => setSolStep(2)}
                               className="text-[10px] font-extrabold bg-[#E5A88B] text-white px-3 py-1.5 rounded-lg font-display cursor-pointer"
                             >
@@ -518,7 +518,7 @@ const { t } = useTranslation();
                             <p className="text-xs font-bold text-[#4E3B36]">{t("shouldersInstruction")}</p>
                           </div>
                           {solStep === 2 ? (
-                            <button
+                            <button type="button"
                               onClick={() => setSolStep(3)}
                               className="text-[10px] font-extrabold bg-[#E5A88B] text-white px-3 py-1.5 rounded-lg font-display cursor-pointer"
                             >
@@ -539,7 +539,7 @@ const { t } = useTranslation();
                             <p className="text-xs font-bold text-[#4E3B36]">{t("handsInstruction")}</p>
                           </div>
                           {solStep === 3 ? (
-                            <button
+                            <button type="button"
                               onClick={() => setSolStep(4)}
                               className="text-[10px] font-extrabold bg-[#E5A88B] text-white px-3 py-1.5 rounded-lg font-display cursor-pointer"
                             >
@@ -580,7 +580,7 @@ const { t } = useTranslation();
           {/* Footer Navigation Controls */}
           {!triageCompleted && (
             <div className="p-5 border-t border-slate-100 bg-[#FAF5F0]/60 flex items-center justify-between">
-              <button
+              <button type="button"
                 onClick={handleBackStep}
                 className="px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-[#4E3B36] transition-colors cursor-pointer"
               >
@@ -588,7 +588,7 @@ const { t } = useTranslation();
               </button>
 
               {currentBranch !== 'initial' && (
-                <button
+                <button type="button"
                   onClick={handleNextStep}
                   disabled={
                     (currentBranch === 'terra' && branchStep === 0 && (!terraSee || !terraTouch || !terraHear)) ||

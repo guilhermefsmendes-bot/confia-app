@@ -199,7 +199,7 @@ const { t } = useTranslation();
 
             <div className="grid grid-cols-1 gap-2">
              {ACTIVITIES(t).map(act => (
-                <button
+                <button type="button"
                   key={act.id}
                   onClick={() => handleSelectActivity(act)}
                   className="w-full p-3.5 bg-white hover:bg-[#FFF0E8]/30 border border-slate-100 hover:border-[#E5A88B]/30 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left"
@@ -254,13 +254,13 @@ const { t } = useTranslation();
             </div>
 
             <div className="flex items-center gap-2.5">
-              <button
+              <button type="button"
                 onClick={handleGoBack}
                 className="px-4 py-3 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-xl text-xs font-bold transition-all cursor-pointer"
               >
                 {t("back")}
               </button>
-              <button
+              <button type="button"
                 onClick={handleStartTimer}
                 className="flex-1 py-3 bg-[#C97B5E] hover:bg-[#B56A4F] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider font-display transition-all shadow-md shadow-[#C97B5E]/15 flex items-center justify-center gap-1.5 cursor-pointer"
               >
@@ -323,7 +323,7 @@ const { t } = useTranslation();
 
             {/* Timer Actions */}
             <div className="flex items-center gap-2 w-full max-w-xs">
-              <button
+              <button type="button"
                 onClick={handleResetTimer}
                 className="p-3 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-xl border border-slate-100 transition-all cursor-pointer"
                title={t("restart")}
@@ -331,7 +331,7 @@ const { t } = useTranslation();
                 <RotateCcw size={15} />
               </button>
 
-              <button
+              <button type="button"
                 onClick={handleToggleTimer}
                 className={`flex-1 py-3 rounded-xl font-black text-xs uppercase tracking-wider font-display shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   isActive
@@ -351,7 +351,7 @@ const { t } = useTranslation();
               </button>
 
               {/* Instant Test Completion Shortcut */}
-              <button
+              <button type="button"
                 onClick={handleFinishExercise}
                 className="px-3 py-3 bg-[#E5A88B]/10 hover:bg-[#E5A88B]/20 text-[#C97B5E] border border-[#E5A88B]/20 rounded-xl text-[10px] font-black uppercase tracking-wider font-display transition-all cursor-pointer"
                title={t("finishEarly")}
@@ -360,7 +360,7 @@ const { t } = useTranslation();
               </button>
             </div>
 
-            <button
+            <button type="button"
               onClick={handleGoBack}
               className="text-[10px] font-bold text-slate-400 hover:text-slate-600 cursor-pointer"
             >
@@ -397,7 +397,7 @@ const { t } = useTranslation();
               </p>
             </div>
 
-            <button
+            <button type="button"
               onClick={() => setStep('choice')}
               className="w-full py-3 bg-[#C97B5E] hover:bg-[#B56A4F] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider font-display transition-all shadow-md cursor-pointer"
             >

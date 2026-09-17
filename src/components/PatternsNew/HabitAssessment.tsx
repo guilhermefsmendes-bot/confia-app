@@ -121,7 +121,7 @@ function HabitAssessment({ onBack }: Props) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FFF9F4] to-[#F2EBE5] p-5 pb-12">
 
-      <button
+      <button type="button"
         onClick={onBack}
         className="mb-5 text-[#795B50] font-semibold"
       >
@@ -164,7 +164,7 @@ function HabitAssessment({ onBack }: Props) {
 
           <div className="grid grid-cols-2 gap-2">
             {categories.map(item => (
-              <button
+              <button type="button"
                 key={item.id}
                 onClick={() => setCategory(item.id)}
                 className={`p-3 rounded-2xl text-left border transition ${
@@ -187,7 +187,7 @@ function HabitAssessment({ onBack }: Props) {
 
           <div className="grid grid-cols-6 gap-2">
             {[0,1,2,3,4,5].map(value => (
-              <button
+              <button type="button"
                 key={value}
                 onClick={() => setBaseline(value)}
                 className={`h-11 rounded-xl font-bold ${
@@ -209,7 +209,7 @@ function HabitAssessment({ onBack }: Props) {
 
           <div className="grid grid-cols-5 gap-2">
             {[1,2,3,4,5].map(value => (
-              <button
+              <button type="button"
                 key={value}
                 onClick={() => setMotivation(value)}
                 className={`h-11 rounded-xl font-bold ${
@@ -224,7 +224,7 @@ function HabitAssessment({ onBack }: Props) {
           </div>
         </div>
 
-        <button
+        <button type="button"
           onClick={addHabit}
           className="w-full mt-5 rounded-2xl p-4 bg-gradient-to-r from-[#76564B] to-[#A67B68] text-white font-extrabold shadow-md"
         >
@@ -270,7 +270,7 @@ function HabitAssessment({ onBack }: Props) {
                     </div>
                   </div>
 
-                  <button
+                  <button type="button"
                     onClick={() => removeHabit(habit.id)}
                     className="text-[#B08B7D] text-lg"
                   >
@@ -281,7 +281,7 @@ function HabitAssessment({ onBack }: Props) {
             ))}
           </div>
 
-          <button
+          <button type="button"
             onClick={save}
             className="w-full mt-5 p-4 rounded-2xl bg-[#76564B] text-white font-extrabold shadow-lg"
           >

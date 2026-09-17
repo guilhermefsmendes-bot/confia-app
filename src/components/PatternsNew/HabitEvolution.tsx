@@ -265,7 +265,7 @@ function HabitEvolution({ onBack }: Props) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FFF9F4] via-[#F8F1EC] to-[#EFE6DF] p-5 pb-12">
 
-      <button
+      <button type="button"
         onClick={onBack}
         className="mb-5 text-[#795B50] font-semibold"
       >
@@ -321,7 +321,7 @@ function HabitEvolution({ onBack }: Props) {
       <div className="bg-white rounded-2xl p-3 shadow-sm border border-[#E8DDD4] mb-5">
         <div className="grid grid-cols-3 gap-2">
           {[7, 14, 30].map(value => (
-            <button
+            <button type="button"
               key={value}
               onClick={() => setPeriod(value)}
               className={`rounded-xl py-2 text-sm font-bold ${

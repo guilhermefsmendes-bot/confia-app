@@ -2983,7 +2983,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                     </div>
 
                     {/* Guardar */}
-                    <button
+                    <button type="button"
                       onClick={handleSaveRatings}
                       className="w-full py-3.5 bg-[#D59375] active:bg-[#C68060] text-white font-extrabold text-xs rounded-2xl shadow-[0_8px_20px_rgba(201,123,94,0.18)] transition-colors duration-200 flex items-center justify-center gap-2"
                     >
@@ -3210,7 +3210,7 @@ className="flex items-center justify-center w-24 h-24 relative"
   >
     <div className="max-w-md mx-auto">
 
-      <button
+      <button type="button"
         onClick={() => {
           // CONFIA_COMPANION_HOME_RETURNED_COMPANION
           emitCompanionBrainEvent(
@@ -3301,28 +3301,28 @@ className="flex items-center justify-center w-24 h-24 relative"
     </p>
 
     <div className="grid grid-cols-2 gap-2">
-      <button
+      <button type="button"
         onClick={() => changeAppLanguage("pt")}
         className="py-3 rounded-2xl border border-[#E5A88B]/30 bg-[#FFF0E8] text-[#C97B5E] font-black text-xs"
       >
         🇵🇹 Português
       </button>
 
-      <button
+      <button type="button"
         onClick={() => changeAppLanguage("en")}
         className="py-3 rounded-2xl border border-slate-200 bg-white text-[#4E3B36] font-black text-xs"
       >
         🇬🇧 English
       </button>
 
-      <button
+      <button type="button"
         onClick={() => changeAppLanguage("es")}
         className="py-3 rounded-2xl border border-slate-200 bg-white text-[#4E3B36] font-black text-xs"
       >
         🇪🇸 Español
       </button>
 
-      <button
+      <button type="button"
         onClick={() => changeAppLanguage("fr")}
         className="py-3 rounded-2xl border border-slate-200 bg-white text-[#4E3B36] font-black text-xs"
       >
@@ -3343,7 +3343,7 @@ className="flex items-center justify-center w-24 h-24 relative"
     {t("communityGuidelinesShort")}
   </p>
 
-  <button
+  <button type="button"
     onClick={() => setShowCommunityTerms(true)}
     className="w-full py-3.5 rounded-2xl bg-[#FFF0E8] border border-[#E5A88B]/30 text-[#C97B5E] font-black text-xs uppercase tracking-wide"
   >
@@ -3360,7 +3360,7 @@ className="flex items-center justify-center w-24 h-24 relative"
         {t("deleteMyDataDescription")}
       </p>
 
-      <button
+      <button type="button"
         onClick={handleDeleteAccountData}
         className="w-full py-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 font-black text-xs uppercase tracking-wide hover:bg-red-100 transition"
       >
@@ -3395,7 +3395,7 @@ className="flex items-center justify-center w-24 h-24 relative"
           {t("communityGuidelines")}
         </h2>
 
-        <button
+        <button type="button"
           onClick={() => setShowCommunityTerms(false)}
           className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-slate-500"
           aria-label={t("close")}
@@ -3409,7 +3409,7 @@ className="flex items-center justify-center w-24 h-24 relative"
         {t("communityGuidelinesDescription")}
       </div>
 
-      <button
+      <button type="button"
         onClick={() => setShowCommunityTerms(false)}
         className="w-full mt-6 py-3.5 rounded-2xl bg-[#FFF0E8] border border-[#E5A88B]/30 text-[#C97B5E] font-black text-xs uppercase tracking-wide"
       >
@@ -3551,7 +3551,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
               </p>
 </div>
-              <button
+              <button type="button"
             onClick={() => setLevelUpOpen(false)}
                 className="w-full py-3 bg-[#E5A88B] hover:bg-[#D59375] text-white shadow-lg shadow-[#E5A88B]/25 font-black text-xs uppercase tracking-wider font-display rounded-xl cursor-pointer"
               >

@@ -119,7 +119,7 @@ const newEntry = {
             "harder"
           ].map((item)=>(
 
-            <button
+            <button type="button"
               key={item}
               onClick={() => saveToday(item)}
               className={`w-full p-4 rounded-xl border ${

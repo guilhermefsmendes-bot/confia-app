@@ -52,7 +52,7 @@ createdAt: new Date().toISOString(),
   return (
     <div className="bg-[#FFF8F5] rounded-2xl p-5">
 
-      <button
+      <button type="button"
         onClick={onBack}
         className="text-sm text-[#7A5E57] mb-4"
       >
@@ -70,7 +70,7 @@ t("patterns.home.habits.title")
       <div className="space-y-3">
 
         {HABITS.map((habit) => (
-          <button
+          <button type="button"
             key={habit}
             onClick={() => toggleHabit(habit)}
             className={`w-full rounded-xl border p-4 text-left transition ${
@@ -85,7 +85,7 @@ t(`patterns.home.habits.${habit}`)
 
       </div>
 
-      <button
+      <button type="button"
         onClick={handleContinue}
         className="w-full mt-6 rounded-2xl bg-[#7A5E57] text-white p-4 font-bold"
       >

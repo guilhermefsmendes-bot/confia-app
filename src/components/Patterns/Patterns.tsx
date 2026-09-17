@@ -92,7 +92,7 @@ if (step === "library") {
   return (
     <div className="space-y-4">
 
-      <button
+      <button type="button"
         onClick={() => setStep("home")}
         className="text-sm text-[#7A5E57]"
       >
@@ -150,7 +150,7 @@ if (step === "plan") {
   return (
     <div className="space-y-4">
 
-      <button
+      <button type="button"
         onClick={() => setStep("home")}
         className="text-sm text-[#7A5E57]"
       >
@@ -216,7 +216,7 @@ return (
 
     <div className="space-y-4">
 
-      <button
+      <button type="button"
         onClick={() => setStep("questionnaire")}
         className="w-full rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm hover:shadow-md transition"
       >
@@ -235,7 +235,7 @@ return (
         </div>
       </button>
 
-      <button
+      <button type="button"
         onClick={() => setStep("habits")}
         className="w-full rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm hover:shadow-md transition"
       >
@@ -254,7 +254,7 @@ t("patterns.home.habits.description")
         </div>
       </button>
 
-<button
+<button type="button"
   onClick={() => setStep("evolution")}
   className="w-full rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm hover:shadow-md transition"
 >
@@ -273,7 +273,7 @@ t("patterns.home.habits.description")
         </div>
       </button>
 
-<button
+<button type="button"
   onClick={() => setStep("library")}
   className="w-full rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm hover:shadow-md transition"
 >
@@ -292,7 +292,7 @@ t("patterns.home.library.description")
         </div>
       </button>
 
-<button
+<button type="button"
 onClick={() => setStep("plan")}
   className="w-full rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm hover:shadow-md transition"
 >

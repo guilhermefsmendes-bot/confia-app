@@ -125,7 +125,7 @@ function HabitDailyCheck({ onBack }: Props) {
   if (habits.length === 0) {
     return (
       <div className="min-h-screen bg-[#F7F1EA] p-5">
-        <button
+        <button type="button"
           onClick={onBack}
           className="mb-6 text-[#795B50] font-semibold"
         >
@@ -152,7 +152,7 @@ function HabitDailyCheck({ onBack }: Props) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FFF9F4] to-[#F1EAE4] p-5 pb-12">
 
-      <button
+      <button type="button"
         onClick={onBack}
         className="mb-5 text-[#795B50] font-semibold"
       >
@@ -223,7 +223,7 @@ function HabitDailyCheck({ onBack }: Props) {
 
             <div className="grid grid-cols-6 gap-2">
               {[0,1,2,3,4,5].map(level => (
-                <button
+                <button type="button"
                   key={level}
                   onClick={() => selectLevel(habit.id, level)}
                   className={`h-12 rounded-xl font-extrabold transition ${
@@ -248,7 +248,7 @@ function HabitDailyCheck({ onBack }: Props) {
       </div>
 
       {completed === habits.length && (
-        <button
+        <button type="button"
           onClick={saveRecord}
           className="w-full mt-6 p-4 rounded-2xl bg-gradient-to-r from-[#587563] to-[#769784] text-white font-extrabold shadow-xl"
         >

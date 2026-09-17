@@ -152,7 +152,7 @@ export default function DailyCheckIn({ onComplete }: Props) {
 
             </div>
 
-            <button
+            <button type="button"
               onClick={handleFinish}
               className="w-full rounded-2xl py-4 bg-green-500 text-white font-black text-lg shadow-lg shadow-green-200"
             >
@@ -222,7 +222,7 @@ export default function DailyCheckIn({ onComplete }: Props) {
               <div className="grid grid-cols-2 gap-3">
 
                 {needs.map((item) => (
-                  <button
+                  <button type="button"
                     key={item.id}
                     onClick={() => setNeed(item.id)}
                     className={`rounded-2xl p-3 text-sm font-bold transition-all border-2 ${
@@ -245,7 +245,7 @@ export default function DailyCheckIn({ onComplete }: Props) {
 
             </div>
 
-            <button
+            <button type="button"
               onClick={handleContinue}
               disabled={!need}
               className={`w-full rounded-2xl py-4 font-black text-lg transition-all ${

@@ -28,7 +28,7 @@ export function StopMode({ onStartImpulse }: StopModeProps) {
        {t("stopQuestion")}
       </p>
 
-      <button
+      <button type="button"
         onClick={onStartImpulse}
         className="bg-[#C97B5E] text-white px-8 py-4 rounded-full font-bold"
       >

@@ -54,7 +54,7 @@ export const PatternResults: React.FC<PatternResultsProps> = ({
         <p>{t(profile.challengeKey)}</p>
 
       </div>
-      <button
+      <button type="button"
         onClick={onContinue}
         className="mt-8 w-full rounded-2xl bg-[#C97B5E] py-4 text-white font-bold"
       >

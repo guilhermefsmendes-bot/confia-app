@@ -1184,7 +1184,7 @@ key={phraseIdx}
 
       {/* Control Buttons */}
       <div className="flex items-center gap-4">
-        <button
+        <button type="button"
           onClick={handleReset}
           className="p-3 bg-white hover:bg-[#FAF5F0] text-slate-500 hover:text-[#4E3B36] rounded-2xl border border-[#E5A88B]/15 shadow-sm transition-all cursor-pointer"
          title={t("reset")}
@@ -1192,7 +1192,7 @@ key={phraseIdx}
           <RotateCcw size={18} />
         </button>
 
-        <button
+        <button type="button"
           onClick={handleToggle}
           className={`px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider font-display shadow-lg transition-all flex items-center gap-2 cursor-pointer ${
             isActive

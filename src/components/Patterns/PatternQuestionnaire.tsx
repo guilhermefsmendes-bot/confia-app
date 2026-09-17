@@ -53,7 +53,7 @@ export const PatternQuestionnaire: React.FC<PatternQuestionnaireProps> = ({
   return (
     <div className="bg-[#FFF8F5] rounded-2xl p-5">
 
-      <button
+      <button type="button"
         onClick={onBack}
         className="text-sm text-[#7A5E57] mb-4"
       >
@@ -84,7 +84,7 @@ export const PatternQuestionnaire: React.FC<PatternQuestionnaireProps> = ({
 
         {OPTIONS.map((option, index) => (
 
-          <button
+          <button type="button"
             key={option}
             onClick={() => handleAnswer(index)}
             className="w-full rounded-xl border border-[#E5D4CB] bg-white p-4 text-left hover:bg-[#FFF3EE]"

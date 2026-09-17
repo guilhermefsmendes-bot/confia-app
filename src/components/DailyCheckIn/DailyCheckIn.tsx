@@ -156,7 +156,7 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
 
           <div className="mt-5 flex justify-between gap-2">
             {[0, 2, 4, 6, 8, 10].map((value) => (
-              <button
+              <button type="button"
                 key={value}
                 onClick={() => setMood(value)}
                 className={`flex h-11 w-11 items-center justify-center rounded-full font-bold transition ${
@@ -183,7 +183,7 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
 
           <div className="mt-4 grid grid-cols-2 gap-3">
             {needs.map((item) => (
-              <button
+              <button type="button"
                 key={item.id}
                 onClick={() => setNeed(item.id)}
                 className={`rounded-2xl border p-4 text-left transition ${
@@ -202,7 +202,7 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
           </div>
         </div>
 
-        <button
+        <button type="button"
           onClick={handleComplete}
           disabled={mood === null || need === null}
           className="mt-8 w-full rounded-2xl bg-emerald-500 py-4 font-bold text-white shadow-lg transition disabled:cursor-not-allowed disabled:opacity-40"

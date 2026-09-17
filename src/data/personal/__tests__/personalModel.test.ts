@@ -61,3 +61,35 @@ test("repeated need becomes a pattern without inventing causality", () => {
   const patterns = buildPersonalPatterns(events);
   assert.equal(patterns.filter(pattern => pattern.type === "repeated_need").length, 1);
 });
+
+import { applyInsightLifecycle } from "../personalInsightLifecycle";
+
+test("two observations do not create a longitudinal pattern", () => {
+  const events = [event("a", "2026-09-10", 3), event("b", "2026-09-17", 9)];
+  assert.equal(buildPersonalInsights(events, new Date("2026-09-17T12:00:00Z")).length, 0);
+});
+
+test("irregular history stays low-confidence rather than becoming precise", () => {
+  const dates = ["2026-06-01", "2026-07-20", "2026-08-31", "2026-09-17"];
+  const insights = buildPersonalInsights(dates.map((date, i) => event(String(i), date, i + 4)), new Date("2026-09-17T12:00:00Z"));
+  assert.ok(insights.every(insight => insight.confidence !== "high"));
+});
+
+test("one intervention outcome is not enough for an effect insight", () => {
+  const intervention = makePersonalEvent({
+    id: "i1", type: "intervention", timestamp: "2026-09-17T10:00:00.000Z", localDate: "2026-09-17",
+    source: "impulso", value: 4, metadata: { initialIntensity: 8, finalIntensity: 4 },
+  });
+  assert.equal(buildPersonalInsights([intervention], new Date("2026-09-17T12:00:00Z")).length, 0);
+});
+
+test("insight lifecycle can surface a pattern that disappeared after a meaningful gap", () => {
+  const store = new Map<string, string>();
+  const previousWindow = globalThis.window;
+  (globalThis as any).window = { localStorage: { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => store.set(k, v) } };
+  store.set("confia_personal_insight_lifecycle_v1", JSON.stringify({ "habit:walk": { firstSeen: "2026-06-01", lastSeen: "2026-07-01", timesShown: 2, status: "consistent", type: "habit_association" } }));
+  const result = applyInsightLifecycle([]);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].type, "pattern_disappearance");
+  (globalThis as any).window = previousWindow;
+});

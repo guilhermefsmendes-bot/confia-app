@@ -1698,7 +1698,8 @@
       "interventionEffect": "En tus episodios registrados, la intensidad ha bajado después de algunas intervenciones.",
       "habitAssociation": "En tus registros, {{label}} ha coincidido con estados medios diferentes.",
       "timeOfDay": "En tus registros, el estado medio tiende a variar en {{label}}.",
-      "repeatedNeed": "La necesidad “{{label}}” aparece repetidamente en tus registros."
+      "repeatedNeed": "La necesidad “{{label}}” aparece repetidamente en tus registros.",
+      "patternDisappearance": "Un patrón que aparecía antes ha dejado de aparecer en tus registros recientes."
     },
     "analogousTitle": "Ya estuviste aquí",
     "analogousSubtitle": "Momentos anteriores con un estado parecido al de ahora.",
@@ -1744,5 +1745,8 @@
     "metric": "Metric: {{metric}}",
     "outcomePrompt": "What did you observe?",
     "cancel": "Cancelar"
+  },
+  "personalInsights": {
+    "patternDisappearance": "Un patrón que aparecía antes ha dejado de aparecer en tus registros recientes."
   }
 }

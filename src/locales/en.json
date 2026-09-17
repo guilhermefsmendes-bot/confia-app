@@ -1798,7 +1798,8 @@
       "interventionEffect": "In your recorded episodes, intensity has decreased after some interventions.",
       "habitAssociation": "In your records, {{label}} has coincided with different average states.",
       "timeOfDay": "In your records, average state tends to vary in {{label}}.",
-      "repeatedNeed": "The need “{{label}}” appears repeatedly in your records."
+      "repeatedNeed": "The need “{{label}}” appears repeatedly in your records.",
+      "patternDisappearance": "A pattern that appeared before has stopped showing up in your recent records."
     },
     "analogousTitle": "You have been here before",
     "analogousSubtitle": "Earlier moments with a state similar to now.",
@@ -1844,5 +1845,8 @@
     "metric": "Metric: {{metric}}",
     "outcomePrompt": "What did you observe?",
     "cancel": "Cancel"
+  },
+  "personalInsights": {
+    "patternDisappearance": "A pattern that appeared before has stopped showing up in your recent records."
   }
 }

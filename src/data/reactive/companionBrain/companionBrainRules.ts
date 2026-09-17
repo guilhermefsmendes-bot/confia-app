@@ -77,6 +77,21 @@ export function buildCompanionCandidates(
   context: CompanionBrainContext
 ): CompanionBrainCandidate[] {
   const candidates: CompanionBrainCandidate[] = [];
+  const personalDiscovery = context.personalDiscovery;
+  if (personalDiscovery && personalDiscovery.actionability !== "low") {
+    candidates.push({
+      id: `personal_discovery:${personalDiscovery.id}`,
+      translationKey: personalDiscovery.messageKey,
+      translationValues: personalDiscovery.messageValues,
+      category: "discovery",
+      emotion: "curious",
+      priority: personalDiscovery.confidence === "high" ? 82 : 76,
+      reason: "A longitudinal personal pattern has enough evidence to be surfaced as a discovery.",
+      cooldownMinutes: 4320,
+      metadata: { longitudinal: true, personalDiscovery: true, evidenceCount: personalDiscovery.evidenceCount, confidence: personalDiscovery.confidence },
+    });
+  }
+
 
   // CONFIA_COMPANION_CROSS_MEMORY_RULES_9D
   /**

@@ -707,7 +707,7 @@ function ConfiaCompanionHome({
       candidate.translationKey;
 
     const translated =
-      t(brainKey);
+      t(brainKey, candidate.translationValues);
 
     if (
       !translated ||
@@ -785,8 +785,6 @@ function ConfiaCompanionHome({
           candidate.reason,
         translationKey:
           candidate.translationKey,
-        text:
-          translated,
         shownAt:
           new Date(
             nowMs

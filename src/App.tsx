@@ -48,7 +48,7 @@ import InnerCanvas from "./components/InnerCanvas/InnerCanvas";
 const PersonalMap = lazy(() => import("./components/PersonalMap"));
 const PersonalExperiments = lazy(() => import("./components/PersonalExperiments"));
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
-import { syncPersonalEventsFromLegacySources } from "./data/personal";
+import { syncPersonalEventsFromLegacySources, readPersonalEvents, buildPersonalInsights } from "./data/personal";
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 import PatternsNew from './components/PatternsNew/PatternsNew';
 import HabitAssessment from './components/PatternsNew/HabitAssessment';
@@ -83,7 +83,6 @@ import { Avatar } from "./components/Avatar";
 import {
   buildCompanionBrainContext,
   evaluateCompanionContext,
-  diagnoseCompanionContext,
   hasRecentCompanionBrainEvent,
   countRecentCompanionBrainEvents,
 } from "./data/reactive/companionBrain";
@@ -366,9 +365,22 @@ return parsed.items
   return INITIAL_OBJECTIVES;
 });
  const completedObjectivesCount = objectives.filter(o => o.completed).length;
+
   const [ratings, setRatings] = useState<DailyRating[]>(() => {
       return readStoredJson<DailyRating[]>(STORAGE_KEYS.RATINGS, []);
   });
+
+  const personalDiscovery = React.useMemo(() => {
+    const insights = buildPersonalInsights(readPersonalEvents(), new Date());
+    return insights
+      .filter(insight => insight.status === "consistent" || insight.status === "possible")
+      .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")
+      .sort((a, b) => {
+        const confidence = { high: 3, moderate: 2, low: 1 };
+        const actionability = { high: 3, medium: 2, low: 1 };
+        return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
+      })[0];
+  }, [ratings]);
 
   const [posts, setPosts] = useState<SharePost[]>(() =>
     readStoredJson<SharePost[]>(STORAGE_KEYS.POSTS, INITIAL_POSTS)
@@ -1521,6 +1533,14 @@ useEffect(() => {
         now
       ),
 
+    personalDiscovery: personalDiscovery ? {
+      id: personalDiscovery.id,
+      messageKey: personalDiscovery.messageKey ?? "personalInsights.discoveryFallback",
+      messageValues: personalDiscovery.messageValues,
+      confidence: personalDiscovery.confidence,
+      evidenceCount: personalDiscovery.evidenceCount,
+      actionability: personalDiscovery.actionability,
+    } : undefined,
 
         sessionActivityCount:
           countRecentCompanionBrainEvents(
@@ -1531,44 +1551,6 @@ useEffect(() => {
     const decision =
       evaluateCompanionContext(context);
 
-    /**
-     * CONFIA_COMPANION_BRAIN_HOME_DIAGNOSTIC
-     *
-     * Apenas diagnóstico em desenvolvimento.
-     * Não altera comportamento nem memória.
-     */
-    if (import.meta.env.DEV) {
-      const diagnostic =
-        diagnoseCompanionContext(context);
-
-      console.groupCollapsed(
-        "[CONFIA Companion Brain]",
-        diagnostic.decision?.candidate?.id
-          ?? "SILÊNCIO"
-      );
-
-      console.log(
-        "Contexto:",
-        diagnostic.context
-      );
-
-      console.log(
-        "Candidatos brutos:",
-        diagnostic.rawCandidates
-      );
-
-      console.log(
-        "Candidatos resolvidos:",
-        diagnostic.resolvedCandidates
-      );
-
-      console.log(
-        "Decisão:",
-        diagnostic.decision
-      );
-
-      console.groupEnd();
-    }
 
     return decision;
   })();
@@ -2094,8 +2076,6 @@ const handleLikePost = async (
 
     if (!user) return;
 
-    console.log("REAÇÃO CLICADA:", id, reaction);
-    console.log("UTILIZADOR:", user.uid);
 
     const postRef = doc(db, "posts", id);
     const post = posts.find(p => p.id === id);
@@ -2118,7 +2098,6 @@ const handleLikePost = async (
         [`${reaction}LikedBy`]: arrayRemove(user.uid)
       });
 
-      console.log("REAÇÃO REMOVIDA:", reaction);
       return;
     }
 
@@ -2153,7 +2132,6 @@ const handleLikePost = async (
 
     await updateDoc(postRef, updates);
 
-    console.log("REAÇÃO ADICIONADA:", reaction);
   } catch (error) {
     console.error("Erro ao atualizar reação:", error);
   }

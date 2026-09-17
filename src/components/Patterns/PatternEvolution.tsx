@@ -3,9 +3,8 @@ import { useTranslation } from "react-i18next";
 
 export const PatternEvolution: React.FC = () => {
 
-const { t, i18n } = useTranslation();
+const { t } = useTranslation();
 
-console.log("IDIOMA ATUAL:", i18n.language);
 
   const history = (() => {
     try {

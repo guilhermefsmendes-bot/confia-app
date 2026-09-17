@@ -1883,6 +1883,9 @@
       "low": "Há sinais iniciais",
       "moderate": "Há alguns sinais repetidos",
       "high": "Há evidência consistente"
-    }
+    },
+    "weekday": "Os teus registos mostram uma diferença recorrente num dia da semana.",
+    "recoveryPattern": "Quando um registo esteve mais baixo, há ocasiões em que os registos seguintes mostram uma recuperação significativa.",
+    "personalChange": "O teu padrão recente está diferente do período anterior, segundo os teus próprios registos."
   }
 }

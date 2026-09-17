@@ -83,6 +83,19 @@ export interface CompanionBrainContext {
   crossMemory?:
     CompanionCrossMemory;
 
+  /**
+   * Descoberta longitudinal pronta a traduzir, quando existe evidência suficiente.
+   * Nunca contém notas emocionais nem conteúdo livre do utilizador.
+   */
+  personalDiscovery?: {
+    id: string;
+    messageKey: string;
+    messageValues?: Record<string, string | number>;
+    confidence: "low" | "moderate" | "high";
+    evidenceCount: number;
+    actionability: "low" | "medium" | "high";
+  };
+
 
   /**
    * Última mensagem que chegou realmente ao balão.
@@ -126,6 +139,19 @@ export function buildCompanionBrainContext(input: {
 
   crossMemory?:
     CompanionCrossMemory;
+
+  /**
+   * Descoberta longitudinal pronta a traduzir, quando existe evidência suficiente.
+   * Nunca contém notas emocionais nem conteúdo livre do utilizador.
+   */
+  personalDiscovery?: {
+    id: string;
+    messageKey: string;
+    messageValues?: Record<string, string | number>;
+    confidence: "low" | "moderate" | "high";
+    evidenceCount: number;
+    actionability: "low" | "medium" | "high";
+  };
 
 
   /**

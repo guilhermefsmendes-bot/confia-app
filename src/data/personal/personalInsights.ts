@@ -88,11 +88,80 @@ function buildInterventionInsight(valid: PersonalEvent[], now: Date): PersonalIn
   };
 }
 
+
+function buildWeekdayInsight(valid: PersonalEvent[], now: Date): PersonalInsight | undefined {
+  const recent = valid.filter(event => new Date(event.timestamp).getTime() >= now.getTime() - 90 * 86400000);
+  if (recent.length < 14) return undefined;
+  const buckets = new Map<number, number[]>();
+  for (const event of recent) {
+    const day = new Date(event.timestamp).getDay();
+    const values = buckets.get(day) ?? [];
+    values.push(mood(event)!);
+    buckets.set(day, values);
+  }
+  const eligible = [...buckets.entries()].filter(([, values]) => values.length >= 3);
+  if (eligible.length < 3) return undefined;
+  const overall = avg(recent.map(event => mood(event)!))!;
+  const [day, values] = eligible.sort((a, b) => Math.abs(avg(b[1])! - overall) - Math.abs(avg(a[1])! - overall))[0];
+  const delta = avg(values)! - overall;
+  if (Math.abs(delta) < 0.8) return undefined;
+  const confidence = calculateInsightConfidence(values.length, Math.min(1, values.length / 6), Math.min(1, recent.length / 30), Math.min(1, eligible.length / 7), Math.abs(delta) / 2, Math.min(1, recent.length / 30));
+  const last = recent[recent.length - 1];
+  return {
+    id: `insight_weekday_${day}_${last.localDate}`, type: "weekday", generatedAt: now.toISOString(), periodStart: recent[0].localDate, periodEnd: last.localDate,
+    evidenceCount: values.length, confidence, direction: delta > 0 ? "up" : "down", variables: [`weekday:${day}`], status: values.length >= 5 ? "consistent" : "possible",
+    fingerprint: `weekday:mood:${day}:${delta > 0 ? "up" : "down"}`, firstSeen: recent[0].localDate, lastSeen: last.localDate, timesShown: 0, novelty: "new", actionability: "medium", supportingEventIds: recent.filter(e => new Date(e.timestamp).getDay() === day).map(e => e.id),
+    message: "Os teus registos mostram uma diferença recorrente num dia da semana.", messageKey: "personalInsights.weekday", messageValues: { day: String(day) },
+  };
+}
+
+function buildRecoveryInsight(valid: PersonalEvent[], now: Date): PersonalInsight | undefined {
+  const recent = valid.filter(event => new Date(event.timestamp).getTime() >= now.getTime() - 90 * 86400000);
+  if (recent.length < 12) return undefined;
+  const ordered = recent.slice().sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  const changes: number[] = [];
+  const supporting: string[] = [];
+  for (let i = 1; i < ordered.length; i += 1) {
+    const before = mood(ordered[i - 1])!;
+    const after = mood(ordered[i])!;
+    const gap = new Date(ordered[i].timestamp).getTime() - new Date(ordered[i - 1].timestamp).getTime();
+    if (gap <= 36 * 3600000 && before <= 4 && after - before >= 2) { changes.push(after - before); supporting.push(ordered[i - 1].id, ordered[i].id); }
+  }
+  if (changes.length < 3) return undefined;
+  const average = avg(changes)!;
+  const first = ordered[0], last = ordered[ordered.length - 1];
+  return {
+    id: `insight_recovery_${last.localDate}`, type: "recovery_pattern", generatedAt: now.toISOString(), periodStart: first.localDate, periodEnd: last.localDate,
+    evidenceCount: changes.length, confidence: calculateInsightConfidence(changes.length, Math.min(1, changes.length / 5), Math.min(1, recent.length / 30), 0.7, Math.min(1, average / 3), Math.min(1, new Set(supporting).size / 8)),
+    direction: "up", variables: ["mood_recovery"], status: changes.length >= 5 ? "consistent" : "possible", fingerprint: "recovery:mood:repeated", firstSeen: first.localDate, lastSeen: last.localDate, timesShown: 0, novelty: "new", actionability: "high", supportingEventIds: [...new Set(supporting)],
+    message: "Quando um registo esteve mais baixo, há ocasiões em que os registos seguintes mostram uma recuperação significativa.", messageKey: "personalInsights.recoveryPattern",
+  };
+}
+
+function buildPersonalChangeInsight(valid: PersonalEvent[], now: Date): PersonalInsight | undefined {
+  const recent = valid.filter(event => new Date(event.timestamp).getTime() >= now.getTime() - 30 * 86400000);
+  const previous = valid.filter(event => { const time = new Date(event.timestamp).getTime(); return time >= now.getTime() - 60 * 86400000 && time < now.getTime() - 30 * 86400000; });
+  if (recent.length < 8 || previous.length < 8) return undefined;
+  const delta = avg(recent.map(e => mood(e)!))! - avg(previous.map(e => mood(e)!))!;
+  if (Math.abs(delta) < 1) return undefined;
+  const last = recent[recent.length - 1];
+  return {
+    id: `insight_change_30d_${last.localDate}`, type: "personal_change", generatedAt: now.toISOString(), periodStart: previous[0].localDate, periodEnd: last.localDate,
+    evidenceCount: recent.length + previous.length, confidence: calculateInsightConfidence(recent.length + previous.length, Math.min(1, Math.abs(delta) / 2), Math.min(1, recent.length / 14), 0.8, Math.min(1, Math.abs(delta) / 2), Math.min(1, recent.length / 14)), direction: delta > 0 ? "up" : "down", variables: ["mood:30d_vs_previous_30d"], status: recent.length >= 12 ? "consistent" : "possible", fingerprint: `personal_change:mood:${delta > 0 ? "up" : "down"}`, firstSeen: previous[0].localDate, lastSeen: last.localDate, timesShown: 0, novelty: "new", actionability: "medium", supportingEventIds: [...previous, ...recent].map(e => e.id), message: "O teu padrão recente está diferente do período anterior, segundo os teus próprios registos.", messageKey: "personalInsights.personalChange",
+  };
+}
+
 export function buildPersonalInsights(events: PersonalEvent[], now = new Date()): PersonalInsight[] {
   const valid = events.filter(validTimestamp).filter(event => mood(event) !== undefined).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   const insights: PersonalInsight[] = [];
   const trend = buildTrendInsight(valid, now);
   if (trend) insights.push(trend);
+  const weekday = buildWeekdayInsight(valid, now);
+  if (weekday) insights.push(weekday);
+  const recovery = buildRecoveryInsight(valid, now);
+  if (recovery) insights.push(recovery);
+  const change = buildPersonalChangeInsight(valid, now);
+  if (change) insights.push(change);
   const interventionEvents = events.filter(validTimestamp).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   const intervention = buildInterventionInsight(interventionEvents, now);
   if (intervention) insights.push(intervention);

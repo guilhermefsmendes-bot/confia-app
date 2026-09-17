@@ -1754,6 +1754,9 @@
       "low": "Des signaux précoces apparaissent",
       "moderate": "Des signaux se répètent",
       "high": "Les éléments sont cohérents"
-    }
+    },
+    "weekday": "Tes relevés montrent une différence récurrente un jour de la semaine.",
+    "recoveryPattern": "Lorsqu’un relevé était plus bas, les relevés suivants montrent parfois une récupération significative.",
+    "personalChange": "Ton profil récent diffère de la période précédente, selon tes propres relevés."
   }
 }

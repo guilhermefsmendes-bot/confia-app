@@ -93,3 +93,37 @@ test("insight lifecycle can surface a pattern that disappeared after a meaningfu
   assert.equal(result[0].type, "pattern_disappearance");
   (globalThis as any).window = previousWindow;
 });
+
+test("weekday insight needs repeated observations on the same weekday", () => {
+  const events = [];
+  const start = new Date("2026-08-20T12:00:00Z");
+  for (let i = 0; i < 21; i++) {
+    const d = new Date(start.getTime() + i * 86400000);
+    const date = d.toISOString().slice(0, 10);
+    events.push(event(`w${i}`, date, d.getUTCDay() === 1 ? 9 : 5));
+  }
+  const insights = buildPersonalInsights(events, new Date("2026-09-17T12:00:00Z"));
+  assert.ok(insights.some(insight => insight.type === "weekday"));
+});
+
+test("recovery insight requires repeated low-to-higher sequences", () => {
+  const events = [];
+  for (let i = 0; i < 12; i++) {
+    const date = new Date(Date.UTC(2026, 7, 25 + i)).toISOString().slice(0, 10);
+    events.push(event(`r${i}`, date, i % 2 === 0 ? 3 : 6));
+  }
+  const insights = buildPersonalInsights(events, new Date("2026-09-17T12:00:00Z"));
+  assert.ok(insights.some(insight => insight.type === "recovery_pattern"));
+});
+
+test("personal change compares adjacent periods rather than population norms", () => {
+  const events = [];
+  for (let i = 0; i < 16; i++) {
+    const oldDate = new Date(Date.UTC(2026, 7, 20 + i)).toISOString().slice(0, 10);
+    const newDate = new Date(Date.UTC(2026, 7, 1 + i)).toISOString().slice(0, 10);
+    events.push(event(`old${i}`, oldDate, 4));
+    events.push(event(`new${i}`, newDate, 7));
+  }
+  const insights = buildPersonalInsights(events, new Date("2026-09-17T12:00:00Z"));
+  assert.ok(insights.some(insight => insight.type === "personal_change"));
+});

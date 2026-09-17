@@ -55,15 +55,6 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
    */
   const getOtherUserId = (): string | null => {
     if (!currentUser) return null;
-console.log("MEU UID:", currentUser.uid);
-console.log("AUTOR DO POST:", post.authorId);
-console.log("NOME DO POST:", post.userName);
-console.log("RED LIKED BY:", post.redLikedBy);
-console.log("================================");
-console.log("CHAT DEBUG - post:", post);
-console.log("CHAT DEBUG - redLikedBy:", (post as any).redLikedBy);
-
-
 
     // Somos o autor da publicação.
     if (currentUser.uid === post.authorId) {
@@ -114,9 +105,6 @@ console.log("CHAT DEBUG - redLikedBy:", (post as any).redLikedBy);
         }
 
         const myUid = user.uid;
-
-        console.log("CHAT - MEU UID:", myUid);
-        console.log("CHAT - AUTOR DO POST:", post.authorId);
 
         /*
          * PRIMEIRO:
@@ -199,8 +187,6 @@ console.log("CHAT DEBUG - redLikedBy:", (post as any).redLikedBy);
             lastMessage: "",
             lastMessageAt: serverTimestamp()
           });
-
-          console.log("NOVO CHAT CRIADO:", newChatId);
         }
 
         if (!cancelled) {

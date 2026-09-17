@@ -1756,6 +1756,9 @@
       "low": "Hay señales iniciales",
       "moderate": "Hay señales repetidas",
       "high": "Hay evidencia consistente"
-    }
+    },
+    "weekday": "Tus registros muestran una diferencia recurrente en un día de la semana.",
+    "recoveryPattern": "Cuando un registro estuvo más bajo, en algunas ocasiones los siguientes muestran una recuperación significativa.",
+    "personalChange": "Tu patrón reciente es diferente del período anterior, según tus propios registros."
   }
 }

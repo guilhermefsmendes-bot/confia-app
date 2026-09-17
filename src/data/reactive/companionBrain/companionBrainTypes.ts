@@ -56,6 +56,8 @@ export interface CompanionBrainCandidate {
   id: string;
   translationKey: string;
 
+  translationValues?: Record<string, string | number>;
+
   category: CompanionBrainCategory;
   emotion: CompanionBrainEmotion;
 

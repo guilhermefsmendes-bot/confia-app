@@ -14,6 +14,7 @@ import {
   Sun,
   Compass,
   ArrowUp,
+  ArrowLeft,
   Sparkles,
   Moon,
   Users,
@@ -45,6 +46,7 @@ import HomeProgressSummary from "./components/HomeProgressSummary";
 import HomeShop from "./components/HomeShop";
 import InnerCanvas from "./components/InnerCanvas/InnerCanvas";
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
+import { syncPersonalEventsFromLegacySources } from "./data/personal";
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 import PatternsNew from './components/PatternsNew/PatternsNew';
 import HabitAssessment from './components/PatternsNew/HabitAssessment';
@@ -272,6 +274,13 @@ const changeAppLanguage = (lang: string) => {
 
 useEffect(() => {
     initLanguage();
+}, []);
+useEffect(() => {
+  try {
+    syncPersonalEventsFromLegacySources();
+  } catch {
+    // O modelo pessoal é complementar e nunca deve bloquear a Home.
+  }
 }, []);
 useEffect(() => {
   initAnonymousAuth().catch((error) => {

@@ -1,10 +1,10 @@
 import type {
   DailyRating,
-} from "../../types";
+} from "../../../types";
 
 import type {
   CompanionImpulseRecord,
-} from "../companionData";
+} from "../../companionData";
 
 /**
  * ============================================================

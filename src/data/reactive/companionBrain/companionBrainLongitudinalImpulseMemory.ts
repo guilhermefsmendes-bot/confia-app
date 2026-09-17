@@ -1,6 +1,6 @@
 import type {
   CompanionImpulseRecord,
-} from "../companionData";
+} from "../../companionData";
 
 /**
  * ============================================================

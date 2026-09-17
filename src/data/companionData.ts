@@ -105,17 +105,16 @@ function readObjectivesHistory(): CompanionObjectiveRecord[] {
 
     if (!Array.isArray(history)) return [];
 
-    return history.map((item) => ({
-      date: item.date,
-      completed:
-        typeof item.completed === "number"
-          ? item.completed
-          : 0,
-      total:
+    return history
+      .filter((item) =>
+        typeof item.completed === "number" &&
         typeof item.total === "number"
-          ? item.total
-          : 0,
-    }));
+      )
+      .map((item) => ({
+        date: item.date,
+        completed: item.completed as number,
+        total: item.total as number,
+      }));
   } catch {
     return [];
   }

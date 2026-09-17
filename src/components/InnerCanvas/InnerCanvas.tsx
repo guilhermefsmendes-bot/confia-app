@@ -13,6 +13,7 @@ import {
   hashAnswers,
   seededNoise,
   type EmotionalAnswers,
+  type EmotionalDefinition,
   type EmotionalFamily,
 } from "./innerCanvasEngine";
 

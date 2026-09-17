@@ -447,7 +447,7 @@ export function openCompanionConversationThread(
     {
       anchorMessageId,
       category,
-      status: "open",
+      status: "open" as const,
       openedAt: now,
     },
   ].slice(-50);

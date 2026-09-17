@@ -1840,6 +1840,8 @@
     "subtitle": "Test one of your hypotheses and measure what changes.",
     "hypothesisPlaceholder": "My hypothesis…",
     "metricPlaceholder": "What I will observe…",
+    "baseline": "Baseline (1–10)",
+    "target": "Target (1–10)",
     "start": "Start experiment",
     "complete": "Record outcome",
     "completed": "Experiment completed",

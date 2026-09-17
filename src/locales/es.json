@@ -1740,6 +1740,8 @@
     "subtitle": "Prueba una hipótesis tuya y mide qué cambia.",
     "hypothesisPlaceholder": "Mi hipótesis…",
     "metricPlaceholder": "Qué voy a observar…",
+    "baseline": "Base (1–10)",
+    "target": "Objetivo (1–10)",
     "start": "Empezar experimento",
     "complete": "Registrar resultado",
     "completed": "Experimento completado",

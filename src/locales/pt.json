@@ -1867,6 +1867,8 @@
     "subtitle": "Testa uma hipótese tua e mede o que muda, sem procurar certezas rápidas.",
     "hypothesisPlaceholder": "A minha hipótese…",
     "metricPlaceholder": "O que vou observar…",
+    "baseline": "Base (1–10)",
+    "target": "Alvo (1–10)",
     "start": "Começar experimento",
     "complete": "Registar resultado",
     "completed": "Experimento concluído",

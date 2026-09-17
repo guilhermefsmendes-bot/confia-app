@@ -1796,8 +1796,7 @@
       "thoughtful": "Pensativo",
       "observant": "Observador",
       "secure": "Seguro"
-    }
-  ,
+    },
     "tierBronze": "Bronze",
     "tierSilver": "Prata",
     "tierGold": "Ouro",
@@ -1808,5 +1807,36 @@
     "silverUnlocked": "A tua peça Prata desta semana foi desbloqueada.",
     "goldUnlocked": "A tua peça Ouro deste mês foi desbloqueada.",
     "createdFromMoments": "Criada a partir de {{count}} momentos"
+  },
+  "personalMap": {
+    "backAria": "Voltar",
+    "title": "O Meu Mapa",
+    "subtitle": "Uma leitura do que a CONFIA já observou em ti.",
+    "observations": "observações",
+    "days": "dias",
+    "completeness": "cobertura",
+    "currentTitle": "O que está presente",
+    "learning": "A CONFIA ainda está a aprender. Continua a registar para descobrires padrões teus.",
+    "needObserved": "A necessidade “{{need}}” aparece {{count}} vezes nos registos.",
+    "discoveries": "Descobertas",
+    "noDiscoveries": "Ainda não há uma descoberta sustentada. Quando houver evidência suficiente, ela aparece aqui.",
+    "explainable": "Cada descoberta aponta para as observações que a sustentam.",
+    "direction": {
+      "up": "Nos teus registos recentes, o estado médio está acima do teu período de referência.",
+      "down": "Nos teus registos recentes, o estado médio está abaixo do teu período de referência.",
+      "stable": "Os teus registos recentes estão relativamente estáveis.",
+      "unknown": "Ainda não há referência suficiente."
+    }
+  },
+  "experiments": {
+    "title": "Microexperimentos",
+    "subtitle": "Testa uma hipótese tua e mede o que muda, sem procurar certezas rápidas.",
+    "hypothesisPlaceholder": "A minha hipótese…",
+    "metricPlaceholder": "O que vou observar…",
+    "start": "Começar experimento",
+    "complete": "Registar resultado",
+    "completed": "Experimento concluído",
+    "metric": "Métrica: {{metric}}",
+    "outcomePrompt": "O que observaste?"
   }
 }

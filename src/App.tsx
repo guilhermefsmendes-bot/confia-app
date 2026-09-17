@@ -45,6 +45,8 @@ import ConfiaCompanionHome from "./components/Companheiro/ConfiaCompanionHome";
 import HomeProgressSummary from "./components/HomeProgressSummary";
 import HomeShop from "./components/HomeShop";
 import InnerCanvas from "./components/InnerCanvas/InnerCanvas";
+import PersonalMap from "./components/PersonalMap";
+import PersonalExperiments from "./components/PersonalExperiments";
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 import { syncPersonalEventsFromLegacySources } from "./data/personal";
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
@@ -290,7 +292,7 @@ useEffect(() => {
   // Global App States
 const [patternsPage, setPatternsPage] = useState("menu");
 const [homeScreen, setHomeScreen] = useState<
-  "home" | "companion" | "patterns" | "shop" | "inventory" | "settings" | "progress" | "innerCanvas"
+  "home" | "companion" | "patterns" | "shop" | "inventory" | "settings" | "progress" | "innerCanvas" | "map" | "experiments"
 >("home");
   const [avatar, setAvatar] = useState<AvatarState>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AVATAR);
@@ -2467,6 +2469,18 @@ className="flex items-center justify-center w-24 h-24 relative"
       </button>
     </div>
 
+    {/* Inteligência pessoal — descoberta e experimentação */}
+    <div className="mt-3 grid grid-cols-2 gap-2 px-3">
+      <button type="button" onClick={() => setHomeScreen("map")} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#E5A88B]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white"><Compass size={17} className="text-[#C97B5E]" /></div>
+        <div><span className="block text-[10px] font-black uppercase tracking-wide text-[#C97B5E]">CONFIA</span><span className="text-xs font-bold text-[#6D5A53]">{t("personalMap.title")}</span></div>
+      </button>
+      <button type="button" onClick={() => setHomeScreen("experiments")} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#E5A88B]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white"><Sparkles size={17} className="text-[#C97B5E]" /></div>
+        <div><span className="block text-[10px] font-black uppercase tracking-wide text-[#C97B5E]">CONFIA</span><span className="text-xs font-bold text-[#6D5A53]">{t("experiments.title")}</span></div>
+      </button>
+    </div>
+
     {/* Definições — utilidade secundária */}
     <div className="mx-4 mt-3 border-t border-[#E8DDD7]/55">
       <button
@@ -3165,6 +3179,14 @@ className="flex items-center justify-center w-24 h-24 relative"
 )}
 
 {/* CONFIA — QUADRO INTERIOR / 60 SEGUNDOS */}
+{currentTab === 0 && homeScreen === "map" && (
+  <PersonalMap onBack={() => setHomeScreen("home")} />
+)}
+
+{currentTab === 0 && homeScreen === "experiments" && (
+  <PersonalExperiments onBack={() => setHomeScreen("home")} />
+)}
+
 {currentTab === 0 && homeScreen === "innerCanvas" && (
   <div
     key="inner-canvas-screen"

@@ -1669,8 +1669,7 @@
       "thoughtful": "Reflexivo",
       "observant": "Observador",
       "secure": "Seguro"
-    }
-  ,
+    },
     "tierBronze": "Bronce",
     "tierSilver": "Plata",
     "tierGold": "Oro",
@@ -1681,5 +1680,36 @@
     "silverUnlocked": "Tu pieza de Plata de esta semana ha sido desbloqueada.",
     "goldUnlocked": "Tu pieza de Oro de este mes ha sido desbloqueada.",
     "createdFromMoments": "Creada a partir de {{count}} momentos"
+  },
+  "personalMap": {
+    "backAria": "Back",
+    "title": "Mi mapa",
+    "subtitle": "A view of what CONFIA has actually observed in you.",
+    "observations": "observations",
+    "days": "days",
+    "completeness": "coverage",
+    "currentTitle": "What is present",
+    "learning": "CONFIA is still learning. Keep recording to discover your patterns.",
+    "needObserved": "The need “{{need}}” appears {{count}} times in your records.",
+    "discoveries": "Discoveries",
+    "noDiscoveries": "There is not enough evidence for a supported discovery yet.",
+    "explainable": "Each discovery points to the observations behind it.",
+    "direction": {
+      "up": "Your recent average is above your reference period.",
+      "down": "Your recent average is below your reference period.",
+      "stable": "Your recent records are relatively stable.",
+      "unknown": "There is not enough reference yet."
+    }
+  },
+  "experiments": {
+    "title": "Microexperimentos",
+    "subtitle": "Test one of your hypotheses and measure what changes.",
+    "hypothesisPlaceholder": "My hypothesis…",
+    "metricPlaceholder": "What I will observe…",
+    "start": "Start experiment",
+    "complete": "Record outcome",
+    "completed": "Experiment completed",
+    "metric": "Metric: {{metric}}",
+    "outcomePrompt": "What did you observe?"
   }
 }

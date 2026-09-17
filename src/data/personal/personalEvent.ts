@@ -77,7 +77,7 @@ export interface InsightFeedbackEvent extends PersonalEventBase {
 export interface ExperimentEvent extends PersonalEventBase {
   type: "experiment";
   value: number | boolean | string | null;
-  metadata?: { experimentId?: string; phase?: "start" | "measure" | "complete"; } & Record<string, unknown>;
+  metadata?: { experimentId?: string; phase?: "start" | "measure" | "complete"; hypothesis?: string; start?: string; end?: string; baseline?: number | string; targetMetric?: string; completion?: string; outcome?: string; status?: "active" | "complete"; } & Record<string, unknown>;
 }
 
 export type PersonalEvent =

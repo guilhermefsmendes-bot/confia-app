@@ -1848,6 +1848,7 @@
     "complete": "Registar resultado",
     "completed": "Experimento concluído",
     "metric": "Métrica: {{metric}}",
-    "outcomePrompt": "O que observaste?"
+    "outcomePrompt": "O que observaste?",
+    "cancel": "Cancelar"
   }
 }

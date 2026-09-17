@@ -1719,6 +1719,7 @@
     "complete": "Record outcome",
     "completed": "Experiment completed",
     "metric": "Metric: {{metric}}",
-    "outcomePrompt": "What did you observe?"
+    "outcomePrompt": "What did you observe?",
+    "cancel": "Annuler"
   }
 }

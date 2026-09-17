@@ -5,6 +5,7 @@ import { readPersonalEvents } from "../data/personal/personalEventStorage";
 import { buildPersonalModel } from "../data/personal/personalModel";
 import { buildPersonalInsights, explainInsight } from "../data/personal/personalInsights";
 import { recordPersonalAnalytics } from "../data/personal/personalAnalytics";
+import { applyInsightLifecycle, markInsightsShown } from "../data/personal/personalInsightLifecycle";
 
 type Props = { onBack: () => void };
 
@@ -12,8 +13,8 @@ export default function PersonalMap({ onBack }: Props) {
   const { t } = useTranslation();
   const events = useMemo(() => readPersonalEvents(), []);
   const model = useMemo(() => buildPersonalModel(events), [events]);
-  const insights = useMemo(() => buildPersonalInsights(events), [events]);
-  useEffect(() => { recordPersonalAnalytics("personal_map_viewed"); }, []);
+  const insights = useMemo(() => applyInsightLifecycle(buildPersonalInsights(events)), [events]);
+  useEffect(() => { recordPersonalAnalytics("personal_map_viewed"); markInsightsShown(insights); }, [insights]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FFF9F4] to-[#F1EAE4] p-5 pb-24">

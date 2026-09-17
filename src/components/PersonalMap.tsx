@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Compass, Info, Sparkles, ThumbsDown, ThumbsUp } from "lucide-react";
 import { readPersonalEvents, appendPersonalEvents, PERSONAL_EVENTS_UPDATED_EVENT } from "../data/personal/personalEventStorage";
@@ -27,9 +27,13 @@ export default function PersonalMap({ onBack }: Props) {
     return target ? findAnalogousMoments(events, target, 3) : [];
   }, [events]);
   const insights = useMemo(() => applyInsightLifecycle(buildPersonalInsights(events)), [events]);
+  const shownInsightIds = useRef(new Set<string>());
   useEffect(() => {
     recordPersonalAnalytics("personal_map_viewed");
-    markInsightsShown(insights);
+    const newlyVisible = insights.filter(insight => !shownInsightIds.current.has(insight.id));
+    if (!newlyVisible.length) return;
+    markInsightsShown(newlyVisible);
+    newlyVisible.forEach(insight => shownInsightIds.current.add(insight.id));
   }, [insights]);
 
   return (

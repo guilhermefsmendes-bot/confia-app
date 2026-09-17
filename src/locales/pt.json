@@ -1819,6 +1819,8 @@
     "learning": "A CONFIA ainda está a aprender. Continua a registar para descobrires padrões teus.",
     "needObserved": "A necessidade “{{need}}” aparece {{count}} vezes nos registos.",
     "discoveries": "Descobertas",
+    "analogousTitle": "Já estiveste aqui",
+    "analogousSubtitle": "Momentos anteriores com um estado semelhante ao de agora.",
     "noDiscoveries": "Ainda não há uma descoberta sustentada. Quando houver evidência suficiente, ela aparece aqui.",
     "explainable": "Cada descoberta aponta para as observações que a sustentam.",
     "direction": {

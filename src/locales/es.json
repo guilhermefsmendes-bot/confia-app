@@ -1692,6 +1692,8 @@
     "learning": "CONFIA is still learning. Keep recording to discover your patterns.",
     "needObserved": "The need “{{need}}” appears {{count}} times in your records.",
     "discoveries": "Discoveries",
+    "analogousTitle": "Ya estuviste aquí",
+    "analogousSubtitle": "Momentos anteriores con un estado parecido al de ahora.",
     "noDiscoveries": "There is not enough evidence for a supported discovery yet.",
     "explainable": "Each discovery points to the observations behind it.",
     "direction": {

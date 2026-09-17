@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Compass, Info, Sparkles } from "lucide-react";
 import { readPersonalEvents } from "../data/personal/personalEventStorage";
-import { buildPersonalModel } from "../data/personal/personalModel";
+import { buildPersonalModel, findAnalogousMoments } from "../data/personal/personalModel";
 import { buildPersonalInsights, explainInsight } from "../data/personal/personalInsights";
 import { recordPersonalAnalytics } from "../data/personal/personalAnalytics";
 import { applyInsightLifecycle, markInsightsShown } from "../data/personal/personalInsightLifecycle";
@@ -13,6 +13,10 @@ export default function PersonalMap({ onBack }: Props) {
   const { t } = useTranslation();
   const events = useMemo(() => readPersonalEvents(), []);
   const model = useMemo(() => buildPersonalModel(events), [events]);
+  const analogous = useMemo(() => {
+    const target = [...events].reverse().find(event => (event.type === "mood" || event.type === "checkin") && typeof event.value === "number");
+    return target ? findAnalogousMoments(events, target, 3) : [];
+  }, [events]);
   const insights = useMemo(() => applyInsightLifecycle(buildPersonalInsights(events)), [events]);
   useEffect(() => { recordPersonalAnalytics("personal_map_viewed"); markInsightsShown(insights); }, [insights]);
 
@@ -33,6 +37,15 @@ export default function PersonalMap({ onBack }: Props) {
         <p className="mt-2 text-sm text-[#806D65]">{model.currentMood === undefined ? t("personalMap.learning") : t(`personalMap.direction.${model.moodDirection}`)}</p>
         {model.repeatedNeeds.length > 0 && <p className="mt-3 text-sm text-[#6D5A53]">{t("personalMap.needObserved", { need: model.repeatedNeeds[0].need, count: model.repeatedNeeds[0].count })}</p>}
       </section>
+      {analogous.length > 0 && (
+        <section className="mt-4 rounded-[26px] border border-[#E8DDD4] bg-white p-5 shadow-sm">
+          <h2 className="font-black text-[#4A352F]">{t("personalMap.analogousTitle")}</h2>
+          <p className="mt-1 text-xs leading-5 text-[#806D65]">{t("personalMap.analogousSubtitle")}</p>
+          <div className="mt-3 space-y-2">
+            {analogous.map(event => <div key={event.id} className="flex items-center justify-between rounded-2xl bg-[#FFF8F4] px-3 py-2"><span className="text-xs font-semibold text-[#6D5A53]">{event.localDate}</span><span className="text-sm font-black text-[#C97B5E]">{event.value}</span></div>)}
+          </div>
+        </section>
+      )}
       <section className="mt-4 rounded-[26px] border border-[#E8DDD4] bg-white p-5 shadow-sm">
         <div className="flex items-center gap-2"><Sparkles size={17} className="text-[#C97B5E]" aria-hidden="true" /><h2 className="font-black text-[#4A352F]">{t("personalMap.discoveries")}</h2></div>
         {insights.length === 0 ? <p className="mt-3 text-sm leading-6 text-[#806D65]">{t("personalMap.noDiscoveries")}</p> : insights.map(insight => <article key={insight.id} className="mt-4 rounded-2xl bg-[#FFF8F4] p-4"><p className="text-sm font-bold text-[#4A352F]">{insight.message}</p><p className="mt-2 text-xs leading-5 text-[#806D65]">{explainInsight(insight)}</p></article>)}

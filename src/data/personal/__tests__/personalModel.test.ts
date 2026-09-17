@@ -23,7 +23,7 @@ test("personal model compares recent data with the person's own baseline", () =>
 });
 
 test("insight needs repeated evidence", () => {
-  const events = ["2026-09-01", "2026-09-04", "2026-09-08", "2026-09-12", "2026-09-16"].map((date, i) => event(String(i), date, i < 2 ? 4 : 7));
+  const events = ["2026-08-29", "2026-09-01", "2026-09-04", "2026-09-08", "2026-09-12", "2026-09-16"].map((date, i) => event(String(i), date, i < 2 ? 4 : 7));
   const insights = buildPersonalInsights(events, new Date("2026-09-17T12:00:00Z"));
   assert.equal(insights.length, 1);
   assert.equal(insights[0].type, "trend");

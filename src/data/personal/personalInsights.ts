@@ -27,50 +27,71 @@ export interface PersonalInsight {
 
 const mood = (event: PersonalEvent) => event.type === "mood" || event.type === "checkin" ? typeof event.value === "number" ? event.value : undefined : undefined;
 const avg = (values: number[]) => values.length ? values.reduce((a, b) => a + b, 0) / values.length : undefined;
+const validTimestamp = (event: PersonalEvent) => Number.isFinite(new Date(event.timestamp).getTime());
 
 export function calculateInsightConfidence(observations: number, consistency: number, recency: number, dispersion: number, effectSize: number, completeness: number): PersonalInsight["confidence"] {
   const score = Math.max(0, Math.min(1, observations / 10)) * 0.25 + consistency * 0.2 + recency * 0.15 + dispersion * 0.1 + Math.min(1, effectSize) * 0.2 + completeness * 0.1;
   if (score >= 0.72 && observations >= 6) return "high";
-  if (score >= 0.48 && observations >= 3) return "moderate";
+  if (score >= 0.48 && observations >= 4) return "moderate";
   return "low";
 }
 
-export function buildPersonalInsights(events: PersonalEvent[], now = new Date()): PersonalInsight[] {
-  const valid = events.filter(event => mood(event) !== undefined && Number.isFinite(new Date(event.timestamp).getTime())).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-  if (valid.length < 3) return [];
+function buildTrendInsight(valid: PersonalEvent[], now: Date): PersonalInsight | undefined {
   const start = new Date(now.getTime() - 30 * 86400000);
   const recent = valid.filter(event => new Date(event.timestamp).getTime() >= start.getTime());
-  if (recent.length < 3) return [];
+  if (recent.length < 6) return undefined;
   const values = recent.map(event => mood(event)!);
   const half = Math.floor(values.length / 2);
   const early = avg(values.slice(0, half));
   const late = avg(values.slice(half));
-  if (early === undefined || late === undefined) return [];
+  if (early === undefined || late === undefined) return undefined;
   const delta = late - early;
   const direction: PersonalInsight["direction"] = delta >= 0.75 ? "up" : delta <= -0.75 ? "down" : "stable";
-  const confidence = calculateInsightConfidence(recent.length, Math.min(1, Math.abs(delta) / 2), Math.min(1, recent.length / 14), 0.7, Math.abs(delta) / 2, Math.min(1, new Set(recent.map(event => event.localDate)).size / 14));
-  if (direction === "stable") return [];
-
-  return [{
+  if (direction === "stable") return undefined;
+  const activeDays = new Set(recent.map(event => event.localDate)).size;
+  const confidence = calculateInsightConfidence(recent.length, Math.min(1, Math.abs(delta) / 2), Math.min(1, recent.length / 14), Math.min(1, activeDays / 14), Math.abs(delta) / 2, Math.min(1, activeDays / 14));
+  return {
     id: `insight_trend_30d_${recent[recent.length - 1].localDate}`,
-    type: "trend",
-    generatedAt: now.toISOString(),
-    periodStart: recent[0].localDate,
-    periodEnd: recent[recent.length - 1].localDate,
-    evidenceCount: recent.length,
-    confidence,
-    direction,
-    variables: ["mood"],
-    status: recent.length >= 6 ? "consistent" : "possible",
-    fingerprint: `trend:mood:30d:${direction}`,
-    firstSeen: recent[0].localDate,
-    lastSeen: recent[recent.length - 1].localDate,
-    timesShown: 0,
-    novelty: "new",
-    actionability: "medium",
-    supportingEventIds: recent.map(event => event.id),
+    type: "trend", generatedAt: now.toISOString(), periodStart: recent[0].localDate, periodEnd: recent[recent.length - 1].localDate,
+    evidenceCount: recent.length, confidence, direction, variables: ["mood"], status: recent.length >= 10 && activeDays >= 7 ? "consistent" : "possible",
+    fingerprint: `trend:mood:30d:${direction}`, firstSeen: recent[0].localDate, lastSeen: recent[recent.length - 1].localDate, timesShown: 0,
+    novelty: "new", actionability: "medium", supportingEventIds: recent.map(event => event.id),
     message: direction === "up" ? "Nos teus registos recentes, o teu estado médio tem subido." : "Nos teus registos recentes, o teu estado médio tem descido.",
-  }];
+  };
+}
+
+function buildInterventionInsight(valid: PersonalEvent[], now: Date): PersonalInsight | undefined {
+  const interventions = valid.filter(event => event.type === "intervention").filter(event => typeof event.metadata?.initialIntensity === "number" && typeof event.metadata?.finalIntensity === "number");
+  if (interventions.length < 3) return undefined;
+  const deltas = interventions.map(event => Number(event.metadata!.initialIntensity) - Number(event.metadata!.finalIntensity));
+  const positive = deltas.filter(delta => delta > 0);
+  const averageDelta = avg(deltas);
+  if (averageDelta === undefined || positive.length < 2 || averageDelta < 0.75) return undefined;
+  const recent = interventions.slice(-10);
+  const first = recent[0];
+  const last = recent[recent.length - 1];
+  const consistency = positive.length / deltas.length;
+  const confidence = calculateInsightConfidence(recent.length, consistency, Math.min(1, recent.length / 8), 0.7, Math.min(1, averageDelta / 3), Math.min(1, new Set(recent.map(event => event.localDate)).size / 8));
+  const status: InsightStatus = recent.length >= 5 && consistency >= 0.7 ? "consistent" : "possible";
+  return {
+    id: `insight_intervention_effect_${last.localDate}`, type: "intervention_effect", generatedAt: now.toISOString(),
+    periodStart: first.localDate, periodEnd: last.localDate, evidenceCount: recent.length, confidence,
+    direction: "down", variables: ["intervention", "initialIntensity", "finalIntensity"], status,
+    fingerprint: "intervention:impulso:intensity_change", firstSeen: first.localDate, lastSeen: last.localDate,
+    timesShown: 0, novelty: "new", actionability: "high", supportingEventIds: recent.map(event => event.id),
+    message: "Nos teus episódios registados, a intensidade baixou depois de algumas intervenções.",
+  };
+}
+
+export function buildPersonalInsights(events: PersonalEvent[], now = new Date()): PersonalInsight[] {
+  const valid = events.filter(validTimestamp).filter(event => mood(event) !== undefined).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  const insights: PersonalInsight[] = [];
+  const trend = buildTrendInsight(valid, now);
+  if (trend) insights.push(trend);
+  const interventionEvents = events.filter(validTimestamp).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  const intervention = buildInterventionInsight(interventionEvents, now);
+  if (intervention) insights.push(intervention);
+  return insights;
 }
 
 export function explainInsight(insight: PersonalInsight): string {

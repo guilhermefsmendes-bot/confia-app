@@ -713,44 +713,22 @@ export function rankCompanionCandidatesContextually(
   now: Date = new Date()
 ): CompanionBrainCandidate[] {
   return candidates
-    .map(
-      (candidate, index) => ({
-        ...getCompanionContextualRanking(
-          candidate,
-          now
-        ),
-        index,
-      })
-    )
-    .sort(
-      (a, b) => {
-        if (
-          b.contextualScore !==
-          a.contextualScore
-        ) {
-          return (
-            b.contextualScore -
-            a.contextualScore
-          );
-        }
-
-        if (
-          b.basePriority !==
-          a.basePriority
-        ) {
-          return (
-            b.basePriority -
-            a.basePriority
-          );
-        }
-
-        return a.index - b.index;
+    .map((candidate, index) => ({
+      ...getCompanionContextualRanking(candidate, now),
+      index,
+    }))
+    .sort((a, b) => {
+      if (b.contextualScore !== a.contextualScore) {
+        return b.contextualScore - a.contextualScore;
       }
-    )
-    .map(
-      result =>
-        result.candidate
-    );
+
+      if (b.basePriority !== a.basePriority) {
+        return b.basePriority - a.basePriority;
+      }
+
+      return a.index - b.index;
+    })
+    .map(result => result.candidate);
 }
 
 

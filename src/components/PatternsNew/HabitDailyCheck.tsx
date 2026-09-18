@@ -1,4 +1,5 @@
 import React, { memo, useEffect, useState } from "react";
+import { getLocalCalendarDate } from "../../utils/date"
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -36,7 +37,7 @@ function HabitDailyCheck({ onBack }: Props) {
   const [today, setToday] = useState("");
 
   useEffect(() => {
-    const todayDate = new Date().toISOString().split("T")[0];
+    const todayDate = getLocalCalendarDate();
     setToday(todayDate);
 
     try {
@@ -84,7 +85,7 @@ function HabitDailyCheck({ onBack }: Props) {
   }
 
   function saveRecord() {
-    const todayDate = today || new Date().toISOString().split("T")[0];
+    const todayDate = today || getLocalCalendarDate();
 
     const history: DailyHistory[] = (() => {
       try {

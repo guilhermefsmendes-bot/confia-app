@@ -11,11 +11,13 @@ import {
   getDocs,
   setDoc,
   updateDoc,
-  where
+  where,
+  limit
 } from "firebase/firestore";
 import { X, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { db, auth } from "../firebase";
+import { db } from "../firebaseFirestore";
+import { auth } from "../firebaseAuth";
 import { SharePost } from "../types";
 
 interface CommunityChatProps {
@@ -58,11 +60,13 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
 
     // Somos o autor da publicação.
     if (currentUser.uid === post.authorId) {
-      const redLikedBy = Array.isArray((post as any).redLikedBy)
-        ? (post as any).redLikedBy
-        : [];
+      const reactedUserIds = [
+        ...(Array.isArray((post as any).yellowLikedBy) ? (post as any).yellowLikedBy : []),
+        ...(Array.isArray((post as any).greenLikedBy) ? (post as any).greenLikedBy : []),
+        ...(Array.isArray((post as any).redLikedBy) ? (post as any).redLikedBy : [])
+      ];
 
-      const otherUser = redLikedBy.find(
+      const otherUser = reactedUserIds.find(
         (uid: string) => uid !== currentUser.uid
       );
 
@@ -126,10 +130,9 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         if (!chatsSnapshot.empty) {
           const existingChat = chatsSnapshot.docs[0];
 
-          console.log(
-            "CHAT EXISTENTE ENCONTRADO:",
-            existingChat.id
-          );
+          if (import.meta.env.DEV) {
+            console.debug("[Confia] Existing private chat found.");
+          }
 
           if (!cancelled) {
             setChatId(existingChat.id);
@@ -148,20 +151,22 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         if (myUid !== post.authorId) {
           otherUserId = post.authorId;
         } else {
-          const redLikedBy = Array.isArray(post.redLikedBy)
-            ? post.redLikedBy
-            : [];
+          const reactedUserIds = [
+            ...(Array.isArray(post.yellowLikedBy) ? post.yellowLikedBy : []),
+            ...(Array.isArray(post.greenLikedBy) ? post.greenLikedBy : []),
+            ...(Array.isArray(post.redLikedBy) ? post.redLikedBy : [])
+          ];
 
           otherUserId =
-            redLikedBy.find(
+            reactedUserIds.find(
               (uid: string) => uid !== myUid
             ) || null;
         }
 
         if (!otherUserId || otherUserId === myUid) {
-          console.log(
-            "Ainda não foi possível identificar o outro participante."
-          );
+          if (import.meta.env.DEV) {
+            console.debug("[Confia] Private chat participant is not available yet.");
+          }
 
           setLoading(false);
           return;
@@ -221,19 +226,24 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
       "messages"
     );
 
+    // Mantemos a conversa limitada às 100 mensagens mais recentes.
+    // Isto evita leituras ilimitadas à medida que a conversa cresce.
     const messagesQuery = query(
       messagesRef,
-      orderBy("createdAt", "asc")
+      orderBy("createdAt", "desc"),
+      limit(100)
     );
 
     const unsubscribe = onSnapshot(
       messagesQuery,
       (snapshot) => {
         const loadedMessages: ChatMessage[] =
-          snapshot.docs.map((messageDoc) => ({
-            id: messageDoc.id,
-            ...(messageDoc.data() as Omit<ChatMessage, "id">)
-          }));
+          snapshot.docs
+            .map((messageDoc) => ({
+              id: messageDoc.id,
+              ...(messageDoc.data() as Omit<ChatMessage, "id">)
+            }))
+            .reverse();
 
         setMessages(loadedMessages);
       },
@@ -341,11 +351,11 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         {/* Cabeçalho */}
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-[#FFF8F4]">
           <div>
-            <h2 className="text-sm font-black text-[#4E3B36]">
+            <h2 className="text-sm font-black text-[#2F2926]">
               {t("communityChat")}
             </h2>
 
-            <p className="text-[10px] text-[#C97B5E] font-semibold mt-0.5">
+            <p className="text-[10px] text-[#934A38] font-semibold mt-0.5">
               {post.userName}
             </p>
           </div>
@@ -353,7 +363,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#C97B5E] transition-colors"
+            className="w-9 h-9 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#934A38] transition-colors"
             aria-label={t("close")}
           >
             <X size={18} />
@@ -375,7 +385,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
               <div>
                 <div className="text-3xl mb-3">💬</div>
 
-                <p className="text-xs font-bold text-[#4E3B36]">
+                <p className="text-xs font-bold text-[#2F2926]">
                   {t("chatEmpty")}
                 </p>
 
@@ -402,8 +412,8 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
                   <div
                     className={`max-w-[78%] px-4 py-2.5 rounded-2xl text-xs leading-relaxed ${
                       mine
-                        ? "bg-[#C97B5E] text-white rounded-br-md"
-                        : "bg-white text-[#4E3B36] border border-slate-100 rounded-bl-md"
+                        ? "bg-[#934A38] text-white rounded-br-md"
+                        : "bg-white text-[#2F2926] border border-slate-100 rounded-bl-md"
                     }`}
                   >
                     {item.text}
@@ -435,14 +445,14 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
               placeholder={t("chatPlaceholder")}
               maxLength={2000}
               rows={1}
-              className="flex-1 resize-none rounded-2xl bg-[#FAF5F0] border border-[#E5A88B]/10 px-4 py-3 text-xs text-[#4E3B36] outline-none focus:border-[#C97B5E]/30"
+              className="flex-1 resize-none rounded-2xl bg-[#F7F5F2] border border-[#B85F48]/10 px-4 py-3 text-xs text-[#2F2926] outline-none focus:border-[#934A38]/30"
             />
 
             <button
               type="button"
               onClick={handleSend}
               disabled={!message.trim() || sending}
-              className="w-11 h-11 shrink-0 rounded-2xl bg-[#C97B5E] text-white flex items-center justify-center disabled:opacity-40 transition-opacity"
+              className="w-11 h-11 shrink-0 rounded-2xl bg-[#934A38] text-white flex items-center justify-center disabled:opacity-40 transition-opacity"
               aria-label={t("chatSend")}
             >
               <Send size={17} />

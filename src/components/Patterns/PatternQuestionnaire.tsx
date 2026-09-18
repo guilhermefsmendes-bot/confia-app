@@ -61,7 +61,7 @@ export const PatternQuestionnaire: React.FC<PatternQuestionnaireProps> = ({
       </button>
 
 
-      <h2 className="text-xl font-black text-[#4E3B36] mb-2">
+      <h2 className="text-xl font-black text-[#2F2926] mb-2">
         🌱 {t("patterns.questionnaire.title")}
       </h2>
 
@@ -73,7 +73,7 @@ export const PatternQuestionnaire: React.FC<PatternQuestionnaireProps> = ({
 
       <div className="bg-white rounded-xl p-5 mb-6">
 
-        <p className="text-lg font-semibold text-[#4E3B36]">
+        <p className="text-lg font-semibold text-[#2F2926]">
           {t(question.translationKey)}
         </p>
 

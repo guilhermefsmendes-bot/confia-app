@@ -1,5 +1,7 @@
-import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { auth } from "./firebase";
+import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
+import { app } from "./firebaseApp";
+
+export const auth = getAuth(app);
 
 export async function initAnonymousAuth() {
   if (auth.currentUser) {
@@ -16,4 +18,4 @@ export async function initAnonymousAuth() {
   return auth.currentUser;
 }
 
-export { onAuthStateChanged };
+export { onAuthStateChanged, signInAnonymously };

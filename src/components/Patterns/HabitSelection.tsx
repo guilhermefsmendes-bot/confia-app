@@ -39,7 +39,8 @@ export const HabitSelection: React.FC<HabitSelectionProps> = ({
 
   const handleContinue = () => {
 savePatternProfile({
-  selectedHabit: selected,
+  selectedHabit: selected[0],
+  selectedHabits: selected,
   completed: false,
   answers: [],
 createdAt: new Date().toISOString(),
@@ -59,7 +60,7 @@ createdAt: new Date().toISOString(),
         ← {t("common.back")}
       </button>
 
-      <h2 className="text-xl font-black text-[#4E3B36] mb-2">
+      <h2 className="text-xl font-black text-[#2F2926] mb-2">
 t("patterns.home.habits.title")
       </h2>
 

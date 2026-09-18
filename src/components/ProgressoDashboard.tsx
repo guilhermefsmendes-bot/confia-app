@@ -4,6 +4,7 @@ import { TrendingUp, Sun, Moon, Calendar, Award, Sparkles, Smile, MessageCircle 
 import { DailyRating } from '../types';
 import { useTranslation } from "react-i18next";
 import EmotionalMemory from "./EmotionalMemory";
+import { getLocalCalendarDate } from "../utils/date";
 
 interface ProgressoDashboardProps {
   ratings: DailyRating[];
@@ -86,60 +87,60 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
     <div className="max-w-md mx-auto space-y-5 py-4">
       {/* Header Banner */}
       <div className="text-center space-y-1 w-full">
-        <h2 className="text-xl font-black text-[#4E3B36] flex items-center justify-center gap-2 font-display">
-          <span className="text-[#E5A88B]">📈</span>📈 {t("evolutionDiary")}
+        <h2 className="text-xl font-black text-[#2F2926] flex items-center justify-center gap-2 font-display">
+          <span className="text-[#B85F48]">📈</span>📈 {t("evolutionDiary")}
         </h2>
-        <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto font-medium">
+        <p className="text-xs text-[var(--cf-text-soft)] leading-relaxed max-w-sm mx-auto font-medium">
          {t("progressDescription")}
         </p>
       </div>
 
       {/* Grid of Averages */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-gradient-to-br from-[#FFF0E8]/50 via-[#FFF0E8]/20 to-transparent p-4 rounded-2xl border border-[#E5A88B]/25 space-y-1 shadow-sm">
-          <div className="flex items-center gap-1.5 text-[#C97B5E] font-bold">
+        <div className="bg-gradient-to-br from-[#F3E3DC]/50 via-[#F3E3DC]/20 to-transparent p-4 rounded-2xl border border-[#B85F48]/25 space-y-1 shadow-sm">
+          <div className="flex items-center gap-1.5 text-[#934A38] font-bold">
             <Sun size={15} />
             <span className="text-[10px] font-extrabold uppercase tracking-widest font-display">{t("morningAverage")}</span>
           </div>
-          <p className="text-2xl font-mono font-black text-[#4E3B36]">
-            {avgMorning} <span className="text-xs text-slate-400 font-bold font-sans">/ 10</span>
+          <p className="text-2xl font-mono font-black text-[#2F2926]">
+            {avgMorning} <span className="text-xs text-[var(--cf-muted)] font-bold font-sans">/ 10</span>
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-[#FAF5F0]/70 via-[#FAF5F0]/30 to-transparent p-4 rounded-2xl border border-[#E5A88B]/20 space-y-1 shadow-sm">
+        <div className="bg-gradient-to-br from-[#F7F5F2]/70 via-[#F7F5F2]/30 to-transparent p-4 rounded-2xl border border-[#B85F48]/20 space-y-1 shadow-sm">
           <div className="flex items-center gap-1.5 text-[#8B5C4D] font-bold">
             <Moon size={15} />
             <span className="text-[10px] font-extrabold uppercase tracking-widest font-display">{t("afternoonAverage")}</span>
           </div>
-          <p className="text-2xl font-mono font-black text-[#4E3B36]">
-            {avgAfternoon} <span className="text-xs text-slate-400 font-bold font-sans">/ 10</span>
+          <p className="text-2xl font-mono font-black text-[#2F2926]">
+            {avgAfternoon} <span className="text-xs text-[var(--cf-muted)] font-bold font-sans">/ 10</span>
           </p>
         </div>
       </div>
 
       {/* Pure SVG Line Chart Card */}
-      <div className="bg-white border border-[#E5A88B]/15 rounded-3xl p-5 shadow-sm space-y-3.5">
+      <div className="bg-white border border-[#B85F48]/15 rounded-3xl p-5 shadow-sm space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <h3 className="text-xs font-black text-[#4E3B36] flex items-center gap-1.5 font-display uppercase tracking-wider">
-              <TrendingUp size={14} className="text-[#E5A88B]" /> {t("dailyMoodVariation")}
+            <h3 className="text-xs font-black text-[#2F2926] flex items-center gap-1.5 font-display uppercase tracking-wider">
+              <TrendingUp size={14} className="text-[#B85F48]" /> {t("dailyMoodVariation")}
             </h3>
-            <p className="text-[10px] text-slate-400 font-medium">{t("last7Days")}</p>
+            <p className="text-[10px] text-[var(--cf-muted)] font-medium">{t("last7Days")}</p>
           </div>
           {/* Chart Legends */}
           <div className="flex items-center gap-2 text-[10px] font-bold font-mono">
-            <span className="flex items-center gap-1 text-[#C97B5E] bg-[#FFF0E8] px-2 py-0.5 rounded-full font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C97B5E]" /> {t("morning")}
+            <span className="flex items-center gap-1 text-[#934A38] bg-[#F3E3DC] px-2 py-0.5 rounded-full font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#934A38]" /> {t("morning")}
             </span>
-            <span className="flex items-center gap-1 text-[#8B5C4D] bg-[#FAF5F0] px-2 py-0.5 rounded-full font-bold">
+            <span className="flex items-center gap-1 text-[#8B5C4D] bg-[#F7F5F2] px-2 py-0.5 rounded-full font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-[#8B5C4D]" /> {t("afternoon")}
             </span>
           </div>
         </div>
 
         {sortedRatings.length < 2 ? (
-          <div className="h-44 flex items-center justify-center text-center p-4 bg-[#FAF5F0] rounded-2xl border border-[#E5A88B]/15 border-dashed">
-            <p className="text-xs text-slate-400 max-w-xs leading-relaxed font-medium">
+          <div className="h-44 flex items-center justify-center text-center p-4 bg-[#F7F5F2] rounded-2xl border border-[#B85F48]/15 border-dashed">
+            <p className="text-xs text-[var(--cf-muted)] max-w-xs leading-relaxed font-medium">
              {t("needTwoDaysMessage")}
             </p>
           </div>
@@ -192,7 +193,7 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
               {morningPoints && (
                 <polyline
                   fill="none"
-                  stroke="#E5A88B"
+                  stroke="#B85F48"
                   strokeWidth="3.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -223,7 +224,7 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
                         cx={x}
                         cy={paddingTop + chartHeight - (rating.morning / 10) * chartHeight}
                         r="4"
-                        fill="#E5A88B"
+                        fill="#B85F48"
                         stroke="#ffffff"
                         strokeWidth="1.5"
                       />
@@ -252,9 +253,9 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
   objectivesHistory={objectivesHistory}
 />
       {/* History Log Card */}
-      <div className="bg-white border border-[#E5A88B]/15 rounded-3xl p-5 shadow-sm space-y-3.5">
-        <h3 className="text-xs font-black text-[#4E3B36] flex items-center gap-1.5 font-display uppercase tracking-wider">
-          <Calendar size={14} className="text-[#E5A88B]" /> {t("dailyHistory")}
+      <div className="bg-white border border-[#B85F48]/15 rounded-3xl p-5 shadow-sm space-y-3.5">
+        <h3 className="text-xs font-black text-[#2F2926] flex items-center gap-1.5 font-display uppercase tracking-wider">
+          <Calendar size={14} className="text-[#B85F48]" /> {t("dailyHistory")}
         </h3>
 
         <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
@@ -262,24 +263,24 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
             return (
               <div
                 key={rating.date}
-                className="flex items-center justify-between p-4 bg-[#FAF5F0] rounded-2xl border border-[#E5A88B]/10"
+                className="flex items-center justify-between p-4 bg-[#F7F5F2] rounded-2xl border border-[#B85F48]/10"
               >
                 <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-[#4E3B36] font-mono flex items-center gap-1">
-                    🗓️ {rating.date === new Date().toISOString().split('T')[0] ? 'Hoje' : rating.date}
+                  <span className="text-[10px] font-bold text-[#2F2926] font-mono flex items-center gap-1">
+                    🗓️ {rating.date === getLocalCalendarDate() ? 'Hoje' : rating.date}
                   </span>
                   {rating.note && (
-                    <p className="text-[10px] text-slate-500 font-semibold italic">
+                    <p className="text-[10px] text-[var(--cf-text-soft)] font-semibold italic">
                       "{rating.note}"
                     </p>
                   )}
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-0.5 text-[10px] font-bold font-mono text-[#C97B5E] bg-[#FFF0E8] px-2.5 py-1 rounded-xl border border-[#E5A88B]/15">
+                  <span className="flex items-center gap-0.5 text-[10px] font-bold font-mono text-[#934A38] bg-[#F3E3DC] px-2.5 py-1 rounded-xl border border-[#B85F48]/15">
                     <Sun size={11} /> M: {rating.morning !== null ? `${rating.morning}/10` : '-'}
                   </span>
-                  <span className="flex items-center gap-0.5 text-[10px] font-bold font-mono text-[#8B5C4D] bg-[#FAF5F0] px-2.5 py-1 rounded-xl border border-[#E5A88B]/15">
+                  <span className="flex items-center gap-0.5 text-[10px] font-bold font-mono text-[#8B5C4D] bg-[#F7F5F2] px-2.5 py-1 rounded-xl border border-[#B85F48]/15">
                     <Moon size={11} /> T: {rating.afternoon !== null ? `${rating.afternoon}/10` : '-'}
                   </span>
                 </div>
@@ -290,20 +291,20 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
       </div>
 
       {/* Level Streaks Card */}
-      <div className="bg-gradient-to-tr from-[#E5A88B]/10 via-[#FFF0E8]/5 to-transparent border border-[#E5A88B]/20 p-5 rounded-[24px] space-y-3 shadow-sm shadow-[#E5A88B]/5">
-        <h4 className="text-xs font-bold text-[#C97B5E] flex items-center gap-1 font-display uppercase tracking-widest">
-          <Sparkles size={14} className="text-[#C97B5E] animate-pulse" /> {t("guardianAchievements")}
+      <div className="bg-gradient-to-tr from-[#B85F48]/10 via-[#F3E3DC]/5 to-transparent border border-[#B85F48]/20 p-5 rounded-[24px] space-y-3 shadow-sm shadow-[#B85F48]/5">
+        <h4 className="text-xs font-bold text-[#934A38] flex items-center gap-1 font-display uppercase tracking-widest">
+          <Sparkles size={14} className="text-[#934A38] animate-pulse" /> {t("guardianAchievements")}
         </h4>
         <div className="grid grid-cols-2 gap-3 text-xs">
-          <div className="bg-white/80 backdrop-blur-sm p-3.5 rounded-xl border border-[#E5A88B]/10 space-y-0.5 shadow-sm shadow-[#E5A88B]/5">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{t("companion")}</span>
-            <p className="font-extrabold text-[#4E3B36]">{t("level")} {avatarLevel}</p>
-            <p className="text-[9px] text-slate-400 font-bold">{avatarXp} {t("xpAccumulated")}</p>
+          <div className="bg-white/80 backdrop-blur-sm p-3.5 rounded-xl border border-[#B85F48]/10 space-y-0.5 shadow-sm shadow-[#B85F48]/5">
+            <span className="text-[9px] font-bold text-[var(--cf-muted)] uppercase tracking-wider">{t("companion")}</span>
+            <p className="font-extrabold text-[#2F2926]">{t("level")} {avatarLevel}</p>
+            <p className="text-[9px] text-[var(--cf-muted)] font-bold">{avatarXp} {t("xpAccumulated")}</p>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm p-3.5 rounded-xl border border-[#E5A88B]/10 space-y-0.5 shadow-sm shadow-[#E5A88B]/5">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{t("dailyGoalsTitle")}</span>
-            <p className="font-extrabold text-[#4E3B36]">{completedObjectivesCount} {t("completed")}</p>
-            <p className="text-[9px] text-slate-400 font-bold">{t("positiveFrequency")}</p>
+          <div className="bg-white/80 backdrop-blur-sm p-3.5 rounded-xl border border-[#B85F48]/10 space-y-0.5 shadow-sm shadow-[#B85F48]/5">
+            <span className="text-[9px] font-bold text-[var(--cf-muted)] uppercase tracking-wider">{t("dailyGoalsTitle")}</span>
+            <p className="font-extrabold text-[#2F2926]">{completedObjectivesCount} {t("completed")}</p>
+            <p className="text-[9px] text-[var(--cf-muted)] font-bold">{t("positiveFrequency")}</p>
           </div>
         </div>
       </div>

@@ -138,8 +138,8 @@ function PremiumRefuge({ xp }: Props) {
               d="M136 138 H161 L158 145 H139 Z"
               fill="#865D43"
             />
-            <circle cx="142" cy="137" r="4" fill="#C97B5E" />
-            <circle cx="149" cy="135" r="4" fill="#E5A88B" />
+            <circle cx="142" cy="137" r="4" fill="#934A38" />
+            <circle cx="149" cy="135" r="4" fill="#B85F48" />
             <circle cx="156" cy="137" r="4" fill="#D49A72" />
           </>
         )}

@@ -30,7 +30,7 @@ function Butterfly({
           y2="1"
         >
           <stop offset="0%" stopColor="#F3C7B5" />
-          <stop offset="100%" stopColor="#C97B5E" />
+          <stop offset="100%" stopColor="#934A38" />
         </linearGradient>
 
         <linearGradient

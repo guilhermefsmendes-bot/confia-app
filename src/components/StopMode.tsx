@@ -12,25 +12,25 @@ export function StopMode({ onStartImpulse }: StopModeProps) {
         🔴
       </div>
 
-      <h1 className="text-3xl font-extrabold text-[#4E3B36] mb-6">
+      <h1 className="text-3xl font-extrabold text-[#2F2926] mb-6">
        {t("stopTitle")}
       </h1>
 
-      <p className="text-lg text-[#4E3B36] mb-4">
+      <p className="text-lg text-[#2F2926] mb-4">
        {t("stopPause")}
       </p>
 
-      <p className="text-lg text-[#4E3B36] mb-8">
+      <p className="text-lg text-[#2F2926] mb-8">
        {t("stopBreathe")}
       </p>
 
-      <p className="text-base text-[#4E3B36] mb-8">
+      <p className="text-base text-[#2F2926] mb-8">
        {t("stopQuestion")}
       </p>
 
       <button type="button"
         onClick={onStartImpulse}
-        className="bg-[#C97B5E] text-white px-8 py-4 rounded-full font-bold"
+        className="bg-[#934A38] text-white px-8 py-4 rounded-full font-bold"
       >
        {t("startExercise")}
       </button>

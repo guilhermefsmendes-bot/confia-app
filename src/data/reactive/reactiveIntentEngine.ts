@@ -394,11 +394,43 @@ export function selectReactiveIntent(
     };
   }
 
-  const confidence =
-    Math.min(
-      0.98,
-      0.55 + selected.priority / 250
-    );
+  /**
+   * A prioridade mede importância narrativa; não é evidência.
+   *
+   * A confiança da intenção deve refletir a qualidade do encaixe
+   * entre os sinais disponíveis e a regra selecionada, evitando
+   * transformar uma prioridade alta numa falsa certeza.
+   */
+  let confidence = 0.48;
+
+  if (selected.situations?.includes(context.situation)) {
+    confidence += 0.16;
+  }
+
+  if (selected.needs?.includes(context.currentNeed ?? "")) {
+    confidence += 0.16;
+  }
+
+  if (context.hasPreviousData) {
+    confidence += 0.07;
+  }
+
+  if (context.activeDays >= 3) {
+    confidence += 0.07;
+  }
+
+  if (typeof context.currentMood === "number") {
+    confidence += 0.06;
+  }
+
+  if (
+    typeof context.moodChange === "number" ||
+    typeof context.impulseAverageReduction === "number"
+  ) {
+    confidence += 0.06;
+  }
+
+  confidence = Math.min(0.92, confidence);
 
   return {
     intent: selected.intent,

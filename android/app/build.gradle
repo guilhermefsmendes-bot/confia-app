@@ -10,8 +10,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        versionCode 43
-        versionName "1.0.43"
+        versionCode 44
+        versionName "1.0.44"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -20,19 +20,30 @@ android {
         }
     }
 
-signingConfigs {
-    release {
-        storeFile file("confia-upload-key.jks")
-        storePassword "Paquitinh0!"
-        keyAlias "confia"
-        keyPassword "Paquitinh0!"
+def releaseKeystore = file(System.getenv("CONFIA_KEYSTORE_FILE") ?: "confia-upload-key.jks")
+def releaseStorePassword = System.getenv("CONFIA_KEYSTORE_PASSWORD")
+def releaseKeyAlias = System.getenv("CONFIA_KEY_ALIAS")
+def releaseKeyPassword = System.getenv("CONFIA_KEY_PASSWORD")
+def hasReleaseSigning = releaseKeystore.exists() && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
+
+if (hasReleaseSigning) {
+    signingConfigs {
+        release {
+            storeFile releaseKeystore
+            storePassword releaseStorePassword
+            keyAlias releaseKeyAlias
+            keyPassword releaseKeyPassword
+        }
     }
 }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

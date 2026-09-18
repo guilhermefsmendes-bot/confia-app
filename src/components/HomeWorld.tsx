@@ -150,7 +150,7 @@ const isNight = hour >= 21 || hour < 7;
         ${
           editMode
             ? "bg-[#F6DDCF] text-[#B86448]"
-            : "bg-[#FFF3EC] text-[#C97B5E]"
+            : "bg-[#FFF3EC] text-[#934A38]"
         }
       `}
     >

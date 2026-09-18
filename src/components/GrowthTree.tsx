@@ -25,9 +25,9 @@ export function GrowthTree({ level = 1 }: GrowthTreeProps) {
   };
 
   return (
-    <div className="bg-white border border-[#E5A88B]/15 rounded-3xl p-6 shadow-sm text-center mb-6">
+    <div className="bg-white border border-[#B85F48]/15 rounded-3xl p-6 shadow-sm text-center mb-6">
 
-      <h2 className="text-xl font-bold text-[#4E3B36]">
+      <h2 className="text-xl font-bold text-[#2F2926]">
         {t("treeTitle")}
       </h2>
 
@@ -39,7 +39,7 @@ export function GrowthTree({ level = 1 }: GrowthTreeProps) {
         {getTree()}
       </div>
 
-      <div className="font-bold text-[#4E3B36]">
+      <div className="font-bold text-[#2F2926]">
         {getLevelName()}
       </div>
 

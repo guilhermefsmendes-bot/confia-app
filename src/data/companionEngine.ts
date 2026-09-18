@@ -9,6 +9,7 @@
  */
 
 import type { CompanionCollectedData } from "./companionData";
+import { getLocalCalendarDate } from "../utils/date";
 
 export type MoodTrend =
   | "positive"
@@ -83,19 +84,13 @@ function calculateTrend(values: number[]): MoodTrend {
   return "stable";
 }
 
-function getRecentDates(days: number): string[] {
+function getRecentDates(days: number, today = new Date()): string[] {
   const result: string[] = [];
-
-  const today = new Date();
 
   for (let i = days - 1; i >= 0; i--) {
     const date = new Date(today);
-
     date.setDate(today.getDate() - i);
-
-    result.push(
-      date.toISOString().split("T")[0]
-    );
+    result.push(getLocalCalendarDate(date));
   }
 
   return result;
@@ -105,8 +100,9 @@ export function analyzeCompanionData(
   data: CompanionCollectedData
 ): CompanionAnalysis {
 
-  const dates7 = getRecentDates(7);
-  const dates14 = getRecentDates(14);
+  const today = new Date();
+  const dates7 = getRecentDates(7, today);
+  const dates14 = getRecentDates(14, today);
 
   /*
    * HUMOR

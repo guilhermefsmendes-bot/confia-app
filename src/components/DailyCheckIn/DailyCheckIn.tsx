@@ -113,7 +113,7 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
                 </div>
 
                 <div>
-                  <p className="text-xs font-black text-[#4E3B36]">
+                  <p className="text-xs font-black text-[#2F2926]">
                     Confia
                   </p>
 

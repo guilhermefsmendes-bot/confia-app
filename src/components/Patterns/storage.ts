@@ -5,6 +5,7 @@ export interface PatternProfile {
   answers: number[];
   dominantPattern?: string;
   selectedHabit?: string;
+  selectedHabits?: string[];
   createdAt: string;
 }
 

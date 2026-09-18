@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { saveEpisode } from "./Impulso";
 import type {
   Emotion,
+  Intensity,
   ImpulseNeed,
   Trigger,
 } from "./Impulso/types";
@@ -105,8 +106,8 @@ const thoughts: Thought[] = [
 ];
   const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
-  const [intensity, setIntensity] = useState(5);
-  const [finalIntensity, setFinalIntensity] = useState(5);
+  const [intensity, setIntensity] = useState<Intensity>(5);
+  const [finalIntensity, setFinalIntensity] = useState<Intensity>(5);
 const lastUse = localStorage.getItem("confia_last_impulse_use_v1");
 
 const impulseCount = Number(
@@ -262,6 +263,8 @@ const getPsychoeducationMessage = () => {
 };
 
 
+  const toIntensity = (value: number): Intensity => Math.min(10, Math.max(0, Math.round(value))) as Intensity;
+
   const finishSOS = () => {
     /**
      * Guardar primeiro o episódio.
@@ -378,19 +381,19 @@ const getPsychoeducationMessage = () => {
         />
 
         <div className="relative text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] border border-[#E5A88B]/25 bg-[#FFF8F4] shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] border border-[#B85F48]/25 bg-[#FFF8F4] shadow-sm">
             <Check
               size={23}
               strokeWidth={1.8}
-              className="text-[#C97B5E]"
+              className="text-[#934A38]"
             />
           </div>
 
-          <p className="mt-4 text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+          <p className="mt-4 text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
             {t("impulseClosing.completedEyebrow")}
           </p>
 
-          <h2 className="mx-auto mt-2 max-w-[330px] text-[22px] font-black leading-tight tracking-tight text-[#4E3B36]">
+          <h2 className="mx-auto mt-2 max-w-[330px] text-[22px] font-black leading-tight tracking-tight text-[#2F2926]">
             {t("impulseClosing.completedTitle")}
           </h2>
 
@@ -410,12 +413,12 @@ const getPsychoeducationMessage = () => {
             </p>
           </div>
 
-          <div className="rounded-[20px] border border-[#E5A88B]/25 bg-white px-2 py-3 text-center shadow-sm">
-            <p className="text-[8px] font-black uppercase tracking-wider text-[#C97B5E]">
+          <div className="rounded-[20px] border border-[#B85F48]/25 bg-white px-2 py-3 text-center shadow-sm">
+            <p className="text-[8px] font-black uppercase tracking-wider text-[#934A38]">
               {t("impulseClosing.after")}
             </p>
 
-            <p className="mt-1.5 text-xl font-black text-[#4E3B36]">
+            <p className="mt-1.5 text-xl font-black text-[#2F2926]">
               {finalIntensity}
             </p>
           </div>
@@ -425,25 +428,25 @@ const getPsychoeducationMessage = () => {
               {t("impulseClosing.difference")}
             </p>
 
-            <p className="mt-1.5 text-xl font-black text-[#C97B5E]">
+            <p className="mt-1.5 text-xl font-black text-[#934A38]">
               {formattedDifference}
             </p>
           </div>
         </div>
 
         {reactiveMessageKey && (
-          <div className="relative mt-4 rounded-[24px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF8F4] to-white p-4">
+          <div className="relative mt-4 rounded-[24px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF8F4] to-white p-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] border border-[#E5A88B]/20 bg-white">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] border border-[#B85F48]/20 bg-white">
                 <Sparkles
                   size={16}
                   strokeWidth={1.8}
-                  className="text-[#C97B5E]"
+                  className="text-[#934A38]"
                 />
               </div>
 
               <div className="min-w-0">
-                <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#C97B5E]">
+                <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#934A38]">
                   {t("impulseClosing.confiaNoticed")}
                 </p>
 
@@ -460,12 +463,12 @@ const getPsychoeducationMessage = () => {
             <Sparkles
               size={15}
               strokeWidth={1.8}
-              className="text-[#C97B5E]"
+              className="text-[#934A38]"
             />
           </div>
 
           <div>
-            <p className="text-xs font-black text-[#4E3B36]">
+            <p className="text-xs font-black text-[#2F2926]">
               {t("impulseClosing.xpEarned")}
             </p>
 
@@ -568,21 +571,21 @@ const getPsychoeducationMessage = () => {
         <div className="relative px-5 pb-5 pt-6">
           {/* Identidade */}
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#E5A88B]/20 bg-white/80">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#B85F48]/20 bg-white/80">
               <Sparkles
                 size={15}
                 strokeWidth={1.8}
-                className="text-[#C97B5E]"
+                className="text-[#934A38]"
               />
             </div>
 
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C97B5E]">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#934A38]">
               {t("impulsePremium.eyebrow")}
             </p>
           </div>
 
           <div className="mt-5 max-w-[330px]">
-            <h1 className="text-[25px] font-black leading-[1.08] tracking-[-0.03em] text-[#4E3B36] font-display">
+            <h1 className="text-[25px] font-black leading-[1.08] tracking-[-0.03em] text-[#2F2926] font-display">
               {t("impulsePremium.title")}
             </h1>
 
@@ -596,24 +599,24 @@ const getPsychoeducationMessage = () => {
 
           {/* Escolha da necessidade */}
           <div>
-            <p className="text-sm font-black text-[#4E3B36]">
+            <p className="text-sm font-black text-[#2F2926]">
               {t("impulsePremium.question")}
             </p>
 
             {rememberedImpulse &&
               rememberedNeedLabel && (
-                <div className="mb-4 rounded-[22px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF8F4] to-white p-4 text-left shadow-[0_8px_24px_rgba(92,64,52,0.04)]">
+                <div className="mb-4 rounded-[22px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF8F4] to-white p-4 text-left shadow-[0_8px_24px_rgba(92,64,52,0.04)]">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] border border-[#E5A88B]/20 bg-white">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] border border-[#B85F48]/20 bg-white">
                       <Sparkles
                         size={15}
                         strokeWidth={1.8}
-                        className="text-[#C97B5E]"
+                        className="text-[#934A38]"
                       />
                     </div>
 
                     <div className="min-w-0">
-                      <p className="text-[9px] font-black uppercase tracking-[0.15em] text-[#C97B5E]">
+                      <p className="text-[9px] font-black uppercase tracking-[0.15em] text-[#934A38]">
                         {t("impulseMemory.memoryEyebrow")}
                       </p>
 
@@ -647,14 +650,14 @@ const getPsychoeducationMessage = () => {
                     aria-pressed={selected}
                     className={`min-h-[132px] rounded-[22px] border p-3.5 text-left transition-all duration-200 ${
                       selected
-                        ? "border-[#E5A88B]/55 bg-[#FFF5EF] shadow-[0_8px_22px_rgba(201,123,94,0.10)]"
+                        ? "border-[#B85F48]/55 bg-[#FFF5EF] shadow-[0_8px_22px_rgba(201,123,94,0.10)]"
                         : "border-[#E8DDD7]/65 bg-white/75 active:bg-[#FFF9F5]"
                     }`}
                   >
                     <div
                       className={`flex h-9 w-9 items-center justify-center rounded-xl ${
                         selected
-                          ? "bg-white text-[#C97B5E]"
+                          ? "bg-white text-[#934A38]"
                           : "bg-[#FFF8F4] text-[#A87968]"
                       }`}
                     >
@@ -664,12 +667,12 @@ const getPsychoeducationMessage = () => {
                       />
                     </div>
 
-                    <p className="mt-3 text-[12px] font-black leading-tight text-[#4E3B36]">
+                    <p className="mt-3 text-[12px] font-black leading-tight text-[#2F2926]">
                       {need.title}
                     </p>
 
                       {rememberedNeed === need.id && (
-                        <span className="mt-1.5 inline-flex rounded-full border border-[#E5A88B]/25 bg-[#FFF3EC] px-2 py-1 text-[8px] font-black uppercase tracking-[0.08em] text-[#C97B5E]">
+                        <span className="mt-1.5 inline-flex rounded-full border border-[#B85F48]/25 bg-[#FFF3EC] px-2 py-1 text-[8px] font-black uppercase tracking-[0.08em] text-[#934A38]">
                           {t(
                             "impulseMemory.helpedRecently"
                           )}
@@ -692,7 +695,7 @@ const getPsychoeducationMessage = () => {
             onClick={beginImpulse}
             className={`mt-5 flex w-full items-center justify-between rounded-[20px] px-4 py-4 transition-all duration-200 ${
               impulseNeed
-                ? "bg-[#C97B5E] text-white shadow-[0_10px_24px_rgba(201,123,94,0.18)] active:scale-[0.99]"
+                ? "bg-[#934A38] text-white shadow-[0_10px_24px_rgba(201,123,94,0.18)] active:scale-[0.99]"
                 : "cursor-not-allowed bg-[#EEE7E2] text-[#B7AAA4]"
             }`}
           >
@@ -751,11 +754,11 @@ const getPsychoeducationMessage = () => {
       <div className="relative border-b border-[#E8DDD7]/55 px-5 pb-4 pt-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
               {t("impulseAdaptive.routeLabel")}
             </p>
 
-            <p className="mt-1 truncate text-[13px] font-black text-[#4E3B36]">
+            <p className="mt-1 truncate text-[13px] font-black text-[#2F2926]">
               {impulseNeed
                 ? t(routeLabelKey[impulseNeed])
                 : t("impulse")}
@@ -770,7 +773,7 @@ const getPsychoeducationMessage = () => {
               })}
             </p>
 
-            <p className="mt-1 text-[11px] font-black text-[#C97B5E]">
+            <p className="mt-1 text-[11px] font-black text-[#934A38]">
               {progress}%
             </p>
           </div>
@@ -778,7 +781,7 @@ const getPsychoeducationMessage = () => {
 
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-[#F1E8E3]">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[#E5A88B] to-[#C97B5E] transition-[width] duration-300"
+            className="h-full rounded-full bg-gradient-to-r from-[#B85F48] to-[#934A38] transition-[width] duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -789,15 +792,15 @@ const getPsychoeducationMessage = () => {
         {step === 1 && (
           <div>
             <div className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] border border-[#E5A88B]/20 bg-[#FFF8F4]">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] border border-[#B85F48]/20 bg-[#FFF8F4]">
                 <Sparkles
                   size={20}
                   strokeWidth={1.7}
-                  className="text-[#C97B5E]"
+                  className="text-[#934A38]"
                 />
               </div>
 
-              <h2 className="mt-4 text-xl font-black tracking-tight text-[#4E3B36]">
+              <h2 className="mt-4 text-xl font-black tracking-tight text-[#2F2926]">
                 {t("impulseExperience.intensityNow")}
               </h2>
 
@@ -808,7 +811,7 @@ const getPsychoeducationMessage = () => {
 
             <div className="mt-7 rounded-[26px] border border-[#E8DDD7]/65 bg-white/80 p-5">
               <div className="text-center">
-                <span className="text-[46px] font-black leading-none tracking-[-0.05em] text-[#4E3B36]">
+                <span className="text-[46px] font-black leading-none tracking-[-0.05em] text-[#2F2926]">
                   {intensity}
                 </span>
 
@@ -816,7 +819,7 @@ const getPsychoeducationMessage = () => {
                   /10
                 </span>
 
-                <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#C97B5E]">
+                <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#934A38]">
                   {intensity <= 3
                     ? t("impulseExperience.low")
                     : intensity <= 6
@@ -832,10 +835,10 @@ const getPsychoeducationMessage = () => {
                   max="10"
                   value={intensity}
                   onChange={(e) =>
-                    setIntensity(Number(e.target.value))
+                    setIntensity(toIntensity(Number(e.target.value)))
                   }
                   aria-label={t("impulseExperience.intensityNow")}
-                  className="w-full accent-[#C97B5E]"
+                  className="w-full accent-[#934A38]"
                 />
 
                 <div className="mt-2 flex justify-between px-0.5 text-[9px] font-bold text-slate-300">
@@ -851,15 +854,15 @@ const getPsychoeducationMessage = () => {
         {step === 2 && (
           <div>
             <div className="mb-5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-[#E5A88B]/20 bg-[#FFF8F4]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-[#B85F48]/20 bg-[#FFF8F4]">
                 <MapPin
                   size={18}
                   strokeWidth={1.8}
-                  className="text-[#C97B5E]"
+                  className="text-[#934A38]"
                 />
               </div>
 
-              <h2 className="mt-3 text-xl font-black tracking-tight text-[#4E3B36]">
+              <h2 className="mt-3 text-xl font-black tracking-tight text-[#2F2926]">
                 {t("impulseStep2")}
               </h2>
             </div>
@@ -875,14 +878,14 @@ const getPsychoeducationMessage = () => {
                     onClick={() => setTrigger(item.id)}
                     className={`flex w-full items-center gap-3 rounded-[20px] border px-4 py-3.5 text-left transition-all active:scale-[0.99] ${
                       selected
-                        ? "border-[#E5A88B]/55 bg-[#FFF5EF] shadow-[0_7px_18px_rgba(201,123,94,0.08)]"
+                        ? "border-[#B85F48]/55 bg-[#FFF5EF] shadow-[0_7px_18px_rgba(201,123,94,0.08)]"
                         : "border-[#E8DDD7]/65 bg-white/80"
                     }`}
                   >
                     <span
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${
                         selected
-                          ? "border-[#C97B5E] bg-[#C97B5E] text-white"
+                          ? "border-[#934A38] bg-[#934A38] text-white"
                           : "border-[#DED4CF] bg-white text-transparent"
                       }`}
                     >
@@ -892,7 +895,7 @@ const getPsychoeducationMessage = () => {
                     <span
                       className={`text-[13px] font-bold leading-snug ${
                         selected
-                          ? "text-[#4E3B36]"
+                          ? "text-[#2F2926]"
                           : "text-[#6F625E]"
                       }`}
                     >
@@ -908,15 +911,15 @@ const getPsychoeducationMessage = () => {
         {step === 3 && (
           <div>
             <div className="mb-5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-[#E5A88B]/20 bg-[#FFF8F4]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-[#B85F48]/20 bg-[#FFF8F4]">
                 <Heart
                   size={18}
                   strokeWidth={1.8}
-                  className="text-[#C97B5E]"
+                  className="text-[#934A38]"
                 />
               </div>
 
-              <h2 className="mt-3 text-xl font-black tracking-tight text-[#4E3B36]">
+              <h2 className="mt-3 text-xl font-black tracking-tight text-[#2F2926]">
                 {t("impulseStep3")}
               </h2>
             </div>
@@ -932,14 +935,14 @@ const getPsychoeducationMessage = () => {
                     onClick={() => setEmotion(item.id)}
                     className={`flex w-full items-center gap-3 rounded-[20px] border px-4 py-3.5 text-left transition-all active:scale-[0.99] ${
                       selected
-                        ? "border-[#E5A88B]/55 bg-[#FFF5EF] shadow-[0_7px_18px_rgba(201,123,94,0.08)]"
+                        ? "border-[#B85F48]/55 bg-[#FFF5EF] shadow-[0_7px_18px_rgba(201,123,94,0.08)]"
                         : "border-[#E8DDD7]/65 bg-white/80"
                     }`}
                   >
                     <span
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${
                         selected
-                          ? "border-[#C97B5E] bg-[#C97B5E] text-white"
+                          ? "border-[#934A38] bg-[#934A38] text-white"
                           : "border-[#DED4CF] bg-white text-transparent"
                       }`}
                     >
@@ -949,7 +952,7 @@ const getPsychoeducationMessage = () => {
                     <span
                       className={`text-[13px] font-bold leading-snug ${
                         selected
-                          ? "text-[#4E3B36]"
+                          ? "text-[#2F2926]"
                           : "text-[#6F625E]"
                       }`}
                     >
@@ -964,15 +967,15 @@ const getPsychoeducationMessage = () => {
 {step === 4 && (
           <div>
             <div className="mb-5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-[#E5A88B]/20 bg-[#FFF8F4]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-[#B85F48]/20 bg-[#FFF8F4]">
                 <Brain
                   size={18}
                   strokeWidth={1.8}
-                  className="text-[#C97B5E]"
+                  className="text-[#934A38]"
                 />
               </div>
 
-              <h2 className="mt-3 text-xl font-black tracking-tight text-[#4E3B36]">
+              <h2 className="mt-3 text-xl font-black tracking-tight text-[#2F2926]">
                 {t("impulseStep4")}
               </h2>
             </div>
@@ -988,7 +991,7 @@ const getPsychoeducationMessage = () => {
                     onClick={() => setThought(item)}
                     className={`group flex w-full items-center justify-between gap-3 rounded-[20px] border px-4 py-4 text-left transition-all active:scale-[0.99] ${
                       selected
-                        ? "border-[#E5A88B]/55 bg-[#FFF5EF]"
+                        ? "border-[#B85F48]/55 bg-[#FFF5EF]"
                         : "border-[#E8DDD7]/65 bg-white/80"
                     }`}
                   >
@@ -999,7 +1002,7 @@ const getPsychoeducationMessage = () => {
                     <ArrowRight
                       size={15}
                       strokeWidth={1.9}
-                      className="shrink-0 text-[#C97B5E]"
+                      className="shrink-0 text-[#934A38]"
                     />
                   </button>
                 );
@@ -1011,21 +1014,21 @@ const getPsychoeducationMessage = () => {
         {step === 5 && (
           <div>
             <div className="mb-5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-[#E5A88B]/20 bg-[#FFF8F4]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-[#B85F48]/20 bg-[#FFF8F4]">
                 <Lightbulb
                   size={18}
                   strokeWidth={1.8}
-                  className="text-[#C97B5E]"
+                  className="text-[#934A38]"
                 />
               </div>
 
-              <h2 className="mt-3 text-xl font-black tracking-tight text-[#4E3B36]">
+              <h2 className="mt-3 text-xl font-black tracking-tight text-[#2F2926]">
                 {t("impulseStep5")}
               </h2>
             </div>
 
             <div className="rounded-[24px] border border-[#E8DDD7]/65 bg-white/80 p-4">
-              <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+              <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#934A38]">
                 {t("identifiedSoFar")}
               </p>
 
@@ -1035,7 +1038,7 @@ const getPsychoeducationMessage = () => {
                     <MapPin
                       size={15}
                       strokeWidth={1.8}
-                      className="mt-0.5 shrink-0 text-[#C97B5E]"
+                      className="mt-0.5 shrink-0 text-[#934A38]"
                     />
 
                     <div className="min-w-0">
@@ -1043,7 +1046,7 @@ const getPsychoeducationMessage = () => {
                         {t("trigger")}
                       </p>
 
-                      <p className="mt-0.5 text-xs font-bold leading-snug text-[#4E3B36]">
+                      <p className="mt-0.5 text-xs font-bold leading-snug text-[#2F2926]">
                         {getTriggerLabel(trigger)}
                       </p>
                     </div>
@@ -1055,7 +1058,7 @@ const getPsychoeducationMessage = () => {
                     <Heart
                       size={15}
                       strokeWidth={1.8}
-                      className="mt-0.5 shrink-0 text-[#C97B5E]"
+                      className="mt-0.5 shrink-0 text-[#934A38]"
                     />
 
                     <div className="min-w-0">
@@ -1063,7 +1066,7 @@ const getPsychoeducationMessage = () => {
                         {t("emotion")}
                       </p>
 
-                      <p className="mt-0.5 text-xs font-bold leading-snug text-[#4E3B36]">
+                      <p className="mt-0.5 text-xs font-bold leading-snug text-[#2F2926]">
                         {getEmotionLabel(emotion)}
                       </p>
                     </div>
@@ -1075,7 +1078,7 @@ const getPsychoeducationMessage = () => {
                     <Brain
                       size={15}
                       strokeWidth={1.8}
-                      className="mt-0.5 shrink-0 text-[#C97B5E]"
+                      className="mt-0.5 shrink-0 text-[#934A38]"
                     />
 
                     <div className="min-w-0">
@@ -1083,7 +1086,7 @@ const getPsychoeducationMessage = () => {
                         {t("thought")}
                       </p>
 
-                      <p className="mt-0.5 text-xs font-bold leading-snug text-[#4E3B36]">
+                      <p className="mt-0.5 text-xs font-bold leading-snug text-[#2F2926]">
                         {thought}
                       </p>
                     </div>
@@ -1097,7 +1100,7 @@ const getPsychoeducationMessage = () => {
                 <Sparkles
                   size={16}
                   strokeWidth={1.8}
-                  className="mt-0.5 shrink-0 text-[#C97B5E]"
+                  className="mt-0.5 shrink-0 text-[#934A38]"
                 />
 
                 <p className="whitespace-pre-line text-xs font-semibold leading-relaxed text-[#6B5750]">
@@ -1111,10 +1114,10 @@ const getPsychoeducationMessage = () => {
                 <Search
                   size={15}
                   strokeWidth={1.8}
-                  className="text-[#C97B5E]"
+                  className="text-[#934A38]"
                 />
 
-                <h3 className="text-xs font-black text-[#4E3B36]">
+                <h3 className="text-xs font-black text-[#2F2926]">
                   {t("anxietyCycle")}
                 </h3>
               </div>
@@ -1129,7 +1132,7 @@ const getPsychoeducationMessage = () => {
                 ].map((label, index) => (
                   <React.Fragment key={`${label}-${index}`}>
                     <div className="flex items-center gap-3 rounded-[16px] bg-[#FFF9F5] px-3 py-2.5">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-[9px] font-black text-[#C97B5E] shadow-sm">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-[9px] font-black text-[#934A38] shadow-sm">
                         {index + 1}
                       </span>
 
@@ -1157,29 +1160,29 @@ const getPsychoeducationMessage = () => {
         {step === 6 && (
           <div>
             <div className="text-center">
-              <div className="relative mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF8F4] to-white shadow-[0_12px_30px_rgba(201,123,94,0.10)]">
-                <div className="absolute inset-2 rounded-full border border-[#E5A88B]/15" />
+              <div className="relative mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF8F4] to-white shadow-[0_12px_30px_rgba(201,123,94,0.10)]">
+                <div className="absolute inset-2 rounded-full border border-[#B85F48]/15" />
 
                 <Wind
                   size={30}
                   strokeWidth={1.4}
-                  className="relative text-[#C97B5E]"
+                  className="relative text-[#934A38]"
                 />
               </div>
 
-              <h2 className="mt-5 text-xl font-black tracking-tight text-[#4E3B36]">
+              <h2 className="mt-5 text-xl font-black tracking-tight text-[#2F2926]">
                 {t("impulseStep6")}
               </h2>
             </div>
 
             <div className="mt-6 space-y-2.5">
               <div className="flex items-center gap-3 rounded-[20px] border border-[#E8DDD7]/60 bg-white/80 px-4 py-3.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFF3EC] text-[10px] font-black text-[#C97B5E]">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFF3EC] text-[10px] font-black text-[#934A38]">
                   1
                 </span>
 
                 <div>
-                  <p className="text-xs font-black text-[#4E3B36]">
+                  <p className="text-xs font-black text-[#2F2926]">
                     {t("inhale")}
                   </p>
 
@@ -1190,12 +1193,12 @@ const getPsychoeducationMessage = () => {
               </div>
 
               <div className="flex items-center gap-3 rounded-[20px] border border-[#E8DDD7]/60 bg-white/80 px-4 py-3.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFF3EC] text-[10px] font-black text-[#C97B5E]">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFF3EC] text-[10px] font-black text-[#934A38]">
                   2
                 </span>
 
                 <div>
-                  <p className="text-xs font-black text-[#4E3B36]">
+                  <p className="text-xs font-black text-[#2F2926]">
                     {t("holdBreath")}
                   </p>
 
@@ -1206,12 +1209,12 @@ const getPsychoeducationMessage = () => {
               </div>
 
               <div className="flex items-center gap-3 rounded-[20px] border border-[#E8DDD7]/60 bg-white/80 px-4 py-3.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFF3EC] text-[10px] font-black text-[#C97B5E]">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFF3EC] text-[10px] font-black text-[#934A38]">
                   3
                 </span>
 
                 <div>
-                  <p className="text-xs font-black text-[#4E3B36]">
+                  <p className="text-xs font-black text-[#2F2926]">
                     {t("exhale")}
                   </p>
 
@@ -1235,11 +1238,11 @@ const getPsychoeducationMessage = () => {
             {impulseNeed === "support" ? (
               <div className="space-y-4 text-left">
                 <div className="rounded-[26px] border border-[#E8DDD7]/70 bg-gradient-to-br from-[#FFF9F5] to-white p-5">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#934A38]">
                     {t("impulsePremium.supportTitle")}
                   </p>
 
-                  <h3 className="mt-2 text-xl font-black leading-tight text-[#4E3B36]">
+                  <h3 className="mt-2 text-xl font-black leading-tight text-[#2F2926]">
                     {t("impulseAdaptive.supportStepTitle")}
                   </h3>
 
@@ -1249,7 +1252,7 @@ const getPsychoeducationMessage = () => {
                 </div>
 
                 <div className="rounded-[22px] border border-[#E8DDD7]/60 bg-white p-4">
-                  <p className="text-xs font-bold leading-relaxed text-[#4E3B36]">
+                  <p className="text-xs font-bold leading-relaxed text-[#2F2926]">
                     {t("impulseAdaptive.supportPrompt")}
                   </p>
 
@@ -1267,29 +1270,29 @@ const getPsychoeducationMessage = () => {
             ) : (
               <div>
                 <div className="text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] border border-[#E5A88B]/20 bg-[#FFF8F4]">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] border border-[#B85F48]/20 bg-[#FFF8F4]">
                     <Heart
                       size={20}
                       strokeWidth={1.7}
-                      className="text-[#C97B5E]"
+                      className="text-[#934A38]"
                     />
                   </div>
 
-                  <p className="mt-4 text-[9px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+                  <p className="mt-4 text-[9px] font-black uppercase tracking-[0.16em] text-[#934A38]">
                     {t("impulseClosing.gratitudeEyebrow")}
                   </p>
 
-                  <h2 className="mt-2 text-xl font-black tracking-tight text-[#4E3B36]">
+                  <h2 className="mt-2 text-xl font-black tracking-tight text-[#2F2926]">
                     {t("gratitudeExercise")}
                   </h2>
                 </div>
 
-                <div className="mt-5 rounded-[22px] border border-[#E5A88B]/20 bg-gradient-to-br from-[#FFF8F4] to-white p-4">
+                <div className="mt-5 rounded-[22px] border border-[#B85F48]/20 bg-gradient-to-br from-[#FFF8F4] to-white p-4">
                   <div className="flex items-start gap-3">
                     <Sparkles
                       size={16}
                       strokeWidth={1.8}
-                      className="mt-0.5 shrink-0 text-[#C97B5E]"
+                      className="mt-0.5 shrink-0 text-[#934A38]"
                     />
 
                     <p className="text-xs font-semibold leading-relaxed text-[#6B5750]">
@@ -1299,7 +1302,7 @@ const getPsychoeducationMessage = () => {
                 </div>
 
                 <div className="mt-3 rounded-[26px] border border-[#E8DDD7]/65 bg-white/80 p-5 text-center">
-                  <p className="text-xs font-black text-[#4E3B36]">
+                  <p className="text-xs font-black text-[#2F2926]">
                     {t("impulseClosing.timerTitle")}
                   </p>
 
@@ -1311,8 +1314,8 @@ const getPsychoeducationMessage = () => {
                     <p
                       className={`font-mono text-[42px] font-black tracking-[-0.04em] ${
                         timeLeft < 30
-                          ? "text-[#C97B5E]"
-                          : "text-[#4E3B36]"
+                          ? "text-[#934A38]"
+                          : "text-[#2F2926]"
                       }`}
                     >
                       {formatTime(timeLeft)}
@@ -1325,7 +1328,7 @@ const getPsychoeducationMessage = () => {
                       onClick={() =>
                         setTimerRunning(!timerRunning)
                       }
-                      className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[17px] bg-[#C97B5E] px-4 text-white shadow-[0_7px_18px_rgba(201,123,94,0.16)] transition-transform active:scale-[0.98]"
+                      className="flex h-11 flex-1 items-center justify-center gap-2 rounded-[17px] bg-[#934A38] px-4 text-white shadow-[0_7px_18px_rgba(201,123,94,0.16)] transition-transform active:scale-[0.98]"
                     >
                       {timerRunning ? (
                         <Pause
@@ -1370,15 +1373,15 @@ const getPsychoeducationMessage = () => {
         {step === 8 && (
           <div>
             <div className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] border border-[#E5A88B]/20 bg-[#FFF8F4]">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[18px] border border-[#B85F48]/20 bg-[#FFF8F4]">
                 <Check
                   size={20}
                   strokeWidth={1.8}
-                  className="text-[#C97B5E]"
+                  className="text-[#934A38]"
                 />
               </div>
 
-              <h2 className="mt-4 text-xl font-black tracking-tight text-[#4E3B36]">
+              <h2 className="mt-4 text-xl font-black tracking-tight text-[#2F2926]">
                 {t("impulseExperience.intensityAfter")}
               </h2>
 
@@ -1401,12 +1404,12 @@ const getPsychoeducationMessage = () => {
                 </p>
               </div>
 
-              <div className="rounded-[20px] border border-[#E5A88B]/30 bg-white px-4 py-3 text-center shadow-sm">
-                <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#C97B5E]">
+              <div className="rounded-[20px] border border-[#B85F48]/30 bg-white px-4 py-3 text-center shadow-sm">
+                <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#934A38]">
                   {t("impulseExperience.now")}
                 </p>
 
-                <p className="mt-1 text-xl font-black text-[#4E3B36]">
+                <p className="mt-1 text-xl font-black text-[#2F2926]">
                   {finalIntensity}
                   <span className="text-[10px] text-slate-300">
                     /10
@@ -1417,7 +1420,7 @@ const getPsychoeducationMessage = () => {
 
             <div className="mt-5 rounded-[26px] border border-[#E8DDD7]/65 bg-white/80 p-5">
               <div className="text-center">
-                <span className="text-[42px] font-black leading-none tracking-[-0.05em] text-[#4E3B36]">
+                <span className="text-[42px] font-black leading-none tracking-[-0.05em] text-[#2F2926]">
                   {finalIntensity}
                 </span>
 
@@ -1425,7 +1428,7 @@ const getPsychoeducationMessage = () => {
                   /10
                 </span>
 
-                <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#C97B5E]">
+                <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-[#934A38]">
                   {finalIntensity <= 3
                     ? t("impulseExperience.low")
                     : finalIntensity <= 6
@@ -1441,10 +1444,10 @@ const getPsychoeducationMessage = () => {
                   max="10"
                   value={finalIntensity}
                   onChange={(e) =>
-                    setFinalIntensity(Number(e.target.value))
+                    setFinalIntensity(toIntensity(Number(e.target.value)))
                   }
                   aria-label={t("impulseExperience.intensityAfter")}
-                  className="w-full accent-[#C97B5E]"
+                  className="w-full accent-[#934A38]"
                 />
 
                 <div className="mt-2 flex justify-between px-0.5 text-[9px] font-bold text-slate-300">
@@ -1484,7 +1487,7 @@ const getPsychoeducationMessage = () => {
           disabled={!canContinueCurrentStep}
           className={`flex h-12 flex-1 items-center justify-between rounded-[18px] px-4 transition-all ${
             canContinueCurrentStep
-              ? "bg-[#C97B5E] text-white shadow-[0_8px_20px_rgba(201,123,94,0.18)] active:scale-[0.99]"
+              ? "bg-[#934A38] text-white shadow-[0_8px_20px_rgba(201,123,94,0.18)] active:scale-[0.99]"
               : "cursor-not-allowed bg-[#EEE7E2] text-[#B7AAA4]"
           }`}
         >

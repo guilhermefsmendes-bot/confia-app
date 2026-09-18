@@ -193,5 +193,7 @@ export function buildCompanionBrainContext(input: {
       input.longitudinalImpulse,
     crossMemory:
       input.crossMemory,
+    personalDiscovery:
+      input.personalDiscovery,
   };
 }

@@ -52,6 +52,10 @@ export interface SharePost {
   greenLikes: number;
   redLikes: number;
 
+  yellowLikedBy?: string[];
+  greenLikedBy?: string[];
+  redLikedBy?: string[];
+
   userReaction?: "yellow" | "green" | "red";
 }
 

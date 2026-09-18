@@ -45,7 +45,7 @@ const { t } = useTranslation();
   const [completed, setCompleted] = useState(false);
 const [selectedSound, setSelectedSound] = useState("rain");
 const [showDoodle, setShowDoodle] = useState(false);
-const [doodleColor, setDoodleColor] = useState("#C97B5E");
+const [doodleColor, setDoodleColor] = useState("#934A38");
 const [doodleWidth, setDoodleWidth] = useState(3);
 const [doodleStrokeCount, setDoodleStrokeCount] = useState(0);
 const [doodlePromptIndex, setDoodlePromptIndex] = useState(
@@ -776,8 +776,8 @@ const formatTime = (seconds: number) => {
     <div className="flex flex-col items-center max-w-md mx-auto space-y-6 py-4">
       {/* Tab Header Banner */}
       <div className="text-center space-y-1.5 w-full">
-        <h2 className="text-xl font-black text-[#4E3B36] flex items-center justify-center gap-2 font-display">
-<span className="text-[#E5A88B]">🫂</span> {t("mindHug")}
+        <h2 className="text-xl font-black text-[#2F2926] flex items-center justify-center gap-2 font-display">
+<span className="text-[#B85F48]">🫂</span> {t("mindHug")}
         </h2>
         <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto font-medium">
        {t("mindHugDescription")}
@@ -785,7 +785,7 @@ const formatTime = (seconds: number) => {
       </div>
 
       {/* Main Visual breathing circle and Timer */}
-      <div className="relative flex items-center justify-center w-64 h-64 my-4 bg-[#FFF0E8]/40 rounded-full border border-[#E5A88B]/15 shadow-inner">
+      <div className="relative flex items-center justify-center w-64 h-64 my-4 bg-[#F3E3DC]/40 rounded-full border border-[#B85F48]/15 shadow-inner">
         {/* Pulsing breathing back aura */}
         {isActive && (
           <motion.div
@@ -797,7 +797,7 @@ const formatTime = (seconds: number) => {
               duration: 5,
               ease: "easeInOut",
             }}
-            className="absolute inset-4 rounded-full bg-[#E5A88B]/20 blur-md pointer-events-none"
+            className="absolute inset-4 rounded-full bg-[#B85F48]/20 blur-md pointer-events-none"
           />
         )}
 
@@ -808,7 +808,7 @@ const formatTime = (seconds: number) => {
             cx="128"
             cy="128"
             r={radius}
-            className="text-[#FFF0E8] stroke-current"
+            className="text-[#F3E3DC] stroke-current"
             strokeWidth={strokeWidth}
             fill="transparent"
           />
@@ -817,7 +817,7 @@ const formatTime = (seconds: number) => {
             cx="128"
             cy="128"
             r={radius}
-            className="text-[#E5A88B] stroke-current"
+            className="text-[#B85F48] stroke-current"
             strokeWidth={strokeWidth}
             fill="transparent"
             strokeDasharray={circumference}
@@ -834,7 +834,7 @@ const formatTime = (seconds: number) => {
               key={breatheState}
               initial={{ scale: 0.9, opacity: 0.7 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-xs font-extrabold uppercase tracking-widest text-[#C97B5E] mb-1 font-display"
+              className="text-xs font-extrabold uppercase tracking-widest text-[#934A38] mb-1 font-display"
             >
              {breatheState === 'Inalar'
  ? t("hugInhale")
@@ -846,7 +846,7 @@ const formatTime = (seconds: number) => {
             </div>
           )}
 
-          <div className="text-4xl font-mono font-bold text-[#4E3B36] tracking-tight">
+          <div className="text-4xl font-mono font-bold text-[#2F2926] tracking-tight">
             {formatTime(secondsLeft)}
           </div>
 
@@ -869,22 +869,22 @@ key={phraseIdx}
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <p className="text-sm font-semibold text-[#4E3B36] max-w-xs mx-auto leading-relaxed italic">
+            <p className="text-sm font-semibold text-[#2F2926] max-w-xs mx-auto leading-relaxed italic">
 {isActive ? t(SOOTHING_PHRASES[phraseIdx]) : t("startHugMessage")}
             </p>
           </motion.div>
         </AnimatePresence>
       </div>
 {/* Relaxing Sounds */}
-<div className="w-full bg-[#F8F1EA] rounded-2xl p-4 border border-[#E5A88B]/20 mb-4">
-  <p className="text-xs font-bold text-[#4E3B36] mb-3">
+<div className="w-full bg-[#F8F1EA] rounded-2xl p-4 border border-[#B85F48]/20 mb-4">
+  <p className="text-xs font-bold text-[#2F2926] mb-3">
     🌿 {t("calmNow")}
   </p>
 
   <select
     value={selectedSound}
     onChange={(e) => setSelectedSound(e.target.value)}
-    className="w-full rounded-xl border border-[#E5A88B]/30 px-3 py-2 text-sm bg-white"
+    className="w-full rounded-xl border border-[#B85F48]/30 px-3 py-2 text-sm bg-white"
   >
     <option value="rain">{t("soundRain")}</option>
     <option value="forest">{t("soundForest")}</option>
@@ -894,10 +894,10 @@ key={phraseIdx}
 </div>
 
       {/* Abraço Premium — Rabisco */}
-      <section className="w-full overflow-hidden rounded-[28px] border border-[#E5A88B]/20 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC]">
+      <section className="w-full overflow-hidden rounded-[28px] border border-[#B85F48]/20 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC]">
         <div className="p-5">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/20 bg-white text-[#C97B5E] shadow-sm">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/20 bg-white text-[#934A38] shadow-sm">
               <Smile
                 size={18}
                 strokeWidth={1.8}
@@ -905,11 +905,11 @@ key={phraseIdx}
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#934A38]">
                 {t("hugDoodle.eyebrow")}
               </p>
 
-              <h3 className="mt-1 text-base font-black tracking-tight text-[#4E3B36]">
+              <h3 className="mt-1 text-base font-black tracking-tight text-[#2F2926]">
                 {t("hugDoodle.title")}
               </h3>
 
@@ -923,7 +923,7 @@ key={phraseIdx}
             <button
               type="button"
               onClick={openDoodle}
-              className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-[18px] border border-[#E5A88B]/25 bg-white px-4 py-3 text-xs font-black text-[#8B5E50] shadow-sm transition-transform active:scale-[0.99]"
+              className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-[18px] border border-[#B85F48]/25 bg-white px-4 py-3 text-xs font-black text-[#8B5E50] shadow-sm transition-transform active:scale-[0.99]"
             >
               <Sparkles
                 size={15}
@@ -933,20 +933,20 @@ key={phraseIdx}
               {t("hugDoodle.open")}
             </button>
           ) : doodleFinished ? (
-            <div className="mt-5 overflow-hidden rounded-[24px] border border-[#E5A88B]/20 bg-white">
+            <div className="mt-5 overflow-hidden rounded-[24px] border border-[#B85F48]/20 bg-white">
               <div className="px-5 py-7 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#FFF0E8] text-[#C97B5E]">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#F3E3DC] text-[#934A38]">
                   <Heart
                     size={20}
                     strokeWidth={1.7}
                   />
                 </div>
 
-                <p className="mt-4 text-[10px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+                <p className="mt-4 text-[10px] font-black uppercase tracking-[0.16em] text-[#934A38]">
                   {t("hugDoodle.ritualEyebrow")}
                 </p>
 
-                <h4 className="mx-auto mt-2 max-w-[250px] text-lg font-black leading-snug text-[#4E3B36]">
+                <h4 className="mx-auto mt-2 max-w-[250px] text-lg font-black leading-snug text-[#2F2926]">
                   {t("hugDoodle.ritual")}
                 </h4>
 
@@ -959,7 +959,7 @@ key={phraseIdx}
                 <button
                   type="button"
                   onClick={closeDoodle}
-                  className="min-h-12 border-r border-[#E8DDD7]/70 px-3 py-3 text-xs font-bold text-[#8B6B60] transition-colors active:bg-[#FAF5F0]"
+                  className="min-h-12 border-r border-[#E8DDD7]/70 px-3 py-3 text-xs font-bold text-[#8B6B60] transition-colors active:bg-[#F7F5F2]"
                 >
                   {t("hugDoodle.letGo")}
                 </button>
@@ -969,7 +969,7 @@ key={phraseIdx}
                   onClick={() =>
                     resetDoodleExperience(true)
                   }
-                  className="min-h-12 px-3 py-3 text-xs font-black text-[#C97B5E] transition-colors active:bg-[#FFF8F4]"
+                  className="min-h-12 px-3 py-3 text-xs font-black text-[#934A38] transition-colors active:bg-[#FFF8F4]"
                 >
                   {t("hugDoodle.another")}
                 </button>
@@ -977,14 +977,14 @@ key={phraseIdx}
             </div>
           ) : (
             <div className="mt-5">
-              <div className="mb-3 rounded-[20px] border border-[#E5A88B]/20 bg-[#FFF8F4] px-4 py-3.5">
+              <div className="mb-3 rounded-[20px] border border-[#B85F48]/20 bg-[#FFF8F4] px-4 py-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+                    <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#934A38]">
                       {t("hugDoodle.challenge")}
                     </p>
 
-                    <p className="mt-1.5 text-sm font-black leading-relaxed text-[#4E3B36]">
+                    <p className="mt-1.5 text-sm font-black leading-relaxed text-[#2F2926]">
                       {t(
                         DOODLE_PROMPT_KEYS[
                           doodlePromptIndex
@@ -1005,7 +1005,7 @@ key={phraseIdx}
                     title={
                       t("hugDoodle.newChallenge")
                     }
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[#E5A88B]/20 bg-white text-[#C97B5E] shadow-sm transition-transform active:scale-95"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[#B85F48]/20 bg-white text-[#934A38] shadow-sm transition-transform active:scale-95"
                   >
                     <RotateCcw
                       size={14}
@@ -1017,7 +1017,7 @@ key={phraseIdx}
 
               <div className="mb-3 flex items-center justify-between gap-3 px-1">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#C97B5E]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#934A38]">
                     {t("hugDoodle.tools")}
                   </p>
 
@@ -1048,8 +1048,8 @@ key={phraseIdx}
                   aria-label={t("hugDoodle.color")}
                 >
                   {[
-                    "#C97B5E",
-                    "#4E3B36",
+                    "#934A38",
+                    "#2F2926",
                     "#D9A66F",
                     "#829A8A",
                   ].map(color => (
@@ -1067,7 +1067,7 @@ key={phraseIdx}
                       }
                       className={`flex h-8 w-8 items-center justify-center rounded-full transition-transform active:scale-90 ${
                         doodleColor === color
-                          ? "ring-2 ring-[#C97B5E]/35 ring-offset-2"
+                          ? "ring-2 ring-[#934A38]/35 ring-offset-2"
                           : ""
                       }`}
                     >
@@ -1082,7 +1082,7 @@ key={phraseIdx}
                 </div>
 
                 <div
-                  className="flex items-center gap-1 rounded-[14px] bg-[#FAF5F0] p-1"
+                  className="flex items-center gap-1 rounded-[14px] bg-[#F7F5F2] p-1"
                   role="group"
                   aria-label={t("hugDoodle.thickness")}
                 >
@@ -1168,7 +1168,7 @@ key={phraseIdx}
                   type="button"
                   onClick={finishDoodle}
                   disabled={doodleStrokeCount === 0}
-                  className="min-h-11 flex-1 rounded-[16px] bg-[#C97B5E] px-3 py-2.5 text-xs font-black text-white shadow-[0_6px_16px_rgba(201,123,94,0.16)] transition-transform enabled:active:scale-[0.98] disabled:cursor-default disabled:opacity-40 disabled:shadow-none"
+                  className="min-h-11 flex-1 rounded-[16px] bg-[#934A38] px-3 py-2.5 text-xs font-black text-white shadow-[0_6px_16px_rgba(201,123,94,0.16)] transition-transform enabled:active:scale-[0.98] disabled:cursor-default disabled:opacity-40 disabled:shadow-none"
                 >
                   {t("hugDoodle.close")}
                 </button>
@@ -1186,7 +1186,7 @@ key={phraseIdx}
       <div className="flex items-center gap-4">
         <button type="button"
           onClick={handleReset}
-          className="p-3 bg-white hover:bg-[#FAF5F0] text-slate-500 hover:text-[#4E3B36] rounded-2xl border border-[#E5A88B]/15 shadow-sm transition-all cursor-pointer"
+          className="p-3 bg-white hover:bg-[#F7F5F2] text-slate-500 hover:text-[#2F2926] rounded-2xl border border-[#B85F48]/15 shadow-sm transition-all cursor-pointer"
          title={t("reset")}
         >
           <RotateCcw size={18} />
@@ -1196,8 +1196,8 @@ key={phraseIdx}
           onClick={handleToggle}
           className={`px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider font-display shadow-lg transition-all flex items-center gap-2 cursor-pointer ${
             isActive
-              ? 'bg-[#E5A88B] hover:bg-[#D59375] text-white shadow-[#E5A88B]/25'
-              : 'bg-[#C97B5E] hover:bg-[#B56A4F] text-white shadow-[#C97B5E]/20'
+              ? 'bg-[#B85F48] hover:bg-[#D59375] text-white shadow-[#B85F48]/25'
+              : 'bg-[#934A38] hover:bg-[#B56A4F] text-white shadow-[#934A38]/20'
           }`}
         >
           {isActive ? (
@@ -1218,17 +1218,17 @@ key={phraseIdx}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#E5A88B]/10 border border-[#E5A88B]/25 p-5 rounded-[24px] text-center max-w-sm space-y-1.5"
+            className="bg-[#B85F48]/10 border border-[#B85F48]/25 p-5 rounded-[24px] text-center max-w-sm space-y-1.5"
           >
-            <div className="flex items-center justify-center text-[#C97B5E] gap-1">
+            <div className="flex items-center justify-center text-[#934A38] gap-1">
               <Sparkles size={16} className="animate-spin" />
              <span className="font-extrabold text-xs uppercase tracking-widest font-display">
   {t("sessionCompleted")}
 </span>
             </div>
-           <p className="text-xs text-[#4E3B36] leading-relaxed font-semibold">
+           <p className="text-xs text-[#2F2926] leading-relaxed font-semibold">
   {t("sessionCompletedMessage")}{" "}
-  <strong className="text-[#C97B5E]">+30 XP</strong>{" "}
+  <strong className="text-[#934A38]">+30 XP</strong>{" "}
   {t("sessionCompletedReward")}
 </p>
           </motion.div>

@@ -153,7 +153,7 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({
             ✦
           </div>
 
-          <h1 className="mt-4 text-xl font-extrabold tracking-tight text-[#4E3B36]">
+          <h1 className="mt-4 text-xl font-extrabold tracking-tight text-[#2F2926]">
             {t("companionCustomization.title")}
           </h1>
 
@@ -198,7 +198,7 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({
               ✦
             </span>
 
-            <h2 className="font-extrabold text-[#4E3B36]">
+            <h2 className="font-extrabold text-[#2F2926]">
               {t(
                 "companionCustomization.accessoriesTitle"
               )}
@@ -260,7 +260,7 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({
                   </div>
 
                   <div className="mt-4 min-h-[58px]">
-                    <p className="pr-1 text-sm font-extrabold leading-snug text-[#4E3B36]">
+                    <p className="pr-1 text-sm font-extrabold leading-snug text-[#2F2926]">
                       {getAccessoryName(item.id)}
                     </p>
 

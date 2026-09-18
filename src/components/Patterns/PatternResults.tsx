@@ -25,7 +25,7 @@ export const PatternResults: React.FC<PatternResultsProps> = ({
           {profile.emoji}
         </div>
 
-        <h2 className="text-2xl font-black text-[#4E3B36]">
+        <h2 className="text-2xl font-black text-[#2F2926]">
           {t(profile.nameKey)}
         </h2>
 
@@ -56,7 +56,7 @@ export const PatternResults: React.FC<PatternResultsProps> = ({
       </div>
       <button type="button"
         onClick={onContinue}
-        className="mt-8 w-full rounded-2xl bg-[#C97B5E] py-4 text-white font-bold"
+        className="mt-8 w-full rounded-2xl bg-[#934A38] py-4 text-white font-bold"
       >
         {t("patterns.continue")}
       </button>

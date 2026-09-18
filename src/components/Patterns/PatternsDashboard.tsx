@@ -74,7 +74,7 @@ const newEntry = {
           🌱
         </div>
 
-        <h2 className="text-2xl font-black text-[#4E3B36] mt-3">
+        <h2 className="text-2xl font-black text-[#2F2926] mt-3">
           {t("patterns.dashboard.title")}
         </h2>
 
@@ -106,7 +106,7 @@ const newEntry = {
         </h3>
 
 {daysSinceStart > 0 && (
-  <p className="mt-3 font-bold text-[#C97B5E]">
+  <p className="mt-3 font-bold text-[#934A38]">
     🔥 {daysSinceStart} {t("patterns.dashboard.days")}
   </p>
 )}
@@ -124,7 +124,7 @@ const newEntry = {
               onClick={() => saveToday(item)}
               className={`w-full p-4 rounded-xl border ${
                 today === item
-                ? "bg-[#FFF1EA] border-[#C97B5E]"
+                ? "bg-[#FFF1EA] border-[#934A38]"
                 : "bg-white border-[#E5D4CB]"
               }`}
             >

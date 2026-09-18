@@ -69,7 +69,7 @@ const { t } = useTranslation();
     <div className="mt-6 bg-white rounded-3xl shadow-lg p-6">
 
 
-      <h3 className="font-black text-xl text-[#4E3B36]">
+      <h3 className="font-black text-xl text-[#2F2926]">
         📈 {t("patterns.evolution.title")}
       </h3>
 
@@ -82,7 +82,7 @@ const { t } = useTranslation();
       <div className="mt-5 h-4 bg-[#EEE5DF] rounded-full">
 
         <div
-          className="h-4 rounded-full bg-[#C97B5E]"
+          className="h-4 rounded-full bg-[#934A38]"
           style={{
             width:`${percentage}%`
           }}

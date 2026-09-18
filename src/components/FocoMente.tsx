@@ -171,12 +171,12 @@ const { t } = useTranslation();
   const progressPercent = ((180 - timeLeft) / 180) * 100;
 
   return (
-    <div className="bg-white border border-[#E5A88B]/15 rounded-[32px] p-6 shadow-sm space-y-4">
+    <div className="bg-white border border-[#B85F48]/15 rounded-[32px] p-6 shadow-sm space-y-4">
       {/* Header of Section */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h3 className="text-sm font-black text-[#4E3B36] flex items-center gap-1.5 font-display uppercase tracking-wider">
-           <Sparkles size={15} className="text-[#E5A88B]" /> {t("mindFocus")}
+          <h3 className="text-sm font-black text-[#2F2926] flex items-center gap-1.5 font-display uppercase tracking-wider">
+           <Sparkles size={15} className="text-[#B85F48]" /> {t("mindFocus")}
           </h3>
           <p className="text-xs text-slate-500 font-semibold leading-relaxed">
            {t("focusSuggestion")}
@@ -193,7 +193,7 @@ const { t } = useTranslation();
             exit={{ opacity: 0, y: -10 }}
             className="space-y-3"
           >
-            <p className="text-xs font-bold text-[#4E3B36] bg-[#FFF0E8]/50 px-3.5 py-2 rounded-xl border border-[#E5A88B]/10">
+            <p className="text-xs font-bold text-[#2F2926] bg-[#F3E3DC]/50 px-3.5 py-2 rounded-xl border border-[#B85F48]/10">
              🤔 {t("chooseFocusActivity")}
             </p>
 
@@ -202,14 +202,14 @@ const { t } = useTranslation();
                 <button type="button"
                   key={act.id}
                   onClick={() => handleSelectActivity(act)}
-                  className="w-full p-3.5 bg-white hover:bg-[#FFF0E8]/30 border border-slate-100 hover:border-[#E5A88B]/30 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left"
+                  className="w-full p-3.5 bg-white hover:bg-[#F3E3DC]/30 border border-slate-100 hover:border-[#B85F48]/30 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="p-2 bg-[#FFF0E8] text-[#C97B5E] rounded-xl flex items-center justify-center shrink-0">
+                    <span className="p-2 bg-[#F3E3DC] text-[#934A38] rounded-xl flex items-center justify-center shrink-0">
                       {act.icon}
                     </span>
                     <div>
-                      <h4 className="text-xs font-black text-[#4E3B36] flex items-center gap-1">
+                      <h4 className="text-xs font-black text-[#2F2926] flex items-center gap-1">
                         <span>{act.emoji}</span> {act.title}
                       </h4>
                       <p className="text-[10px] text-slate-400 font-semibold line-clamp-1 mt-0.5">
@@ -217,7 +217,7 @@ const { t } = useTranslation();
                       </p>
                     </div>
                   </div>
-                  <ChevronRight size={14} className="text-[#C97B5E] group-hover:translate-x-0.5 transition-transform shrink-0" />
+                  <ChevronRight size={14} className="text-[#934A38] group-hover:translate-x-0.5 transition-transform shrink-0" />
                 </button>
               ))}
             </div>
@@ -232,21 +232,21 @@ const { t } = useTranslation();
             exit={{ opacity: 0, scale: 0.98 }}
             className="space-y-4"
           >
-            <div className="border border-[#E5A88B]/20 rounded-2xl p-4 bg-[#FFF0E8]/30 space-y-3">
+            <div className="border border-[#B85F48]/20 rounded-2xl p-4 bg-[#F3E3DC]/30 space-y-3">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">{selectedActivity.emoji}</span>
                 <div>
-                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-[#C97B5E] font-display">{t("recommendedExercise")}</h4>
-                  <h3 className="text-sm font-black text-[#4E3B36] font-display">{selectedActivity.exerciseTitle}</h3>
+                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-[#934A38] font-display">{t("recommendedExercise")}</h4>
+                  <h3 className="text-sm font-black text-[#2F2926] font-display">{selectedActivity.exerciseTitle}</h3>
                 </div>
               </div>
 
-              <p className="text-xs text-[#4E3B36] leading-relaxed font-semibold">
+              <p className="text-xs text-[#2F2926] leading-relaxed font-semibold">
                 {selectedActivity.exerciseDesc}
               </p>
 
-              <div className="flex items-start gap-2 pt-2 border-t border-[#E5A88B]/10 text-[10px] font-semibold text-slate-500">
-                <Lightbulb size={13} className="text-[#C97B5E] shrink-0 mt-0.5 animate-pulse" />
+              <div className="flex items-start gap-2 pt-2 border-t border-[#B85F48]/10 text-[10px] font-semibold text-slate-500">
+                <Lightbulb size={13} className="text-[#934A38] shrink-0 mt-0.5 animate-pulse" />
                 <p className="leading-relaxed">
                  <strong>{t("successTip")}:</strong>
                 </p>
@@ -262,7 +262,7 @@ const { t } = useTranslation();
               </button>
               <button type="button"
                 onClick={handleStartTimer}
-                className="flex-1 py-3 bg-[#C97B5E] hover:bg-[#B56A4F] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider font-display transition-all shadow-md shadow-[#C97B5E]/15 flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 py-3 bg-[#934A38] hover:bg-[#B56A4F] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider font-display transition-all shadow-md shadow-[#934A38]/15 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                <Clock size={14} /> {t("startExerciseTimed")}
               </button>
@@ -279,10 +279,10 @@ const { t } = useTranslation();
             className="flex flex-col items-center text-center space-y-4"
           >
             <div className="space-y-1">
-              <span className="text-[9px] font-extrabold text-[#C97B5E] uppercase tracking-widest bg-[#E5A88B]/10 px-2.5 py-0.5 rounded-lg font-display">
+              <span className="text-[9px] font-extrabold text-[#934A38] uppercase tracking-widest bg-[#B85F48]/10 px-2.5 py-0.5 rounded-lg font-display">
                {t("activeFocus")}: {selectedActivity.title}
               </span>
-              <h4 className="text-xs font-bold text-[#4E3B36] max-w-xs leading-relaxed">
+              <h4 className="text-xs font-bold text-[#2F2926] max-w-xs leading-relaxed">
                {t("putPhoneAway")}
               </h4>
             </div>
@@ -294,7 +294,7 @@ const { t } = useTranslation();
                   cx="80"
                   cy="80"
                   r="70"
-                  className="text-[#FFF0E8] stroke-current"
+                  className="text-[#F3E3DC] stroke-current"
                   strokeWidth="8"
                   fill="transparent"
                 />
@@ -302,7 +302,7 @@ const { t } = useTranslation();
                   cx="80"
                   cy="80"
                   r="70"
-                  className="text-[#C97B5E] stroke-current"
+                  className="text-[#934A38] stroke-current"
                   strokeWidth="8"
                   fill="transparent"
                   strokeDasharray="440"
@@ -312,7 +312,7 @@ const { t } = useTranslation();
                 />
               </svg>
               <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-2xl font-mono font-black text-[#4E3B36] tracking-tight">
+                <span className="text-2xl font-mono font-black text-[#2F2926] tracking-tight">
                   {formatTime(timeLeft)}
                 </span>
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 font-display">
@@ -336,7 +336,7 @@ const { t } = useTranslation();
                 className={`flex-1 py-3 rounded-xl font-black text-xs uppercase tracking-wider font-display shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   isActive
                     ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                    : 'bg-[#C97B5E] hover:bg-[#B56A4F] text-white'
+                    : 'bg-[#934A38] hover:bg-[#B56A4F] text-white'
                 }`}
               >
                 {isActive ? (
@@ -353,7 +353,7 @@ const { t } = useTranslation();
               {/* Instant Test Completion Shortcut */}
               <button type="button"
                 onClick={handleFinishExercise}
-                className="px-3 py-3 bg-[#E5A88B]/10 hover:bg-[#E5A88B]/20 text-[#C97B5E] border border-[#E5A88B]/20 rounded-xl text-[10px] font-black uppercase tracking-wider font-display transition-all cursor-pointer"
+                className="px-3 py-3 bg-[#B85F48]/10 hover:bg-[#B85F48]/20 text-[#934A38] border border-[#B85F48]/20 rounded-xl text-[10px] font-black uppercase tracking-wider font-display transition-all cursor-pointer"
                title={t("finishEarly")}
               >
                {t("finishNow")}
@@ -377,29 +377,29 @@ const { t } = useTranslation();
             exit={{ opacity: 0 }}
             className="text-center py-2 space-y-4"
           >
-            <div className="w-14 h-14 bg-[#E5A88B]/15 text-[#C97B5E] rounded-full flex items-center justify-center mx-auto shadow-sm">
+            <div className="w-14 h-14 bg-[#B85F48]/15 text-[#934A38] rounded-full flex items-center justify-center mx-auto shadow-sm">
               <CheckCircle size={28} className="animate-bounce" />
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-sm font-black text-[#4E3B36] font-display">{t("excellentFocus")}</h3>
+              <h3 className="text-sm font-black text-[#2F2926] font-display">{t("excellentFocus")}</h3>
               <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto font-semibold">
                {t("focusBenefit")}
               </p>
             </div>
 
-            <div className="bg-[#FFF0E8]/80 border border-[#E5A88B]/20 rounded-2xl p-4 text-left">
-              <h4 className="text-[10px] font-black text-[#C97B5E] uppercase tracking-wider mb-1 flex items-center gap-1.5 font-display">
+            <div className="bg-[#F3E3DC]/80 border border-[#B85F48]/20 rounded-2xl p-4 text-left">
+              <h4 className="text-[10px] font-black text-[#934A38] uppercase tracking-wider mb-1 flex items-center gap-1.5 font-display">
                <Sparkles size={13} /> {t("companionStrengthened")}
               </h4>
-              <p className="text-xs text-[#4E3B36] leading-relaxed font-semibold">
-              {t("mindFocusCompleted")} <strong className="text-[#C97B5E]">+40 XP</strong> {t("evolutionProgress")}
+              <p className="text-xs text-[#2F2926] leading-relaxed font-semibold">
+              {t("mindFocusCompleted")} <strong className="text-[#934A38]">+40 XP</strong> {t("evolutionProgress")}
               </p>
             </div>
 
             <button type="button"
               onClick={() => setStep('choice')}
-              className="w-full py-3 bg-[#C97B5E] hover:bg-[#B56A4F] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider font-display transition-all shadow-md cursor-pointer"
+              className="w-full py-3 bg-[#934A38] hover:bg-[#B56A4F] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider font-display transition-all shadow-md cursor-pointer"
             >
               {t("focusAnother")}
             </button>

@@ -153,7 +153,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
 
         <div className="mt-4 min-h-[76px]">
 
-          <p className="pr-1 text-sm font-extrabold leading-snug text-[#4E3B36]">
+          <p className="pr-1 text-sm font-extrabold leading-snug text-[#2F2926]">
             {t(
               `companionCustomization.items.${item.id}`
             )}
@@ -307,7 +307,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
             ✦
           </div>
 
-          <h1 className="mt-4 text-xl font-extrabold tracking-tight text-[#4E3B36]">
+          <h1 className="mt-4 text-xl font-extrabold tracking-tight text-[#2F2926]">
             {t("companionShop.title")}
           </h1>
 
@@ -328,7 +328,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
               {t("companionShop.xpAvailable")}
             </span>
 
-            <span className="text-sm font-extrabold text-[#4E3B36]">
+            <span className="text-sm font-extrabold text-[#2F2926]">
               {xp} XP
             </span>
 
@@ -358,7 +358,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
                 ✦
               </span>
 
-              <h2 className="font-extrabold text-[#4E3B36]">
+              <h2 className="font-extrabold text-[#2F2926]">
                 {t("companionShop.accessoriesTitle")}
               </h2>
 

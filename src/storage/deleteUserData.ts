@@ -4,11 +4,11 @@ import {
   query,
   where,
   writeBatch,
-  deleteField,
   type WriteBatch,
 } from "firebase/firestore";
 import { deleteUser } from "firebase/auth";
-import { db, auth } from "../firebase";
+import { db } from "../firebaseFirestore";
+import { auth } from "../firebaseAuth";
 
 export async function deleteAllUserData(): Promise<void> {
   const user = auth.currentUser;
@@ -58,7 +58,24 @@ export async function deleteAllUserData(): Promise<void> {
 
   const chatsSnapshot = await getDocs(chatsQuery);
 
-  // 4–6. Preparar operações e executá-las em lotes seguros.
+  // 4. Procurar denúncias e bloqueios criados pelo utilizador.
+  // Estes documentos também contêm identificadores pessoais e devem ser
+  // removidos quando o utilizador elimina a própria conta.
+  const reportsQuery = query(
+    collection(db, "reports"),
+    where("reporterId", "==", uid)
+  );
+  const blocksQuery = query(
+    collection(db, "blocks"),
+    where("blockerId", "==", uid)
+  );
+
+  const [reportsSnapshot, blocksSnapshot] = await Promise.all([
+    getDocs(reportsQuery),
+    getDocs(blocksQuery),
+  ]);
+
+  // 5–7. Preparar operações e executá-las em lotes seguros.
   // Firestore limita cada batch a 500 operações; 400 deixa margem para
   // futuras alterações e impede que a eliminação falhe com contas grandes.
   const operations: Array<(batch: WriteBatch) => void> = [];
@@ -92,17 +109,27 @@ export async function deleteAllUserData(): Promise<void> {
     });
   });
 
+  reportsSnapshot.forEach(reportDoc => queueDelete(reportDoc.ref));
+  blocksSnapshot.forEach(blockDoc => queueDelete(blockDoc.ref));
+
   for (const chatDoc of chatsSnapshot.docs) {
+    const data = chatDoc.data();
+    const deletingOwnedChat = data.authorId === uid;
     const messagesSnapshot = await getDocs(collection(db, "chats", chatDoc.id, "messages"));
     messagesSnapshot.forEach(messageDoc => {
-      if (messageDoc.data().senderId === uid) queueDelete(messageDoc.ref);
+      // When removing an owned chat, delete its full message subcollection.
+      // Firestore does not cascade subcollection deletes with the parent doc.
+      if (deletingOwnedChat || messageDoc.data().senderId === uid) {
+        queueDelete(messageDoc.ref);
+      }
     });
-
-    const data = chatDoc.data();
     const participants = Array.isArray(data.participants) ? data.participants : [];
     const remainingParticipants = participants.filter((participant: unknown) => participant !== uid);
 
-    if (remainingParticipants.length === 0) {
+    // O campo authorId identifica estruturalmente o autor da conversa e as
+    // regras não permitem alterá-lo. Se o autor apagar a conta, remover o
+    // chat inteiro evita deixar uma conversa sem autor válido.
+    if (remainingParticipants.length === 0 || data.authorId === uid) {
       queueDelete(chatDoc.ref);
       continue;
     }
@@ -112,7 +139,6 @@ export async function deleteAllUserData(): Promise<void> {
       lastMessage: "",
       lastMessageAt: null,
     };
-    if (data.authorId === uid) updates.authorId = deleteField();
     queueUpdate(chatDoc.ref, updates);
   }
 

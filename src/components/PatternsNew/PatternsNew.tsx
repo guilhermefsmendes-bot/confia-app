@@ -48,7 +48,7 @@ function PatternsNew({
   })();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FFF9F4] via-[#FAF5F0] to-[#F3ECE5] p-5 pb-12">
+    <div className="min-h-screen bg-gradient-to-b from-[#FFF9F4] via-[#F7F5F2] to-[#F3ECE5] p-5 pb-12">
 
       <button type="button"
         onClick={onBack}

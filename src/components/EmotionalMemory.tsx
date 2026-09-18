@@ -33,7 +33,7 @@ export default function EmotionalMemory({
   if (values.length < 3) {
     return (
       <div className="bg-[#F8F1EA] rounded-3xl p-5 shadow-sm">
-        <h3 className="font-bold text-[#4E3B36] mb-2">
+        <h3 className="font-bold text-[#2F2926] mb-2">
           🧠 {t("emotionalMemoryTitle")}
         </h3>
 
@@ -117,7 +117,7 @@ export default function EmotionalMemory({
       : null;
   return (
     <div className="bg-[#F8F1EA] rounded-3xl p-5 shadow-sm">
-      <h3 className="font-bold text-[#4E3B36] mb-3">
+      <h3 className="font-bold text-[#2F2926] mb-3">
         🧠 {t("emotionalMemoryTitle")}
       </h3>
 

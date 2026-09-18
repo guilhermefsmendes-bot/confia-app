@@ -1,11 +1,7 @@
-import {
-  getLastCompanionShownMessage,
-} from "./data/reactive/companionBrain";
-import { buildCompanionCrossMemory } from "./data/reactive/companionBrain";
-import { collectCompanionData } from "./data/companionData";
-import { buildCompanionLongitudinalImpulseMemory } from "./data/reactive/companionBrain";
-import { buildCompanionLongitudinalMoodMemory } from "./data/reactive/companionBrain";
-import React, { lazy, Suspense, useState, useEffect, useRef } from 'react';
+import { emitCompanionBrainEvent } from "./data/reactive/companionBrain/companionBrainEvents";
+import React, { lazy, Suspense, useState, useEffect, useRef, useMemo } from 'react';
+import { AppHeader } from "./components/layout/AppHeader";
+import { MainNavigation } from "./components/layout/MainNavigation";
 import {
   motion,
   AnimatePresence } from 'motion/react';
@@ -30,25 +26,26 @@ import {
   ChartNoAxesCombined,
   Backpack,
   Store,
-  Settings
+  Settings,
+  EyeOff
 } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n";
-import { collection, addDoc, onSnapshot, serverTimestamp, doc, updateDoc, arrayUnion, arrayRemove, increment, deleteDoc } from "firebase/firestore";
-import { db, auth, signInAnonymously } from "./firebase";
-import { initAnonymousAuth } from "./firebaseAuth";
+import { auth, initAnonymousAuth } from "./firebaseAuth";
 
-import { createWeeklyTrophy } from "./storage/weeklyTrophies";
-import { deleteAllUserData } from "./storage/deleteUserData";
-import { initLanguage } from "./i18n/language";
 
-import HomeProgressSummary from "./components/HomeProgressSummary";
+
+import { initLanguage, setLanguage } from "./i18n/language";
+
+const HomeProgressSummary = lazy(() => import("./components/HomeProgressSummary"));
+import { useDailyOpenState } from "./hooks/useDailyOpenState";
+import { getLocalCalendarDate } from "./utils/date";
 
 const PersonalMap = lazy(() => import("./components/PersonalMap"));
 const PersonalExperiments = lazy(() => import("./components/PersonalExperiments"));
-import ConfiaCompanionHome from "./components/Companheiro/ConfiaCompanionHome";
-import DailyCheckIn from "./components/DailyCheckIn/DailyCheckIn";
-import Companion from "./components/Companheiro/Companion";
+const ConfiaCompanionHome = lazy(() => import("./components/Companheiro/ConfiaCompanionHome"));
+const DailyCheckIn = lazy(() => import("./components/DailyCheckIn/DailyCheckIn"));
+const Companion = lazy(() => import("./components/Companheiro/Companion"));
 const InnerCanvas = lazy(() => import("./components/InnerCanvas/InnerCanvas"));
 const PatternsNew = lazy(() => import("./components/PatternsNew/PatternsNew"));
 const HabitAssessment = lazy(() => import("./components/PatternsNew/HabitAssessment"));
@@ -65,14 +62,19 @@ const StopMode = lazy(() => import("./components/StopMode").then(m => ({ default
 const CommunityChat = lazy(() => import("./components/CommunityChat").then(m => ({ default: m.CommunityChat })));
 const TriageModal = lazy(() => import("./components/TriageModal").then(m => ({ default: m.TriageModal })));
 const AbracoTimer = lazy(() => import("./components/AbracoTimer").then(m => ({ default: m.AbracoTimer })));
+const BlindVent = lazy(() => import("./components/BlindVent"));
+const MicroHabitCard = lazy(() => import("./components/MicroHabits/MicroHabitCard"));
+const InvisibleAchievements = lazy(() => import("./components/InvisibleAchievements/InvisibleAchievements"));
+const CatastrophicThoughtTranslator = lazy(() => import("./components/CatastrophicThoughtTranslator"));
+const PredictiveMoodCurve = lazy(() => import("./components/PredictiveMoodCurve"));
+const AdvancedWellbeingTools = lazy(() => import("./components/AdvancedWellbeingTools"));
 
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
-import { syncPersonalEventsFromLegacySources, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle, PERSONAL_EVENTS_UPDATED_EVENT } from "./data/personal";
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 
-import {
-  analyzeReactiveState,
-} from "./data/reactive/reactiveEngine";
+import type { ReactiveResult } from "./data/reactive/reactiveTypes";
+import type { PersonalInsight } from "./data/personal/personalInsights";
+type HomeCompanionBrainDecision = ReturnType<typeof import("./data/reactive/companionBrain/homeDecision").getHomeCompanionBrainDecision>;
 import {
   recordReactiveResponse,
 } from "./data/reactive/reactiveHistoryStorage";
@@ -84,15 +86,6 @@ import {
 
 import { hasCompletedToday } from "./storage/dailyCheckInStorage";
 
-import {
-  buildCompanionBrainContext,
-  evaluateCompanionContext,
-  hasRecentCompanionBrainEvent,
-  countRecentCompanionBrainEvents,
-} from "./data/reactive/companionBrain";
-
-import { emitCompanionBrainEvent } from "./data/reactive/companionBrain";
-import { getRecentCompanionBrainEvents } from "./data/reactive/companionBrain";
 const STORAGE_KEYS = {
   AVATAR: 'confia_avatar_v2',
   OBJECTIVES: 'confia_objectives_v2',
@@ -103,7 +96,7 @@ const STORAGE_KEYS = {
   LAST_PET_DATE: 'confia_last_pet_date_v2',
   LAST_IMPULSE_USE: 'confia_last_impulse_use_v1',
   IMPULSE_COUNT: 'confia_impulse_count_v1',
-  LAST_APP_OPEN_DATE: 'confia_last_app_open_date_v1',
+  MICRO_HABIT_XP_DATE: 'confia_micro_habit_xp_date_v1',
 };
 
 function readStoredJson<T>(key: string, fallback: T): T {
@@ -139,154 +132,28 @@ const { t, i18n } = useTranslation();
  * a própria sessão.
  */
 
-const getLocalCalendarDate = () => {
-  const now = new Date();
-
-  const year =
-    now.getFullYear();
-
-  const month =
-    String(now.getMonth() + 1).padStart(2, "0");
-
-  const day =
-    String(now.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
-const getCalendarDaysDifference = (
-  previousDate: string | null,
-  currentDate: string
-) => {
-  if (!previousDate) {
-    return undefined;
-  }
-
-  const previousParts =
-    previousDate.split("-").map(Number);
-
-  const currentParts =
-    currentDate.split("-").map(Number);
-
-  if (
-    previousParts.length !== 3 ||
-    currentParts.length !== 3 ||
-    previousParts.some(Number.isNaN) ||
-    currentParts.some(Number.isNaN)
-  ) {
-    return undefined;
-  }
-
-  const previousUtc = Date.UTC(
-    previousParts[0],
-    previousParts[1] - 1,
-    previousParts[2]
-  );
-
-  const currentUtc = Date.UTC(
-    currentParts[0],
-    currentParts[1] - 1,
-    currentParts[2]
-  );
-
-  const dayMs =
-    24 * 60 * 60 * 1000;
-
-  return Math.max(
-    0,
-    Math.round(
-      (currentUtc - previousUtc) / dayMs
-    )
-  );
-};
-
-const [dailyOpenState] = useState(() => {
-  const appOpenDate =
-    getLocalCalendarDate();
-
-  const previousAppOpenDate =
-    localStorage.getItem(
-      STORAGE_KEYS.LAST_APP_OPEN_DATE
-    );
-
-  const isFirstAppOpenToday =
-    previousAppOpenDate !== appOpenDate;
-
-  const daysSincePreviousAppOpen =
-    getCalendarDaysDifference(
-      previousAppOpenDate,
-      appOpenDate
-    );
-
-  return {
-    appOpenDate,
-    previousAppOpenDate,
-    isFirstAppOpenToday,
-    daysSincePreviousAppOpen,
-  };
-});
-
 const {
   appOpenDate,
   previousAppOpenDate,
   isFirstAppOpenToday,
   daysSincePreviousAppOpen,
-} = dailyOpenState;
-
-/**
- * A escrita acontece depois do commit.
- *
- * O segundo getItem funciona como proteção adicional para:
- * - StrictMode;
- * - efeitos repetidos;
- * - escrita já efetuada por esta própria montagem.
- */
-useEffect(() => {
-  if (!isFirstAppOpenToday) {
-    return;
-  }
-
-  const storedDate =
-    localStorage.getItem(
-      STORAGE_KEYS.LAST_APP_OPEN_DATE
-    );
-
-  if (storedDate === appOpenDate) {
-    return;
-  }
-
-  localStorage.setItem(
-    STORAGE_KEYS.LAST_APP_OPEN_DATE,
-    appOpenDate
-  );
-}, [
-  appOpenDate,
-  isFirstAppOpenToday,
-]);
+} = useDailyOpenState();
 
 /* CONFIA 3A — FIM DO ESTADO DIÁRIO */
 
 
 
- useEffect(() => {
-    signInAnonymously(auth).catch((error) => {
-      console.error("Erro na autenticação anónima:", error);
-    });
-  }, []);
-const changeAppLanguage = (lang: string) => {
-    localStorage.setItem("confia_language", lang);
-    i18n.changeLanguage(lang);
+const changeAppLanguage = (lang: "pt" | "en" | "es" | "fr") => {
+    setLanguage(lang);
 };
 
 useEffect(() => {
     initLanguage();
 }, []);
 useEffect(() => {
-  try {
-    syncPersonalEventsFromLegacySources();
-  } catch {
-    // O modelo pessoal é complementar e nunca deve bloquear a Home.
-  }
+  void import("./data/personal").then(({ syncPersonalEventsFromLegacySources }) => {
+    try { syncPersonalEventsFromLegacySources(); } catch { /* complementar */ }
+  });
 }, []);
 useEffect(() => {
   initAnonymousAuth().catch((error) => {
@@ -338,7 +205,7 @@ useEffect(() => {
 
 
 const [objectives, setObjectives] = useState<Objective[]>(() => {
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalCalendarDate();
 
   const parsed = readStoredJson<{ date?: string; items?: Objective[] } | Objective[] | null>(STORAGE_KEYS.OBJECTIVES, null);
 
@@ -375,23 +242,26 @@ return parsed.items
   });
 
   const [personalEventRevision, setPersonalEventRevision] = useState(0);
+  const [personalDiscovery, setPersonalDiscovery] = useState<PersonalInsight | undefined>(undefined);
 
   useEffect(() => {
-    const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
-    window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
-    return () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
-  }, []);
-
-  const personalDiscovery = React.useMemo(() => {
-    const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
-    return insights
-      .filter(insight => insight.status === "consistent" || insight.status === "possible")
-      .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")
-      .sort((a, b) => {
-        const confidence = { high: 3, moderate: 2, low: 1 };
-        const actionability = { high: 3, medium: 2, low: 1 };
-        return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
-      })[0];
+    let cancelled = false;
+    void import("./data/personal").then(({ PERSONAL_EVENTS_UPDATED_EVENT, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle }) => {
+      if (cancelled) return;
+      const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
+      window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+      const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
+      setPersonalDiscovery(insights
+        .filter(insight => insight.status === "consistent" || insight.status === "possible")
+        .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")
+        .sort((a, b) => {
+          const confidence = { high: 3, moderate: 2, low: 1 };
+          const actionability = { high: 3, medium: 2, low: 1 };
+          return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
+        })[0]);
+      return () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+    }).catch(() => { if (!cancelled) setPersonalDiscovery(undefined); });
+    return () => { cancelled = true; };
   }, [ratings, personalEventRevision]);
 
   const [posts, setPosts] = useState<SharePost[]>(() =>
@@ -413,6 +283,7 @@ const [avatarMemoryMessage, setAvatarMemoryMessage] = useState("");
   const [prevLevel, setPrevLevel] = useState(avatar.level);
   const [showSplash, setShowSplash] = useState(true);
 const [showStopMode, setShowStopMode] = useState(false);
+const [showBlindVent, setShowBlindVent] = useState(false);
 const [showCommunityTerms, setShowCommunityTerms] = useState(false);
 
 // Chat privado da comunidade
@@ -440,7 +311,7 @@ const [showDailyCheckIn, setShowDailyCheckIn] = useState(
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 2800);
+    }, 1600);
     return () => clearTimeout(timer);
   }, []);
 
@@ -498,7 +369,7 @@ const isEarlyLearning =
  * Reutiliza o mesmo modelo de memória do sistema reativo.
  * Não persiste nada e não cria uma segunda fonte de verdade.
  */
-const homeCompanionRelationalMemory = (() => {
+const homeCompanionRelationalMemory = useMemo(() => {
   if (
     currentTab !== 0 ||
     homeScreen !== "home"
@@ -511,16 +382,23 @@ const homeCompanionRelationalMemory = (() => {
   } catch {
     return null;
   }
-})();
+}, [
+  currentTab,
+  homeScreen,
+  ratings,
+  objectives,
+  weeklyGoal,
+  avatar.xp,
+]);
 
 
-const homeNowMemory = (() => {
+const homeNowMemory = useMemo(() => {
   if (currentTab !== 0 || homeScreen !== "home") {
     return null;
   }
 
   try {
-    const memory = collectReactiveRecentMemory();
+    const memory = homeCompanionRelationalMemory;
 
     const effectiveImpulse =
       memory?.recentEffectiveImpulse ?? null;
@@ -663,7 +541,14 @@ const homeNowMemory = (() => {
      */
     return null;
   }
-})();
+}, [
+  currentTab,
+  homeScreen,
+  ratings,
+  objectives,
+  weeklyGoal,
+  avatar.xp,
+]);
 
 
 /**
@@ -675,15 +560,29 @@ const homeNowMemory = (() => {
  * - balão;
  * - expressão visual.
  */
-const homeReactiveResult = (() => {
+const [homeReactiveResult, setHomeReactiveResult] =
+  useState<ReactiveResult | null>(null);
+
+useEffect(() => {
+  let cancelled = false;
+
   if (currentTab !== 0 || homeScreen !== "home") {
-    return null;
+    setHomeReactiveResult(null);
+    return () => { cancelled = true; };
   }
 
-  return analyzeReactiveState({
-    source: "general",
-  });
-})();
+  import("./data/reactive/reactiveEngine")
+    .then(({ analyzeReactiveState }) => {
+      if (!cancelled) {
+        setHomeReactiveResult(analyzeReactiveState({ source: "general" }));
+      }
+    })
+    .catch(() => {
+      if (!cancelled) setHomeReactiveResult(null);
+    });
+
+  return () => { cancelled = true; };
+}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp]);
 
 
 const homeNowAction = (() => {
@@ -1204,15 +1103,15 @@ const handleHomeNowAction = () => {
       return;
     }
 
-    const reactiveResult = analyzeReactiveState({
-      source: "mood",
-    });
+    import("./data/reactive/reactiveEngine")
+      .then(({ analyzeReactiveState }) => {
+        const reactiveResult = analyzeReactiveState({ source: "mood" });
+        if (reactiveResult?.response?.translationKey) {
+          setReactiveMessageKey(reactiveResult.response.translationKey);
+        }
+      })
+      .catch(() => setReactiveMessageKey(null));
 
-    if (reactiveResult?.response?.translationKey) {
-      setReactiveMessageKey(
-        reactiveResult.response.translationKey
-      );
-    }
   }, [currentTab, homeScreen, ratings]);
 
   /**
@@ -1227,45 +1126,21 @@ const handleHomeNowAction = () => {
   useEffect(() => {
     if (currentTab !== 1) return;
 
-    const objectiveReactiveResult =
-      analyzeReactiveState({
-        source: "objective",
-      });
+    import("./data/reactive/reactiveEngine")
+      .then(({ analyzeReactiveState }) => {
+        const objectiveReactiveResult = analyzeReactiveState({ source: "objective" });
+        if (objectiveReactiveResult.situation === "no_data") {
+          setReactiveMessageKey(null);
+          return;
+        }
+        setReactiveMessageKey(objectiveReactiveResult?.response?.translationKey ?? null);
+      })
+      .catch(() => setReactiveMessageKey(null));
 
-    /**
-     * Silêncio inteligente.
-     *
-     * "no_data" é uma situação válida para o motor
-     * global da CONFIA, mas não representa uma
-     * descoberta relevante dentro dos Objetivos.
-     *
-     * Portanto:
-     *
-     * - improving   -> mostrar
-     * - declining   -> mostrar
-     * - consistent  -> mostrar
-     * - no_data     -> silêncio
-     */
-    if (
-      objectiveReactiveResult.situation === "no_data"
-    ) {
-      setReactiveMessageKey(null);
-      return;
-    }
-
-    if (
-      objectiveReactiveResult?.response?.translationKey
-    ) {
-      setReactiveMessageKey(
-        objectiveReactiveResult.response.translationKey
-      );
-    } else {
-      setReactiveMessageKey(null);
-    }
   }, [currentTab, objectivesHistory]);
 
 const [selectedDate, setSelectedDate] = useState(
-  new Date().toISOString().split('T')[0]
+  getLocalCalendarDate()
 );
   // Save states to localStorage on changes
   useEffect(() => {
@@ -1276,7 +1151,7 @@ const [selectedDate, setSelectedDate] = useState(
    localStorage.setItem(
   STORAGE_KEYS.OBJECTIVES,
   JSON.stringify({
-    date: new Date().toISOString().split("T")[0],
+    date: getLocalCalendarDate(),
     items: objectives
   })
 );
@@ -1297,72 +1172,13 @@ localStorage.setItem(
 
 useEffect(() => {
   let unsubscribe: (() => void) | undefined;
+  let cancelled = false;
 
   const startCommunityListener = async () => {
     try {
-      if (!auth.currentUser) {
-        await signInAnonymously(auth);
-      }
-
-      const postsQuery = collection(db, "posts");
-
-      unsubscribe = onSnapshot(
-        postsQuery,
-        (snapshot) => {
-      const firestorePosts: SharePost[] = snapshot.docs
-.map(doc => {
-const data = doc.data();
-const userId = auth.currentUser?.uid;
-
-let userReaction: "yellow" | "green" | "red" | undefined;
-
-if (userId) {
-  if (Array.isArray(data.yellowLikedBy) && data.yellowLikedBy.includes(userId)) {
-    userReaction = "yellow";
-  } else if (Array.isArray(data.greenLikedBy) && data.greenLikedBy.includes(userId)) {
-    userReaction = "green";
-  } else if (Array.isArray(data.redLikedBy) && data.redLikedBy.includes(userId)) {
-    userReaction = "red";
-  }
-}
-
-return {
-  id: doc.id,
-  authorId: data.authorId || "",
-  userName: data.userName || "Guardião Anon",
-  feeling: data.feeling || "Calmo",
-  message: data.message || "",
-  timestamp: data.createdAt
-    ? data.createdAt.toDate().toLocaleString("pt-PT")
-    : t("justNow"),
-
-  yellowLikes: data.yellowLikes || 0,
-  greenLikes: data.greenLikes || 0,
-  redLikes: data.redLikes || 0,
-
-  redLikedBy: Array.isArray(data.redLikedBy)
-    ? data.redLikedBy
-    : [],
-
-  userReaction
-};
-})
-.sort((a, b) => {
-const dateA = snapshot.docs.find(doc => doc.id === a.id)?.data().createdAt;
-const dateB = snapshot.docs.find(doc => doc.id === b.id)?.data().createdAt;
-
-if (!dateA || !dateB) return 0;
-
-return dateB.toMillis() - dateA.toMillis();
-});
-
-  setPosts(firestorePosts);
-    },
-    (error) => {
-      console.error("Erro ao ouvir comunidade:", error);
-    }
-  );
-
+      const { subscribeToCommunityPosts } = await import("./data/community/communityService");
+      if (cancelled) return;
+      unsubscribe = subscribeToCommunityPosts(setPosts, t);
     } catch (error) {
       console.error("Erro ao iniciar comunidade:", error);
     }
@@ -1371,9 +1187,10 @@ return dateB.toMillis() - dateA.toMillis();
   startCommunityListener();
 
   return () => {
+    cancelled = true;
     unsubscribe?.();
   };
-}, []);
+}, [t]);
 
 // Check if selected date is already logged
 useEffect(() => {
@@ -1431,141 +1248,27 @@ useEffect(() => {
    * Nesta fase só usamos informação que podemos afirmar
    * com segurança.
    */
-  const homeCompanionBrainDecision = (() => {
-    if (
-      currentTab !== 0 ||
-      homeScreen !== "home"
-    ) {
-      return null;
+  const [homeCompanionBrainDecision, setHomeCompanionBrainDecision] = useState<HomeCompanionBrainDecision>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (currentTab !== 0 || homeScreen !== "home") {
+      setHomeCompanionBrainDecision(null);
+      return () => { cancelled = true; };
     }
-
-    const now = new Date();
-
-    const localToday = [
-      now.getFullYear(),
-      String(now.getMonth() + 1).padStart(2, "0"),
-      String(now.getDate()).padStart(2, "0"),
-    ].join("-");
-
-    /**
-     * Não produzir mensagens temporais sobre hoje
-     * quando o utilizador está a consultar outro dia.
-     */
-    if (selectedDate !== localToday) {
-      return null;
-    }
-
-  const companionCollectedData =
-    collectCompanionData();
-
-    const context =
-      buildCompanionBrainContext({
-      previousShownMessage:
-        getLastCompanionShownMessage(),
-
-        now,
-
-        currentTab,
-        homeScreen,
-
-        /**
-         * A estrutura atual só sabe que o registo
-         * completo do dia foi guardado.
-         */
-        morningCompleted: todayLogged,
-        afternoonCompleted: todayLogged,
-
-        morningRating:
-          todayLogged
-            ? morningRating
+    void import("./data/reactive/companionBrain/homeDecision")
+      .then(({ getHomeCompanionBrainDecision }) => {
+        if (cancelled) return;
+        setHomeCompanionBrainDecision(getHomeCompanionBrainDecision({
+          currentTab, homeScreen, selectedDate, todayLogged, morningRating, afternoonRating, ratings,
+          personalDiscovery: personalDiscovery?.messageKey
+            ? { ...personalDiscovery, messageKey: personalDiscovery.messageKey }
             : undefined,
-
-        afternoonRating:
-          todayLogged
-            ? afternoonRating
-            : undefined,
-
-        /**
-         * Contexto comportamental real vindo da
-         * memória de eventos do Companion Brain.
-         */
-        recentImpulse:
-          hasRecentCompanionBrainEvent(
-            "impulse_completed",
-            30
-          ),
-
-    /**
-     * CONFIA — COMPANION VIVO 8C
-     *
-     * Última interação humana relevante dos
-     * últimos 10 minutos.
-     *
-     * O ID do evento distingue um clique verdadeiro
-     * de um simples render do React.
-     */
-    latestInteractionEvent:
-      getRecentCompanionBrainEvents(10)
-        .filter(event =>
-          event.type === "avatar_tapped" ||
-          event.type === "home_returned"
-        )
-        .sort(
-          (a, b) =>
-            new Date(b.timestamp).getTime() -
-            new Date(a.timestamp).getTime()
-        )[0],
-
-    /**
-     * Janela de memória comportamental da sessão.
-     *
-     * 30 minutos é suficiente para reconhecer
-     * sequências sem transformar acontecimentos
-     * antigos em contexto atual.
-     */
-    recentEvents:
-      getRecentCompanionBrainEvents(30),
-
-    longitudinalMood:
-      buildCompanionLongitudinalMoodMemory(
-        ratings,
-        now
-      ),
-
-    longitudinalImpulse:
-      buildCompanionLongitudinalImpulseMemory(
-        companionCollectedData.impulse,
-        now
-      ),
-
-    crossMemory:
-      buildCompanionCrossMemory(
-        ratings,
-        companionCollectedData.impulse,
-        now
-      ),
-
-    personalDiscovery: personalDiscovery ? {
-      id: personalDiscovery.id,
-      messageKey: personalDiscovery.messageKey ?? "personalInsights.discoveryFallback",
-      messageValues: personalDiscovery.messageValues,
-      confidence: personalDiscovery.confidence,
-      evidenceCount: personalDiscovery.evidenceCount,
-      actionability: personalDiscovery.actionability,
-    } : undefined,
-
-        sessionActivityCount:
-          countRecentCompanionBrainEvents(
-            60
-          ),
-      });
-
-    const decision =
-      evaluateCompanionContext(context);
-
-
-    return decision;
-  })();
+        }));
+      })
+      .catch(() => { if (!cancelled) setHomeCompanionBrainDecision(null); });
+    return () => { cancelled = true; };
+  }, [currentTab, homeScreen, selectedDate, todayLogged, morningRating, afternoonRating, ratings, personalDiscovery]);
 
 // Handle XP increments and level ups
   const addXp = (amount: number) => {
@@ -1599,6 +1302,17 @@ setTimeout(() => {
     });
   };
 
+const handleMicroHabitCompleted = () => {
+  const today = getLocalCalendarDate();
+  try {
+    if (localStorage.getItem(STORAGE_KEYS.MICRO_HABIT_XP_DATE) === today) return;
+    localStorage.setItem(STORAGE_KEYS.MICRO_HABIT_XP_DATE, today);
+  } catch {
+    // If storage is unavailable, still reward the completion for this session.
+  }
+  addXp(1);
+};
+
 const spendXp = (amount: number) => {
   setAvatar(prev => ({
     ...prev,
@@ -1623,7 +1337,7 @@ const handleBuyItem = (item: any) => {
       }
     );
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalCalendarDate();
     const lastPetDate = localStorage.getItem(STORAGE_KEYS.LAST_PET_DATE);
     const petCountStr = localStorage.getItem(STORAGE_KEYS.PET_COUNT);
     let petCount = petCountStr ? parseInt(petCountStr, 10) : 0;
@@ -1694,24 +1408,18 @@ const handleSaveRatings = () => {
   /**
    * Analisar imediatamente o novo estado do utilizador.
    */
-  const reactiveResult = analyzeReactiveState({
-    source: "mood",
-  });
-
-  setReactiveMessageKey(
-    reactiveResult.response.translationKey
-  );
-
-  /**
-   * Esta utilização corresponde a uma resposta realmente
-   * provocada por uma ação explícita do utilizador.
-   */
-  recordReactiveResponse({
-    responseId: reactiveResult.response.id,
-    situation: reactiveResult.situation,
-    intent: reactiveResult.intent,
-    timestamp: new Date().toISOString(),
-  });
+  import("./data/reactive/reactiveEngine")
+    .then(({ analyzeReactiveState }) => {
+      const reactiveResult = analyzeReactiveState({ source: "mood" });
+      setReactiveMessageKey(reactiveResult.response.translationKey);
+      recordReactiveResponse({
+        responseId: reactiveResult.response.id,
+        situation: reactiveResult.situation,
+        intent: reactiveResult.intent,
+        timestamp: new Date().toISOString(),
+      });
+    })
+    .catch(() => setReactiveMessageKey(null));
 };
 
   // Toggle single objective completion
@@ -1734,34 +1442,22 @@ const handleSaveRatings = () => {
              *
              * Não criamos regras editoriais locais.
              */
-            const objectiveReactiveResult =
-              analyzeReactiveState({
-                source: "objective",
-                objectiveCompleted: true,
-              });
+            void import("./data/reactive/reactiveEngine")
+              .then(({ analyzeReactiveState }) => {
+                const objectiveReactiveResult = analyzeReactiveState({
+                  source: "objective",
+                  objectiveCompleted: true,
+                });
+                setReactiveMessageKey(objectiveReactiveResult.response.translationKey);
+                recordReactiveResponse({
+                  responseId: objectiveReactiveResult.response.id,
+                  situation: objectiveReactiveResult.situation,
+                  intent: objectiveReactiveResult.intent,
+                  timestamp: new Date().toISOString(),
+                });
+              })
+              .catch(() => setReactiveMessageKey(null));
 
-            /**
-             * A resposta imediata usa o mesmo estado
-             * reativo já existente na CONFIA.
-             */
-            setReactiveMessageKey(
-              objectiveReactiveResult.response.translationKey
-            );
-
-            /**
-             * Esta resposta foi provocada por uma ação
-             * explícita do utilizador, por isso entra
-             * no histórico/cooldown reativo.
-             */
-            recordReactiveResponse({
-              responseId:
-                objectiveReactiveResult.response.id,
-              situation:
-                objectiveReactiveResult.situation,
-              intent:
-                objectiveReactiveResult.intent,
-              timestamp: new Date().toISOString(),
-            });
           } else {
             // Deduct points/XP if unchecked
             setAvatar(a => ({
@@ -1780,7 +1476,7 @@ const handleSaveRatings = () => {
       });
 
       // Save today's completed objectives count
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = getLocalCalendarDate();
 
       const completedCount = updatedObjectives.filter(
         obj => obj.completed
@@ -1909,10 +1605,13 @@ const handleSaveRatings = () => {
         medalUnlocked &&
         !prev.medalUnlocked
       ) {
-        createWeeklyTrophy(
-          prev.id,
-          prev.title
-        );
+        void import("./storage/weeklyTrophies")
+          .then(({ createWeeklyTrophy }) => {
+            createWeeklyTrophy(prev.id, prev.title);
+          })
+          .catch((error) => {
+            console.error("Erro ao criar troféu semanal:", error);
+          });
       }
 
       return {
@@ -1933,6 +1632,7 @@ const handleSaveRatings = () => {
     if (!confirmed) return;
 
     try {
+      const { deleteAllUserData } = await import("./storage/deleteUserData");
       await deleteAllUserData();
 
       alert(t("deleteDataSuccess"));
@@ -1950,27 +1650,10 @@ const handleSaveRatings = () => {
     setObjectives(prev => prev.filter(o => o.id !== id));
   };
 
-const handleDeleteAllUserData = async () => {
-  const confirmed = window.confirm(
- t("deleteDataConfirm")
-  );
-
-  if (!confirmed) return;
-
-  try {
-    await deleteAllUserData();
-
-    alert(t("deleteDataSuccess"));
-
-    window.location.reload();
-  } catch (error) {
-    console.error("Erro ao apagar os dados:", error);
-    alert(t("deleteDataError"));
-  }
-};
 const handleDeletePost = async (id: string) => {
   try {
-    await deleteDoc(doc(db, "posts", id));
+    const { deleteCommunityPost } = await import("./data/community/communityService");
+    await deleteCommunityPost(id);
 
     setPosts(prev =>
       prev.filter(post => post.id !== id)
@@ -1987,17 +1670,8 @@ const handleReportPost = async (
   reason: string
 ) => {
   try {
-    if (!auth.currentUser) {
-      await signInAnonymously(auth);
-    }
-
-    await addDoc(collection(db, "reports"), {
-      postId: post.id,
-      reportedUserId: post.authorId,
-      reporterId: auth.currentUser!.uid,
-      reason,
-      createdAt: serverTimestamp()
-    });
+    const { reportCommunityPost } = await import("./data/community/communityService");
+    await reportCommunityPost(post, reason);
 
     alert("Obrigado. A denúncia foi enviada para análise.");
 
@@ -2009,17 +1683,8 @@ const handleReportPost = async (
 // Bloquear utilizador
 const handleBlockUser = async (blockedUserId: string) => {
   try {
-    if (!auth.currentUser) {
-      await signInAnonymously(auth);
-    }
-
-    if (auth.currentUser!.uid === blockedUserId) return;
-
-    await addDoc(collection(db, "blocks"), {
-      blockerId: auth.currentUser!.uid,
-      blockedUserId,
-      createdAt: serverTimestamp()
-    });
+    const { blockCommunityUser } = await import("./data/community/communityService");
+    await blockCommunityUser(blockedUserId);
 
     setPosts(prev =>
       prev.filter(post => post.authorId !== blockedUserId)
@@ -2035,37 +1700,12 @@ alert(t("blockError"));
   // Create Community Post
 const handleAddPost = async (feeling: string, message: string) => {
   try {
-    if (!auth.currentUser) {
-      await signInAnonymously(auth);
-    }
+    const { createCommunityPost } = await import("./data/community/communityService");
+    const created = await createCommunityPost(feeling, message);
 
-    const userName = `Guardião Anon_${Math.floor(100 + Math.random() * 900)}`;
-
-    const docRef = await addDoc(collection(db, "posts"), {
-      authorId: auth.currentUser!.uid,
-      userName,
-      feeling,
-      message,
-      yellowLikes: 0,
-      greenLikes: 0,
-      redLikes: 0,
-      yellowLikedBy: [],
-      greenLikedBy: [],
-      redLikedBy: [],
-      createdAt: serverTimestamp()
-    });
-
-const newPost: SharePost = {
-  id: docRef.id,
-  authorId: auth.currentUser!.uid,
-  userName,
-      feeling,
-      message,
+    const newPost: SharePost = {
+      ...created,
       timestamp: t("justNow"),
-      yellowLikes: 0,
-      greenLikes: 0,
-      redLikes: 0,
-      userReaction: undefined
     };
 
     setPosts(prev => [newPost, ...prev]);
@@ -2089,60 +1729,11 @@ const handleLikePost = async (
     if (!user) return;
 
 
-    const postRef = doc(db, "posts", id);
     const post = posts.find(p => p.id === id);
-
     if (!post) return;
 
-    const currentReaction = post.userReaction;
-
-    // Se clicar novamente na mesma reação, remove-a
-    if (currentReaction === reaction) {
-      const field =
-        reaction === "yellow"
-          ? "yellowLikes"
-          : reaction === "green"
-          ? "greenLikes"
-          : "redLikes";
-
-      await updateDoc(postRef, {
-        [field]: increment(-1),
-        [`${reaction}LikedBy`]: arrayRemove(user.uid)
-      });
-
-      return;
-    }
-
-    // Se já tinha outra reação, removemos primeiro essa reação
-    const updates: Record<string, any> = {};
-
-    if (currentReaction === "yellow") {
-      updates.yellowLikes = increment(-1);
-      updates.yellowLikedBy = arrayRemove(user.uid);
-    }
-
-    if (currentReaction === "green") {
-      updates.greenLikes = increment(-1);
-      updates.greenLikedBy = arrayRemove(user.uid);
-    }
-
-    if (currentReaction === "red") {
-      updates.redLikes = increment(-1);
-      updates.redLikedBy = arrayRemove(user.uid);
-    }
-
-    // Adiciona a nova reação
-    const newField =
-      reaction === "yellow"
-        ? "yellowLikes"
-        : reaction === "green"
-        ? "greenLikes"
-        : "redLikes";
-
-    updates[newField] = increment(1);
-    updates[`${reaction}LikedBy`] = arrayUnion(user.uid);
-
-    await updateDoc(postRef, updates);
+    const { reactToCommunityPost } = await import("./data/community/communityService");
+    await reactToCommunityPost(id, reaction, post.userReaction);
 
   } catch (error) {
     console.error("Erro ao atualizar reação:", error);
@@ -2157,8 +1748,8 @@ const handleOpenChat = (post: SharePost) => {
 // Visual text helper for slider values (0-10)
 
 const getRatingLabel = (val: number) => {
-    if (val <= 2) return { text: t("moodVeryAgitated"), emoji: '🥺', color: 'text-[#C97B5E]' };
-    if (val <= 4) return { text: t("moodRestless"), emoji: '😐', color: 'text-[#C97B5E]' };
+    if (val <= 2) return { text: t("moodVeryAgitated"), emoji: '🥺', color: 'text-[#934A38]' };
+    if (val <= 4) return { text: t("moodRestless"), emoji: '😐', color: 'text-[#934A38]' };
     if (val <= 6) return { text: t("moodStable"), emoji: '🙂', color: 'text-[#8B5C4D]' };
     if (val <= 8) return { text: t("moodCalm"), emoji: '🌿', color: 'text-[#8B5C4D]' };
     return { text: t("moodVeryCalm"), emoji: '✨', color: 'text-[#8B5C4D]' };
@@ -2166,7 +1757,7 @@ const getRatingLabel = (val: number) => {
 
 return (
     <Suspense fallback={<ScreenLoading label={t("loading")} />}>
-    <div className="min-h-screen bg-[#FAF5F0] flex flex-col antialiased text-[#4E3B36]">
+    <div className="confia-app min-h-screen flex flex-col antialiased">
 {showDailyCheckIn && (
   <DailyCheckIn
     onComplete={() => {
@@ -2196,7 +1787,7 @@ className="flex items-center justify-center w-24 h-24 relative"
       <motion.div
         animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
         transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-        className="absolute inset-0 rounded-full border-2 border-[#E5A88B]/30"
+        className="absolute inset-0 rounded-full border-2 border-[#B85F48]/30"
       />
 <img
   src="/images/confia-icon.png"
@@ -2209,7 +1800,7 @@ className="flex items-center justify-center w-24 h-24 relative"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.8 }}
-      className="text-2xl font-black text-[#4E3B36] font-display tracking-tight"
+      className="text-2xl font-black text-[#2F2926] font-display tracking-tight"
     >
       Confia
     </motion.h2>
@@ -2217,29 +1808,10 @@ className="flex items-center justify-center w-24 h-24 relative"
 </motion.div>
 )}
       </AnimatePresence>
-  {/* App Top Brand Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5A88B]/15 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-<img
-  src="/images/confia-icon.png"
-  alt="Confia"
-  className="w-10 h-10 rounded-2xl shadow-md"
-/>
-          <h1 className="text-xl font-black tracking-tight bg-gradient-to-r from-[#E5A88B] to-[#C97B5E] bg-clip-text text-transparent font-display">
-            Confia
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          {/* Level badge quick indicator */}
-          <div className="flex items-center gap-1.5 bg-[#FFF8F4] text-[#C97B5E] px-3 py-1.5 rounded-xl border border-[#E5A88B]/20 text-xs font-bold font-mono">
-            <Sparkles size={13} strokeWidth={1.9} className="text-[#E5A88B]" />
-            {t("level")} {avatar.level}
-          </div>
-        </div>
-      </header>
+      <AppHeader avatar={avatar} />
 
       {/* Main Content Stage */}
-      <main className="flex-1 pb-24 px-4 max-w-lg mx-auto w-full pt-4">
+      <main className="confia-main flex-1 pb-28 px-4 sm:px-6 w-full pt-5 sm:pt-7">
 {currentTab === 0 && homeScreen === "home" && (
           <div
               key="main-menu"
@@ -2307,13 +1879,13 @@ className="flex items-center justify-center w-24 h-24 relative"
     <div className="relative px-5 pb-4 pt-5">
       <div
         aria-hidden="true"
-        className="absolute left-5 top-0 h-px w-10 bg-[#E5A88B]/45"
+        className="absolute left-5 top-0 h-px w-10 bg-[#B85F48]/45"
       />
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38]">
         {t("homeSpace.title")}
       </p>
 
-      <p className="mt-1 text-[11px] font-semibold text-slate-400">
+      <p className="mt-1 text-[11px] font-semibold text-[var(--cf-muted)]">
         {t("homeSpace.subtitle")}
       </p>
     </div>
@@ -2323,7 +1895,7 @@ className="flex items-center justify-center w-24 h-24 relative"
       <button
         type="button"
         onClick={() => setHomeScreen("companion")}
-        className="relative w-full overflow-hidden flex items-center justify-between gap-4 rounded-[24px] border border-[#E5A88B]/20 bg-gradient-to-br from-white via-white to-[#FFF3EC] px-4 py-4 text-left shadow-[0_8px_22px_rgba(92,64,52,0.055)] transition-colors duration-200 active:bg-[#FFF8F4]"
+        className="relative w-full overflow-hidden flex items-center justify-between gap-4 rounded-[24px] border border-[#B85F48]/20 bg-gradient-to-br from-white via-white to-[#FFF3EC] px-4 py-4 text-left shadow-[0_8px_22px_rgba(92,64,52,0.055)] transition-colors duration-200 active:bg-[#FFF8F4]"
       >
         <div
           aria-hidden="true"
@@ -2331,20 +1903,20 @@ className="flex items-center justify-center w-24 h-24 relative"
         />
 
         <div className="relative flex min-w-0 items-center gap-3.5">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#E5A88B]/15 bg-gradient-to-br from-[#FFF8F4] to-[#F3E2D8] shadow-[0_5px_14px_rgba(92,64,52,0.04)]">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#B85F48]/15 bg-gradient-to-br from-[#FFF8F4] to-[#F3E2D8] shadow-[0_5px_14px_rgba(92,64,52,0.04)]">
             <Sparkles
               size={19}
               strokeWidth={1.8}
-              className="text-[#C97B5E]"
+              className="text-[#934A38]"
             />
           </div>
 
           <div className="min-w-0">
-            <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+            <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#934A38]">
               CONFIA
             </p>
 
-            <p className="mt-0.5 text-sm font-black text-[#4E3B36]">
+            <p className="mt-0.5 text-sm font-black text-[#2F2926]">
               {t("companion")}
             </p>
           </div>
@@ -2352,7 +1924,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
         <span
           aria-hidden="true"
-          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#E5A88B]/15 bg-white/90 text-base font-light text-[#C97B5E] shadow-sm"
+          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#B85F48]/15 bg-white/90 text-base font-light text-[#934A38] shadow-sm"
         >
           →
         </span>
@@ -2379,11 +1951,11 @@ className="flex items-center justify-center w-24 h-24 relative"
         }}
         className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
       >
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#B85F48]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
           <ChartNoAxesCombined
             size={16}
             strokeWidth={1.8}
-            className="text-[#C97B5E]"
+            className="text-[#934A38]"
           />
         </div>
 
@@ -2398,11 +1970,11 @@ className="flex items-center justify-center w-24 h-24 relative"
         onClick={() => setHomeScreen("inventory")}
         className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
       >
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#B85F48]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
           <Backpack
             size={16}
             strokeWidth={1.8}
-            className="text-[#C97B5E]"
+            className="text-[#934A38]"
           />
         </div>
 
@@ -2417,11 +1989,11 @@ className="flex items-center justify-center w-24 h-24 relative"
         onClick={() => setHomeScreen("shop")}
         className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
       >
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#E5A88B]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#B85F48]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
           <Store
             size={16}
             strokeWidth={1.8}
-            className="text-[#C97B5E]"
+            className="text-[#934A38]"
           />
         </div>
 
@@ -2433,13 +2005,13 @@ className="flex items-center justify-center w-24 h-24 relative"
 
     {/* Inteligência pessoal — descoberta e experimentação */}
     <div className="mt-3 grid grid-cols-2 gap-2 px-3">
-      <button type="button" onClick={() => setHomeScreen("map")} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#E5A88B]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white"><Compass size={17} className="text-[#C97B5E]" /></div>
-        <div><span className="block text-[10px] font-black uppercase tracking-wide text-[#C97B5E]">CONFIA</span><span className="text-xs font-bold text-[#6D5A53]">{t("personalMap.title")}</span></div>
+      <button type="button" onClick={() => setHomeScreen("map")} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#B85F48]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white"><Compass size={17} className="text-[#934A38]" /></div>
+        <div><span className="block text-[10px] font-black uppercase tracking-wide text-[#934A38]">CONFIA</span><span className="text-xs font-bold text-[#6D5A53]">{t("personalMap.title")}</span></div>
       </button>
-      <button type="button" onClick={() => setHomeScreen("experiments")} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#E5A88B]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white"><Sparkles size={17} className="text-[#C97B5E]" /></div>
-        <div><span className="block text-[10px] font-black uppercase tracking-wide text-[#C97B5E]">CONFIA</span><span className="text-xs font-bold text-[#6D5A53]">{t("experiments.title")}</span></div>
+      <button type="button" onClick={() => setHomeScreen("experiments")} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#B85F48]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white"><Sparkles size={17} className="text-[#934A38]" /></div>
+        <div><span className="block text-[10px] font-black uppercase tracking-wide text-[#934A38]">CONFIA</span><span className="text-xs font-bold text-[#6D5A53]">{t("experiments.title")}</span></div>
       </button>
     </div>
 
@@ -2448,7 +2020,7 @@ className="flex items-center justify-center w-24 h-24 relative"
       <button
         type="button"
         onClick={() => setHomeScreen("settings")}
-        className="flex w-full items-center justify-end gap-1.5 px-1 py-3.5 text-slate-400 transition-colors duration-200 active:text-[#C97B5E]"
+        className="flex w-full items-center justify-end gap-1.5 px-1 py-3.5 text-[var(--cf-muted)] transition-colors duration-200 active:text-[#934A38]"
       >
         <Settings
           size={13}
@@ -2480,7 +2052,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 {dailyContext &&
  dailyContext.state !== "first_contact" && (
   <section
-    className="relative mt-4 overflow-hidden rounded-[30px] border border-[#E5A88B]/20 bg-gradient-to-br from-[#FFF8F3] via-white to-[#FFFDFB] px-5 py-4 shadow-[0_12px_32px_rgba(92,64,52,0.055)]"
+    className="relative mt-4 overflow-hidden rounded-[30px] border border-[#B85F48]/20 bg-gradient-to-br from-[#FFF8F3] via-white to-[#FFFDFB] px-5 py-4 shadow-[0_12px_32px_rgba(92,64,52,0.055)]"
     aria-label={t("dailyMoment.eyebrow")}
   >
     {/* detalhe atmosférico — CSS puro */}
@@ -2491,24 +2063,24 @@ className="flex items-center justify-center w-24 h-24 relative"
 
     <div
       aria-hidden="true"
-      className="absolute left-0 top-5 h-14 w-[3px] rounded-r-full bg-gradient-to-b from-[#E5A88B]/70 to-[#E5A88B]/15"
+      className="absolute left-0 top-5 h-14 w-[3px] rounded-r-full bg-gradient-to-b from-[#B85F48]/70 to-[#B85F48]/15"
     />
 
     <div className="relative flex items-start gap-3.5">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/20 bg-white/90 shadow-sm">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/20 bg-white/90 shadow-sm">
         <Sparkles
           size={18}
           strokeWidth={1.8}
-          className="text-[#C97B5E]"
+          className="text-[#934A38]"
         />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
           {t("dailyMoment.eyebrow")}
         </p>
 
-        <h2 className="mt-1 text-[15px] font-black leading-snug text-[#4E3B36]">
+        <h2 className="mt-1 text-[15px] font-black leading-snug text-[#2F2926]">
           {dailyContext.state === "return_after_absence"
             ? t("dailyMoment.return.title")
             : dailyContext.state === "first_today"
@@ -2540,7 +2112,7 @@ className="flex items-center justify-center w-24 h-24 relative"
         {dailyContext.state === "return_after_absence" &&
          typeof dailyContext.daysSincePreviousOpen === "number" &&
          dailyContext.daysSincePreviousOpen >= 2 && (
-          <div className="mt-3 inline-flex items-center rounded-full border border-[#E5A88B]/15 bg-white/80 px-3 py-1.5">
+          <div className="mt-3 inline-flex items-center rounded-full border border-[#B85F48]/15 bg-white/80 px-3 py-1.5">
             <span className="text-[9px] font-bold text-[#9A7567]">
               {t("dailyMoment.return.days", {
                 count: dailyContext.daysSincePreviousOpen,
@@ -2560,9 +2132,9 @@ className="flex items-center justify-center w-24 h-24 relative"
           <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-[#E8DDD7]/45 bg-white/45 px-3.5 py-2.5">
             <div
               aria-hidden="true"
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#E5A88B]/20 bg-[#FFF9F5]"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#B85F48]/20 bg-[#FFF9F5]"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#C97B5E]/70" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#934A38]/70" />
             </div>
 
             <div className="min-w-0">
@@ -2631,8 +2203,8 @@ className="flex items-center justify-center w-24 h-24 relative"
         ====================================================== */}
         {dailyContext.state === "first_today" &&
          dailyContext.daysSincePreviousOpen === 1 && (
-          <div className="mt-3 rounded-2xl border border-[#E5A88B]/15 bg-gradient-to-r from-[#FFF9F5]/80 to-white/70 px-3.5 py-3">
-            <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#C97B5E]">
+          <div className="mt-3 rounded-2xl border border-[#B85F48]/15 bg-gradient-to-r from-[#FFF9F5]/80 to-white/70 px-3.5 py-3">
+            <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#934A38]">
               {t("dailyMoment.continuityReturn.eyebrow")}
             </p>
 
@@ -2683,14 +2255,14 @@ className="flex items-center justify-center w-24 h-24 relative"
          dailyContext.suggestedAction === homeNowAction.kind && (
           <div className="mt-4 border-t border-[#E8DDD7]/60 pt-3">
             {/* CONFIA 3D — AÇÃO INTELIGENTE DO DIA */}
-            <p className="text-[9px] font-bold leading-relaxed text-slate-400">
+            <p className="text-[9px] font-bold leading-relaxed text-[var(--cf-muted)]">
               {t("dailyMoment.actionHint")}
             </p>
 
             <button
               type="button"
               onClick={handleHomeNowAction}
-              className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-2xl border border-[#E5A88B]/20 bg-white/85 px-4 py-2 text-[10px] font-black text-[#C97B5E] shadow-[0_5px_16px_rgba(92,64,52,0.045)] transition-[transform,opacity,background-color] active:scale-[0.98] active:opacity-75"
+              className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-2xl border border-[#B85F48]/20 bg-white/85 px-4 py-2 text-[10px] font-black text-[#934A38] shadow-[0_5px_16px_rgba(92,64,52,0.045)] transition-[transform,opacity,background-color] active:scale-[0.98] active:opacity-75"
             >
               <span>
                 {t(homeNowAction.actionKey)}
@@ -2714,27 +2286,27 @@ className="flex items-center justify-center w-24 h-24 relative"
   <>
   {homeNowMemory?.kind === "impulseLearning" &&
   !homeNowAction && (
-  <div className="mt-4 overflow-hidden rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC] shadow-[0_10px_30px_rgba(92,64,52,0.06)]">
+  <div className="mt-4 overflow-hidden rounded-[28px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC] shadow-[0_10px_30px_rgba(92,64,52,0.06)]">
     <div className="px-5 pt-5 pb-4">
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/20 bg-white">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/20 bg-white">
           <Sparkles
             size={18}
             strokeWidth={1.8}
-            className="text-[#C97B5E]"
+            className="text-[#934A38]"
           />
         </div>
 
         <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#934A38]">
             {t("impulseLearning.eyebrow")}
           </p>
 
-          <h3 className="mt-1 text-base font-black leading-tight text-[#4E3B36]">
+          <h3 className="mt-1 text-base font-black leading-tight text-[#2F2926]">
             {t("impulseLearning.title")}
           </h3>
 
-          <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-500">
+          <p className="mt-2 text-xs font-semibold leading-relaxed text-[var(--cf-text-soft)]">
             {t("impulseLearning.description", {
               count: homeNowMemory.effectiveCount,
               reduction:
@@ -2751,18 +2323,18 @@ className="flex items-center justify-center w-24 h-24 relative"
       {homeNowMemory.need && (
         <div className="mt-4 flex items-center justify-between gap-3 rounded-[20px] border border-[#E8DDD7]/60 bg-white/80 px-4 py-3">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">
+            <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[var(--cf-muted)]">
               {t("impulseLearning.patternLabel")}
             </p>
 
-            <p className="mt-1 text-sm font-black text-[#4E3B36]">
+            <p className="mt-1 text-sm font-black text-[#2F2926]">
               {t(
                 `impulsePremium.${homeNowMemory.need}Title`
               )}
             </p>
           </div>
 
-          <div className="rounded-full bg-[#FFF3EC] px-3 py-1.5 text-[9px] font-black text-[#C97B5E]">
+          <div className="rounded-full bg-[#FFF3EC] px-3 py-1.5 text-[9px] font-black text-[#934A38]">
             {t("impulseLearning.observed", {
               count: homeNowMemory.needCount,
             })}
@@ -2770,7 +2342,7 @@ className="flex items-center justify-center w-24 h-24 relative"
         </div>
       )}
 
-      <p className="mt-3 text-[10px] font-semibold leading-relaxed text-slate-400">
+      <p className="mt-3 text-[10px] font-semibold leading-relaxed text-[var(--cf-muted)]">
         {t("impulseLearning.disclaimer")}
       </p>
     </div>
@@ -2779,35 +2351,35 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 {isFirstContact && (
   <section
-    className={`relative mt-4 overflow-hidden rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC] p-5 shadow-[0_10px_28px_rgba(92,64,52,0.05)] ${
+    className={`relative mt-4 overflow-hidden rounded-[28px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC] p-5 shadow-[0_10px_28px_rgba(92,64,52,0.05)] ${
       homeNowAction ? "rounded-b-[22px]" : ""
     }`}
     aria-label={t("firstContactInsight.eyebrow")}
   >
     <div
       aria-hidden="true"
-      className="absolute left-0 top-6 h-12 w-[3px] rounded-r-full bg-[#E5A88B]/55"
+      className="absolute left-0 top-6 h-12 w-[3px] rounded-r-full bg-[#B85F48]/55"
     />
 
     <div className="flex items-start gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/15 bg-white shadow-sm">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/15 bg-white shadow-sm">
         <Sparkles
           size={18}
           strokeWidth={1.8}
-          className="text-[#C97B5E]"
+          className="text-[#934A38]"
         />
       </div>
 
       <div className="min-w-0">
-        <p className="text-xs font-black uppercase tracking-wider text-[#C97B5E] font-display">
+        <p className="text-xs font-black uppercase tracking-wider text-[#934A38] font-display">
           {t("firstContactInsight.eyebrow")}
         </p>
 
-        <h3 className="mt-1.5 text-sm font-black leading-snug text-[#4E3B36]">
+        <h3 className="mt-1.5 text-sm font-black leading-snug text-[#2F2926]">
           {t("firstContactInsight.title")}
         </h3>
 
-        <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-slate-500">
+        <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[var(--cf-text-soft)]">
           {t("firstContactInsight.text")}
         </p>
       </div>
@@ -2843,23 +2415,23 @@ className="flex items-center justify-center w-24 h-24 relative"
                   type="button"
                   onClick={() => setShowDayRatingPanel((current) => !current)}
                   aria-expanded={showDayRatingPanel}
-                  className="w-full flex items-center justify-between gap-4 border-t border-[#E5A88B]/10 px-5 py-4 text-left transition-colors duration-200 active:bg-[#FFF9F5]"
+                  className="w-full flex items-center justify-between gap-4 border-t border-[#B85F48]/10 px-5 py-4 text-left transition-colors duration-200 active:bg-[#FFF9F5]"
                 >
                   <div className="flex min-w-0 items-center gap-3.5">
-                    <div className="w-11 h-11 shrink-0 rounded-2xl border border-[#E5A88B]/15 bg-gradient-to-br from-[#FFF5EF] to-[#F8EAE2] flex items-center justify-center shadow-[0_5px_14px_rgba(92,64,52,0.04)]">
+                    <div className="w-11 h-11 shrink-0 rounded-2xl border border-[#B85F48]/15 bg-gradient-to-br from-[#FFF5EF] to-[#F8EAE2] flex items-center justify-center shadow-[0_5px_14px_rgba(92,64,52,0.04)]">
                       <Calendar
                         size={19}
                         strokeWidth={1.8}
-                        className="text-[#C97B5E]"
+                        className="text-[#934A38]"
                       />
                     </div>
 
                     <div className="min-w-0">
-                      <h3 className="text-sm font-black text-[#4E3B36] font-display">
+                      <h3 className="text-sm font-black text-[#2F2926] font-display">
                         {t("classifyDay")}
                       </h3>
 
-                      <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 font-semibold">
+                      <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--cf-text-soft)] font-semibold">
                         {t("wellbeingDescription")}
                       </p>
                     </div>
@@ -2867,18 +2439,18 @@ className="flex items-center justify-center w-24 h-24 relative"
 
                   <span
                     aria-hidden="true"
-                    className="shrink-0 w-8 h-8 rounded-full border border-[#E5A88B]/15 bg-white flex items-center justify-center text-[#C97B5E] text-lg font-light shadow-sm"
+                    className="shrink-0 w-8 h-8 rounded-full border border-[#B85F48]/15 bg-white flex items-center justify-center text-[#934A38] text-lg font-light shadow-sm"
                   >
                     {showDayRatingPanel ? "−" : "+"}
                   </span>
                 </button>
 
                 {showDayRatingPanel && (
-                  <div className="border-t border-[#E5A88B]/10 bg-[#FFFCFA]/70 px-5 pb-5 pt-4 space-y-5">
+                  <div className="border-t border-[#B85F48]/10 bg-[#FFFCFA]/70 px-5 pb-5 pt-4 space-y-5">
 
                     {/* Data */}
                     <div className="space-y-2">
-                      <label className="text-[11px] font-bold text-[#4E3B36]">
+                      <label className="text-[11px] font-bold text-[#2F2926]">
                         {t("recordDate")}
                       </label>
 
@@ -2886,20 +2458,20 @@ className="flex items-center justify-center w-24 h-24 relative"
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] font-bold text-[#4E3B36]"
+                        className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#B85F48] focus:ring-2 focus:ring-[#B85F48]/15 bg-[#F7F5F2] font-bold text-[#2F2926]"
                       />
                     </div>
 
                     {/* Manhã */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-3">
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-[#C97B5E]">
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-[#934A38]">
                           <Sun size={15} strokeWidth={1.8} />
                           {t("morning")}
                         </span>
 
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-[#4E3B36]">
+                          <span className="text-sm font-black text-[#2F2926]">
                             {morningRating}
                           </span>
 
@@ -2919,10 +2491,10 @@ className="flex items-center justify-center w-24 h-24 relative"
                         step="1"
                         value={morningRating}
                         onChange={(e) => setMorningRating(Number(e.target.value))}
-                        className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#E5A88B]"
+                        className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#B85F48]"
                       />
 
-                      <div className="flex justify-between text-[9px] text-slate-400 font-bold">
+                      <div className="flex justify-between text-[9px] text-[var(--cf-muted)] font-bold">
                         <span>0 · {t("difficult")}</span>
                         <span>10 · {t("peaceful")}</span>
                       </div>
@@ -2931,13 +2503,13 @@ className="flex items-center justify-center w-24 h-24 relative"
                     {/* Tarde */}
                     <div className="space-y-2 pt-1">
                       <div className="flex items-center justify-between gap-3">
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-[#C97B5E]">
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-[#934A38]">
                           <Moon size={15} strokeWidth={1.8} />
                           {t("afternoon")}
                         </span>
 
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-[#4E3B36]">
+                          <span className="text-sm font-black text-[#2F2926]">
                             {afternoonRating}
                           </span>
 
@@ -2957,10 +2529,10 @@ className="flex items-center justify-center w-24 h-24 relative"
                         step="1"
                         value={afternoonRating}
                         onChange={(e) => setAfternoonRating(Number(e.target.value))}
-                        className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#E5A88B]"
+                        className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-[#B85F48]"
                       />
 
-                      <div className="flex justify-between text-[9px] text-slate-400 font-bold">
+                      <div className="flex justify-between text-[9px] text-[var(--cf-muted)] font-bold">
                         <span>0 · {t("difficult")}</span>
                         <span>10 · {t("peaceful")}</span>
                       </div>
@@ -2968,7 +2540,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
                     {/* Nota opcional */}
                     <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-[#4E3B36]">
+                      <label className="text-[11px] font-bold text-[#2F2926]">
                         {t("dailyNote")}
                       </label>
 
@@ -2978,7 +2550,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                         value={noteText}
                         onChange={(e) => setNoteText(e.target.value)}
                         maxLength={100}
-                        className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] font-bold text-[#4E3B36]"
+                        className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#B85F48] focus:ring-2 focus:ring-[#B85F48]/15 bg-[#F7F5F2] font-bold text-[#2F2926]"
                       />
                     </div>
 
@@ -3005,7 +2577,7 @@ className="flex items-center justify-center w-24 h-24 relative"
       <button
         type="button"
         onClick={() => setHomeScreen("innerCanvas")}
-        className="relative w-full overflow-hidden rounded-[24px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#4E3B36] via-[#6E5148] to-[#9A6758] px-4 py-4 text-left shadow-[0_10px_26px_rgba(78,59,54,0.16)] transition-transform active:scale-[0.99]"
+        className="relative w-full overflow-hidden rounded-[24px] border border-[#B85F48]/25 bg-gradient-to-br from-[#2F2926] via-[#6E5148] to-[#9A6758] px-4 py-4 text-left shadow-[0_10px_26px_rgba(78,59,54,0.16)] transition-transform active:scale-[0.99]"
       >
         <div
           aria-hidden="true"
@@ -3111,7 +2683,7 @@ className="flex items-center justify-center w-24 h-24 relative"
           setHomeScreen("home");
         }}
         aria-label={t("back")}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E8DDD7]/80 bg-white text-[#C97B5E] shadow-sm transition-transform active:scale-95"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E8DDD7]/80 bg-white text-[#934A38] shadow-sm transition-transform active:scale-95"
       >
         <ArrowLeft
           size={18}
@@ -3120,11 +2692,11 @@ className="flex items-center justify-center w-24 h-24 relative"
       </button>
 
       <div className="min-w-0">
-        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#934A38]">
           {t("homeProgress.eyebrow")}
         </p>
 
-        <h2 className="text-lg font-black tracking-tight text-[#4E3B36]">
+        <h2 className="text-lg font-black tracking-tight text-[#2F2926]">
           {t("homeProgress.evolutionTitle")}
         </h2>
       </div>
@@ -3222,7 +2794,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
           setHomeScreen("home");
         }}
-        className="mb-4 text-xs font-bold text-[#C97B5E]"
+        className="mb-4 text-xs font-bold text-[#934A38]"
       >
         ← {t("back")}
       </button>
@@ -3280,83 +2852,83 @@ className="flex items-center justify-center w-24 h-24 relative"
         type="button"
         onClick={() => setHomeScreen("home")}
         aria-label={t("back")}
-        className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C97B5E]"
+        className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-lg shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#934A38]"
       >
         ←
       </button>
 
-      <h2 className="text-xl font-black text-[#4E3B36]">
+      <h2 className="text-xl font-black text-[#2F2926]">
         {t("settings")}
       </h2>
     </div>
 
 {/* Idioma */}
-  <div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm mb-4">
-    <h3 className="text-sm font-black text-[#4E3B36] mb-1">
+  <div className="bg-white border border-[#B85F48]/20 rounded-3xl p-5 shadow-sm mb-4">
+    <h3 className="text-sm font-black text-[#2F2926] mb-1">
       {t("language")}
     </h3>
 
-    <p className="text-xs text-slate-500 leading-relaxed mb-4">
+    <p className="text-xs text-[var(--cf-text-soft)] leading-relaxed mb-4">
       {t("chooseLanguage")}
     </p>
 
     <div className="grid grid-cols-2 gap-2">
       <button type="button"
         onClick={() => changeAppLanguage("pt")}
-        className="py-3 rounded-2xl border border-[#E5A88B]/30 bg-[#FFF0E8] text-[#C97B5E] font-black text-xs"
+        className="py-3 rounded-2xl border border-[#B85F48]/30 bg-[#F3E3DC] text-[#934A38] font-black text-xs"
       >
         🇵🇹 Português
       </button>
 
       <button type="button"
         onClick={() => changeAppLanguage("en")}
-        className="py-3 rounded-2xl border border-slate-200 bg-white text-[#4E3B36] font-black text-xs"
+        className="py-3 rounded-2xl border border-slate-200 bg-white text-[#2F2926] font-black text-xs"
       >
         🇬🇧 English
       </button>
 
       <button type="button"
         onClick={() => changeAppLanguage("es")}
-        className="py-3 rounded-2xl border border-slate-200 bg-white text-[#4E3B36] font-black text-xs"
+        className="py-3 rounded-2xl border border-slate-200 bg-white text-[#2F2926] font-black text-xs"
       >
         🇪🇸 Español
       </button>
 
       <button type="button"
         onClick={() => changeAppLanguage("fr")}
-        className="py-3 rounded-2xl border border-slate-200 bg-white text-[#4E3B36] font-black text-xs"
+        className="py-3 rounded-2xl border border-slate-200 bg-white text-[#2F2926] font-black text-xs"
       >
         🇫🇷 Français
       </button>
     </div>
   </div>
 
-<div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm mb-4">
+<div className="bg-white border border-[#B85F48]/20 rounded-3xl p-5 shadow-sm mb-4">
 
 
 
-<h3 className="text-sm font-black text-[#4E3B36] mb-1">
+<h3 className="text-sm font-black text-[#2F2926] mb-1">
     {t("communityTerms")}
   </h3>
 
-  <p className="text-xs text-slate-500 leading-relaxed mb-4">
+  <p className="text-xs text-[var(--cf-text-soft)] leading-relaxed mb-4">
     {t("communityGuidelinesShort")}
   </p>
 
   <button type="button"
     onClick={() => setShowCommunityTerms(true)}
-    className="w-full py-3.5 rounded-2xl bg-[#FFF0E8] border border-[#E5A88B]/30 text-[#C97B5E] font-black text-xs uppercase tracking-wide"
+    className="w-full py-3.5 rounded-2xl bg-[#F3E3DC] border border-[#B85F48]/30 text-[#934A38] font-black text-xs uppercase tracking-wide"
   >
     {t("communityTermsButton")}
   </button>
 
 </div>
     <div className="bg-white border border-red-100 rounded-3xl p-5 shadow-sm">
-      <h3 className="text-sm font-black text-[#4E3B36] mb-1">
+      <h3 className="text-sm font-black text-[#2F2926] mb-1">
         {t("deleteMyData")}
       </h3>
 
-      <p className="text-xs text-slate-500 leading-relaxed mb-4">
+      <p className="text-xs text-[var(--cf-text-soft)] leading-relaxed mb-4">
         {t("deleteMyDataDescription")}
       </p>
 
@@ -3391,13 +2963,13 @@ className="flex items-center justify-center w-24 h-24 relative"
 
       <div className="flex items-center justify-between mb-5">
 
-        <h2 className="text-xl font-black text-[#4E3B36]">
+        <h2 className="text-xl font-black text-[#2F2926]">
           {t("communityGuidelines")}
         </h2>
 
         <button type="button"
           onClick={() => setShowCommunityTerms(false)}
-          className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-slate-500"
+          className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-[var(--cf-text-soft)]"
           aria-label={t("close")}
         >
           ×
@@ -3411,7 +2983,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
       <button type="button"
         onClick={() => setShowCommunityTerms(false)}
-        className="w-full mt-6 py-3.5 rounded-2xl bg-[#FFF0E8] border border-[#E5A88B]/30 text-[#C97B5E] font-black text-xs uppercase tracking-wide"
+        className="w-full mt-6 py-3.5 rounded-2xl bg-[#F3E3DC] border border-[#B85F48]/30 text-[#934A38] font-black text-xs uppercase tracking-wide"
       >
         {t("close")}
       </button>
@@ -3430,7 +3002,7 @@ className="flex items-center justify-center w-24 h-24 relative"
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <div className="bg-white border border-slate-100/80 rounded-[32px] p-6 shadow-sm">
+              <div className="confia-surface-panel">
 <AbracoTimer
   onAddXp={addXp}
   onRegisterStop={(fn) => {
@@ -3448,19 +3020,19 @@ className="flex items-center justify-center w-24 h-24 relative"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className="bg-white border border-slate-100/80 rounded-[32px] p-6 shadow-sm">
+              <div className="confia-surface-panel">
                 {currentTab === 2 && reactiveMessageKey && (
-                  <section className="mb-4 overflow-hidden rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FFFDFC] shadow-[0_12px_32px_rgba(92,64,52,0.06)]">
+                  <section className="mb-4 overflow-hidden rounded-[28px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FFFDFC] shadow-[0_12px_32px_rgba(92,64,52,0.06)]">
                     <div className="flex items-start gap-3.5 p-5">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/15 bg-white text-[#C97B5E] shadow-sm">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/15 bg-white text-[#934A38] shadow-sm">
                         <Sparkles size={18} strokeWidth={1.8} aria-hidden="true" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">{t("homeNow.eyebrow")}</p>
-                        <p className="mt-1.5 text-sm font-semibold leading-relaxed text-[#4E3B36]">{t(reactiveMessageKey)}</p>
+                        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">{t("homeNow.eyebrow")}</p>
+                        <p className="mt-1.5 text-sm font-semibold leading-relaxed text-[#2F2926]">{t(reactiveMessageKey)}</p>
                       </div>
                     </div>
-                    <div aria-hidden="true" className="h-[3px] w-full bg-gradient-to-r from-[#E5A88B]/10 via-[#C97B5E]/45 to-[#E5A88B]/10" />
+                    <div aria-hidden="true" className="h-[3px] w-full bg-gradient-to-r from-[#B85F48]/10 via-[#934A38]/45 to-[#B85F48]/10" />
                   </section>
                 )}
                 <ObjectivosList
@@ -3487,6 +3059,29 @@ className="flex items-center justify-center w-24 h-24 relative"
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -10 }}
   >
+    <div className="mb-4 rounded-[28px] border border-[#B85F48]/20 bg-white/80 p-4 shadow-sm sm:p-5">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F8E8DF] text-[#A85F45]">
+          <EyeOff size={18} aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#B9785D]">{t("blindVent.eyebrow")}</p>
+          <p className="mt-1 text-sm font-black text-[#2F2926]">{t("blindVent.shortTitle")}</p>
+          <p className="mt-1 text-xs font-semibold leading-5 text-[var(--cf-text-soft)]">{t("blindVent.shortText")}</p>
+        </div>
+      </div>
+      <button type="button" onClick={() => setShowBlindVent(true)} className="mt-3 min-h-11 w-full rounded-2xl border border-[#D9B5A4] bg-[#FFF9F5] px-4 py-3 text-xs font-black text-[#A85F45] transition hover:bg-[#FBEFE9]">
+        {t("blindVent.open")}
+      </button>
+    </div>
+    <MicroHabitCard onCompleted={handleMicroHabitCompleted} />
+    <InvisibleAchievements checkInDays={new Set(ratings.map((rating) => rating.date)).size} completedObjectives={objectives.filter((objective) => objective.completed).length} />
+    <div className="mt-4" />
+    <CatastrophicThoughtTranslator />
+    <div className="mt-4" />
+    <PredictiveMoodCurve ratings={ratings} />
+    <AdvancedWellbeingTools ratings={ratings} objectives={objectives} />
+    <div className="h-3" />
     <ImpulsoSOS onAddXp={addXp} />
   </motion.div>
 )}
@@ -3528,32 +3123,32 @@ className="flex items-center justify-center w-24 h-24 relative"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-[32px] p-7 text-center max-w-sm border border-[#E5A88B]/20 shadow-2xl space-y-4"
+              className="bg-white rounded-[32px] p-7 text-center max-w-sm border border-[#B85F48]/20 shadow-2xl space-y-4"
             >
-              <div className="w-16 h-16 bg-[#FFF0E8] rounded-full flex items-center justify-center mx-auto text-[#C97B5E] animate-bounce">
+              <div className="w-16 h-16 bg-[#F3E3DC] rounded-full flex items-center justify-center mx-auto text-[#934A38] animate-bounce">
                 <Gift size={32} />
               </div>
 <div className="space-y-1.5">
-<h3 className="text-xl font-black text-[#4E3B36] font-display">
+<h3 className="text-xl font-black text-[#2F2926] font-display">
   {t("companionEvolution")}
 </h3>
 
-<p className="text-xs text-slate-500 leading-relaxed font-semibold">
+<p className="text-xs text-[var(--cf-text-soft)] leading-relaxed font-semibold">
   {t("guardianEvolution")}
 </p>
 
-<div className="py-2.5 px-4 bg-[#E5A88B]/15 text-[#C97B5E] border border-[#E5A88B]/30 rounded-2xl text-xs font-black font-display">
+<div className="py-2.5 px-4 bg-[#B85F48]/15 text-[#934A38] border border-[#B85F48]/30 rounded-2xl text-xs font-black font-display">
   {t("levelReached", { level: prevLevel })} 🎉
 </div>
 
-<p className="text-[10px] text-slate-400 font-extrabold font-mono uppercase tracking-wider">
+<p className="text-[10px] text-[var(--cf-muted)] font-extrabold font-mono uppercase tracking-wider">
   {t("extraReward")}
 
               </p>
 </div>
               <button type="button"
             onClick={() => setLevelUpOpen(false)}
-                className="w-full py-3 bg-[#E5A88B] hover:bg-[#D59375] text-white shadow-lg shadow-[#E5A88B]/25 font-black text-xs uppercase tracking-wider font-display rounded-xl cursor-pointer"
+                className="w-full py-3 bg-[#B85F48] hover:bg-[#D59375] text-white shadow-lg shadow-[#B85F48]/25 font-black text-xs uppercase tracking-wider font-display rounded-xl cursor-pointer"
               >
 {t("continueWalking")}
               </button>
@@ -3563,6 +3158,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 
       </AnimatePresence>
+      {showBlindVent && <BlindVent onClose={() => setShowBlindVent(false)} />}
       {showStopMode && (
         <StopMode
           onStartImpulse={() => {
@@ -3578,51 +3174,7 @@ className="flex items-center justify-center w-24 h-24 relative"
         />
       )}
 
-      {/* Global Tab Navigation Footer */}
-      {/* Global Tab Navigation Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#E5A88B]/15 bg-white/95 px-4 pb-[calc(.75rem+env(safe-area-inset-bottom))] pt-3.5 backdrop-blur-md" aria-label={t("mainNavigation") }>
-        <div className="mx-auto flex max-w-lg items-center justify-between">
-          {[
-           { label: t("home"), icon: House, index: 0 },
-           { label: t("hug"), icon: Wind, index: 1 },
-           { label: t("objectives"), icon: Target, index: 2 },
-           { label: t("impulse"), icon: Zap, index: 3 },
-           { label: t("community"), icon: Users, index: 4 }
-          ].map(tab => {
-            const TabIcon = tab.icon;
-
-            return (
-            <button
-              key={tab.index}
-              type="button"
-              aria-current={currentTab === tab.index ? "page" : undefined}
-              className={`flex min-h-11 flex-1 flex-col items-center justify-center rounded-xl py-1 transition-all relative cursor-pointer ${
-                currentTab === tab.index ? 'text-[#C97B5E] font-black' : 'text-slate-400 hover:text-slate-600'
-              }`}
-              onClick={() => {
-  window.dispatchEvent(new Event("stop-background-audio"));
-  setHomeScreen("home");
-  setCurrentTab(tab.index);
-}}
-            >
-              {currentTab === tab.index && (
-                <motion.div
-                  layoutId="active-bar"
-                  className="absolute -top-3 w-10 h-1 rounded-full bg-[#E5A88B]"
-                />
-              )}
-
-              <TabIcon
-                size={20}
-                strokeWidth={currentTab === tab.index ? 2.4 : 1.9}
-                className="mb-1 transition-all duration-300"
-              />
-              <span className="text-[10px] tracking-tight">{tab.label}</span>
-            </button>
-            );
-          })}
-        </div>
-      </footer>
+      <MainNavigation currentTab={currentTab} onNavigate={(index) => { setHomeScreen("home"); setCurrentTab(index); }} />
     </div>
     </Suspense>
   );

@@ -74,8 +74,8 @@ const { t } = useTranslation();
     switch (category) {
       case 'corporeo':
         return {
-          bg: 'bg-[#E5A88B]/10 text-[#C97B5E] border-[#E5A88B]/20',
-          badge: 'bg-[#E5A88B]/10 text-[#C97B5E] border border-[#E5A88B]/20',
+          bg: 'bg-[#B85F48]/10 text-[#934A38] border-[#B85F48]/20',
+          badge: 'bg-[#B85F48]/10 text-[#934A38] border border-[#B85F48]/20',
           icon: <Heart size={14} />,
           label: t("physical")
         };
@@ -88,8 +88,8 @@ const { t } = useTranslation();
         };
       case 'social':
         return {
-          bg: 'bg-[#FFF0E8] text-[#8A5C50] border-[#FFF0E8]',
-          badge: 'bg-[#FFF0E8] text-[#8A5C50] border border-[#E5A88B]/15',
+          bg: 'bg-[#F3E3DC] text-[#8A5C50] border-[#F3E3DC]',
+          badge: 'bg-[#F3E3DC] text-[#8A5C50] border border-[#B85F48]/15',
           icon: <Users size={14} />,
          label: t("social")
         };
@@ -103,8 +103,8 @@ const { t } = useTranslation();
       case 'nutricao':
       default:
         return {
-          bg: 'bg-[#FAF5F0] text-[#7A4E43] border-[#FAF5F0]',
-          badge: 'bg-[#FAF5F0] text-[#7A4E43] border border-[#E5A88B]/15',
+          bg: 'bg-[#F7F5F2] text-[#7A4E43] border-[#F7F5F2]',
+          badge: 'bg-[#F7F5F2] text-[#7A4E43] border border-[#B85F48]/15',
           icon: <Coffee size={14} />,
          label: t("nutrition")
         };
@@ -167,7 +167,7 @@ const { t } = useTranslation();
             className="pointer-events-none fixed left-1/2 top-20 z-50 -translate-x-1/2"
             aria-live="polite"
           >
-            <div className="flex items-center gap-2 rounded-full border border-[#E5A88B]/30 bg-white/95 px-4 py-2.5 text-[#C97B5E] shadow-[0_12px_30px_rgba(92,64,52,0.14)] backdrop-blur-sm">
+            <div className="flex items-center gap-2 rounded-full border border-[#B85F48]/30 bg-white/95 px-4 py-2.5 text-[#934A38] shadow-[0_12px_30px_rgba(92,64,52,0.14)] backdrop-blur-sm">
               <motion.span
                 initial={{
                   rotate: -12,
@@ -181,7 +181,7 @@ const { t } = useTranslation();
                   duration: 0.32,
                   ease: "easeOut"
                 }}
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FFF0E8]"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F3E3DC]"
               >
                 <Sparkles
                   size={14}
@@ -212,9 +212,9 @@ const { t } = useTranslation();
       </AnimatePresence>
 
       {/* 2B — Identidade premium + progresso diário */}
-      <section className="relative overflow-hidden rounded-[30px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFF0E8]/70 p-5 shadow-sm">
+      <section className="relative overflow-hidden rounded-[30px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#F3E3DC]/70 p-5 shadow-sm">
         <div
-          className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#E5A88B]/10 blur-2xl"
+          className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#B85F48]/10 blur-2xl"
           aria-hidden="true"
         />
 
@@ -227,16 +227,16 @@ const { t } = useTranslation();
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="mb-2 flex items-center gap-2">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#E5A88B]/25 bg-white text-[#C97B5E] shadow-sm">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#B85F48]/25 bg-white text-[#934A38] shadow-sm">
                   <Award size={16} strokeWidth={2.2} />
                 </span>
 
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E] font-display">
+                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38] font-display">
                   {t("objectivesPremium.eyebrow")}
                 </span>
               </div>
 
-              <h2 className="text-[22px] font-black leading-tight text-[#4E3B36] font-display">
+              <h2 className="text-[22px] font-black leading-tight text-[#2F2926] font-display">
                 {t("objectivesPremium.title")}
               </h2>
 
@@ -245,8 +245,8 @@ const { t } = useTranslation();
               </p>
             </div>
 
-            <div className="shrink-0 rounded-2xl border border-[#E5A88B]/20 bg-white/85 px-3 py-2 text-right shadow-sm">
-              <div className="text-lg font-black leading-none text-[#4E3B36] font-display">
+            <div className="shrink-0 rounded-2xl border border-[#B85F48]/20 bg-white/85 px-3 py-2 text-right shadow-sm">
+              <div className="text-lg font-black leading-none text-[#2F2926] font-display">
                 {completionPercentage}%
               </div>
 
@@ -263,7 +263,7 @@ const { t } = useTranslation();
                   {t("objectivesPremium.todayProgress")}
                 </p>
 
-                <p className="mt-1 text-sm font-black text-[#4E3B36]">
+                <p className="mt-1 text-sm font-black text-[#2F2926]">
                   {t("completedGoals", {
                     completed: completedCount,
                     total: objectives.length,
@@ -271,7 +271,7 @@ const { t } = useTranslation();
                 </p>
               </div>
 
-              <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-[#E5A88B]/20 bg-[#FFF7F2] px-2.5 py-1.5 text-[#C97B5E]">
+              <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-[#B85F48]/20 bg-[#FFF7F2] px-2.5 py-1.5 text-[#934A38]">
                 <Sparkles size={12} />
 
                 <AnimatePresence mode="wait" initial={false}>
@@ -313,7 +313,7 @@ const { t } = useTranslation();
                   duration: 0.45,
                   ease: "easeOut"
                 }}
-                className="h-full rounded-full bg-gradient-to-r from-[#E5A88B] to-[#C97B5E]"
+                className="h-full rounded-full bg-gradient-to-r from-[#B85F48] to-[#934A38]"
               />
             </div>
 
@@ -322,7 +322,7 @@ const { t } = useTranslation();
                 {t("objectivesPremium.progressHint")}
               </span>
 
-              <span className="shrink-0 text-[10px] font-black text-[#C97B5E]">
+              <span className="shrink-0 text-[10px] font-black text-[#934A38]">
                 {completedCount}/{objectives.length}
               </span>
             </div>
@@ -334,13 +334,13 @@ const { t } = useTranslation();
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3 px-1">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38]">
               {allObjectivesCompleted
                 ? t("objectivesPremium.completedEyebrow")
                 : t("objectivesPremium.nextStep")}
             </p>
 
-            <h3 className="mt-0.5 text-base font-black text-[#4E3B36] font-display">
+            <h3 className="mt-0.5 text-base font-black text-[#2F2926] font-display">
               {allObjectivesCompleted
                 ? t("objectivesPremium.completedTitle")
                 : t("objectivesPremium.nextStepTitle")}
@@ -350,8 +350,8 @@ const { t } = useTranslation();
           <div
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border ${
               allObjectivesCompleted
-                ? "border-[#E5A88B]/30 bg-[#FFF0E8] text-[#C97B5E]"
-                : "border-[#E5A88B]/20 bg-white text-[#C97B5E] shadow-sm"
+                ? "border-[#B85F48]/30 bg-[#F3E3DC] text-[#934A38]"
+                : "border-[#B85F48]/20 bg-white text-[#934A38] shadow-sm"
             }`}
           >
             {allObjectivesCompleted ? (
@@ -367,10 +367,10 @@ const { t } = useTranslation();
             key={featuredObjective.id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-[28px] border border-[#E5A88B]/30 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FFF0E8] p-5 shadow-md shadow-[#E5A88B]/10"
+            className="relative overflow-hidden rounded-[28px] border border-[#B85F48]/30 bg-gradient-to-br from-[#FFF8F4] via-white to-[#F3E3DC] p-5 shadow-md shadow-[#B85F48]/10"
           >
             <div
-              className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#E5A88B]/10 blur-2xl"
+              className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#B85F48]/10 blur-2xl"
               aria-hidden="true"
             />
 
@@ -381,13 +381,13 @@ const { t } = useTranslation();
                   <span>{featuredCategory.label}</span>
                 </span>
 
-                <span className="inline-flex items-center gap-1 rounded-full border border-[#E5A88B]/15 bg-white px-2.5 py-1 text-[9px] font-black text-[#C97B5E]">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#B85F48]/15 bg-white px-2.5 py-1 text-[9px] font-black text-[#934A38]">
                   <Sparkles size={10} />
                   +{featuredObjective.xpReward} XP
                 </span>
               </div>
 
-              <p className="mt-4 text-[17px] font-black leading-snug text-[#4E3B36] font-display">
+              <p className="mt-4 text-[17px] font-black leading-snug text-[#2F2926] font-display">
                 {t(featuredObjective.text)}
               </p>
 
@@ -400,7 +400,7 @@ const { t } = useTranslation();
                 onClick={() =>
                   handleObjectiveToggle(featuredObjective)
                 }
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E5A88B] to-[#C97B5E] px-4 py-3.5 text-xs font-black text-white shadow-md shadow-[#E5A88B]/20 transition-transform active:scale-[0.98] cursor-pointer"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#B85F48] to-[#934A38] px-4 py-3.5 text-xs font-black text-white shadow-md shadow-[#B85F48]/20 transition-transform active:scale-[0.98] cursor-pointer"
               >
                 <Check size={16} strokeWidth={3} />
                 {t("objectivesPremium.completeStep")}
@@ -408,12 +408,12 @@ const { t } = useTranslation();
             </div>
           </motion.div>
         ) : allObjectivesCompleted ? (
-          <div className="rounded-[28px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] to-[#FFF0E8]/70 p-5 text-center shadow-sm">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E5A88B]/25 bg-white text-[#C97B5E] shadow-sm">
+          <div className="rounded-[28px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF9F5] to-[#F3E3DC]/70 p-5 text-center shadow-sm">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-[#B85F48]/25 bg-white text-[#934A38] shadow-sm">
               <CircleCheckBig size={23} strokeWidth={2.3} />
             </div>
 
-            <p className="mt-3 text-sm font-black text-[#4E3B36]">
+            <p className="mt-3 text-sm font-black text-[#2F2926]">
               {t("objectivesPremium.allDone")}
             </p>
 
@@ -422,7 +422,7 @@ const { t } = useTranslation();
             </p>
           </div>
         ) : (
-          <div className="rounded-[24px] border border-dashed border-[#E5A88B]/25 bg-[#FFF9F5] p-4 text-center">
+          <div className="rounded-[24px] border border-dashed border-[#B85F48]/25 bg-[#FFF9F5] p-4 text-center">
             <p className="text-xs font-semibold text-[#8A7770]">
               {t("objectivesPremium.noObjectives")}
             </p>
@@ -439,12 +439,12 @@ const { t } = useTranslation();
                 {t("objectivesPremium.smallWinsEyebrow")}
               </p>
 
-              <h3 className="mt-0.5 text-base font-black text-[#4E3B36] font-display">
+              <h3 className="mt-0.5 text-base font-black text-[#2F2926] font-display">
                 {t("objectivesPremium.smallWins")}
               </h3>
             </div>
 
-            <span className="shrink-0 rounded-full border border-[#E5A88B]/15 bg-[#FFF8F4] px-2.5 py-1 text-[9px] font-black text-[#A06E5B]">
+            <span className="shrink-0 rounded-full border border-[#B85F48]/15 bg-[#FFF8F4] px-2.5 py-1 text-[9px] font-black text-[#A06E5B]">
               {completedCount}/{objectives.length}
             </span>
           </div>
@@ -463,13 +463,13 @@ const { t } = useTranslation();
                     exit={{ opacity: 0, x: -20 }}
                     className={`group relative overflow-hidden rounded-[22px] border p-3.5 transition-all ${
                       objective.completed
-                        ? "border-[#E5A88B]/20 bg-gradient-to-r from-[#FFF8F4] to-[#FFFDFC]"
-                        : "border-[#EEE5E0] bg-white shadow-sm hover:border-[#E5A88B]/30 hover:shadow-md"
+                        ? "border-[#B85F48]/20 bg-gradient-to-r from-[#FFF8F4] to-[#FFFDFC]"
+                        : "border-[#EEE5E0] bg-white shadow-sm hover:border-[#B85F48]/30 hover:shadow-md"
                     }`}
                   >
                     {objective.completed && (
                       <div
-                        className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-[#E5A88B]"
+                        className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-[#B85F48]"
                         aria-hidden="true"
                       />
                     )}
@@ -487,8 +487,8 @@ const { t } = useTranslation();
                         }
                         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border transition-all cursor-pointer ${
                           objective.completed
-                            ? "border-[#E5A88B] bg-[#E5A88B] text-white shadow-sm shadow-[#E5A88B]/20"
-                            : "border-[#E7DDD7] bg-[#FCFAF8] text-[#B49B90] hover:border-[#E5A88B] hover:bg-[#FFF5F0] hover:text-[#C97B5E]"
+                            ? "border-[#B85F48] bg-[#B85F48] text-white shadow-sm shadow-[#B85F48]/20"
+                            : "border-[#E7DDD7] bg-[#FCFAF8] text-[#B49B90] hover:border-[#B85F48] hover:bg-[#FFF5F0] hover:text-[#934A38]"
                         }`}
                       >
                         {objective.completed ? (
@@ -514,7 +514,7 @@ const { t } = useTranslation();
                           </p>
 
                           {objective.completed && (
-                            <span className="shrink-0 rounded-full bg-[#E5A88B]/10 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-[#C97B5E]">
+                            <span className="shrink-0 rounded-full bg-[#B85F48]/10 px-2 py-1 text-[8px] font-black uppercase tracking-wider text-[#934A38]">
                               {t("objectivesPremium.completedLabel")}
                             </span>
                           )}
@@ -531,7 +531,7 @@ const { t } = useTranslation();
                           <span
                             className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[8px] font-black ${
                               objective.completed
-                                ? "bg-[#FFF0E8] text-[#C97B5E]"
+                                ? "bg-[#F3E3DC] text-[#934A38]"
                                 : "bg-[#FAF6F3] text-[#9B7B6D]"
                             }`}
                           >
@@ -566,10 +566,10 @@ const { t } = useTranslation();
         <button
           type="button"
           onClick={() => setShowForm(true)}
-          className="flex w-full items-center justify-between rounded-[22px] border border-dashed border-[#E5A88B]/25 bg-[#FFFCFA] px-4 py-3.5 text-left transition-all hover:border-[#E5A88B]/45 hover:bg-[#FFF8F4] cursor-pointer"
+          className="flex w-full items-center justify-between rounded-[22px] border border-dashed border-[#B85F48]/25 bg-[#FFFCFA] px-4 py-3.5 text-left transition-all hover:border-[#B85F48]/45 hover:bg-[#FFF8F4] cursor-pointer"
         >
           <span className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-[#E5A88B]/20 bg-white text-[#C97B5E] shadow-sm">
+            <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-[#B85F48]/20 bg-white text-[#934A38] shadow-sm">
               <Plus size={16} />
             </span>
 
@@ -593,10 +593,10 @@ const { t } = useTranslation();
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           onSubmit={handleSubmit}
-          className="rounded-[26px] border border-[#E5A88B]/20 bg-gradient-to-br from-white to-[#FFF9F5] p-5 space-y-4 shadow-md shadow-[#E5A88B]/5"
+          className="rounded-[26px] border border-[#B85F48]/20 bg-gradient-to-br from-white to-[#FFF9F5] p-5 space-y-4 shadow-md shadow-[#B85F48]/5"
         >
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/20 bg-white text-[#C97B5E] shadow-sm">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/20 bg-white text-[#934A38] shadow-sm">
               <Plus size={17} />
             </span>
 
@@ -605,27 +605,27 @@ const { t } = useTranslation();
                 {t("objectivesPremium.yourGoalEyebrow")}
               </p>
 
-              <h3 className="mt-0.5 text-sm font-black text-[#4E3B36]">
+              <h3 className="mt-0.5 text-sm font-black text-[#2F2926]">
                 {t("objectivesPremium.createOwnTitle")}
               </h3>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#4E3B36]">{t("whatToAchieveToday")}</label>
+            <label className="text-xs font-bold text-[#2F2926]">{t("whatToAchieveToday")}</label>
             <input
               type="text"
              placeholder={t("goalPlaceholder")}
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
-              className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#E5A88B] focus:ring-2 focus:ring-[#E5A88B]/15 bg-[#FAF5F0] text-[#4E3B36]"
+              className="w-full px-4 py-3 text-xs border border-slate-200/80 rounded-xl focus:outline-none focus:border-[#B85F48] focus:ring-2 focus:ring-[#B85F48]/15 bg-[#F7F5F2] text-[#2F2926]"
               maxLength={70}
               required
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#4E3B36]">{t("goalCategory")}</label>
+            <label className="text-xs font-bold text-[#2F2926]">{t("goalCategory")}</label>
             <div className="grid grid-cols-4 gap-1.5">
               {(['mental', 'corporeo', 'social', 'nutricao'] as const).map(cat => {
                 const styles = getCategoryStyles(cat);
@@ -636,8 +636,8 @@ const { t } = useTranslation();
                     onClick={() => setNewCategory(cat)}
                     className={`p-2.5 border text-[10px] font-bold rounded-xl flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
                       newCategory === cat
-                        ? 'bg-[#E5A88B] border-[#E5A88B] text-white shadow-md shadow-[#E5A88B]/25'
-                        : 'border-slate-100 hover:border-slate-200 bg-slate-50 text-slate-500'
+                        ? 'bg-[#B85F48] border-[#B85F48] text-white shadow-md shadow-[#B85F48]/25'
+                        : 'border-[var(--cf-border)] hover:border-slate-200 bg-[var(--cf-surface-soft)] text-[var(--cf-text-soft)]'
                     }`}
                   >
                     {styles.icon}
@@ -652,13 +652,13 @@ const { t } = useTranslation();
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="flex-1 py-3 text-xs text-slate-500 hover:bg-slate-50 rounded-xl font-bold border border-slate-200/60 cursor-pointer"
+              className="flex-1 py-3 text-xs text-[var(--cf-text-soft)] hover:bg-[var(--cf-surface-soft)] rounded-xl font-bold border border-slate-200/60 cursor-pointer"
             >
               {t("cancel")}
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 text-xs bg-gradient-to-r from-[#E5A88B] to-[#D59375] hover:from-[#D59375] hover:to-[#C68060] text-white rounded-xl font-bold flex items-center justify-center gap-1 shadow-md shadow-[#E5A88B]/20 cursor-pointer"
+              className="flex-1 py-3 text-xs bg-gradient-to-r from-[#B85F48] to-[#D59375] hover:from-[#D59375] hover:to-[#C68060] text-white rounded-xl font-bold flex items-center justify-center gap-1 shadow-md shadow-[#B85F48]/20 cursor-pointer"
             >
               {t("saveGoal")}
             </button>

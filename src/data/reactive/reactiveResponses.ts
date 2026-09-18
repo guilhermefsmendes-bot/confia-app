@@ -5105,12 +5105,25 @@ export const REACTIVE_RESPONSES: ReactiveResponse[] = [
 ];
 
 
+const RESPONSES_BY_SITUATION = new Map<ReactiveSituation, ReactiveResponse[]>();
+
+for (const item of REACTIVE_RESPONSES) {
+  const bucket = RESPONSES_BY_SITUATION.get(item.situation);
+  if (bucket) {
+    bucket.push(item);
+  } else {
+    RESPONSES_BY_SITUATION.set(item.situation, [item]);
+  }
+}
+
+for (const bucket of RESPONSES_BY_SITUATION.values()) {
+  bucket.sort((a, b) => b.priority - a.priority);
+}
+
 export function getResponsesForSituation(
   situation: ReactiveSituation
 ): ReactiveResponse[] {
-  return REACTIVE_RESPONSES
-    .filter((item) => item.situation === situation)
-    .sort((a, b) => b.priority - a.priority);
+  return RESPONSES_BY_SITUATION.get(situation) ?? [];
 }
 
 

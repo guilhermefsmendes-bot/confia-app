@@ -14,6 +14,7 @@ type Step =
   | "assessment"
   | "questionnaire"
   | "results"
+  | "dashboard"
   | "habits"
   | "evolution"
   | "library"
@@ -60,6 +61,7 @@ if (step === "results") {
   return (
     <PatternResults
       dominant={currentAnalysis.dominant}
+      onContinue={() => setStep("habits")}
     />
   );
 }
@@ -78,12 +80,6 @@ if (step === "dashboard") {
   );
 }
 
-if (step === "evolution") {
-  return <PatternEvolution />;
-}
-if (step === "evolution") {
-  return <PatternEvolution />;
-}
 if (step === "evolution") {
   return <PatternEvolution />;
 }
@@ -158,11 +154,11 @@ if (step === "plan") {
       </button>
 
       <h2 className="text-2xl font-bold">
-t("patterns.plan.title")
+{t("patterns.plan.title")}
       </h2>
 
       <p className="text-[#7A5E57]">
-t("patterns.plan.description")
+{t("patterns.plan.description")}
       </p>
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -190,7 +186,7 @@ return (
         🌱
       </motion.div>
 
-      <h2 className="text-3xl font-black mt-4 text-[#4E3B36]">
+      <h2 className="text-3xl font-black mt-4 text-[#2F2926]">
         {t("patterns.home.title")}
       </h2>
 
@@ -242,11 +238,11 @@ return (
         <div className="flex justify-between items-center">
           <div>
             <div className="font-bold text-lg">
-t("patterns.home.habits.title")
+{t("patterns.home.habits.title")}
             </div>
 
             <div className="text-sm text-[#7A5E57] mt-1">
-t("patterns.home.habits.description")
+{t("patterns.home.habits.description")}
             </div>
           </div>
 
@@ -280,11 +276,11 @@ t("patterns.home.habits.description")
         <div className="flex justify-between items-center">
           <div>
             <div className="font-bold text-lg">
-t("patterns.home.library.title")
+{t("patterns.home.library.title")}
             </div>
 
             <div className="text-sm text-[#7A5E57] mt-1">
-t("patterns.home.library.description")
+{t("patterns.home.library.description")}
             </div>
           </div>
 
@@ -299,11 +295,11 @@ onClick={() => setStep("plan")}
         <div className="flex justify-between items-center">
           <div>
             <div className="font-bold text-lg">
-t("patterns.home.plan.title")
+{t("patterns.home.plan.title")}
             </div>
 
             <div className="text-sm text-[#7A5E57] mt-1">
-t("patterns.home.plan.description")
+{t("patterns.home.plan.description")}
             </div>
           </div>
 

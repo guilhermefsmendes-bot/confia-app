@@ -1,0 +1,193 @@
+:root {
+  --cf-bg: #f7f5f2;
+  --cf-surface: #ffffff;
+  --cf-surface-soft: #fbfaf8;
+  --cf-surface-warm: #fff8f4;
+  --cf-surface-strong: #f1ece8;
+  --cf-primary: #b85f48;
+  --cf-primary-strong: #934a38;
+  --cf-primary-soft: #f3e3dc;
+  --cf-secondary: #5f7f6d;
+  --cf-accent: #c9a56a;
+  --cf-text: #2f2926;
+  --cf-text-soft: #675c57;
+  --cf-muted: #8b817c;
+  --cf-border: #e7e0db;
+  --cf-border-strong: #d8cec7;
+  --cf-success: #3f765f;
+  --cf-warning: #a66d20;
+  --cf-error: #b64d4b;
+  --cf-info: #4e6f91;
+  --cf-radius-sm: 10px;
+  --cf-radius-md: 14px;
+  --cf-radius-lg: 20px;
+  --cf-radius-xl: 28px;
+  --cf-shadow-sm: 0 1px 2px rgb(47 41 38 / .05), 0 4px 14px rgb(47 41 38 / .04);
+  --cf-shadow-md: 0 10px 30px rgb(47 41 38 / .08);
+  --cf-space-1: .25rem;
+  --cf-space-2: .5rem;
+  --cf-space-3: .75rem;
+  --cf-space-4: 1rem;
+  --cf-space-5: 1.25rem;
+  --cf-space-6: 1.5rem;
+  --cf-space-8: 2rem;
+  --cf-space-10: 2.5rem;
+  --cf-space-12: 3rem;
+}
+
+html { background: var(--cf-bg); }
+body {
+  margin: 0;
+  background: var(--cf-bg);
+  color: var(--cf-text);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.confia-app { background:
+  radial-gradient(circle at 12% -8%, rgb(184 95 72 / .07), transparent 28rem),
+  radial-gradient(circle at 88% 10%, rgb(95 127 109 / .055), transparent 24rem),
+  var(--cf-bg); }
+
+.confia-header {
+  background: rgb(255 255 255 / .88);
+  border-bottom: 1px solid rgb(231 224 219 / .9);
+  box-shadow: 0 1px 0 rgb(255 255 255 / .9);
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+.confia-header-inner { width: min(1180px, 100%); gap: 1rem; }
+.confia-brand-mark { box-shadow: 0 5px 16px rgb(47 41 38 / .10); }
+.confia-level-chip {
+  color: var(--cf-primary-strong);
+  background: var(--cf-surface-warm);
+  border: 1px solid #ead5cc;
+}
+
+.confia-main { max-width: 1180px; margin-inline: auto; }
+.confia-main > * { min-width: 0; max-width: 920px; margin-inline: auto; }
+
+.confia-nav { background: transparent; pointer-events: none; }
+.confia-nav-inner {
+  width: min(680px, 100%);
+  min-height: 66px;
+  padding: .4rem .55rem;
+  gap: .25rem;
+  border: 1px solid rgb(231 224 219 / .92);
+  border-radius: 24px;
+  background: rgb(255 255 255 / .92);
+  box-shadow: 0 14px 40px rgb(47 41 38 / .13), 0 2px 8px rgb(47 41 38 / .05);
+  backdrop-filter: blur(20px) saturate(1.12);
+  pointer-events: auto;
+}
+.confia-nav button { color: var(--cf-muted); min-height: 52px; border-radius: 18px; }
+.confia-nav button:hover { background: var(--cf-surface-soft); color: var(--cf-text-soft); }
+.confia-nav-active { color: var(--cf-primary) !important; background: var(--cf-primary-soft); }
+.confia-nav-inactive { color: var(--cf-muted); }
+
+.confia-app button,
+.confia-app input,
+.confia-app textarea,
+.confia-app select { font-family: inherit; }
+.confia-app button { -webkit-tap-highlight-color: transparent; }
+.confia-app button { min-height: 42px; border-color: transparent; transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease; }
+.confia-app button:not(:disabled):hover { filter: brightness(.985); }
+.confia-app button:not(:disabled):active { transform: translateY(1px); }
+.confia-app button:disabled { cursor: not-allowed; opacity: .55; }
+.confia-app img { max-width: 100%; }
+.confia-app img:not([class*="rounded"]):not([class*="avatar"]) { border-radius: var(--cf-radius-lg); }
+.confia-app .bg-white { background-color: var(--cf-surface); }
+.confia-app .bg-slate-50, .confia-app .bg-slate-50\/50 { background-color: var(--cf-surface-soft); }
+.confia-app .text-slate-900, .confia-app .text-slate-800 { color: var(--cf-text); }
+.confia-app .text-slate-700, .confia-app .text-slate-600 { color: var(--cf-text-soft); }
+.confia-app .text-slate-500 { color: var(--cf-text-soft); }
+.confia-app .text-slate-400, .confia-app .text-slate-300 { color: var(--cf-muted); }
+.confia-app .border-slate-100, .confia-app .border-slate-100\/80, .confia-app .border-slate-200 { border-color: var(--cf-border); }
+.confia-app .border-t, .confia-app .border-b { border-color: var(--cf-border); }
+.confia-app [class*="divide-"] > :not([hidden]) ~ :not([hidden]) { border-color: var(--cf-border); }
+.confia-app button:focus-visible,
+.confia-app input:focus-visible,
+.confia-app textarea:focus-visible,
+.confia-app select:focus-visible {
+  outline: 3px solid rgb(184 95 72 / .22);
+  outline-offset: 2px;
+}
+.confia-app input,
+.confia-app textarea,
+.confia-app select {
+  border-radius: var(--cf-radius-md);
+  border-color: var(--cf-border);
+}
+.confia-app input::placeholder,
+.confia-app textarea::placeholder { color: #a39a95; opacity: 1; }
+
+/* Shared visual language for legacy Tailwind surfaces. */
+.confia-app .shadow-sm { box-shadow: var(--cf-shadow-sm); }
+.confia-app .shadow-md { box-shadow: var(--cf-shadow-md); }
+.confia-app .rounded-xl { border-radius: var(--cf-radius-md); }
+.confia-app .rounded-2xl { border-radius: var(--cf-radius-lg); }
+.confia-app .rounded-3xl { border-radius: var(--cf-radius-xl); }
+
+@media (min-width: 768px) {
+  .confia-main { padding-inline: 0; }
+  .confia-main > * { max-width: 920px; }
+  .confia-nav-inner { min-height: 62px; }
+}
+
+@media (max-width: 640px) {
+  .confia-header { padding-inline: 1rem; }
+  .confia-header img { width: 2.5rem; height: 2.5rem; }
+  .confia-main { padding-bottom: calc(7.5rem + env(safe-area-inset-bottom)); }
+  .confia-nav-inner { min-height: 62px; border-radius: 21px; }
+  .confia-nav button { min-height: 50px; border-radius: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confia-nav-inner { backdrop-filter: none; }
+}
+
+.confia-surface-panel {
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-xl);
+  background: rgb(255 255 255 / .88);
+  padding: var(--cf-space-6);
+  box-shadow: var(--cf-shadow-sm);
+}
+.confia-surface-panel > * + * { margin-top: var(--cf-space-5); }
+
+.confia-app .confia-action {
+  min-height: 44px;
+  border-radius: var(--cf-radius-md);
+  font-weight: 800;
+  transition: transform .16s ease, background-color .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.confia-app .confia-action:active { transform: scale(.985); }
+
+
+.confia-card {
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-lg);
+  background: var(--cf-surface);
+  box-shadow: var(--cf-shadow-sm);
+}
+.confia-card-soft {
+  border: 1px solid var(--cf-border);
+  border-radius: var(--cf-radius-lg);
+  background: var(--cf-surface-soft);
+}
+.confia-eyebrow {
+  color: var(--cf-primary-strong);
+  font-size: .625rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.confia-error-screen {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: var(--cf-bg);
+  color: var(--cf-text);
+}

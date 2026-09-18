@@ -86,7 +86,7 @@ const normalAverage =
       </p>
 
 
-      <div className="mt-5 text-3xl font-black text-[#C97B5E]">
+      <div className="mt-5 text-3xl font-black text-[#934A38]">
 
 <div>
   🟢 {t("patterns.dashboard.betterDays")}

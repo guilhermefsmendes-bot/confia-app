@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { collectCompanionData } from "../data/companionData";
+import { getLocalCalendarDate } from "../utils/date";
 
 interface DayData {
   date: string;
@@ -24,7 +25,7 @@ function getLast7Days(): string[] {
     const date = new Date();
     date.setHours(12, 0, 0, 0);
     date.setDate(date.getDate() - i);
-    days.push(date.toISOString().split("T")[0]);
+    days.push(getLocalCalendarDate(date));
   }
 
   return days;
@@ -245,11 +246,11 @@ export default function HomeProgressSummary({
       {/* Identidade */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38]">
             {t("homeToday.title")}
           </p>
 
-          <h3 className="mt-1 text-lg font-black tracking-tight text-[#4E3B36]">
+          <h3 className="mt-1 text-lg font-black tracking-tight text-[#2F2926]">
             {t("homeProgress.title")}
           </h3>
 
@@ -264,23 +265,23 @@ export default function HomeProgressSummary({
       </div>
 
       {/* Leitura principal da CONFIA */}
-      <div className="relative mt-4 overflow-hidden rounded-[22px] border border-[#E5A88B]/20 bg-gradient-to-br from-white via-white to-[#FFF5EF] p-4 shadow-[0_10px_28px_rgba(107,78,67,0.055)]">
+      <div className="relative mt-4 overflow-hidden rounded-[22px] border border-[#B85F48]/20 bg-gradient-to-br from-white via-white to-[#FFF5EF] p-4 shadow-[0_10px_28px_rgba(107,78,67,0.055)]">
         <div
           aria-hidden="true"
-          className="absolute left-0 top-4 h-10 w-[3px] rounded-r-full bg-[#E5A88B]/55"
+          className="absolute left-0 top-4 h-10 w-[3px] rounded-r-full bg-[#B85F48]/55"
         />
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#FFF0E8] text-[#C97B5E]">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#F3E3DC] text-[#934A38]">
             <TrendIcon size={17} />
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[9px] font-black uppercase tracking-[0.15em] text-[#C97B5E]">
+              <p className="text-[9px] font-black uppercase tracking-[0.15em] text-[#934A38]">
                 {t("homeProgress.feedbackTitle")}
               </p>
 
-              <span className="rounded-full bg-[#FAF5F0] px-2 py-0.5 text-[8px] font-bold text-[#8B6F65]">
+              <span className="rounded-full bg-[#F7F5F2] px-2 py-0.5 text-[8px] font-bold text-[#8B6F65]">
                 {t(trendLabelKey)}
               </span>
             </div>
@@ -295,7 +296,7 @@ export default function HomeProgressSummary({
       {/* Indicadores */}
       <div className="mt-4 grid grid-cols-3 gap-2">
         <div className="rounded-[18px] border border-[#E8DDD7]/60 bg-white/70 px-2 py-3 text-center shadow-[0_5px_16px_rgba(92,64,52,0.035)]">
-          <div className="text-lg font-black text-[#4E3B36]">
+          <div className="text-lg font-black text-[#2F2926]">
             {moodText}
           </div>
 
@@ -305,7 +306,7 @@ export default function HomeProgressSummary({
         </div>
 
         <div className="rounded-[18px] border border-[#E8DDD7]/60 bg-white/70 px-2 py-3 text-center shadow-[0_5px_16px_rgba(92,64,52,0.035)]">
-          <div className="text-lg font-black text-[#4E3B36]">
+          <div className="text-lg font-black text-[#2F2926]">
             {analysis.activeDays}/7
           </div>
 
@@ -315,7 +316,7 @@ export default function HomeProgressSummary({
         </div>
 
         <div className="rounded-[18px] border border-[#E8DDD7]/60 bg-white/70 px-2 py-3 text-center shadow-[0_5px_16px_rgba(92,64,52,0.035)]">
-          <div className="text-lg font-black text-[#4E3B36]">
+          <div className="text-lg font-black text-[#2F2926]">
             {objectiveText}
           </div>
 
@@ -330,7 +331,7 @@ export default function HomeProgressSummary({
         <button
           type="button"
           onClick={onOpenProgress}
-          className="group inline-flex min-h-9 items-center gap-2 rounded-xl px-1 text-left text-[10px] font-black text-[#C97B5E] transition-opacity active:opacity-70"
+          className="group inline-flex min-h-9 items-center gap-2 rounded-xl px-1 text-left text-[10px] font-black text-[#934A38] transition-opacity active:opacity-70"
         >
           <span>
             {t("homeProgress.openEvolution")}
@@ -344,7 +345,7 @@ export default function HomeProgressSummary({
           </span>
         </button>
 
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#E5A88B]/15 bg-white/80 px-2.5 py-1.5 text-[9px] font-black tracking-wide text-[#C97B5E]">
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#B85F48]/15 bg-white/80 px-2.5 py-1.5 text-[9px] font-black tracking-wide text-[#934A38]">
           <Sparkles size={11} />
           {analysis.xp} XP
         </span>

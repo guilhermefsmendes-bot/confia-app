@@ -301,8 +301,7 @@ function ConfiaCompanionHome({
     companionReaction &&
     companionReaction.priority < 70
       ? resolveCompanionRelationalAction(
-          companionRelationalExpression?.kind ??
-            companionReaction.kind
+          companionReaction.kind
         )
       : null;
 
@@ -1081,7 +1080,7 @@ function ConfiaCompanionHome({
                 font-black
                 uppercase
                 tracking-[0.2em]
-                text-[#C97B5E]
+                text-[#934A38]
               "
             >
               CONFIA
@@ -1094,7 +1093,7 @@ function ConfiaCompanionHome({
               text-[21px]
               font-black
               tracking-[-0.035em]
-              text-[#4E3B36]
+              text-[#2F2926]
             "
           >
             {t("companion")}
@@ -1119,7 +1118,7 @@ function ConfiaCompanionHome({
           <Sparkles
             size={11}
             strokeWidth={2}
-            className="text-[#C97B5E]"
+            className="text-[#934A38]"
           />
 
           <span
@@ -1140,7 +1139,7 @@ function ConfiaCompanionHome({
       <div className="relative z-20 mx-3 mb-1 flex items-center justify-between rounded-full border border-white/80 bg-white/60 px-3 py-2 shadow-[0_8px_24px_rgba(89,58,45,0.045)] backdrop-blur-md">
         <div className="flex min-w-0 items-center gap-2">
           <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FFF4EC]">
-            <CircleDot size={14} className="text-[#C97B5E]" />
+            <CircleDot size={14} className="text-[#934A38]" />
             <span aria-hidden="true" className={`absolute right-0.5 top-0.5 h-2 w-2 rounded-full ${statusDot} ring-2 ring-white`} />
           </span>
           <div className="min-w-0">
@@ -1318,7 +1317,7 @@ function ConfiaCompanionHome({
             className="
               text-[10px]
               font-black
-              text-[#C97B5E]
+              text-[#934A38]
             "
           >
             {progress}%
@@ -1339,7 +1338,7 @@ function ConfiaCompanionHome({
               rounded-full
               bg-gradient-to-r
               from-[#D99879]
-              via-[#C97B5E]
+              via-[#934A38]
               to-[#B45E4C]
               transition-[width]
               duration-500

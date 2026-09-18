@@ -1,34 +1,26 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
 import {defineConfig} from 'vite';
 
-export default defineConfig(() => {
-  return {
-    plugins: [react(), tailwindcss()],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
-    },
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            react: ['react', 'react-dom'],
-            firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
-            i18n: ['i18next', 'react-i18next'],
-            icons: ['lucide-react'],
-          },
+export default defineConfig(() => ({
+  plugins: [react(), tailwindcss()],
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules[\\/]react(?:-dom)?[\\/]/, priority: 40 },
+            { name: 'firebaseAuth', test: /node_modules[\\/](?:firebase[\\/](?:app|auth)|@firebase[\\/]auth)[\\/]/, priority: 35 },
+            { name: 'firebaseFirestore', test: /node_modules[\\/](?:firebase[\\/]firestore|@firebase[\\/]firestore)[\\/]/, priority: 35 },
+            { name: 'i18n', test: /node_modules[\\/](?:i18next|react-i18next)[\\/]/, priority: 30 },
+            { name: 'icons', test: /node_modules[\\/]lucide-react[\\/]/, priority: 25 },
+          ],
         },
       },
     },
-    server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
-      // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
-    },
-  };
-});
+  },
+  server: {
+    hmr: process.env.DISABLE_HMR !== 'true',
+    watch: process.env.DISABLE_HMR === 'true' ? null : {},
+  },
+}));

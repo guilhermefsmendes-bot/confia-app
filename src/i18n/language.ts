@@ -31,30 +31,38 @@ export const getLanguage = (): LanguagePreference => {
   return "auto";
 };
 
+const syncDocumentLanguage = (language: ConfiaLanguage) => {
+  if (typeof document !== "undefined") {
+    document.documentElement.lang = language;
+  }
+};
+
 export const setLanguage = (
   language: LanguagePreference
 ) => {
   localStorage.setItem(STORAGE_KEY, language);
 
   if (language === "auto") {
-    i18n.changeLanguage(
-      getSupportedDeviceLanguage()
-    );
+    const deviceLanguage = getSupportedDeviceLanguage();
+    i18n.changeLanguage(deviceLanguage);
+    syncDocumentLanguage(deviceLanguage);
     return;
   }
 
   i18n.changeLanguage(language);
+  syncDocumentLanguage(language);
 };
 
 export const initLanguage = () => {
   const saved = getLanguage();
 
   if (saved === "auto") {
-    i18n.changeLanguage(
-      getSupportedDeviceLanguage()
-    );
+    const deviceLanguage = getSupportedDeviceLanguage();
+    i18n.changeLanguage(deviceLanguage);
+    syncDocumentLanguage(deviceLanguage);
     return;
   }
 
   i18n.changeLanguage(saved);
+  syncDocumentLanguage(saved);
 };

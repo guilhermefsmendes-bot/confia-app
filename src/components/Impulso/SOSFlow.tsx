@@ -10,7 +10,7 @@ export default function SOSFlow({ onAddXp }: SOSFlowProps) {
 
   return (
     <div className="bg-white rounded-[32px] p-6 shadow-sm">
-      <h2 className="text-xl font-black text-[#4E3B36]">
+      <h2 className="text-xl font-black text-[#2F2926]">
         Fluxo SOS
       </h2>
 
@@ -18,7 +18,7 @@ export default function SOSFlow({ onAddXp }: SOSFlowProps) {
         Passo atual:
       </p>
 
-      <div className="mt-2 font-bold text-[#C97B5E]">
+      <div className="mt-2 font-bold text-[#934A38]">
         {step}
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { getLocalCalendarDate } from "../utils/date";
+
 export interface DailyCheckInData {
   date: string;
   mood: number;
@@ -37,7 +39,7 @@ export function saveDailyCheckIn(
   need: string
 ): DailyCheckInData {
   const data: DailyCheckInData = {
-    date: new Date().toISOString().split("T")[0],
+    date: getLocalCalendarDate(),
     mood,
     need,
     completed: true,
@@ -71,7 +73,7 @@ export function hasCompletedToday(): boolean {
 
   if (!data) return false;
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getLocalCalendarDate();
 
   return data.date === today && data.completed;
 }

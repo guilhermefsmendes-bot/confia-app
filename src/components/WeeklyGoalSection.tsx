@@ -146,7 +146,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
           </div>
 
           <div>
-            <h3 className="font-extrabold text-[#4E3B36]">
+            <h3 className="font-extrabold text-[#2F2926]">
               {t("weeklyGoal.title")}
             </h3>
 
@@ -165,7 +165,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
             }
             maxLength={20}
             placeholder={t("weeklyGoal.placeholder")}
-            className="w-full rounded-2xl border border-amber-100 bg-white px-4 py-3 text-[#4E3B36] outline-none focus:border-amber-300"
+            className="w-full rounded-2xl border border-amber-100 bg-white px-4 py-3 text-[#2F2926] outline-none focus:border-amber-300"
           />
 
           <div className="mt-1 flex justify-between px-1 text-xs text-[#8A7770]">
@@ -182,7 +182,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
           type="button"
           onClick={handleCreate}
           disabled={!title.trim()}
-          className="w-full rounded-2xl bg-gradient-to-r from-[#E5A88B] to-[#C97B5E] px-4 py-3 font-bold text-white shadow-md shadow-[#E5A88B]/20 disabled:cursor-not-allowed disabled:opacity-40"
+          className="w-full rounded-2xl bg-gradient-to-r from-[#B85F48] to-[#934A38] px-4 py-3 font-bold text-white shadow-md shadow-[#B85F48]/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {t("weeklyGoal.start")}
         </button>
@@ -192,26 +192,26 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
 
   return (
     <>
-      <section className="mt-6 overflow-hidden rounded-[30px] border border-[#E5A88B]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFF3EC] shadow-sm">
+      <section className="mt-6 overflow-hidden rounded-[30px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFF3EC] shadow-sm">
         <div className="relative p-5">
           <div
-            className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#E5A88B]/10 blur-3xl"
+            className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#B85F48]/10 blur-3xl"
             aria-hidden="true"
           />
 
           <div className="relative">
             <div className="flex items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#E5A88B]/25 bg-white text-xl shadow-sm">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/25 bg-white text-xl shadow-sm">
                   {weeklyGoal.medalUnlocked ? "🏅" : "🏆"}
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38]">
                     {t("weeklyGoalPremium.pathEyebrow")}
                   </p>
 
-                  <h3 className="mt-0.5 text-base font-black text-[#4E3B36]">
+                  <h3 className="mt-0.5 text-base font-black text-[#2F2926]">
                     {t("weeklyGoalPremium.pathTitle")}
                   </h3>
 
@@ -221,8 +221,8 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
                 </div>
               </div>
 
-              <div className="shrink-0 rounded-2xl border border-[#E5A88B]/20 bg-white px-3 py-2 text-right shadow-sm">
-                <div className="text-lg font-black leading-none text-[#4E3B36]">
+              <div className="shrink-0 rounded-2xl border border-[#B85F48]/20 bg-white px-3 py-2 text-right shadow-sm">
+                <div className="text-lg font-black leading-none text-[#2F2926]">
                   {progress}/7
                 </div>
 
@@ -248,7 +248,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
                   </p>
                 </div>
 
-                <span className="rounded-full bg-[#FFF0E8] px-2.5 py-1 text-[10px] font-black text-[#C97B5E]">
+                <span className="rounded-full bg-[#F3E3DC] px-2.5 py-1 text-[10px] font-black text-[#934A38]">
                   {weeklyPercentage}%
                 </span>
               </div>
@@ -261,7 +261,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
                   />
 
                   <div
-                    className="absolute left-[7%] top-5 h-1 rounded-full bg-gradient-to-r from-[#E5A88B] to-[#C97B5E] transition-all duration-500"
+                    className="absolute left-[7%] top-5 h-1 rounded-full bg-gradient-to-r from-[#B85F48] to-[#934A38] transition-all duration-500"
                     style={{
                       width: `${
                         progress <= 1
@@ -312,9 +312,9 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
                           <span
                             className={`relative z-10 flex h-10 w-10 max-w-full items-center justify-center rounded-full border text-[11px] font-black transition-all active:scale-95 ${
                               completed
-                                ? "border-[#E5A88B] bg-[#E5A88B] text-white shadow-md shadow-[#E5A88B]/20"
+                                ? "border-[#B85F48] bg-[#B85F48] text-white shadow-md shadow-[#B85F48]/20"
                                 : isToday
-                                  ? "border-[#C97B5E] bg-white text-[#C97B5E] shadow-sm ring-4 ring-[#E5A88B]/10"
+                                  ? "border-[#934A38] bg-white text-[#934A38] shadow-sm ring-4 ring-[#B85F48]/10"
                                   : isMissed
                                     ? "border-[#E8D8D0] bg-[#FBF7F5] text-[#AD9489]"
                                     : "border-[#E8DDD7] bg-white text-[#9B857B]"
@@ -329,7 +329,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
                             )}
 
                             {hasRating && (
-                              <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white bg-[#C97B5E] text-[7px] text-white">
+                              <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white bg-[#934A38] text-[7px] text-white">
                                 ★
                               </span>
                             )}
@@ -338,7 +338,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
                           <span
                             className={`mt-2 text-[8px] font-black uppercase tracking-tight ${
                               isToday
-                                ? "text-[#C97B5E]"
+                                ? "text-[#934A38]"
                                 : completed
                                   ? "text-[#8D746A]"
                                   : "text-[#B09B92]"
@@ -366,7 +366,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
                 </p>
 
                 {!weeklyGoal.medalUnlocked && (
-                  <span className="shrink-0 text-[9px] font-black text-[#C97B5E]">
+                  <span className="shrink-0 text-[9px] font-black text-[#934A38]">
                     {t("weeklyGoalPremium.credits", {
                       count: Math.max(0, 2 - todayCredits)
                     })}
@@ -376,14 +376,14 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
             </div>
 
             {weeklyGoal.medalUnlocked && (
-              <div className="mt-4 rounded-[24px] border border-[#E5A88B]/25 bg-gradient-to-r from-[#FFF0E8] to-[#FFF8F4] p-4">
+              <div className="mt-4 rounded-[24px] border border-[#B85F48]/25 bg-gradient-to-r from-[#F3E3DC] to-[#FFF8F4] p-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm">
                     🏅
                   </div>
 
                   <div>
-                    <p className="text-sm font-black text-[#4E3B36]">
+                    <p className="text-sm font-black text-[#2F2926]">
                       {t("weeklyGoal.completed")}
                     </p>
 
@@ -400,10 +400,10 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
 
       {selectedDate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F302B]/45 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[30px] border border-[#E5A88B]/20 bg-[#FFFCFA] p-6 shadow-2xl">
+          <div className="w-full max-w-md rounded-[30px] border border-[#B85F48]/20 bg-[#FFFCFA] p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-extrabold text-[#4E3B36]">
+                <h3 className="text-xl font-extrabold text-[#2F2926]">
                   {t("weeklyGoal.day")} {weekDates.indexOf(selectedDate) + 1}
                 </h3>
 
@@ -422,7 +422,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
             </div>
 
             <div className="mb-6">
-              <p className="mb-3 text-center text-sm font-bold text-[#4E3B36]">
+              <p className="mb-3 text-center text-sm font-bold text-[#2F2926]">
                 {t("weeklyGoal.easeQuestion")}
               </p>
 
@@ -449,7 +449,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
                     >
                       <span className="text-3xl">{smile.emoji}</span>
 
-                      <span className="text-sm font-black text-[#4E3B36]">
+                      <span className="text-sm font-black text-[#2F2926]">
                         {smile.value}
                       </span>
 
@@ -463,7 +463,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
             </div>
 
             <div className="mb-5">
-              <label className="mb-2 block text-sm font-bold text-[#4E3B36]">
+              <label className="mb-2 block text-sm font-bold text-[#2F2926]">
                 {t("weeklyGoal.dayNote")}
               </label>
 
@@ -472,7 +472,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
                 placeholder={t("weeklyGoal.dayNotePlaceholder")}
-                className="w-full rounded-2xl border border-amber-100 bg-slate-50 px-4 py-3 text-[#4E3B36] outline-none focus:border-amber-300"
+                className="w-full rounded-2xl border border-amber-100 bg-slate-50 px-4 py-3 text-[#2F2926] outline-none focus:border-amber-300"
               />
             </div>
 
@@ -480,7 +480,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
               type="button"
               onClick={handleSaveDay}
               disabled={!selectedEase}
-              className="w-full rounded-2xl bg-[#4E3B36] px-4 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="w-full rounded-2xl bg-[#2F2926] px-4 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t("weeklyGoal.saveDay")}
             </button>

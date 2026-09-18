@@ -50,8 +50,12 @@ import {
 /**
  * Data atual no formato YYYY-MM-DD.
  */
-function todayString(): string {
-  return new Date().toISOString().split("T")[0];
+function todayString(now: Date = new Date()): string {
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -976,36 +980,34 @@ function selectResponse(
   const history = loadReactiveHistory();
   const now = Date.now();
 
-  const getLastUseTime = (
-    responseId: string
-  ): number | undefined => {
-    for (let i = history.length - 1; i >= 0; i -= 1) {
-      if (history[i].responseId !== responseId) {
-        continue;
-      }
+  // Construímos estes índices uma vez por análise. A seleção pode
+  // comparar dezenas de candidatos, por isso não devemos percorrer
+  // todo o histórico repetidamente para cada resposta.
+  const responseUsage = new Map<string, { count: number; lastUseTime?: number }>();
 
-      const timestamp = new Date(
-        history[i].timestamp
-      ).getTime();
+  for (const item of history) {
+    const current = responseUsage.get(item.responseId);
+    const timestamp = new Date(item.timestamp).getTime();
 
-      if (!Number.isNaN(timestamp)) {
-        return timestamp;
-      }
+    if (!current) {
+      responseUsage.set(item.responseId, {
+        count: 1,
+        lastUseTime: Number.isNaN(timestamp) ? undefined : timestamp,
+      });
+      continue;
     }
 
-    return undefined;
-  };
+    current.count += 1;
+    if (!Number.isNaN(timestamp)) {
+      current.lastUseTime = Math.max(current.lastUseTime ?? timestamp, timestamp);
+    }
+  }
 
-  const getUseCount = (
-    responseId: string
-  ): number =>
-    history.reduce(
-      (count, item) =>
-        item.responseId === responseId
-          ? count + 1
-          : count,
-      0
-    );
+  const getLastUseTime = (responseId: string): number | undefined =>
+    responseUsage.get(responseId)?.lastUseTime;
+
+  const getUseCount = (responseId: string): number =>
+    responseUsage.get(responseId)?.count ?? 0;
 
   const isInCooldown = (
     response: (typeof candidates)[number]

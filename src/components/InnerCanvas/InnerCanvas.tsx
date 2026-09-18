@@ -1181,7 +1181,7 @@ function EmotionalArtwork({
                     4 +
                     state.value * 0.3
                   }
-                  fill="#4E3B36"
+                  fill="#2F2926"
                   fillOpacity="0.80"
                   stroke="#FFFFFF"
                   strokeWidth="2"
@@ -1193,7 +1193,7 @@ function EmotionalArtwork({
                   textAnchor="middle"
                   fontSize="8"
                   fontWeight="700"
-                  fill="#4E3B36"
+                  fill="#2F2926"
                   paintOrder="stroke"
                   stroke="#FFFFFF"
                   strokeWidth="2.5"
@@ -1214,7 +1214,7 @@ function EmotionalArtwork({
               y1="30"
               x2="180"
               y2="330"
-              stroke="#4E3B36"
+              stroke="#2F2926"
               strokeOpacity="0.13"
               strokeDasharray="3 5"
             />
@@ -1224,7 +1224,7 @@ function EmotionalArtwork({
               y1="180"
               x2="330"
               y2="180"
-              stroke="#4E3B36"
+              stroke="#2F2926"
               strokeOpacity="0.13"
               strokeDasharray="3 5"
             />
@@ -1461,18 +1461,18 @@ export default function InnerCanvas({
 
             previousPage();
           }}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E8DDD7]/80 bg-white text-[#C97B5E] shadow-sm active:scale-95"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E8DDD7]/80 bg-white text-[#934A38] shadow-sm active:scale-95"
           aria-label={t("back")}
         >
           ←
         </button>
 
         <div className="min-w-0 flex-1">
-          <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+          <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
             CONFIA
           </p>
 
-          <h2 className="truncate text-lg font-black tracking-tight text-[#4E3B36]">
+          <h2 className="truncate text-lg font-black tracking-tight text-[#2F2926]">
             {t("innerCanvas.title")}
           </h2>
         </div>
@@ -1492,19 +1492,19 @@ export default function InnerCanvas({
 
       {mode === "intro" && (
         <div className="space-y-4">
-          <section className="relative overflow-hidden rounded-[32px] border border-[#E5A88B]/20 bg-gradient-to-br from-[#FFF8F3] via-white to-[#F7F1ED] px-6 py-7 shadow-[0_16px_40px_rgba(92,64,52,0.07)]">
+          <section className="relative overflow-hidden rounded-[32px] border border-[#B85F48]/20 bg-gradient-to-br from-[#FFF8F3] via-white to-[#F7F1ED] px-6 py-7 shadow-[0_16px_40px_rgba(92,64,52,0.07)]">
             <div
               aria-hidden="true"
               className="absolute -right-14 -top-12 h-44 w-44 rounded-full bg-[#E9C7B5]/20 blur-2xl"
             />
 
-            <p className="relative text-[10px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+            <p className="relative text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38]">
               {t(
                 "innerCanvas.sixtySeconds"
               )}
             </p>
 
-            <h3 className="relative mt-2 text-2xl font-black leading-tight text-[#4E3B36]">
+            <h3 className="relative mt-2 text-2xl font-black leading-tight text-[#2F2926]">
               {t(
                 "innerCanvas.introTitle"
               )}
@@ -1559,7 +1559,7 @@ export default function InnerCanvas({
             <button
               type="button"
               onClick={startSurvey}
-              className="relative mt-6 w-full rounded-[22px] bg-[#C97B5E] px-5 py-4 text-sm font-black text-white shadow-[0_10px_24px_rgba(201,123,94,0.22)] active:scale-[0.99]"
+              className="relative mt-6 w-full rounded-[22px] bg-[#934A38] px-5 py-4 text-sm font-black text-white shadow-[0_10px_24px_rgba(201,123,94,0.22)] active:scale-[0.99]"
             >
               {t(
                 "innerCanvas.start"
@@ -1575,13 +1575,13 @@ export default function InnerCanvas({
               }
               className="w-full rounded-[24px] border border-[#E8DDD7]/70 bg-white px-5 py-4 text-left shadow-sm"
             >
-              <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#C97B5E]">
+              <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#934A38]">
                 {t(
                   "innerCanvas.gallery"
                 )}
               </p>
 
-              <p className="mt-1 text-sm font-bold text-[#4E3B36]">
+              <p className="mt-1 text-sm font-bold text-[#2F2926]">
                 {t(
                   "innerCanvas.galleryCount",
                   {
@@ -1600,7 +1600,7 @@ export default function InnerCanvas({
           <div className="mb-5">
             <div className="mb-2 flex items-center justify-between gap-3">
               <div>
-                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#C97B5E]">
+                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#934A38]">
                   {t(
                     "innerCanvas.questionEyebrow",
                     {
@@ -1612,21 +1612,21 @@ export default function InnerCanvas({
                   )}
                 </p>
 
-                <h3 className="mt-1 text-xl font-black text-[#4E3B36]">
+                <h3 className="mt-1 text-xl font-black text-[#2F2926]">
                   {t(
                     "innerCanvas.questionTitle"
                   )}
                 </h3>
               </div>
 
-              <span className="text-xs font-black text-[#C97B5E]">
+              <span className="text-xs font-black text-[#934A38]">
                 {Math.round(progress)}%
               </span>
             </div>
 
             <div className="h-1.5 overflow-hidden rounded-full bg-[#F1E8E3]">
               <div
-                className="h-full rounded-full bg-[#C97B5E] transition-all duration-300"
+                className="h-full rounded-full bg-[#934A38] transition-all duration-300"
                 style={{
                   width: `${progress}%`,
                 }}
@@ -1652,13 +1652,13 @@ export default function InnerCanvas({
                     className="rounded-[22px] border border-[#EEE5E0] bg-[#FFFCFA] px-4 py-4"
                   >
                     <div className="mb-3 flex items-center justify-between">
-                      <span className="text-sm font-black text-[#4E3B36]">
+                      <span className="text-sm font-black text-[#2F2926]">
                         {t(
                           `innerCanvas.states.${state.id}`
                         )}
                       </span>
 
-                      <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-[#FFF0E8] px-2 text-xs font-black text-[#C97B5E]">
+                      <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-[#F3E3DC] px-2 text-xs font-black text-[#934A38]">
                         {value}
                       </span>
                     </div>
@@ -1684,7 +1684,7 @@ export default function InnerCanvas({
                           })
                         );
                       }}
-                      className="w-full accent-[#C97B5E]"
+                      className="w-full accent-[#934A38]"
                       aria-label={t(
                         `innerCanvas.states.${state.id}`
                       )}
@@ -1711,7 +1711,7 @@ export default function InnerCanvas({
           <button
             type="button"
             onClick={nextPage}
-            className="mt-6 w-full rounded-[22px] bg-[#C97B5E] px-5 py-4 text-sm font-black text-white shadow-[0_10px_24px_rgba(201,123,94,0.18)]"
+            className="mt-6 w-full rounded-[22px] bg-[#934A38] px-5 py-4 text-sm font-black text-white shadow-[0_10px_24px_rgba(201,123,94,0.18)]"
           >
             {page === groups.length - 1
               ? t(
@@ -1729,13 +1729,13 @@ export default function InnerCanvas({
           <div className="space-y-4">
             <section className="rounded-[30px] border border-[#E8DDD7]/70 bg-white p-4 shadow-[0_14px_36px_rgba(92,64,52,0.065)]">
               <div className="px-2 pb-4 pt-1">
-                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
                   {t(
                     "innerCanvas.resultEyebrow"
                   )}
                 </p>
 
-                <h3 className="mt-1 text-xl font-black leading-tight text-[#4E3B36]">
+                <h3 className="mt-1 text-xl font-black leading-tight text-[#2F2926]">
                   {t(
                     "innerCanvas.resultTitle"
                   )}
@@ -1842,7 +1842,7 @@ export default function InnerCanvas({
               <button
                 type="button"
                 onClick={startSurvey}
-                className="rounded-[20px] border border-[#E5A88B]/30 bg-[#FFF8F4] px-4 py-3.5 text-xs font-black text-[#C97B5E]"
+                className="rounded-[20px] border border-[#B85F48]/30 bg-[#FFF8F4] px-4 py-3.5 text-xs font-black text-[#934A38]"
               >
                 {t(
                   "innerCanvas.redo"
@@ -1854,7 +1854,7 @@ export default function InnerCanvas({
                 onClick={() =>
                   setMode("gallery")
                 }
-                className="rounded-[20px] bg-[#4E3B36] px-4 py-3.5 text-xs font-black text-white"
+                className="rounded-[20px] bg-[#2F2926] px-4 py-3.5 text-xs font-black text-white"
               >
                 {t(
                   "innerCanvas.openGallery"
@@ -1873,13 +1873,13 @@ export default function InnerCanvas({
       {mode === "gallery" && (
         <div className="space-y-4">
           <div className="px-1">
-            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#C97B5E]">
+            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
               {t(
                 "innerCanvas.galleryEyebrow"
               )}
             </p>
 
-            <h3 className="mt-1 text-xl font-black text-[#4E3B36]">
+            <h3 className="mt-1 text-xl font-black text-[#2F2926]">
               {t(
                 "innerCanvas.galleryTitle"
               )}
@@ -1902,7 +1902,7 @@ export default function InnerCanvas({
                     )}
                   </p>
 
-                  <p className="mt-1 text-sm font-black text-[#4E3B36]">
+                  <p className="mt-1 text-sm font-black text-[#2F2926]">
                     {t(
                       "innerCanvas.weeklyPiece"
                     )}
@@ -1960,7 +1960,7 @@ export default function InnerCanvas({
                     )}
                   </p>
 
-                  <p className="mt-1 text-sm font-black text-[#4E3B36]">
+                  <p className="mt-1 text-sm font-black text-[#2F2926]">
                     {t(
                       "innerCanvas.monthlyPiece"
                     )}
@@ -2009,7 +2009,7 @@ export default function InnerCanvas({
 
           {gallery.length === 0 ? (
             <div className="rounded-[28px] border border-[#E8DDD7]/70 bg-white px-6 py-10 text-center shadow-sm">
-              <p className="text-sm font-black text-[#4E3B36]">
+              <p className="text-sm font-black text-[#2F2926]">
                 {t(
                   "innerCanvas.emptyGallery"
                 )}
@@ -2018,7 +2018,7 @@ export default function InnerCanvas({
               <button
                 type="button"
                 onClick={startSurvey}
-                className="mt-4 rounded-full bg-[#C97B5E] px-5 py-3 text-xs font-black text-white"
+                className="mt-4 rounded-full bg-[#934A38] px-5 py-3 text-xs font-black text-white"
               >
                 {t(
                   "innerCanvas.start"

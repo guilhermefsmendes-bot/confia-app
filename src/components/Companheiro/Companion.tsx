@@ -73,13 +73,13 @@ function Companion({
 
       <div className="flex items-center gap-3">
 
-        <div className="w-12 h-12 rounded-2xl bg-[#FFF0E8] flex items-center justify-center text-2xl">
+        <div className="w-12 h-12 rounded-2xl bg-[#F3E3DC] flex items-center justify-center text-2xl">
           🌱
         </div>
 
         <div>
 
-          <h2 className="text-xl font-black text-[#4E3B36]">
+          <h2 className="text-xl font-black text-[#2F2926]">
             {t("companionTitle")}
           </h2>
 
@@ -94,22 +94,22 @@ function Companion({
 
       {/* MENSAGEM PRINCIPAL */}
 
-      <div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5 shadow-sm">
+      <div className="bg-white border border-[#B85F48]/20 rounded-3xl p-5 shadow-sm">
 
         <div className="flex items-center gap-2 mb-3">
 
           <Sparkles
             size={16}
-            className="text-[#C97B5E]"
+            className="text-[#934A38]"
           />
 
-          <span className="text-[10px] font-black uppercase tracking-widest text-[#C97B5E]">
+          <span className="text-[10px] font-black uppercase tracking-widest text-[#934A38]">
             {t("companionToday")}
           </span>
 
         </div>
 
-        <p className="text-sm leading-relaxed text-[#4E3B36] font-medium">
+        <p className="text-sm leading-relaxed text-[#2F2926] font-medium">
           {mainMessage}
         </p>
 
@@ -118,16 +118,16 @@ function Companion({
 
       {/* OBSERVAÇÃO */}
 
-      <div className="bg-[#FFF9F5] border border-[#E5A88B]/20 rounded-3xl p-5">
+      <div className="bg-[#FFF9F5] border border-[#B85F48]/20 rounded-3xl p-5">
 
         <div className="flex items-center gap-2 mb-3">
 
           <TrendingUp
             size={16}
-            className="text-[#C97B5E]"
+            className="text-[#934A38]"
           />
 
-          <h3 className="text-sm font-black text-[#4E3B36]">
+          <h3 className="text-sm font-black text-[#2F2926]">
             {t("companionObservationTitle")}
           </h3>
 
@@ -142,16 +142,16 @@ function Companion({
 
       {/* GRATIDÃO */}
 
-      <div className="bg-white border border-[#E5A88B]/20 rounded-3xl p-5">
+      <div className="bg-white border border-[#B85F48]/20 rounded-3xl p-5">
 
         <div className="flex items-center gap-2 mb-3">
 
           <Heart
             size={16}
-            className="text-[#C97B5E]"
+            className="text-[#934A38]"
           />
 
-          <h3 className="text-sm font-black text-[#4E3B36]">
+          <h3 className="text-sm font-black text-[#2F2926]">
             {t("companionSuggestionTitle")}
           </h3>
 

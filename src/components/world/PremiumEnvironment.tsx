@@ -35,7 +35,7 @@ function PremiumEnvironment({ level }: Props) {
             <span className="absolute bottom-7 left-2 h-3.5 w-3.5 rounded-full bg-[#D88978] ring-2 ring-[#F1C5B5]/70" />
             <span className="absolute bottom-9 left-8 h-3 w-3 rounded-full bg-[#E7B36D] ring-2 ring-[#F6D7A2]/70" />
             <span className="absolute bottom-6 left-14 h-3.5 w-3.5 rounded-full bg-[#C987A0] ring-2 ring-[#E9BCCB]/70" />
-            <span className="absolute bottom-8 left-[75px] h-3 w-3 rounded-full bg-[#E5A88B] ring-2 ring-[#F3CDBA]/70" />
+            <span className="absolute bottom-8 left-[75px] h-3 w-3 rounded-full bg-[#B85F48] ring-2 ring-[#F3CDBA]/70" />
           </div>
 
           {/* pequeno canteiro do lado direito */}

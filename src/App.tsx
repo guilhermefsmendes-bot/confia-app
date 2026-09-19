@@ -53,21 +53,21 @@ const HabitDailyCheck = lazy(() => import("./components/PatternsNew/HabitDailyCh
 const HabitEvolution = lazy(() => import("./components/PatternsNew/HabitEvolution"));
 const HomeInventory = lazy(() => import("./components/HomeInventory"));
 const HomeShop = lazy(() => import("./components/HomeShop"));
-const PartilhaFeed = lazy(() => import("./components/PartilhaFeed").then(m => ({ default: m.PartilhaFeed })));
-const ObjectivosList = lazy(() => import("./components/ObjectivosList").then(m => ({ default: m.ObjectivosList })));
-const WeeklyGoalSection = lazy(() => import("./components/WeeklyGoalSection").then(m => ({ default: m.WeeklyGoalSection })));
-const ImpulsoSOS = lazy(() => import("./components/ImpulsoSOS").then(m => ({ default: m.ImpulsoSOS })));
+import { PartilhaFeed } from "./components/PartilhaFeed";
+import { ObjectivosList } from "./components/ObjectivosList";
+import { WeeklyGoalSection } from "./components/WeeklyGoalSection";
+import { ImpulsoSOS } from "./components/ImpulsoSOS";
 const ProgressoDashboard = lazy(() => import("./components/ProgressoDashboard").then(m => ({ default: m.ProgressoDashboard })));
 const StopMode = lazy(() => import("./components/StopMode").then(m => ({ default: m.StopMode })));
 const CommunityChat = lazy(() => import("./components/CommunityChat").then(m => ({ default: m.CommunityChat })));
 const TriageModal = lazy(() => import("./components/TriageModal").then(m => ({ default: m.TriageModal })));
-const AbracoTimer = lazy(() => import("./components/AbracoTimer").then(m => ({ default: m.AbracoTimer })));
+import { AbracoTimer } from "./components/AbracoTimer";
 const BlindVent = lazy(() => import("./components/BlindVent"));
-const MicroHabitCard = lazy(() => import("./components/MicroHabits/MicroHabitCard"));
-const InvisibleAchievements = lazy(() => import("./components/InvisibleAchievements/InvisibleAchievements"));
-const CatastrophicThoughtTranslator = lazy(() => import("./components/CatastrophicThoughtTranslator"));
-const PredictiveMoodCurve = lazy(() => import("./components/PredictiveMoodCurve"));
-const AdvancedWellbeingTools = lazy(() => import("./components/AdvancedWellbeingTools"));
+import MicroHabitCard from "./components/MicroHabits/MicroHabitCard";
+import InvisibleAchievements from "./components/InvisibleAchievements/InvisibleAchievements";
+import CatastrophicThoughtTranslator from "./components/CatastrophicThoughtTranslator";
+import PredictiveMoodCurve from "./components/PredictiveMoodCurve";
+import AdvancedWellbeingTools from "./components/AdvancedWellbeingTools";
 
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
@@ -1124,7 +1124,7 @@ const handleHomeNowAction = () => {
    * uma conclusão acabada de acontecer.
    */
   useEffect(() => {
-    if (currentTab !== 1) return;
+    if (currentTab !== 2) return;
 
     import("./data/reactive/reactiveEngine")
       .then(({ analyzeReactiveState }) => {
@@ -1171,6 +1171,8 @@ localStorage.setItem(
   }, [posts]);
 
 useEffect(() => {
+  if (currentTab !== 4) return;
+
   let unsubscribe: (() => void) | undefined;
   let cancelled = false;
 
@@ -1190,7 +1192,7 @@ useEffect(() => {
     cancelled = true;
     unsubscribe?.();
   };
-}, [t]);
+}, [currentTab, t]);
 
 // Check if selected date is already logged
 useEffect(() => {
@@ -1756,15 +1758,16 @@ const getRatingLabel = (val: number) => {
   };
 
 return (
-    <Suspense fallback={<ScreenLoading label={t("loading")} />}>
     <div className="confia-app min-h-screen flex flex-col antialiased">
 {showDailyCheckIn && (
-  <DailyCheckIn
-    onComplete={() => {
-      addXp(20);
-      setShowDailyCheckIn(false);
-    }}
-  />
+  <LazySection>
+    <DailyCheckIn
+      onComplete={() => {
+        addXp(20);
+        setShowDailyCheckIn(false);
+      }}
+    />
+  </LazySection>
 )}
 
       {/* Splash Welcome Screen Overlay */}
@@ -1821,6 +1824,7 @@ className="flex items-center justify-center w-24 h-24 relative"
               <div className="space-y-4">
 
 
+<LazySection>
 <ConfiaCompanionHome
   avatar={avatar}
   avatarCelebrating={avatarCelebrating}
@@ -1868,6 +1872,7 @@ className="flex items-center justify-center w-24 h-24 relative"
     }
   }}
 />
+</LazySection>
 
 {/* O teu espaço — navegação secundária premium */}
 {homeScreen === "home" && (
@@ -2401,9 +2406,11 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 {/* Hoje — resumo + registo diário */}
               <div className="mt-1">
-                <HomeProgressSummary
+                <LazySection>
+<HomeProgressSummary
   onOpenProgress={() => setHomeScreen("progress")}
 />
+</LazySection>
 
                 {/* Registo diário premium — integrado na área Hoje */}
                 <section
@@ -2702,13 +2709,15 @@ className="flex items-center justify-center w-24 h-24 relative"
       </div>
     </div>
 
-    <ProgressoDashboard
-      ratings={ratings}
-      avatarLevel={avatar.level}
-      avatarXp={avatar.xp}
-      completedObjectivesCount={completedObjectivesCount}
-      objectivesHistory={objectivesHistory}
-    />
+    <LazySection>
+      <ProgressoDashboard
+        ratings={ratings}
+        avatarLevel={avatar.level}
+        avatarXp={avatar.xp}
+        completedObjectivesCount={completedObjectivesCount}
+        objectivesHistory={objectivesHistory}
+      />
+    </LazySection>
   </div>
 )}
 
@@ -2726,9 +2735,11 @@ className="flex items-center justify-center w-24 h-24 relative"
     key="inner-canvas-screen"
     className="flex-1"
   >
-    <InnerCanvas
-      onBack={() => setHomeScreen("home")}
-    />
+    <LazySection>
+      <InnerCanvas
+        onBack={() => setHomeScreen("home")}
+      />
+    </LazySection>
   </div>
 )}
 
@@ -2736,7 +2747,8 @@ className="flex items-center justify-center w-24 h-24 relative"
 {currentTab === 0 && homeScreen === "patterns" && (
   <>
     {patternsPage === "menu" && (
-      <PatternsNew
+      <LazySection>
+<PatternsNew
         onBack={() => {
           // CONFIA_COMPANION_HOME_RETURNED_PATTERNS
           emitCompanionBrainEvent(
@@ -2753,24 +2765,31 @@ className="flex items-center justify-center w-24 h-24 relative"
         onOpenDaily={() => setPatternsPage("daily")}
         onOpenEvolution={() => setPatternsPage("evolution")}
       />
+</LazySection>
     )}
 
     {patternsPage === "assessment" && (
-      <HabitAssessment
+      <LazySection>
+<HabitAssessment
         onBack={() => setPatternsPage("menu")}
       />
+</LazySection>
     )}
 
     {patternsPage === "daily" && (
-      <HabitDailyCheck
+      <LazySection>
+<HabitDailyCheck
         onBack={() => setPatternsPage("menu")}
       />
+</LazySection>
     )}
 
     {patternsPage === "evolution" && (
-      <HabitEvolution
+      <LazySection>
+<HabitEvolution
         onBack={() => setPatternsPage("menu")}
       />
+</LazySection>
     )}
   </>
 )}
@@ -2799,16 +2818,19 @@ className="flex items-center justify-center w-24 h-24 relative"
         ← {t("back")}
       </button>
 
-      <Companion
+      <LazySection>
+<Companion
         avatarLevel={avatar.level}
         avatarXp={avatar.xp}
       />
+</LazySection>
 
     </div>
   </div>
 )}
 
 {currentTab === 0 && homeScreen === "shop" && (
+<LazySection>
 <HomeShop
   onBack={() => {
     // CONFIA_COMPANION_HOME_RETURNED_SHOP
@@ -2825,9 +2847,11 @@ className="flex items-center justify-center w-24 h-24 relative"
   companionLevel={avatar.level}
   spendXp={spendXp}
 />
+</LazySection>
 )}
 {currentTab === 0 && homeScreen === "inventory" && (
-  <HomeInventory
+  <LazySection>
+<HomeInventory
     onBack={() => {
       // CONFIA_COMPANION_HOME_RETURNED_INVENTORY
       emitCompanionBrainEvent(
@@ -2841,6 +2865,7 @@ className="flex items-center justify-center w-24 h-24 relative"
     }}
     companionLevel={avatar.level}
   />
+</LazySection>
 )}
 {currentTab === 0 && homeScreen === "settings" && (
   <div
@@ -3109,11 +3134,13 @@ className="flex items-center justify-center w-24 h-24 relative"
       </main>
 
       {/* Triage / Screening Help Modal */}
-      <TriageModal
+      <LazySection>
+<TriageModal
         isOpen={triageOpen}
       onClose={() => setTriageOpen(false)}
         onAddXp={addXp}
       />
+</LazySection>
 
       {/* Celebratory Level Up Overlay */}
       <AnimatePresence>
@@ -3158,24 +3185,40 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 
       </AnimatePresence>
-      {showBlindVent && <BlindVent onClose={() => setShowBlindVent(false)} />}
+      {showBlindVent && (
+      <LazySection>
+        <BlindVent onClose={() => setShowBlindVent(false)} />
+      </LazySection>
+    )}
       {showStopMode && (
+      <LazySection>
         <StopMode
           onStartImpulse={() => {
             setShowStopMode(false);
             setCurrentTab(3);
           }}
         />
+      </LazySection>
       )}
       {chatPost && (
-        <CommunityChat
+        <LazySection>
+<CommunityChat
           post={chatPost}
           onClose={() => setChatPost(null)}
         />
+</LazySection>
       )}
 
       <MainNavigation currentTab={currentTab} onNavigate={(index) => { setHomeScreen("home"); setCurrentTab(index); }} />
     </div>
+  );
+}
+
+
+function LazySection({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      {children}
     </Suspense>
   );
 }

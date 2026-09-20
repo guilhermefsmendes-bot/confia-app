@@ -1722,7 +1722,23 @@
     "feedbackThanks": "Guardado. CONFIA aprende contigo.",
     "useful": "Marcar descubrimiento como útil",
     "dismiss": "Marcar descubrimiento como poco útil",
-    "pulseAria": "Evolución reciente de tus registros emocionales"
+    "pulseAria": "Evolución reciente de tus registros emocionales",
+    "signalsDetected_one": "Se ha identificado {{count}} señal en tus registros",
+    "signalsDetected_other": "Se han identificado {{count}} señales en tus registros",
+    "signalsExplanation": "Estas señales se basan en patrones observados en tus propios registros.",
+    "signalTypes": {
+      "trend": "Estado emocional",
+      "time_of_day": "Momento del día",
+      "weekday": "Día de la semana",
+      "habit_association": "Hábitos y bienestar",
+      "goal_association": "Objetivos y bienestar",
+      "intervention_effect": "Efecto del Impulso",
+      "recovery_pattern": "Recuperación emocional",
+      "repeated_need": "Necesidad recurrente",
+      "personal_change": "Cambio reciente",
+      "pattern_disappearance": "Cambio de patrón",
+      "default": "Señal observada"
+    }
   },
   "companionPresence": {
     "present": "Presencia CONFIA",
@@ -1918,5 +1934,82 @@
     "anxious": "ansioso",
     "low": "bajo",
     "neutral": "neutro"
+  },
+  "companionRelationship": {
+    "firstContact": "Hola. Estoy aquí contigo. No necesitas contármelo todo de una vez; podemos empezar simplemente por cómo estás en este momento.",
+    "firstMoment": "Gracias por compartir este momento conmigo. Es solo un registro, así que todavía no sacaré conclusiones. Iremos conociendo tu ritmo poco a poco.",
+    "earlyLearning": "Ya hemos compartido algunos momentos. Empiezo a tener contexto sobre tu ritmo, pero todavía es pronto para distinguir un patrón de una coincidencia.",
+    "established": "Estoy aquí contigo. Lo que decides registrar me ayuda a mantener continuidad entre tus momentos, sin suponer aquello que no me has contado.",
+    "discoveryReady": "Ya hay suficientes momentos para que algunas cosas empiecen a tomar forma. Cuando algo esté realmente respaldado por tus registros, te lo mostraré con cuidado."
+  },
+  "companionIntelligence": {
+    "welcome": {
+      "a": "Hola. Estoy aquí contigo. Podemos empezar poco a poco.",
+      "b": "Hola. No necesitas saber por dónde empezar. Cuéntame simplemente cómo estás cuando te apetezca.",
+      "c": "Este espacio es tuyo. Podemos empezar simplemente por el momento en el que estás ahora."
+    },
+    "difficultMoment": {
+      "a": "Parece que este momento está siendo más pesado. Estoy aquí contigo.",
+      "b": "Hoy parece estar costando más. No necesitas resolverlo todo ahora.",
+      "c": "Podemos ir despacio. A veces reconocer que está siendo difícil ya es suficiente para este momento.",
+      "d": "Estoy aquí. Podemos mirar solo este momento, sin intentar resolver todo el día."
+    },
+    "goodMoment": {
+      "a": "Este parece ser un momento más ligero. Merece la pena dejarlo registrado.",
+      "b": "Es bueno ver este momento en tu camino. También importa notar cuándo las cosas están mejor.",
+      "c": "Hoy hay una señal más favorable. Podemos guardarla sin necesidad de convertirla en nada más."
+    },
+    "learning": {
+      "a": "Todavía estamos construyendo contexto. Cada momento ayuda, pero no quiero sacar conclusiones demasiado pronto.",
+      "b": "Empiezo a tener algunos puntos de referencia tuyos. Todavía estoy aprendiendo qué es circunstancial y qué se repite de verdad.",
+      "c": "Ya no estamos en el primer momento, pero seguimos al principio. Continuaré observando contigo con calma."
+    },
+    "continuity": {
+      "a": "Ya tenemos algo de camino juntos. Uso lo que has registrado para mantener continuidad entre tus momentos.",
+      "b": "Lo que compartiste antes no desaparece. Cuando es relevante, me ayuda a comprender mejor el contexto actual.",
+      "c": "Sigo tu camino a través de los momentos que decides registrar, sin completar las partes que no conozco.",
+      "d": "Ya existe algo de historia aquí. Quiero que sirva para acompañarte mejor, no para encasillarte."
+    },
+    "discovery": {
+      "a": "Ya hay información suficiente para que algunas pistas empiecen a tomar forma. Seguiré tratándolas como señales, no como certezas.",
+      "b": "Algunos de tus registros empiezan a conectarse. Si esa conexión continúa, se verá más clara en tu mapa.",
+      "c": "Empiezan a aparecer pistas personales en tus registros. Te las mostraré cuando haya suficiente contexto para que sean útiles."
+    },
+    "presence": {
+      "a": "Estoy aquí. ¿Cómo está siendo este momento para ti?",
+      "b": "Podemos simplemente hacer una pausa para ver cómo estás. ¿Cómo te encuentras ahora?",
+      "c": "No necesitas tener nada especial que decir. Podemos simplemente registrar cómo está este momento.",
+      "d": "¿Cómo estás ahora mismo? Podemos empezar exactamente ahí."
+    },
+    "quietPresence": {
+      "a": "Estoy aquí contigo."
+    }
+  },
+  "companionBehavior": {
+    "returnAfterSupport": {
+      "a": "Sigo aquí contigo. Has hecho algo por este momento, y eso ya cuenta.",
+      "b": "Has vuelto. No necesitamos hacer nada más ahora. Podemos quedarnos aquí un momento.",
+      "c": "Has vuelto. Si el momento sigue siendo difícil, podemos continuar despacio."
+    },
+    "reflection": {
+      "a": "Parece que has estado observando con más atención cómo te has sentido. Podemos seguir observando sin sacar conclusiones demasiado pronto.",
+      "b": "Has mirado tus patrones y después has vuelto a registrar cómo estás. Eso puede dar más contexto a tu camino.",
+      "c": "Hay aquí un pequeño momento de reflexión. No necesitamos explicarlo todavía."
+    },
+    "companionContact": {
+      "a": "Estoy aquí. No necesitas tener una pregunta preparada.",
+      "b": "Puedes quedarte aquí un momento. No hace falta resolver nada ahora.",
+      "c": "Estoy contigo en este momento. Podemos empezar exactamente donde estás."
+    },
+    "progress": {
+      "a": "He visto ese pequeño paso. No tiene que ser enorme para contar.",
+      "b": "Has estado mirando el camino que ya has recorrido. A veces también es importante notar lo que ha avanzado.",
+      "c": "Hay progresos que solo se ven cuando miramos atrás. Merece la pena guardar este momento."
+    },
+    "support": {
+      "a": "Acabas de hacer algo para cuidar este momento. ¿Cómo estás ahora?",
+      "b": "Has terminado este momento de apoyo. No necesitamos decidir todavía qué significa; podemos simplemente notar cómo estás ahora.",
+      "c": "Has hecho una pausa para cuidarte. Si quieres, podemos continuar desde aquí."
+    }
   }
 }

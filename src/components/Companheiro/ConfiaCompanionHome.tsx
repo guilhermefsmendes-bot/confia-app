@@ -24,8 +24,20 @@ import {
   markCompanionDecisionShown,
   type CompanionBrainDecision,
 } from "../../data/reactive/companionBrain";
+import {
+  resolveCompanionPresence,
+  chooseCompanionVariant,
+} from "../../data/reactive/companionBrain/companionPresenceEngine";
 import { getEquipped } from "../../storage/homeInventory";
 import { getCompanionAccessories } from "../../data/homeItems";
+
+import {
+  getCompanionBehaviorPresentation,
+} from "../../data/reactive/companionBrain/companionBehaviorPresentation";
+
+import {
+  markCompanionBehaviorShown,
+} from "../../data/reactive/companionBrain/companionBehaviorMemory";
 
 interface ConfiaCompanionHomeProps {
   avatar: AvatarState;
@@ -37,6 +49,12 @@ interface ConfiaCompanionHomeProps {
   reactiveResult: ReactiveResult | null;
   companionBrainDecision: CompanionBrainDecision | null;
   relationalMemory: ReactiveRecentMemory | null;
+  relationshipStage:
+    | "first_contact"
+    | "early_learning"
+    | "established"
+    | "personal_discovery";
+  relationshipObservationCount: number;
   onCompanionAction: (
     target:
       | "impulse"
@@ -81,10 +99,52 @@ function ConfiaCompanionHome({
   reactiveResult,
   companionBrainDecision,
   relationalMemory,
+  relationshipStage,
+  relationshipObservationCount,
   onCompanionAction,
   worldMood,
 }: ConfiaCompanionHomeProps) {
   const { t } = useTranslation();
+
+  /**
+   * ==========================================================
+   * CONFIA — COMPANION INTELLIGENCE V3C
+   * ==========================================================
+   *
+   * Atualiza a leitura comportamental apenas quando ocorre
+   * uma interação semântica real da V3.
+   */
+  const [
+    companionBehaviorRevision,
+    setCompanionBehaviorRevision,
+  ] = useState(0);
+
+  useEffect(() => {
+    const handleBehaviorInteraction = () => {
+      setCompanionBehaviorRevision(
+        current => current + 1
+      );
+    };
+
+    window.addEventListener(
+      "confia-companion-interaction",
+      handleBehaviorInteraction
+    );
+
+    return () => {
+      window.removeEventListener(
+        "confia-companion-interaction",
+        handleBehaviorInteraction
+      );
+    };
+  }, []);
+
+  const companionBehaviorPresentation =
+    useMemo(
+      () =>
+        getCompanionBehaviorPresentation(),
+      [companionBehaviorRevision]
+    );
 
   /**
    * ==========================================================
@@ -331,6 +391,79 @@ function ConfiaCompanionHome({
         }
       : null;
 
+  /**
+   * ==========================================================
+   * CONFIA — PRESENÇA RELACIONAL PROGRESSIVA
+   * ==========================================================
+   *
+   * Esta camada não inventa memória nem interpreta padrões.
+   *
+   * Apenas adapta o acolhimento ao volume de história real
+   * existente. Memória factual, reações importantes e decisões
+   * do Companion Brain continuam a ter prioridade.
+   */
+  /**
+   * ==========================================================
+   * COMPANION INTELLIGENCE V2 — PRESENÇA
+   * ==========================================================
+   *
+   * O motor não interpreta novamente os dados.
+   * Recebe apenas contexto já conhecido por este componente.
+   *
+   * A seleção de variante é estável durante o contexto atual,
+   * evitando mudanças arbitrárias em cada render.
+   */
+  const companionPresenceDecision = useMemo(() => {
+    return resolveCompanionPresence({
+      relationshipStage,
+      observationCount: relationshipObservationCount,
+      moodRating: currentMoodRating,
+      hasPriorityDecision: Boolean(
+        companionReaction &&
+        companionReaction.priority >= 70
+      ),
+      hasRelationalMemory: Boolean(
+        companionRelationalMemory
+      ),
+      worldMood,
+    });
+  }, [
+    relationshipStage,
+    relationshipObservationCount,
+    currentMoodRating,
+    companionReaction,
+    companionRelationalMemory,
+    worldMood,
+  ]);
+
+  const companionPresenceMessage = useMemo(() => {
+    const seed = [
+      companionPresenceDecision.intent,
+      relationshipStage,
+      relationshipObservationCount,
+      currentMoodRating ?? "none",
+      worldMood,
+    ].join(":");
+
+    const key = chooseCompanionVariant(
+      companionPresenceDecision.translationKeys,
+      seed
+    );
+
+    return t(key);
+  }, [
+    companionPresenceDecision,
+    relationshipStage,
+    relationshipObservationCount,
+    currentMoodRating,
+    worldMood,
+    t,
+  ]);
+
+  const relationshipFallbackMessage = useMemo(() => {
+    return companionPresenceMessage;
+  }, [companionPresenceMessage]);
+
   const proposedCompanionMessage = useMemo(() => {
     /**
      * A6.3 — HIERARQUIA DA VOZ
@@ -402,27 +535,24 @@ function ConfiaCompanionHome({
       return t("avatarHighMood");
     }
 
-    if (avatar.level === 1) {
-      return t("avatarStageMessage1");
-    }
-
-    if (avatar.level >= 10) {
-      return t("avatarStageMessage10");
-    }
-
-    if (avatar.level >= 5) {
-      return t("avatarStageMessage5");
-    }
-
-    return t("avatarWelcome");
+    /**
+     * Sem reação, memória ou estado emocional prioritário,
+     * a voz regressa à relação real já construída.
+     *
+     * O nível visual da criatura não é usado para fingir
+     * conhecimento sobre a pessoa.
+     */
+    return relationshipFallbackMessage;
   }, [
     avatar.level,
     avatarMemoryMessage,
     canUseRelationalMemory,
+    companionBehaviorPresentation,
     companionReaction,
     companionRelationalExpression,
     companionRelationalMemory,
     currentMoodRating,
+    relationshipFallbackMessage,
     t,
   ]);
 
@@ -488,6 +618,8 @@ function ConfiaCompanionHome({
    * não pode substituir essa fala.
    */
   useEffect(() => {
+    let behaviorWasActuallyShown = false;
+
     setCurrentUtterance(current => {
       if (current.source === "brain") {
         return current;
@@ -499,12 +631,41 @@ function ConfiaCompanionHome({
         return current;
       }
 
+      if (
+        companionBehaviorPresentation &&
+        proposedCompanionMessage ===
+          t(
+            companionBehaviorPresentation.translationKey
+          )
+      ) {
+        behaviorWasActuallyShown = true;
+      }
+
       return {
         text: proposedCompanionMessage,
         source: "fallback",
       };
     });
-  }, [proposedCompanionMessage]);
+
+    /**
+     * A reação V3 só entra em cooldown se tiver sido
+     * realmente aceite pelo balão.
+     *
+     * Se o Companion Brain estiver a falar, não é consumida.
+     */
+    if (
+      behaviorWasActuallyShown &&
+      companionBehaviorPresentation
+    ) {
+      markCompanionBehaviorShown(
+        companionBehaviorPresentation.signal
+      );
+    }
+  }, [
+    proposedCompanionMessage,
+    companionBehaviorPresentation,
+    t,
+  ]);
 
   /**
    * ==========================================================

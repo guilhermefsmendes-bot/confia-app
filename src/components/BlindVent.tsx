@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { EyeOff, Feather, LockKeyhole, Sparkles, Wind, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
 
 const PARTICLES = Array.from({ length: 42 }, (_, index) => ({
   id: index,
@@ -156,7 +157,14 @@ export function BlindVent({ onClose }: { onClose: () => void }) {
 
                 <button
                   type="button"
-                  onClick={release}
+                  onClick={() => {
+  emitCompanionInteraction(
+    "tool_completed",
+    "vent",
+    { tool: "blind_vent" }
+  );
+  release();
+}}
                   disabled={!canRelease}
                   className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#934A38] px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-[#934A38]/20 transition hover:bg-[#B86C51] disabled:cursor-not-allowed disabled:opacity-40"
                 >

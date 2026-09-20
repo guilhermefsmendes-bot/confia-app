@@ -13,3 +13,13 @@ export * from "./companionBrainSessionInterpreter";
 export * from "./companionBrainLongitudinalMemory";
 export * from "./companionBrainLongitudinalImpulseMemory";
 export * from "./companionBrainCrossMemory";
+
+export * from "./companionEventIntelligence";
+export * from "./companionInteractionEvents";
+
+export * from "./companionBehaviorContext";
+export * from "./companionBehaviorResponse";
+
+
+export * from "./companionBehaviorMemory";
+export * from "./companionBehaviorPresentation";

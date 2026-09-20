@@ -1720,7 +1720,23 @@
     "feedbackThanks": "Enregistré. CONFIA apprend avec toi.",
     "useful": "Marquer la découverte comme utile",
     "dismiss": "Marquer la découverte comme peu utile",
-    "pulseAria": "Évolution récente de tes relevés émotionnels"
+    "pulseAria": "Évolution récente de tes relevés émotionnels",
+    "signalsDetected_one": "{{count}} signal a été identifié dans tes relevés",
+    "signalsDetected_other": "{{count}} signaux ont été identifiés dans tes relevés",
+    "signalsExplanation": "Ces signaux reposent sur des tendances observées dans tes propres relevés.",
+    "signalTypes": {
+      "trend": "État émotionnel",
+      "time_of_day": "Moment de la journée",
+      "weekday": "Jour de la semaine",
+      "habit_association": "Habitudes et bien-être",
+      "goal_association": "Objectifs et bien-être",
+      "intervention_effect": "Effet de l'Impulsion",
+      "recovery_pattern": "Récupération émotionnelle",
+      "repeated_need": "Besoin récurrent",
+      "personal_change": "Changement récent",
+      "pattern_disappearance": "Changement de schéma",
+      "default": "Signal observé"
+    }
   },
   "companionPresence": {
     "present": "Présence CONFIA",
@@ -1916,5 +1932,82 @@
     "anxious": "anxieux",
     "low": "bas",
     "neutral": "neutre"
+  },
+  "companionRelationship": {
+    "firstContact": "Bonjour. Je suis là avec toi. Tu n'as pas besoin de tout me raconter d'un coup — nous pouvons simplement commencer par ce que tu ressens maintenant.",
+    "firstMoment": "Merci d'avoir partagé ce moment avec moi. Ce n'est qu'un premier repère, je ne vais donc pas en tirer de conclusion. Nous découvrirons ton rythme progressivement.",
+    "earlyLearning": "Nous avons déjà partagé quelques moments. Je commence à mieux comprendre ton rythme, mais il est encore trop tôt pour distinguer une tendance d'une coïncidence.",
+    "established": "Je suis là avec toi. Ce que tu choisis d'enregistrer m'aide à garder une continuité entre tes moments, sans supposer ce que tu ne m'as pas dit.",
+    "discoveryReady": "Il y a maintenant assez de moments pour que certaines choses commencent à prendre forme. Lorsqu'un élément sera réellement étayé par tes relevés, je te le montrerai avec prudence."
+  },
+  "companionIntelligence": {
+    "welcome": {
+      "a": "Bonjour. Je suis là avec toi. Nous pouvons commencer doucement.",
+      "b": "Bonjour. Tu n'as pas besoin de savoir par où commencer. Dis-moi simplement comment tu vas lorsque tu en as envie.",
+      "c": "Cet espace est le tien. Nous pouvons simplement commencer par le moment que tu vis maintenant."
+    },
+    "difficultMoment": {
+      "a": "Ce moment semble plus difficile. Je suis là avec toi.",
+      "b": "Aujourd'hui semble plus difficile. Tu n'as pas besoin de tout résoudre maintenant.",
+      "c": "Nous pouvons avancer doucement. Parfois, reconnaître que c'est difficile suffit pour ce moment.",
+      "d": "Je suis là. Nous pouvons regarder uniquement ce moment sans essayer de résoudre toute la journée."
+    },
+    "goodMoment": {
+      "a": "Ce moment semble plus léger. Cela vaut la peine de le garder dans ton parcours.",
+      "b": "C'est agréable de voir ce moment dans ton parcours. Remarquer quand les choses vont mieux compte aussi.",
+      "c": "Il y a aujourd'hui un signal plus favorable. Nous pouvons simplement le garder sans devoir en faire davantage."
+    },
+    "learning": {
+      "a": "Nous construisons encore le contexte. Chaque moment aide, mais je ne veux pas tirer de conclusions trop tôt.",
+      "b": "Je commence à avoir quelques points de repère. J'apprends encore à distinguer ce qui est ponctuel de ce qui se répète réellement.",
+      "c": "Nous ne sommes plus au tout premier moment, mais nous sommes encore au début. Je vais continuer à observer avec toi, avec prudence."
+    },
+    "continuity": {
+      "a": "Nous avons déjà un peu de chemin ensemble. J'utilise ce que tu as enregistré pour garder une continuité entre tes moments.",
+      "b": "Ce que tu as partagé auparavant ne disparaît pas simplement. Lorsque c'est pertinent, cela m'aide à mieux comprendre le contexte actuel.",
+      "c": "Je suis ton parcours à travers les moments que tu choisis d'enregistrer, sans inventer les parties que je ne connais pas.",
+      "d": "Il existe maintenant une certaine histoire ici. Je veux qu'elle m'aide à mieux t'accompagner, pas à t'enfermer dans une catégorie."
+    },
+    "discovery": {
+      "a": "Il y a assez d'informations pour que quelques pistes commencent à prendre forme. Je continuerai à les traiter comme des signaux, pas comme des certitudes.",
+      "b": "Certains de tes relevés commencent à se relier. Si ce lien continue, il deviendra plus clair dans ta carte.",
+      "c": "Des pistes personnelles commencent à apparaître dans tes relevés. Je te les montrerai lorsqu'il y aura assez de contexte pour qu'elles soient utiles."
+    },
+    "presence": {
+      "a": "Je suis là. Comment vis-tu ce moment ?",
+      "b": "Nous pouvons simplement faire un point. Comment vas-tu maintenant ?",
+      "c": "Tu n'as pas besoin d'avoir quelque chose de particulier à dire. Nous pouvons simplement noter comment est ce moment.",
+      "d": "Comment vas-tu maintenant ? Nous pouvons commencer exactement là."
+    },
+    "quietPresence": {
+      "a": "Je suis là avec toi."
+    }
+  },
+  "companionBehavior": {
+    "returnAfterSupport": {
+      "a": "Je reste ici avec toi. Tu as fait quelque chose pour ce moment, et cela compte déjà.",
+      "b": "Tu es revenu. Nous n'avons rien d'autre à faire maintenant. Nous pouvons simplement rester ici un moment.",
+      "c": "Tu es de retour. Si ce moment reste difficile, nous pouvons continuer doucement."
+    },
+    "reflection": {
+      "a": "On dirait que tu as observé plus attentivement ce que tu ressens. Nous pouvons continuer à observer sans tirer de conclusions trop vite.",
+      "b": "Tu as regardé tes tendances puis tu as de nouveau indiqué comment tu vas. Cela peut donner davantage de contexte à ton parcours.",
+      "c": "Il y a ici un petit moment de réflexion. Nous n'avons pas besoin de l'expliquer tout de suite."
+    },
+    "companionContact": {
+      "a": "Je suis là. Tu n'as pas besoin d'avoir une question préparée.",
+      "b": "Tu peux rester ici un moment. Rien n'a besoin d'être résolu maintenant.",
+      "c": "Je suis avec toi dans ce moment. Nous pouvons commencer exactement là où tu en es."
+    },
+    "progress": {
+      "a": "J'ai remarqué ce petit pas. Il n'a pas besoin d'être immense pour compter.",
+      "b": "Tu as regardé le chemin déjà parcouru. Parfois, il est aussi important de remarquer ce qui a avancé.",
+      "c": "Certains progrès ne deviennent visibles qu'en regardant en arrière. Ce moment mérite d'être gardé."
+    },
+    "support": {
+      "a": "Tu viens de faire quelque chose pour prendre soin de ce moment. Comment vas-tu maintenant ?",
+      "b": "Tu as terminé ce moment de soutien. Nous n'avons pas besoin de décider tout de suite ce qu'il signifie — nous pouvons simplement remarquer comment tu vas maintenant.",
+      "c": "Tu as pris une pause pour prendre soin de toi. Si tu veux, nous pouvons continuer à partir d'ici."
+    }
   }
 }

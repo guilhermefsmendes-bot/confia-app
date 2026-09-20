@@ -36,6 +36,7 @@ import { auth, initAnonymousAuth } from "./firebaseAuth";
 
 
 import { initLanguage, setLanguage } from "./i18n/language";
+import { emitCompanionInteraction } from "./data/reactive/companionBrain/companionInteractionEvents";
 
 const HomeProgressSummary = lazy(() => import("./components/HomeProgressSummary"));
 import { useDailyOpenState } from "./hooks/useDailyOpenState";
@@ -1836,6 +1837,16 @@ className="flex items-center justify-center w-24 h-24 relative"
   reactiveResult={homeReactiveResult}
   companionBrainDecision={homeCompanionBrainDecision}
   relationalMemory={homeCompanionRelationalMemory}
+  relationshipStage={
+    isFirstContact
+      ? "first_contact"
+      : isEarlyLearning
+        ? "early_learning"
+        : personalDiscovery
+          ? "personal_discovery"
+          : "established"
+  }
+  relationshipObservationCount={ratings.length}
 
   onCompanionAction={(target) => {
     if (target === "impulse") {
@@ -1899,7 +1910,14 @@ className="flex items-center justify-center w-24 h-24 relative"
     <div className="px-3">
       <button
         type="button"
-        onClick={() => setHomeScreen("companion")}
+        onClick={() => {
+  emitCompanionInteraction(
+    "companion_contact",
+    "companion",
+    { from: "home", to: "companion" }
+  );
+  setHomeScreen("companion");
+}}
         className="relative w-full overflow-hidden flex items-center justify-between gap-4 rounded-[24px] border border-[#B85F48]/20 bg-gradient-to-br from-white via-white to-[#FFF3EC] px-4 py-4 text-left shadow-[0_8px_22px_rgba(92,64,52,0.055)] transition-colors duration-200 active:bg-[#FFF8F4]"
       >
         <div
@@ -1972,7 +1990,14 @@ className="flex items-center justify-center w-24 h-24 relative"
       {/* Inventário */}
       <button
         type="button"
-        onClick={() => setHomeScreen("inventory")}
+        onClick={() => {
+  emitCompanionInteraction(
+    "area_opened",
+    "inventory",
+    { from: "home", to: "inventory" }
+  );
+  setHomeScreen("inventory");
+}}
         className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
       >
         <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#B85F48]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
@@ -2010,11 +2035,25 @@ className="flex items-center justify-center w-24 h-24 relative"
 
     {/* Inteligência pessoal — descoberta e experimentação */}
     <div className="mt-3 grid grid-cols-2 gap-2 px-3">
-      <button type="button" onClick={() => setHomeScreen("map")} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#B85F48]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
+      <button type="button" onClick={() => {
+  emitCompanionInteraction(
+    "reflection_opened",
+    "map",
+    { from: "home", to: "map" }
+  );
+  setHomeScreen("map");
+}} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#B85F48]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white"><Compass size={17} className="text-[#934A38]" /></div>
         <div><span className="block text-[10px] font-black uppercase tracking-wide text-[#934A38]">CONFIA</span><span className="text-xs font-bold text-[#6D5A53]">{t("personalMap.title")}</span></div>
       </button>
-      <button type="button" onClick={() => setHomeScreen("experiments")} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#B85F48]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
+      <button type="button" onClick={() => {
+  emitCompanionInteraction(
+    "area_opened",
+    "experiments",
+    { from: "home", to: "experiments" }
+  );
+  setHomeScreen("experiments");
+}} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#B85F48]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white"><Sparkles size={17} className="text-[#934A38]" /></div>
         <div><span className="block text-[10px] font-black uppercase tracking-wide text-[#934A38]">CONFIA</span><span className="text-xs font-bold text-[#6D5A53]">{t("experiments.title")}</span></div>
       </button>
@@ -2354,43 +2393,9 @@ className="flex items-center justify-center w-24 h-24 relative"
   </div>
 )}
 
-{isFirstContact && (
-  <section
-    className={`relative mt-4 overflow-hidden rounded-[28px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC] p-5 shadow-[0_10px_28px_rgba(92,64,52,0.05)] ${
-      homeNowAction ? "rounded-b-[22px]" : ""
-    }`}
-    aria-label={t("firstContactInsight.eyebrow")}
-  >
-    <div
-      aria-hidden="true"
-      className="absolute left-0 top-6 h-12 w-[3px] rounded-r-full bg-[#B85F48]/55"
-    />
-
-    <div className="flex items-start gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/15 bg-white shadow-sm">
-        <Sparkles
-          size={18}
-          strokeWidth={1.8}
-          className="text-[#934A38]"
-        />
-      </div>
-
-      <div className="min-w-0">
-        <p className="text-xs font-black uppercase tracking-wider text-[#934A38] font-display">
-          {t("firstContactInsight.eyebrow")}
-        </p>
-
-        <h3 className="mt-1.5 text-sm font-black leading-snug text-[#2F2926]">
-          {t("firstContactInsight.title")}
-        </h3>
-
-        <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[var(--cf-text-soft)]">
-          {t("firstContactInsight.text")}
-        </p>
-      </div>
-    </div>
-  </section>
-)}
+{/* O primeiro contacto vive agora no próprio companheiro.
+    Não existe um segundo cartão a explicar a relação:
+    a CONFIA demonstra-a através da sua presença e voz. */}
 
 {/* CONFIA A3.3 — a reação do Principal é agora
     apresentada pela própria CONFIA através do seu balão.
@@ -2563,7 +2568,14 @@ className="flex items-center justify-center w-24 h-24 relative"
 
                     {/* Guardar */}
                     <button type="button"
-                      onClick={handleSaveRatings}
+                      onClick={() => {
+  emitCompanionInteraction(
+    "checkin_completed",
+    "checkin",
+    { source: "home_day_rating" }
+  );
+  handleSaveRatings();
+}}
                       className="w-full py-3.5 bg-[#D59375] active:bg-[#C68060] text-white font-extrabold text-xs rounded-2xl shadow-[0_8px_20px_rgba(201,123,94,0.18)] transition-colors duration-200 flex items-center justify-center gap-2"
                     >
                       <CheckCircle2 size={15} />

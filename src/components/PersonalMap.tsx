@@ -8,6 +8,7 @@ import { recordPersonalAnalytics } from "../data/personal/personalAnalytics";
 import { applyInsightLifecycle, markInsightsShown } from "../data/personal/personalInsightLifecycle";
 import { makePersonalEvent, createPersonalEventId } from "../data/personal/personalEvent";
 import type { PersonalInsight } from "../data/personal/personalInsights";
+import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
 
 type Props = { onBack: () => void };
 
@@ -67,7 +68,13 @@ export default function PersonalMap({ onBack }: Props) {
 
       <section className="mt-4 rounded-[30px] border border-white bg-white/90 p-5 shadow-[0_16px_45px_rgba(93,65,53,.08)] sm:p-6">
         <div className="flex items-center gap-2"><Sparkles size={17} className="text-[#B86B52]" aria-hidden="true" /><h2 className="text-xl font-black text-[#3F2C27]">{t("personalMap.discoveries")}</h2></div>
-        {insights.length === 0 ? <p className="mt-3 text-sm leading-6 text-[#806D65]">{t("personalMap.noDiscoveries")}</p> : insights.map(insight => <InsightCard key={insight.id} insight={insight} t={t} />)}
+        {insights.length === 0 ? (
+          <p className="mt-3 text-sm leading-6 text-[#806D65]">
+            {t("personalMap.noDiscoveries")}
+          </p>
+        ) : (
+          <InsightsSummary insights={insights} t={t} />
+        )}
         {events.length > 0 && <div className="mt-5 flex gap-2 rounded-2xl bg-[#F8F3F0] p-3 text-xs leading-5 text-[#806D65]"><Info size={14} className="mt-0.5 shrink-0" aria-hidden="true" /> {t("personalMap.explainable")}</div>}
       </section>
 
@@ -75,6 +82,153 @@ export default function PersonalMap({ onBack }: Props) {
 
       {analogous.length > 0 && <section className="mt-4 rounded-[30px] border border-white bg-white/90 p-5 shadow-sm"><h2 className="text-xl font-black text-[#3F2C27]">{t("personalMap.analogousTitle")}</h2><p className="mt-1 text-xs leading-5 text-[#806D65]">{t("personalMap.analogousSubtitle")}</p><div className="mt-3 grid gap-2 sm:grid-cols-3">{analogous.map(event => <div key={event.id} className="rounded-2xl bg-[#FFF8F4] px-4 py-3"><span className="block text-xs font-semibold text-[#806D65]">{event.localDate}</span><span className="mt-1 block text-xl font-black text-[#B86B52]">{event.value}/10</span></div>)}</div></section>}
     </main>
+  );
+}
+
+
+function InsightsSummary({
+  insights,
+  t,
+}: {
+  insights: PersonalInsight[];
+  t: (key: string, values?: Record<string, unknown>) => string;
+}) {
+  const [feedback, setFeedback] = useState<Record<string, "useful" | "dismissed">>({});
+
+  const send = (insight: PersonalInsight, kind: "useful" | "dismissed") => {
+    appendPersonalEvents([
+      makePersonalEvent({
+        id: createPersonalEventId("insight_feedback"),
+        type: "insight_feedback",
+        timestamp: new Date().toISOString(),
+        source: "insight",
+        value: kind,
+        metadata: {
+          insightId: insight.id,
+          feedback: kind,
+        },
+      }),
+    ]);
+
+    recordPersonalAnalytics(
+      kind === "useful" ? "insight_useful" : "insight_dismissed",
+    );
+
+    setFeedback(current => ({
+      ...current,
+      [insight.id]: kind,
+    }));
+  };
+
+  const signalLabel = (insight: PersonalInsight): string => {
+    const supportedTypes = new Set([
+      "trend",
+      "time_of_day",
+      "weekday",
+      "habit_association",
+      "goal_association",
+      "intervention_effect",
+      "recovery_pattern",
+      "repeated_need",
+      "personal_change",
+      "pattern_disappearance",
+    ]);
+
+    const type = supportedTypes.has(insight.type)
+      ? insight.type
+      : "default";
+
+    return t(`personalMap.signalTypes.${type}`);
+  };
+
+  return (
+    <article className="mt-4 rounded-[24px] border border-[#F0E3DC] bg-gradient-to-br from-[#FFF9F5] to-[#F6EFEB] p-4 sm:p-5">
+      <div>
+        <p className="text-sm font-black leading-6 text-[#3F2C27]">
+          {t("personalMap.signalsDetected", { count: insights.length })}
+        </p>
+
+        <p className="mt-1 text-xs leading-5 text-[#806D65]">
+          {t("personalMap.signalsExplanation")}
+        </p>
+      </div>
+
+      <div className="mt-4 divide-y divide-[#EADBD3]">
+        {insights.map((insight, index) => {
+          const currentFeedback = feedback[insight.id];
+
+          return (
+            <section key={insight.id} className="py-4 first:pt-0 last:pb-0">
+              <div className="flex items-start gap-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EED3C7] text-[11px] font-black text-[#7A493A]">
+                  {index + 1}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-xs font-black uppercase tracking-wide text-[#B86B52]">
+                      {signalLabel(insight)}
+                    </p>
+
+                    <span className="rounded-full bg-[#F0E3DC] px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-[#7A5A4E]">
+                      {t(`personalInsights.confidence.${insight.confidence}`)}
+                    </span>
+
+                    {insight.novelty !== "known" && (
+                      <span className="rounded-full bg-[#EED3C7] px-2 py-0.5 text-[8px] font-black uppercase tracking-wide text-[#7A493A]">
+                        {t("personalMap.new")}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mt-1 text-sm font-bold leading-6 text-[#3F2C27]">
+                    {insight.messageKey
+                      ? t(insight.messageKey, insight.messageValues)
+                      : insight.message}
+                  </p>
+
+                  <p className="mt-2 text-xs leading-5 text-[#806D65]">
+                    {explainInsight(insight, t)}
+                  </p>
+
+                  <div className="mt-3 flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-bold text-[#9A8177]">
+                      {currentFeedback
+                        ? t("personalMap.feedbackThanks")
+                        : t("personalMap.feedbackPrompt")}
+                    </span>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => send(insight, "useful")}
+                        disabled={Boolean(currentFeedback)}
+                        aria-pressed={currentFeedback === "useful"}
+                        aria-label={t("personalMap.useful")}
+                        className="flex min-h-10 min-w-10 items-center justify-center rounded-full border border-[#E5D5CD] bg-white text-[#6B8A72] transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B86B52] disabled:cursor-default disabled:opacity-60"
+                      >
+                        <ThumbsUp size={15} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => send(insight, "dismissed")}
+                        disabled={Boolean(currentFeedback)}
+                        aria-pressed={currentFeedback === "dismissed"}
+                        aria-label={t("personalMap.dismiss")}
+                        className="flex min-h-10 min-w-10 items-center justify-center rounded-full border border-[#E5D5CD] bg-white text-[#9A6E64] transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B86B52] disabled:cursor-default disabled:opacity-60"
+                      >
+                        <ThumbsDown size={15} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </article>
   );
 }
 

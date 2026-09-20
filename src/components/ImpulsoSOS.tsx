@@ -35,6 +35,7 @@ import {
   recordReactiveResponse,
 } from "../data/reactive/reactiveHistoryStorage";
 import { emitCompanionBrainEvent } from "../data/reactive/companionBrain";
+import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
 
 interface ImpulsoSOSProps {
   onAddXp: (amount: number) => void;
@@ -296,6 +297,12 @@ const getPsychoeducationMessage = () => {
         hasThought:
           Boolean(thought && thought.trim().length > 0),
       }
+    );
+
+    emitCompanionInteraction(
+      "support_completed",
+      "impulse",
+      { tool: "impulse" }
     );
 
     const reactiveResult = analyzeReactiveState({

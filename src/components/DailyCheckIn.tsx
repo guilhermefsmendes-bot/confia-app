@@ -4,6 +4,7 @@ import {
   saveDailyCheckIn,
   getDailyCheckInHistory,
 } from "../storage/dailyCheckInStorage";
+import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
 
 interface Props {
   onComplete: () => void;
@@ -153,7 +154,14 @@ export default function DailyCheckIn({ onComplete }: Props) {
             </div>
 
             <button type="button"
-              onClick={handleFinish}
+              onClick={() => {
+  emitCompanionInteraction(
+    "checkin_completed",
+    "checkin",
+    { source: "daily_checkin" }
+  );
+  handleFinish();
+}}
               className="w-full rounded-2xl py-4 bg-green-500 text-white font-black text-lg shadow-lg shadow-green-200"
             >
               {t("dailyCheckIn.continue")}

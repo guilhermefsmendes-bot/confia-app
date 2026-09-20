@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState } from "react";
 import { getLocalCalendarDate } from "../../utils/date"
 import { useTranslation } from "react-i18next";
+import { emitCompanionInteraction } from "../../data/reactive/companionBrain/companionInteractionEvents";
 
 interface Props {
   onBack: () => void;
@@ -118,6 +119,11 @@ function HabitDailyCheck({ onBack }: Props) {
         date: todayDate,
         ratings,
       })
+    );
+
+    emitCompanionInteraction(
+      "habit_completed",
+      "habits"
     );
 
     setSaved(true);

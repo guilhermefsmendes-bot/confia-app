@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
 
 import {
   homeItems,
@@ -84,6 +85,15 @@ const HomeShop: React.FC<HomeShopProps> = ({
     spendXp(item.cost);
 
     buyItem(item.id);
+
+    emitCompanionInteraction(
+      "item_purchased",
+      "shop",
+      {
+        itemType:
+          item.companionSlot ?? "other",
+      }
+    );
 
     onBuy?.(item);
 

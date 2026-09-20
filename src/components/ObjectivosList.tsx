@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Check, Plus, Trash2, Heart, Award, Smile, Coffee, Users, Sparkles, ArrowRight, CircleCheckBig, Footprints } from 'lucide-react';
 import { Objective } from '../types';
 import { useTranslation } from "react-i18next";
+import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
 interface ObjectivosListProps {
   objectives: Objective[];
   onToggleComplete: (id: string) => void;
@@ -49,6 +50,14 @@ const { t } = useTranslation();
     const isCompleting = !objective.completed;
 
     if (isCompleting) {
+      emitCompanionInteraction(
+        "goal_completed",
+        "objectives",
+        {
+          goalType: objective.category,
+        }
+      );
+
       setObjectiveCelebration({
         id: objective.id,
         xp: objective.xpReward,

@@ -54,6 +54,10 @@ export type CompanionInteractionKind =
   | "goal_completed"
   | "habit_completed"
   | "item_equipped"
+  | "item_purchased"
+  | "experiment_started"
+  | "experiment_completed"
+  | "community_interaction"
   | "support_requested"
   | "support_completed"
   | "companion_contact"
@@ -89,6 +93,7 @@ export type CompanionBehaviorSignal =
   | "return_after_support"
   | "repeated_companion_contact"
   | "progress_reflection"
+  | "experiment_reflection"
   | "self_care_action"
   | "unfinished_tool";
 
@@ -483,6 +488,19 @@ export function interpretCompanionInteractions(
           "progress_viewed"
     );
 
+  const experimentReflection =
+    hasSequence(
+      events,
+      event =>
+        event.kind ===
+          "experiment_completed",
+      event =>
+        event.kind ===
+          "progress_viewed" ||
+        event.kind ===
+          "reflection_opened"
+    );
+
   const unfinishedTool =
     hasSequence(
       events,
@@ -540,6 +558,12 @@ export function interpretCompanionInteractions(
     );
   }
 
+  if (experimentReflection) {
+    signals.push(
+      "experiment_reflection"
+    );
+  }
+
   if (
     events.some(
       event =>
@@ -582,6 +606,9 @@ export function interpretCompanionInteractions(
     ) ||
     signals.includes(
       "progress_reflection"
+    ) ||
+    signals.includes(
+      "experiment_reflection"
     )
   ) {
     relevance = "medium";

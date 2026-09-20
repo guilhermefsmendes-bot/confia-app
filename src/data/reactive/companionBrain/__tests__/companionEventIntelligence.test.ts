@@ -203,3 +203,197 @@ test(
     );
   }
 );
+
+
+test(
+  "goal completion followed by progress view becomes progress reflection",
+  () => {
+    const result =
+      interpretCompanionInteractions([
+        event(
+          "goal",
+          1,
+          "goal_completed",
+          "objectives"
+        ),
+        event(
+          "progress",
+          3,
+          "progress_viewed",
+          "progress"
+        ),
+      ]);
+
+    assert.ok(
+      result.signals.includes(
+        "progress_reflection"
+      )
+    );
+
+    assert.equal(
+      result.shouldConsiderSpeaking,
+      true
+    );
+
+    assert.equal(
+      result.relevance,
+      "medium"
+    );
+  }
+);
+
+test(
+  "experiment completion followed by progress view becomes reflection",
+  () => {
+    const result =
+      interpretCompanionInteractions([
+        event(
+          "experiment",
+          1,
+          "experiment_completed",
+          "experiments"
+        ),
+        event(
+          "progress",
+          4,
+          "progress_viewed",
+          "progress"
+        ),
+      ]);
+
+    assert.ok(
+      result.signals.includes(
+        "experiment_reflection"
+      )
+    );
+
+    assert.equal(
+      result.shouldConsiderSpeaking,
+      true
+    );
+
+    assert.equal(
+      result.relevance,
+      "medium"
+    );
+  }
+);
+
+test(
+  "purchase and equipment remain silent when isolated",
+  () => {
+    const result =
+      interpretCompanionInteractions([
+        event(
+          "purchase",
+          1,
+          "item_purchased",
+          "shop"
+        ),
+        event(
+          "equip",
+          2,
+          "item_equipped",
+          "inventory"
+        ),
+      ]);
+
+    assert.equal(
+      result.shouldConsiderSpeaking,
+      false
+    );
+
+    assert.equal(
+      result.relevance,
+      "none"
+    );
+  }
+);
+
+test(
+  "community interaction remains silent when isolated",
+  () => {
+    const result =
+      interpretCompanionInteractions([
+        event(
+          "community",
+          1,
+          "community_interaction",
+          "community"
+        ),
+      ]);
+
+    assert.equal(
+      result.shouldConsiderSpeaking,
+      false
+    );
+
+    assert.equal(
+      result.relevance,
+      "none"
+    );
+  }
+);
+
+test(
+  "starting an experiment remains silent",
+  () => {
+    const result =
+      interpretCompanionInteractions([
+        event(
+          "experiment-start",
+          1,
+          "experiment_started",
+          "experiments"
+        ),
+      ]);
+
+    assert.equal(
+      result.shouldConsiderSpeaking,
+      false
+    );
+
+    assert.equal(
+      result.relevance,
+      "none"
+    );
+  }
+);
+
+
+test(
+  "habit completion followed by progress view becomes progress reflection",
+  () => {
+    const result =
+      interpretCompanionInteractions([
+        event(
+          "habit",
+          1,
+          "habit_completed",
+          "habits"
+        ),
+        event(
+          "progress-after-habit",
+          3,
+          "progress_viewed",
+          "progress"
+        ),
+      ]);
+
+    assert.ok(
+      result.signals.includes(
+        "progress_reflection"
+      )
+    );
+
+    assert.equal(
+      result.shouldConsiderSpeaking,
+      true
+    );
+
+    assert.equal(
+      result.relevance,
+      "medium"
+    );
+  }
+);

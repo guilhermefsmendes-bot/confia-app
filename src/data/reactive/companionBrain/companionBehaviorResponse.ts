@@ -98,6 +98,23 @@ export function resolveCompanionBehaviorResponse(
 
   if (
     signals.includes(
+      "experiment_reflection"
+    )
+  ) {
+    return {
+      signal: "experiment_reflection",
+      priority: 40,
+      cooldownMinutes: 120,
+      translationKeys: [
+        "companionBehavior.reflection.a",
+        "companionBehavior.reflection.b",
+        "companionBehavior.reflection.c",
+      ],
+    };
+  }
+
+  if (
+    signals.includes(
       "support_sequence"
     )
   ) {

@@ -103,3 +103,32 @@ test(
     );
   }
 );
+
+
+test(
+  "experiment reflection can produce a restrained response",
+  () => {
+    const response =
+      resolveCompanionBehaviorResponse({
+        signals: [
+          "experiment_reflection"
+        ],
+        eventCount: 2,
+        uniqueAreas: 2,
+        latestArea: "progress",
+        shouldConsiderSpeaking: true,
+        relevance: "medium",
+      });
+
+    assert.ok(response);
+
+    assert.equal(
+      response.signal,
+      "experiment_reflection"
+    );
+
+    assert.ok(
+      response.priority < 50
+    );
+  }
+);

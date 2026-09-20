@@ -32,6 +32,16 @@ import {
 import { useTranslation } from "react-i18next";
 import i18n from "./i18n";
 import { auth, initAnonymousAuth } from "./firebaseAuth";
+import { db } from "./firebaseFirestore";
+import {
+  collection,
+  onSnapshot,
+  query,
+  where,
+  doc,
+  updateDoc,
+  arrayRemove
+} from "firebase/firestore";
 
 
 
@@ -289,6 +299,20 @@ const [showCommunityTerms, setShowCommunityTerms] = useState(false);
 
 // Chat privado da comunidade
 const [chatPost, setChatPost] = useState<SharePost | null>(null);
+
+// Conversa privada mais recente ainda não lida pelo utilizador.
+// Guardamos apenas os dados necessários para abrir o chat
+// quando o utilizador entra no separador Comunidade.
+const [pendingCommunityChat, setPendingCommunityChat] = useState<{
+  id: string;
+  postId: string;
+  lastMessageAt?: any;
+} | null>(null);
+
+// Só tentamos abrir automaticamente uma conversa quando
+// o utilizador toca explicitamente no separador Comunidade.
+const [openPendingChatOnCommunityEntry, setOpenPendingChatOnCommunityEntry] =
+  useState(false);
 const [showDailyCheckIn, setShowDailyCheckIn] = useState(
   () => !hasCompletedToday()
 );
@@ -1171,6 +1195,104 @@ localStorage.setItem(
     localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
   }, [posts]);
 
+// Escuta os chats privados deste utilizador.
+// Não abre nada automaticamente aqui: apenas mantém memória
+// da conversa não lida mais recente.
+useEffect(() => {
+  let unsubscribe: (() => void) | undefined;
+  let cancelled = false;
+
+  const startUnreadChatListener = async () => {
+    let user = auth.currentUser;
+
+    if (!user) {
+      await new Promise<void>((resolve) => {
+        const unsubscribeAuth = auth.onAuthStateChanged((authUser) => {
+          unsubscribeAuth();
+          if (authUser) {
+            resolve();
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      user = auth.currentUser;
+    }
+
+    if (!user || cancelled) return;
+
+    const myUid = user.uid;
+
+    const chatsQuery = query(
+      collection(db, "chats"),
+      where("participants", "array-contains", myUid)
+    );
+
+    unsubscribe = onSnapshot(
+      chatsQuery,
+      (snapshot) => {
+        if (cancelled) return;
+
+        const unreadChats = snapshot.docs
+          .map((chatDoc) => ({
+            id: chatDoc.id,
+            ...chatDoc.data()
+          }) as {
+            id: string;
+            postId?: string;
+            unreadBy?: string[];
+            lastMessageAt?: any;
+          })
+          .filter((chat) =>
+            Boolean(chat.postId) &&
+            Array.isArray(chat.unreadBy) &&
+            chat.unreadBy.includes(myUid)
+          )
+          .sort((a, b) => {
+            const aTime =
+              typeof a.lastMessageAt?.toMillis === "function"
+                ? a.lastMessageAt.toMillis()
+                : 0;
+
+            const bTime =
+              typeof b.lastMessageAt?.toMillis === "function"
+                ? b.lastMessageAt.toMillis()
+                : 0;
+
+            return bTime - aTime;
+          });
+
+        const newest = unreadChats[0];
+
+        if (!newest?.postId) {
+          setPendingCommunityChat(null);
+          return;
+        }
+
+        setPendingCommunityChat({
+          id: newest.id,
+          postId: newest.postId,
+          lastMessageAt: newest.lastMessageAt
+        });
+      },
+      (error) => {
+        console.error(
+          "Erro ao verificar mensagens da comunidade:",
+          error
+        );
+      }
+    );
+  };
+
+  startUnreadChatListener();
+
+  return () => {
+    cancelled = true;
+    unsubscribe?.();
+  };
+}, []);
+
 useEffect(() => {
   if (currentTab !== 4) return;
 
@@ -1194,6 +1316,68 @@ useEffect(() => {
     unsubscribe?.();
   };
 }, [currentTab, t]);
+
+// Ao tocar em Comunidade, se existir uma mensagem privada
+// não lida, esperamos que o feed esteja disponível e abrimos
+// automaticamente a publicação/conversa correspondente.
+useEffect(() => {
+  if (
+    currentTab !== 4 ||
+    !openPendingChatOnCommunityEntry
+  ) {
+    return;
+  }
+
+  // Se não existe nenhuma conversa pendente, terminamos
+  // imediatamente o pedido de abertura.
+  if (!pendingCommunityChat) {
+    setOpenPendingChatOnCommunityEntry(false);
+    return;
+  }
+
+  const matchingPost = posts.find(
+    (post) => post.id === pendingCommunityChat.postId
+  );
+
+  // O listener da Comunidade pode ainda estar a carregar os posts.
+  // Nesse caso esperamos pela próxima atualização de posts.
+  if (!matchingPost) {
+    return;
+  }
+
+  const openUnreadConversation = async () => {
+    try {
+      setChatPost(matchingPost);
+
+      const user = auth.currentUser;
+
+      if (user) {
+        // Como esta conversa está agora efetivamente aberta,
+        // deixa de estar marcada como não lida para este utilizador.
+        await updateDoc(
+          doc(db, "chats", pendingCommunityChat.id),
+          {
+            unreadBy: arrayRemove(user.uid)
+          }
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Erro ao abrir/marcar conversa da comunidade como lida:",
+        error
+      );
+    } finally {
+      setOpenPendingChatOnCommunityEntry(false);
+    }
+  };
+
+  void openUnreadConversation();
+}, [
+  currentTab,
+  openPendingChatOnCommunityEntry,
+  pendingCommunityChat,
+  posts
+]);
 
 // Check if selected date is already logged
 useEffect(() => {
@@ -1306,6 +1490,12 @@ setTimeout(() => {
   };
 
 const handleMicroHabitCompleted = () => {
+  emitCompanionInteraction(
+    "tool_completed",
+    "exercise",
+    { tool: "micro_habit" }
+  );
+
   const today = getLocalCalendarDate();
   try {
     if (localStorage.getItem(STORAGE_KEYS.MICRO_HABIT_XP_DATE) === today) return;
@@ -1546,6 +1736,31 @@ const handleSaveRatings = () => {
     return getLocalDateString(date);
   };
 
+  /**
+   * CICLO SEMANAL
+   *
+   * Um objetivo pertence sempre à semana indicada por
+   * weekStart. Quando entramos numa nova semana, o quadro
+   * anterior deixa de ser o quadro ativo.
+   *
+   * O troféu NÃO é apagado: vive separadamente em
+   * confia_weekly_trophies.
+   */
+  useEffect(() => {
+    if (!weeklyGoal) {
+      return;
+    }
+
+    const currentWeekStart =
+      getMondayOfCurrentWeek();
+
+    if (weeklyGoal.weekStart === currentWeekStart) {
+      return;
+    }
+
+    setWeeklyGoal(null);
+  }, [weeklyGoal?.weekStart]);
+
   const handleCreateWeeklyGoal = (title: string) => {
     const cleanTitle = title.trim().slice(0, 20);
 
@@ -1610,7 +1825,11 @@ const handleSaveRatings = () => {
       ) {
         void import("./storage/weeklyTrophies")
           .then(({ createWeeklyTrophy }) => {
-            createWeeklyTrophy(prev.id, prev.title);
+            createWeeklyTrophy(
+              prev.id,
+              prev.title,
+              prev.weekStart
+            );
           })
           .catch((error) => {
             console.error("Erro ao criar troféu semanal:", error);
@@ -1720,6 +1939,19 @@ const handleAddPost = async (feeling: string, message: string) => {
     console.error("Erro ao publicar na comunidade:", error);
   }
 };
+
+  /**
+   * Partilha de troféus.
+   *
+   * Por privacidade, o texto pessoal do objetivo não é
+   * enviado para a Comunidade.
+   */
+  const handleShareWeeklyTrophy = async () => {
+    await handleAddPost(
+      t("trophyRoom.communityFeeling"),
+      t("trophyRoom.communityMessage")
+    );
+  };
 
   // Reações da comunidade
 const handleLikePost = async (
@@ -2591,34 +2823,98 @@ className="flex items-center justify-center w-24 h-24 relative"
                 </section>
               </div>
 
-{/* CONFIA — 60 SEGUNDOS / AÇÃO PRINCIPAL ACIMA DO SOS */}
+{/* CONFIA — O TEU CÉU / AÇÃO PRINCIPAL ACIMA DO SOS */}
     <div className="mb-3">
       <button
         type="button"
         onClick={() => setHomeScreen("innerCanvas")}
-        className="relative w-full overflow-hidden rounded-[24px] border border-[#B85F48]/25 bg-gradient-to-br from-[#2F2926] via-[#6E5148] to-[#9A6758] px-4 py-4 text-left shadow-[0_10px_26px_rgba(78,59,54,0.16)] transition-transform active:scale-[0.99]"
+        aria-label={t("innerCanvas.homeTitle")}
+        className="group relative w-full overflow-hidden rounded-[24px] border border-[#6976B5]/30 bg-[#090D20] px-4 py-4 text-left shadow-[0_12px_30px_rgba(10,14,35,0.20)] transition-all duration-300 active:scale-[0.99]"
       >
+        {/* Fundo profundo */}
         <div
           aria-hidden="true"
-          className="absolute -right-7 -top-9 h-28 w-28 rounded-full bg-white/10 blur-xl"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(118,135,220,0.23),transparent_34%),radial-gradient(circle_at_84%_82%,rgba(117,79,171,0.20),transparent_38%)]"
         />
 
-        <div className="relative flex items-center justify-between gap-4">
+        {/* Pequeno brilho azul */}
+        <div
+          aria-hidden="true"
+          className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#7B83D5]/15 blur-2xl transition-transform duration-500 group-hover:scale-110"
+        />
+
+        {/* Campo de estrelas */}
+        <div
+          aria-hidden="true"
+          className="absolute left-[7%] top-[21%] h-1 w-1 rounded-full bg-white/75 shadow-[37px_22px_0_rgba(255,255,255,0.40),76px_-7px_0_rgba(255,255,255,0.72),116px_27px_0_rgba(255,255,255,0.34),159px_-3px_0_rgba(255,255,255,0.56),204px_23px_0_rgba(255,255,255,0.38),248px_-5px_0_rgba(255,255,255,0.62),282px_28px_0_rgba(255,255,255,0.32)]"
+        />
+
+        <span
+          aria-hidden="true"
+          className="absolute bottom-[17%] left-[43%] h-1 w-1 rounded-full bg-[#DCE4FF]/70"
+        />
+
+        <span
+          aria-hidden="true"
+          className="absolute right-[18%] top-[20%] h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_7px_rgba(255,255,255,0.75)]"
+        />
+
+        {/* Constelação decorativa subtil */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 150 70"
+          className="pointer-events-none absolute right-10 top-1/2 h-[65px] w-[130px] -translate-y-1/2 opacity-[0.18]"
+        >
+          <path
+            d="M8 46 L35 24 L62 39 L91 15 L121 34 L142 20"
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+          />
+
+          {[
+            [8, 46],
+            [35, 24],
+            [62, 39],
+            [91, 15],
+            [121, 34],
+            [142, 20],
+          ].map(([cx, cy], index) => (
+            <circle
+              key={`home-sky-star-${index}`}
+              cx={cx}
+              cy={cy}
+              r={index === 3 ? 2.6 : 1.8}
+              fill="white"
+            />
+          ))}
+        </svg>
+
+        <div className="relative z-10 flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3.5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-white/15 bg-white/10">
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-white/15 bg-white/[0.08] shadow-[inset_0_0_18px_rgba(170,185,255,0.08)]">
               <Sparkles
-                size={19}
-                strokeWidth={1.8}
-                className="text-[#FFE9DC]"
+                size={21}
+                strokeWidth={1.7}
+                className="text-[#F5F2E9]"
+              />
+
+              <span
+                aria-hidden="true"
+                className="absolute right-1.5 top-1.5 h-1 w-1 rounded-full bg-white shadow-[0_0_7px_rgba(255,255,255,0.9)]"
               />
             </div>
 
             <div className="min-w-0">
-              <p className="text-[9px] font-black uppercase tracking-[0.17em] text-[#F2C3AC]">
+              <p className="text-[9px] font-black uppercase tracking-[0.21em] text-[#AAB5E6]">
+                ✦ CONFIA
+              </p>
+
+              <p className="mt-0.5 text-[16px] font-black tracking-[0.02em] text-white">
                 {t("innerCanvas.homeTitle")}
               </p>
 
-              <p className="mt-0.5 text-sm font-black text-white">
+              <p className="mt-0.5 max-w-[190px] text-[10px] font-semibold leading-snug text-[#B7BEDD]">
                 {t("innerCanvas.homeSubtitle")}
               </p>
             </div>
@@ -2626,7 +2922,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
           <span
             aria-hidden="true"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-base font-light text-white"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.08] text-base font-light text-white transition-transform duration-300 group-hover:translate-x-0.5"
           >
             →
           </span>
@@ -3083,6 +3379,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                   weeklyGoal={weeklyGoal}
                   onCreateGoal={handleCreateWeeklyGoal}
                   onCompleteDay={handleCompleteWeeklyDay}
+                  onShareTrophy={handleShareWeeklyTrophy}
                 />
               </div>
             </motion.div>
@@ -3221,7 +3518,27 @@ className="flex items-center justify-center w-24 h-24 relative"
 </LazySection>
       )}
 
-      <MainNavigation currentTab={currentTab} onNavigate={(index) => { setHomeScreen("home"); setCurrentTab(index); }} />
+      <MainNavigation
+        currentTab={currentTab}
+        hasUnreadCommunityMessage={Boolean(pendingCommunityChat)}
+        onNavigate={(index) => {
+          setHomeScreen("home");
+
+          // A abertura automática do chat só é armada quando
+          // o utilizador toca no separador Comunidade.
+          if (index === 4 && currentTab !== 4) {
+            // Só armamos a abertura automática se a mensagem
+            // já estava pendente no momento exato do toque.
+            setOpenPendingChatOnCommunityEntry(
+              Boolean(pendingCommunityChat)
+            );
+          } else {
+            setOpenPendingChatOnCommunityEntry(false);
+          }
+
+          setCurrentTab(index);
+        }}
+      />
     </div>
   );
 }

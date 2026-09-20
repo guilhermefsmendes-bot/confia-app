@@ -20,6 +20,8 @@ import { db } from "../firebaseFirestore";
 import { auth } from "../firebaseAuth";
 import { SharePost } from "../types";
 
+import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
+
 interface CommunityChatProps {
   post: SharePost;
   onClose: () => void;
@@ -326,13 +328,34 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         }
       );
 
-      // Atualizar última mensagem do chat.
+      // Atualizar última mensagem do chat e indicar
+      // qual participante ainda não a leu.
+      const activeChatRef = doc(db, "chats", activeChatId);
+      const activeChatSnapshot = await getDoc(activeChatRef);
+
+      const activeParticipants: string[] =
+        activeChatSnapshot.exists() &&
+        Array.isArray(activeChatSnapshot.data().participants)
+          ? activeChatSnapshot.data().participants
+          : [];
+
+      const unreadBy = activeParticipants.filter(
+        (uid: string) => uid !== currentUser.uid
+      );
+
       await updateDoc(
-        doc(db, "chats", activeChatId),
+        activeChatRef,
         {
           lastMessage: text,
-          lastMessageAt: serverTimestamp()
+          lastMessageAt: serverTimestamp(),
+          lastSenderId: currentUser.uid,
+          unreadBy
         }
+      );
+
+      emitCompanionInteraction(
+        "community_interaction",
+        "community"
       );
 
       setMessage("");

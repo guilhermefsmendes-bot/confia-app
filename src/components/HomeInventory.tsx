@@ -16,6 +16,7 @@ import {
 
 import { getWeeklyTrophies } from "../storage/weeklyTrophies";
 import ConfiaCreature from "./Companheiro/ConfiaCreature";
+import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
 
 interface HomeInventoryProps {
   onBack: () => void;
@@ -282,6 +283,17 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({
                           item.companionSlot,
                           accessoryIdsBySlot
                         );
+
+                        if (!isEquipped) {
+                          emitCompanionInteraction(
+                            "item_equipped",
+                            "inventory",
+                            {
+                              itemType:
+                                item.companionSlot,
+                            }
+                          );
+                        }
                       }
 
                       setRefresh(v => v + 1);

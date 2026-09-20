@@ -9,6 +9,20 @@ interface AbracoTimerProps {
   onRegisterStop?: (stopFunction: () => void) => void;
 }
 
+type FiveMinuteMood =
+  | "anxious"
+  | "busyMind"
+  | "low"
+  | "irritated"
+  | "tired"
+  | "disconnected"
+  | "pause";
+
+type FiveMinuteOutcome =
+  | "better"
+  | "same"
+  | "worse";
+
 type DoodlePoint = {
   x: number;
   y: number;
@@ -43,6 +57,17 @@ const { t } = useTranslation();
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [breatheState, setBreatheState] = useState<'Inalar' | 'Exalar'>('Inalar');
   const [completed, setCompleted] = useState(false);
+
+  // CONFIA — 5 MINUTOS PARA MIM
+  const [fiveMinuteMood, setFiveMinuteMood] =
+    useState<FiveMinuteMood | null>(null);
+
+  const [fiveMinuteOutcome, setFiveMinuteOutcome] =
+    useState<FiveMinuteOutcome | null>(null);
+
+  const [soundEnabled, setSoundEnabled] =
+    useState(false);
+
 const [selectedSound, setSelectedSound] = useState("rain");
 const [showDoodle, setShowDoodle] = useState(false);
 const [doodleColor, setDoodleColor] = useState("#934A38");
@@ -174,11 +199,19 @@ useEffect(() => {
 
 const handleToggle = () => {
   if (!isActive) {
-    const sound = new Audio(`/audio/${selectedSound}.mp3`);
-    sound.loop = true;
-    sound.play();
+    if (soundEnabled) {
+      const sound =
+        new Audio(`/audio/${selectedSound}.mp3`);
 
-audioRef.current = sound;
+      sound.loop = true;
+
+      sound.play().catch(() => {
+        // Alguns browsers podem bloquear autoplay.
+        // A sessão continua normalmente sem som.
+      });
+
+      audioRef.current = sound;
+    }
   } else {
 if (audioRef.current) {
   audioRef.current.pause();
@@ -197,6 +230,7 @@ stopAudio();
   setPhraseIdx(0);
   setCompleted(false);
   setBreatheState('Inalar');
+  setFiveMinuteOutcome(null);
 };
   
 const DOODLE_MAX_STROKES = 120;
@@ -759,6 +793,90 @@ useEffect(() => {
   };
 }, [showDoodle, doodleFinished]);
 
+/**
+ * ==========================================================
+ * CONFIA — 5 MINUTOS PARA MIM
+ * ==========================================================
+ *
+ * O mesmo relógio de 300 segundos continua a controlar
+ * toda a experiência.
+ *
+ * Não existem timers paralelos.
+ * A fase é derivada apenas do tempo restante.
+ */
+const fiveMinutePhase =
+  secondsLeft > 240
+    ? 0
+    : secondsLeft > 180
+      ? 1
+      : secondsLeft > 60
+        ? 2
+        : 3;
+
+const getFiveMinuteGuideKey = () => {
+  if (!fiveMinuteMood) {
+    return null;
+  }
+
+  return `fiveMinutes.guides.${fiveMinuteMood}.${fiveMinutePhase}`;
+};
+
+const selectFiveMinuteMood = (
+  mood: FiveMinuteMood
+) => {
+  if (isActive) {
+    return;
+  }
+
+  setFiveMinuteMood(mood);
+  setFiveMinuteOutcome(null);
+  setSecondsLeft(TOTAL_SECONDS);
+  setCompleted(false);
+  setPhraseIdx(0);
+  setBreatheState("Inalar");
+};
+
+const registerFiveMinuteOutcome = (
+  outcome: FiveMinuteOutcome
+) => {
+  setFiveMinuteOutcome(outcome);
+
+  try {
+    const storageKey =
+      "confia_five_minute_sessions_v1";
+
+    const raw =
+      window.localStorage.getItem(storageKey);
+
+    const previous =
+      raw ? JSON.parse(raw) : [];
+
+    const sessions =
+      Array.isArray(previous)
+        ? previous
+        : [];
+
+    sessions.push({
+      mood: fiveMinuteMood,
+      outcome,
+      completedAt: new Date().toISOString(),
+    });
+
+    /**
+     * Mantemos apenas as últimas 60 experiências.
+     * É suficiente para futura aprendizagem sem deixar
+     * crescer o armazenamento indefinidamente.
+     */
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify(sessions.slice(-60))
+    );
+  } catch {
+    // A experiência continua normalmente mesmo que
+    // localStorage não esteja disponível.
+  }
+};
+
 const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -783,6 +901,92 @@ const formatTime = (seconds: number) => {
        {t("mindHugDescription")}
         </p>
       </div>
+
+      {/* CONFIA — 5 MINUTOS PARA MIM */}
+      <section className="w-full overflow-hidden rounded-[28px] border border-[#B85F48]/20 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FFFDFC] shadow-[0_10px_28px_rgba(92,64,52,0.045)]">
+        <div className="p-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F3E3DC] text-lg">
+              ✨
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
+                {t("fiveMinutes.eyebrow")}
+              </p>
+
+              <h3 className="mt-1 text-base font-black text-[#2F2926]">
+                {t("fiveMinutes.title")}
+              </h3>
+
+              <p className="mt-1 text-xs font-medium leading-relaxed text-slate-500">
+                {t("fiveMinutes.description")}
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-5 text-xs font-black text-[#2F2926]">
+            {t("fiveMinutes.howAreYou")}
+          </p>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {([
+              ["anxious", "😰"],
+              ["busyMind", "🤯"],
+              ["low", "😔"],
+              ["irritated", "😤"],
+              ["tired", "😴"],
+              ["disconnected", "🫥"],
+              ["pause", "🙂"],
+            ] as const).map(([mood, emoji]) => (
+              <button
+                key={mood}
+                type="button"
+                disabled={isActive}
+                onClick={() => selectFiveMinuteMood(mood)}
+                aria-pressed={fiveMinuteMood === mood}
+                className={`min-h-[54px] rounded-[18px] border px-3 py-2.5 text-left transition-all ${
+                  fiveMinuteMood === mood
+                    ? "border-[#B85F48]/45 bg-[#F8E8DF] shadow-sm"
+                    : "border-[#E8DDD7]/75 bg-white"
+                } ${
+                  isActive
+                    ? "cursor-default opacity-70"
+                    : "active:scale-[0.98]"
+                }`}
+              >
+                <span className="mr-1.5">
+                  {emoji}
+                </span>
+
+                <span className="text-[11px] font-bold text-[#5F504A]">
+                  {t(`fiveMinutes.moods.${mood}`)}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {fiveMinuteMood && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 rounded-[20px] border border-[#B85F48]/20 bg-[#FFF8F4] px-4 py-3.5"
+            >
+              <p className="text-[9px] font-black uppercase tracking-[0.15em] text-[#934A38]">
+                {isActive
+                  ? t("fiveMinutes.now")
+                  : t("fiveMinutes.prepared")}
+              </p>
+
+              <p className="mt-1.5 text-sm font-bold leading-relaxed text-[#2F2926]">
+                {getFiveMinuteGuideKey()
+                  ? t(getFiveMinuteGuideKey()!)
+                  : null}
+              </p>
+            </motion.div>
+          )}
+        </div>
+      </section>
 
       {/* Main Visual breathing circle and Timer */}
       <div className="relative flex items-center justify-center w-64 h-64 my-4 bg-[#F3E3DC]/40 rounded-full border border-[#B85F48]/15 shadow-inner">
@@ -875,22 +1079,67 @@ key={phraseIdx}
           </motion.div>
         </AnimatePresence>
       </div>
-{/* Relaxing Sounds */}
-<div className="w-full bg-[#F8F1EA] rounded-2xl p-4 border border-[#B85F48]/20 mb-4">
-  <p className="text-xs font-bold text-[#2F2926] mb-3">
-    🌿 {t("calmNow")}
-  </p>
+{/* Sons — continuam sempre opcionais */}
+<div className="w-full bg-[#F8F1EA] rounded-[24px] p-4 border border-[#B85F48]/20 mb-4">
 
-  <select
-    value={selectedSound}
-    onChange={(e) => setSelectedSound(e.target.value)}
-    className="w-full rounded-xl border border-[#B85F48]/30 px-3 py-2 text-sm bg-white"
-  >
-    <option value="rain">{t("soundRain")}</option>
-    <option value="forest">{t("soundForest")}</option>
-    <option value="ocean">{t("soundOcean")}</option>
-    <option value="white-noise">{t("soundWhiteNoise")}</option>
-  </select>
+  <div className="flex items-center justify-between gap-3">
+    <div>
+      <p className="text-xs font-black text-[#2F2926]">
+        🎧 {t("fiveMinutes.soundTitle")}
+      </p>
+
+      <p className="mt-1 text-[10px] font-medium text-slate-500">
+        {t("fiveMinutes.soundDescription")}
+      </p>
+    </div>
+
+    <button
+      type="button"
+      disabled={isActive}
+      onClick={() =>
+        setSoundEnabled(current => !current)
+      }
+      aria-pressed={soundEnabled}
+      className={`shrink-0 rounded-full border px-3 py-2 text-[10px] font-black transition ${
+        soundEnabled
+          ? "border-[#B85F48]/35 bg-[#934A38] text-white"
+          : "border-[#DCCBC3] bg-white text-[#8B6B60]"
+      }`}
+    >
+      {soundEnabled
+        ? t("fiveMinutes.soundOn")
+        : t("fiveMinutes.soundOff")}
+    </button>
+  </div>
+
+  {soundEnabled && (
+    <div className="mt-3">
+      <select
+        value={selectedSound}
+        disabled={isActive}
+        onChange={(e) =>
+          setSelectedSound(e.target.value)
+        }
+        className="w-full rounded-xl border border-[#B85F48]/30 bg-white px-3 py-2.5 text-sm"
+      >
+        <option value="rain">
+          {t("soundRain")}
+        </option>
+
+        <option value="forest">
+          {t("soundForest")}
+        </option>
+
+        <option value="ocean">
+          {t("soundOcean")}
+        </option>
+
+        <option value="white-noise">
+          {t("soundWhiteNoise")}
+        </option>
+      </select>
+    </div>
+  )}
 </div>
 
       {/* Abraço Premium — Rabisco */}
@@ -1211,6 +1460,81 @@ key={phraseIdx}
           )}
         </button>
       </div>
+
+      {/* ==================================================
+          COMO FICASTE?
+      ================================================== */}
+
+      {completed && fiveMinuteMood && (
+        <motion.section
+          initial={{
+            opacity: 0,
+            y: 8,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
+          className="w-full rounded-[26px] border border-[#B85F48]/20 bg-white p-5 shadow-sm"
+        >
+          <p className="text-center text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
+            {t("fiveMinutes.finishEyebrow")}
+          </p>
+
+          <h3 className="mt-1.5 text-center text-base font-black text-[#2F2926]">
+            {t("fiveMinutes.afterQuestion")}
+          </h3>
+
+          {!fiveMinuteOutcome ? (
+            <div className="mt-4 grid grid-cols-3 gap-2">
+
+              {([
+                ["better", "🙂"],
+                ["same", "😐"],
+                ["worse", "😕"],
+              ] as const).map(
+                ([outcome, emoji]) => (
+                  <button
+                    key={outcome}
+                    type="button"
+                    onClick={() =>
+                      registerFiveMinuteOutcome(
+                        outcome
+                      )
+                    }
+                    className="rounded-[18px] border border-[#E8DDD7] bg-[#FFFDFC] px-2 py-3 text-center transition-transform active:scale-[0.97]"
+                  >
+                    <span className="block text-xl">
+                      {emoji}
+                    </span>
+
+                    <span className="mt-1 block text-[10px] font-black text-[#6D5A53]">
+                      {t(
+                        `fiveMinutes.outcomes.${outcome}`
+                      )}
+                    </span>
+                  </button>
+                )
+              )}
+
+            </div>
+          ) : (
+            <motion.div
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+              }}
+              className="mt-4 rounded-[18px] bg-[#FFF8F4] px-4 py-3 text-center"
+            >
+              <p className="text-xs font-bold leading-relaxed text-[#76584D]">
+                {t("fiveMinutes.thankYou")}
+              </p>
+            </motion.div>
+          )}
+        </motion.section>
+      )}
 
       {/* Completion reward banner */}
       <AnimatePresence>

@@ -31,6 +31,8 @@ function getLast7Days(): string[] {
   return days;
 }
 
+import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
+
 interface HomeProgressSummaryProps {
   onOpenProgress: () => void;
 }
@@ -330,7 +332,13 @@ export default function HomeProgressSummary({
       <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#E8DDD7]/50 pt-3">
         <button
           type="button"
-          onClick={onOpenProgress}
+          onClick={() => {
+            emitCompanionInteraction(
+              "progress_viewed",
+              "progress"
+            );
+            onOpenProgress();
+          }}
           className="group inline-flex min-h-9 items-center gap-2 rounded-xl px-1 text-left text-[10px] font-black text-[#934A38] transition-opacity active:opacity-70"
         >
           <span>

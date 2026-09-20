@@ -316,7 +316,48 @@
     "rememberStrength": "Remember a difficult situation you overcame — remind yourself that you have faced hard moments before",
     "dailyAchievement": "Write down one thing you achieved today — recognising progress reinforces your sense of ability",
     "pauseStress": "Pause before responding to something stressful — a few seconds can prevent an automatic reaction",
-    "endWithGratitude": "End the day with something you are grateful for — focusing on something positive can help close the day"
+    "endWithGratitude": "End the day with something you are grateful for — focusing on something positive can help close the day",
+    "morningWater": "Start the day with a glass of water — a simple way to care for your body",
+    "fruitPortion": "Eat a piece of fruit — add one simple nutritious choice to your day",
+    "vegetableMeal": "Include vegetables in one meal — make a small choice for your wellbeing",
+    "slowFirstBites": "Eat the first few bites slowly — give yourself time to notice the flavours and your body",
+    "noticeHunger": "Before eating, notice whether you feel hunger, desire or habit — observe without judging",
+    "prepareHealthySnack": "Prepare a nutritious snack — make a caring choice easier later",
+    "waterBottle": "Keep water near you — make it easier to remember to drink throughout the day",
+    "standAndMove": "Stand up and move for 2 minutes — break up a long period of inactivity",
+    "neckStretch": "Gently stretch your neck — release some accumulated tension",
+    "bodyScan": "Do a brief body scan — notice where you hold tension without trying to change it immediately",
+    "shortDance": "Put on a song and move for 3 minutes — allow yourself a small moment of energy",
+    "stairsMovement": "Add a few minutes of movement — small opportunities count too",
+    "freshAirWindow": "Open a window and feel the fresh air for 1 minute — take a small break from your surroundings",
+    "restEyes": "Look away from the screen for 2 minutes — give your eyes and attention a short break",
+    "slowWalkFive": "Walk slowly for 5 minutes — pay attention to the movement of your body",
+    "threeGoodThings": "Notice 3 small things that went well — train your attention to recognise the positive too",
+    "nameEmotion": "Name the emotion you feel right now — identifying it can bring greater clarity",
+    "thoughtNotFact": "Choose a difficult thought and remind yourself: «it is a thought, not necessarily a fact»",
+    "oneMinuteSilence": "Spend 1 minute in silence — allow your mind to slow down without having to solve anything",
+    "noticeWithoutJudging": "For 1 minute notice what you are feeling without labelling it good or bad",
+    "writeOneNeed": "Write down one thing you need today — recognising needs can guide small actions",
+    "selfKindness": "Talk to yourself as you would to someone you care about — replace criticism with understanding",
+    "worryLater": "Postpone a worry for 15 minutes — remind yourself that you do not need to solve it immediately",
+    "acceptUncertainty": "Leave one small uncertainty unanswered — practise tolerating not having absolute certainty",
+    "noticeProgress": "Notice one thing you did better today, even if it was small",
+    "thankSomeone": "Genuinely thank someone for something they did — strengthen a moment of connection",
+    "listenFully": "Listen to someone for a few minutes without preparing your reply — offer genuine attention",
+    "checkOnSomeone": "Ask someone you care about how they are — create a small moment of closeness",
+    "shareFeeling": "Tell someone you trust how you have been feeling — you do not have to explain everything",
+    "smallConnection": "Create a small moment of connection — a conversation, smile or gesture also counts",
+    "sayNoKindly": "Say no to something you cannot take on — protect your boundaries respectfully",
+    "askHowSomeoneIs": "Genuinely ask someone how their day went",
+    "twoMinuteStart": "Spend just 2 minutes starting a task you have postponed — starting is already progress",
+    "prepareTomorrow": "Prepare one small thing for tomorrow — reduce one future decision",
+    "oneThingAtTime": "For 5 minutes do only one thing — reduce the need to divide your attention",
+    "clearNotifications": "Turn off unnecessary notifications for a while — create a little more mental space",
+    "fiveMinuteDeclutter": "Clear or tidy a few things for 5 minutes — create a simpler small space",
+    "doSmallDecision": "Make one small decision without repeatedly reviewing it — practise trusting your choice",
+    "leaveComfortSmall": "Do one small thing outside your comfort zone — choose something challenging but safe",
+    "finishDelayedThing": "Finish one small thing you have postponed — free up some mental space",
+    "screenFreeTen": "Spend 10 minutes without screens — give your attention an intentional break"
   },
   "completed": "Completed!",
   "complete": "Complete",
@@ -1722,13 +1763,13 @@
   "companionBrain.conversationAfterHarderMoment": "A little while ago it looked like the day was getting harder. Now I'm seeing a different signal. It may be worth noticing what changed in the meantime.",
   "companionBrain.conversationAfterImpulseImprovement": "A little while ago we talked about the moment when you needed Impulso. Your rating is better now. I don't know whether the two are connected, but it's a change worth noticing.",
   "innerCanvas": {
-    "title": "Inner Canvas",
-    "sixtySeconds": "60 seconds",
-    "introTitle": "Turn what you feel into an image.",
-    "introText": "In about a minute, tell us how strongly you recognise each state in yourself. Confia turns your answers into a unique picture of this moment.",
-    "start": "Start the 60 seconds",
-    "gallery": "Gallery",
-    "galleryCount": "{{count}} saved artworks",
+    "title": "Your sky",
+    "sixtySeconds": "YOUR SKY",
+    "introTitle": "Discover the constellation of your moment.",
+    "introText": "Tell us how you feel right now. CONFIA transforms your answers into a unique constellation and brings it closer to one of the 88 constellations in the sky.",
+    "start": "Discover my sky",
+    "gallery": "My Sky",
+    "galleryCount": "{{count}} moments saved",
     "questionEyebrow": "Part {{current}} of {{total}}",
     "questionTitle": "How do you feel right now?",
     "scaleHelp": "Do not look for the perfect answer. Use 0 when you do not feel it and 10 when it is strongly present.",
@@ -1751,8 +1792,8 @@
     "emptyGallery": "You do not have any saved artworks yet.",
     "delete": "Delete",
     "deleteConfirm": "Do you want to delete this artwork?",
-    "homeTitle": "60 seconds",
-    "homeSubtitle": "Turn what you feel into an image.",
+    "homeTitle": "Your sky",
+    "homeSubtitle": "Discover the constellation of your moment",
     "states": {
       "motivated": "Motivated",
       "energetic": "Energetic",
@@ -1780,7 +1821,12 @@
     "goldHint": "Record 20 days this month to reveal your Gold piece.",
     "silverUnlocked": "Your Silver piece for this week has been unlocked.",
     "goldUnlocked": "Your Gold piece for this month has been unlocked.",
-    "createdFromMoments": "Created from {{count}} moments"
+    "createdFromMoments": "Created from {{count}} moments",
+    "galleryCount_one": "{{count}} moment saved",
+    "galleryCount_other": "{{count}} moments saved",
+    "saveInMySky": "Save to My Sky",
+    "savedInMySky": "Saved in your sky",
+    "notSavedYet": "This constellation has not been saved to your sky yet."
   },
   "personalMap": {
     "backAria": "Back",
@@ -2111,5 +2157,116 @@
       "b": "You've finished this moment of support. We don't need to decide what it means yet — we can simply notice how you are now.",
       "c": "You took a pause to care for yourself. If you want, we can continue from here."
     }
+  },
+  "companionDailyTips": {
+    "habits": "💡 Explore your Habits to understand what may be positively or negatively influencing your days.",
+    "patterns": "💡 In Habits you can start discovering patterns between what you do and how you feel.",
+    "personalMap": "💡 Have you seen your Personal Map? It brings together discoveries CONFIA makes with you over time.",
+    "experiments": "💡 Try Personal Experiments to test small changes and discover what works better for you.",
+    "objectives": "💡 Every day you have different small Objectives. They are simple steps you can complete at your own pace.",
+    "weeklyGoal": "💡 Your weekly goal can help turn repeated small steps into consistency.",
+    "progress": "💡 Check your Progress occasionally. Some changes become easier to see when you look across several days.",
+    "sos": "💡 If you're having a difficult moment, SOS has quick tools you can use right away.",
+    "dailyCheckin": "💡 Recording how you feel takes very little time and helps CONFIA understand how your days are changing.",
+    "companion": "💡 The more you use CONFIA, the more context your companion can have to support you.",
+    "inventory": "💡 Take a look at your Inventory. That's where you'll find what you earn for your companion.",
+    "shop": "💡 In the Shop you can use what you've earned in the app to personalise your companion's experience.",
+    "community": "💡 In the Community you can share or connect with other people without having to face everything alone.",
+    "reflection": "💡 Small records become more useful over time. What seems isolated today may help you recognise a pattern later.",
+    "habitEvolution": "💡 Habit evolution can reveal trends that are difficult to notice when looking at just one day.",
+    "smallChanges": "💡 You don't need to change everything at once. Use CONFIA to try small changes and observe the result.",
+    "observeDays": "💡 One day tells a small story. Several days together can reveal much more about what influences you.",
+    "useRegularly": "💡 You don't need to fill in everything. Regularly using a few areas of CONFIA can already build a more useful picture of your days."
+  },
+  "fiveMinutes": {
+    "eyebrow": "5 minutes for you",
+    "title": "How are you right now?",
+    "description": "Choose what feels closest to this moment. CONFIA will guide these minutes with you.",
+    "howAreYou": "What do you need right now?",
+    "prepared": "These minutes are ready",
+    "now": "Right now",
+    "soundTitle": "Would you like sound?",
+    "soundDescription": "It's optional. You can spend these minutes in silence.",
+    "soundOn": "Sound on",
+    "soundOff": "No sound",
+    "finishEyebrow": "Before you finish",
+    "afterQuestion": "How are you now?",
+    "thankYou": "Thanks for recording this moment. Over time, this can help you notice what seems to work better for you.",
+    "moods": {
+      "anxious": "Anxious",
+      "busyMind": "Busy mind",
+      "low": "Feeling low",
+      "irritated": "Irritated",
+      "tired": "Tired",
+      "disconnected": "Disconnected",
+      "pause": "I just want a break"
+    },
+    "outcomes": {
+      "better": "Better",
+      "same": "Same",
+      "worse": "Worse"
+    },
+    "guides": {
+      "anxious": [
+        "You don't need to solve anything right now. Start simply by slowing down.",
+        "Follow your breathing without forcing it. Let your body find its own rhythm.",
+        "Notice what's around you and let thoughts pass without having to follow them.",
+        "Slowly return to the present. You don't need to leave with everything solved."
+      ],
+      "busyMind": [
+        "For this first minute, give your mind permission not to solve anything.",
+        "Choose just one place for your attention: breathing, sound or movement.",
+        "If you want, use drawing to move something from your mind onto the screen.",
+        "To finish, think only about the next small thing you want to do."
+      ],
+      "low": [
+        "You don't have to change what you're feeling. Just stay here for a few minutes.",
+        "Breathe slowly and allow this moment to be simple.",
+        "Choose something small that feels comfortable: listen, draw or simply stay.",
+        "When you finish, look for one small caring action you can offer yourself."
+      ],
+      "irritated": [
+        "Before reacting to anything, give these minutes to your body.",
+        "Breathe out slowly and let your shoulders release some tension.",
+        "If you want, draw freely without trying to make anything beautiful.",
+        "Notice whether there is now a little more space between what you feel and what you do next."
+      ],
+      "tired": [
+        "For these minutes, you don't need to produce or solve anything.",
+        "Let your breathing become comfortable and slow the pace.",
+        "Rest your eyes, listen if you chose sound, and allow yourself to stop.",
+        "Before continuing your day, ask yourself what the simplest thing you need is."
+      ],
+      "disconnected": [
+        "Let's slowly return to the present. First notice where your body is supported.",
+        "Notice one simple physical sensation: temperature, contact or breathing.",
+        "Look around and identify a few things you can see or hear.",
+        "Stay here for a few more seconds before returning to what you were doing."
+      ],
+      "pause": [
+        "These five minutes don't need to have a goal.",
+        "Choose sound or silence and let the pace slow down.",
+        "There's nothing you need to complete. You can simply be here.",
+        "Take with you only the feeling of having stopped for a few minutes."
+      ]
+    }
+  },
+  "trophyRoom": {
+    "eyebrow": "Achievements",
+    "title": "Trophy Room",
+    "count": "{{count}} trophy/trophies earned",
+    "open": "View",
+    "close": "Close",
+    "emptyTitle": "Your trophy room is waiting",
+    "emptyDescription": "Complete all 7 days of a weekly goal to earn your first trophy.",
+    "weekComplete": "7 days completed",
+    "achievement": "Weekly achievement",
+    "sevenDays": "7/7 goal",
+    "completedOn": "Earned on {{date}}",
+    "privateGoal": "The name of your personal goal stays private when you share this achievement.",
+    "share": "Share with Community",
+    "shared": "Shared ✓",
+    "communityFeeling": "Proud",
+    "communityMessage": "🏆 I completed all 7 days of my weekly goal on CONFIA."
   }
 }

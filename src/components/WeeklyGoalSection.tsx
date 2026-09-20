@@ -1,6 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { WeeklyGoal } from "../types";
+import {
+  getWeeklyTrophies,
+  type WeeklyTrophy
+} from "../storage/weeklyTrophies";
 
 interface WeeklyGoalSectionProps {
   weeklyGoal: WeeklyGoal | null;
@@ -11,6 +15,9 @@ interface WeeklyGoalSectionProps {
     note: string,
     recovery: boolean
   ) => void;
+  onShareTrophy: (
+    trophy: WeeklyTrophy
+  ) => Promise<void> | void;
 }
 
 const getLocalDateString = (date = new Date()) => {
@@ -43,6 +50,7 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
   weeklyGoal,
   onCreateGoal,
   onCompleteDay,
+  onShareTrophy,
 }) => {
   const { t, i18n } = useTranslation();
 
@@ -52,6 +60,21 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedEase, setSelectedEase] = useState<number | null>(null);
   const [note, setNote] = useState("");
+  const [showTrophyRoom, setShowTrophyRoom] =
+    useState(false);
+  const [selectedTrophy, setSelectedTrophy] =
+    useState<WeeklyTrophy | null>(null);
+  const [sharedTrophyId, setSharedTrophyId] =
+    useState<string | null>(null);
+
+  /**
+   * O storage é a fonte de verdade dos troféus.
+   * Relemos em cada render relevante para que um troféu
+   * acabado de conquistar apareça imediatamente.
+   */
+  const trophies = getWeeklyTrophies()
+    .slice()
+    .sort((a, b) => b.createdAt - a.createdAt);
 
   const today = getLocalDateString();
 
@@ -137,9 +160,197 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
     closeModal();
   };
 
+  const formatTrophyDate = (
+    timestamp: number
+  ) => {
+    try {
+      return new Intl.DateTimeFormat(
+        i18n.language,
+        {
+          day: "2-digit",
+          month: "short",
+          year: "numeric"
+        }
+      ).format(new Date(timestamp));
+    } catch {
+      return "";
+    }
+  };
+
+  const handleShareTrophy = async (
+    trophy: WeeklyTrophy
+  ) => {
+    try {
+      await onShareTrophy(trophy);
+      setSharedTrophyId(trophy.id);
+    } catch (error) {
+      console.error(
+        "Erro ao partilhar troféu:",
+        error
+      );
+    }
+  };
+
+  const TrophyDetailModal = ({
+    trophy
+  }: {
+    trophy: WeeklyTrophy;
+  }) => (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#3F302B]/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-[30px] border border-[#B85F48]/20 bg-[#FFFCFA] p-6 text-center shadow-2xl">
+        <button
+          type="button"
+          onClick={() =>
+            setSelectedTrophy(null)
+          }
+          className="ml-auto flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500"
+          aria-label={t("trophyRoom.close")}
+        >
+          ✕
+        </button>
+
+        <div className="mx-auto mt-1 flex h-20 w-20 items-center justify-center rounded-[26px] bg-gradient-to-br from-[#F3E3DC] to-[#FFF4ED] text-5xl shadow-sm">
+          {trophy.emoji || "🏆"}
+        </div>
+
+        <p className="mt-5 text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
+          {t("trophyRoom.achievement")}
+        </p>
+
+        <h3 className="mt-1 text-xl font-black text-[#2F2926]">
+          {t("trophyRoom.sevenDays")}
+        </h3>
+
+        <p className="mt-2 text-sm font-semibold text-[#7A6A64]">
+          {t("trophyRoom.completedOn", {
+            date: formatTrophyDate(
+              trophy.createdAt
+            )
+          })}
+        </p>
+
+        <div className="mt-5 rounded-[20px] bg-[#FBF7F5] p-4">
+          <p className="text-xs font-medium leading-relaxed text-[#8A7770]">
+            {t("trophyRoom.privateGoal")}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() =>
+            void handleShareTrophy(trophy)
+          }
+          disabled={
+            sharedTrophyId === trophy.id
+          }
+          className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#B85F48] to-[#934A38] px-4 py-3 text-sm font-black text-white shadow-md shadow-[#B85F48]/20 disabled:opacity-60"
+        >
+          {sharedTrophyId === trophy.id
+            ? t("trophyRoom.shared")
+            : t("trophyRoom.share")}
+        </button>
+      </div>
+    </div>
+  );
+
+  const TrophyRoom = () => (
+    <section className="mt-4 overflow-hidden rounded-[28px] border border-[#B85F48]/20 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC] shadow-sm">
+      <button
+        type="button"
+        onClick={() =>
+          setShowTrophyRoom(previous => !previous)
+        }
+        className="flex w-full items-center justify-between gap-4 p-5 text-left"
+        aria-expanded={showTrophyRoom}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F3E3DC] text-2xl">
+            🏆
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
+              {t("trophyRoom.eyebrow")}
+            </p>
+
+            <h3 className="mt-0.5 text-base font-black text-[#2F2926]">
+              {t("trophyRoom.title")}
+            </h3>
+
+            <p className="mt-1 text-xs font-semibold text-[#8A7770]">
+              {t("trophyRoom.count", {
+                count: trophies.length
+              })}
+            </p>
+          </div>
+        </div>
+
+        <span className="shrink-0 rounded-full border border-[#B85F48]/15 bg-white px-3 py-1.5 text-xs font-black text-[#934A38]">
+          {showTrophyRoom
+            ? t("trophyRoom.close")
+            : t("trophyRoom.open")}
+        </span>
+      </button>
+
+      {showTrophyRoom && (
+        <div className="border-t border-[#F0E5DF] p-5 pt-4">
+          {trophies.length === 0 ? (
+            <div className="rounded-[22px] bg-[#FBF7F5] px-4 py-6 text-center">
+              <div className="text-3xl">
+                🏆
+              </div>
+
+              <p className="mt-3 text-sm font-black text-[#2F2926]">
+                {t("trophyRoom.emptyTitle")}
+              </p>
+
+              <p className="mx-auto mt-1 max-w-xs text-xs font-medium leading-relaxed text-[#8A7770]">
+                {t("trophyRoom.emptyDescription")}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {trophies.map((trophy, index) => (
+                <button
+                  key={trophy.id}
+                  type="button"
+                  onClick={() =>
+                    setSelectedTrophy(trophy)
+                  }
+                  className="rounded-[22px] border border-[#EADDD6] bg-white p-4 text-left shadow-sm transition-transform active:scale-[0.98]"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-3xl">
+                      {trophy.emoji || "🏆"}
+                    </span>
+
+                    <span className="rounded-full bg-[#F8E8DF] px-2 py-1 text-[8px] font-black uppercase tracking-wide text-[#934A38]">
+                      #{trophies.length - index}
+                    </span>
+                  </div>
+
+                  <p className="mt-3 text-xs font-black text-[#2F2926]">
+                    {t("trophyRoom.weekComplete")}
+                  </p>
+
+                  <p className="mt-1 text-[10px] font-semibold text-[#9A857C]">
+                    {formatTrophyDate(
+                      trophy.createdAt
+                    )}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+
   if (!weeklyGoal) {
     return (
-      <div className="mt-6 rounded-[28px] border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm">
+      <>
+        <div className="mt-6 rounded-[28px] border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-2xl">
             🏆
@@ -186,7 +397,16 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
         >
           {t("weeklyGoal.start")}
         </button>
-      </div>
+        </div>
+
+        <TrophyRoom />
+
+        {selectedTrophy && (
+          <TrophyDetailModal
+            trophy={selectedTrophy}
+          />
+        )}
+      </>
     );
   }
 
@@ -397,6 +617,14 @@ export const WeeklyGoalSection: React.FC<WeeklyGoalSectionProps> = ({
           </div>
         </div>
       </section>
+
+      <TrophyRoom />
+
+      {selectedTrophy && (
+        <TrophyDetailModal
+          trophy={selectedTrophy}
+        />
+      )}
 
       {selectedDate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F302B]/45 p-4 backdrop-blur-sm">

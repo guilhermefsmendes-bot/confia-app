@@ -4,6 +4,7 @@ import { ArrowLeft, FlaskConical, CheckCircle2, X } from "lucide-react";
 import { appendPersonalEvents } from "../data/personal/personalEventStorage";
 import { makePersonalEvent } from "../data/personal/personalEvent";
 import { recordPersonalAnalytics } from "../data/personal/personalAnalytics";
+import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
 
 type Experiment = {
   id: string;
@@ -42,6 +43,12 @@ export default function PersonalExperiments({ onBack }: { onBack: () => void }) 
     const item: Experiment = { id, hypothesis: hypothesis.trim(), metric: metric.trim(), startedAt: now, baseline: Number.isFinite(baselineValue) ? baselineValue : undefined, target: Number.isFinite(targetValue) ? targetValue : undefined, status: "active" };
     setItems(current => [item, ...current]);
     recordPersonalAnalytics("experiment_started");
+
+    emitCompanionInteraction(
+      "experiment_started",
+      "experiments"
+    );
+
     appendPersonalEvents([makePersonalEvent({ id: `pe_experiment_start_${id}`, type: "experiment", timestamp: now, source: "microexperiment", value: true, metadata: { experimentId: id, phase: "start", hypothesis: item.hypothesis, targetMetric: item.metric, baseline: item.baseline, target: item.target } })]);
     setHypothesis(""); setMetric(""); setBaseline(""); setTarget("");
   };
@@ -52,6 +59,12 @@ export default function PersonalExperiments({ onBack }: { onBack: () => void }) 
     const now = new Date().toISOString();
     setItems(current => current.map(value => value.id === item.id ? { ...value, status: "complete", completedAt: now, outcome: cleanOutcome } : value));
     recordPersonalAnalytics("experiment_completed");
+
+    emitCompanionInteraction(
+      "experiment_completed",
+      "experiments"
+    );
+
     appendPersonalEvents([makePersonalEvent({ id: `pe_experiment_complete_${item.id}`, type: "experiment", timestamp: now, source: "microexperiment", value: cleanOutcome, metadata: { experimentId: item.id, phase: "complete", targetMetric: item.metric, baseline: item.baseline, target: item.target, outcome: cleanOutcome } })]);
     setCompletingId(null); setOutcome("");
   };

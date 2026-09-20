@@ -39,6 +39,10 @@ import {
   markCompanionBehaviorShown,
 } from "../../data/reactive/companionBrain/companionBehaviorMemory";
 
+import {
+  getCompanionDailyTip,
+} from "../../data/companionDailyTips";
+
 interface ConfiaCompanionHomeProps {
   avatar: AvatarState;
   avatarCelebrating: boolean;
@@ -464,6 +468,29 @@ function ConfiaCompanionHome({
     return companionPresenceMessage;
   }, [companionPresenceMessage]);
 
+  /**
+   * ==========================================================
+   * CONFIA — DICA DE DESCOBERTA DO DIA
+   * ==========================================================
+   *
+   * Uma dica estável por dia para ajudar o utilizador
+   * a descobrir funcionalidades da aplicação.
+   *
+   * Não cria memória, não interpreta dados e não compete
+   * com mensagens emocionais ou relacionais importantes.
+   */
+  const companionDailyTip = useMemo(() => {
+    return getCompanionDailyTip();
+  }, []);
+
+  const companionDailyTipMessage = useMemo(() => {
+    if (!companionDailyTip) {
+      return null;
+    }
+
+    return t(companionDailyTip.translationKey);
+  }, [companionDailyTip, t]);
+
   const proposedCompanionMessage = useMemo(() => {
     /**
      * A6.3 — HIERARQUIA DA VOZ
@@ -536,11 +563,18 @@ function ConfiaCompanionHome({
     }
 
     /**
-     * Sem reação, memória ou estado emocional prioritário,
-     * a voz regressa à relação real já construída.
+     * DICA DE DESCOBERTA
      *
-     * O nível visual da criatura não é usado para fingir
-     * conhecimento sobre a pessoa.
+     * Só chega aqui quando não existe nenhuma mensagem
+     * pessoal, emocional ou contextual mais importante.
+     */
+    if (companionDailyTipMessage) {
+      return companionDailyTipMessage;
+    }
+
+    /**
+     * Sem reação, memória, estado emocional ou dica,
+     * a voz regressa à relação real já construída.
      */
     return relationshipFallbackMessage;
   }, [
@@ -552,6 +586,7 @@ function ConfiaCompanionHome({
     companionRelationalExpression,
     companionRelationalMemory,
     currentMoodRating,
+    companionDailyTipMessage,
     relationshipFallbackMessage,
     t,
   ]);

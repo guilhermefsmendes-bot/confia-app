@@ -60,6 +60,335 @@ const OBJECTIVES_LIBRARY: Objective[] = [
   { id: 'drinkWaterMindful', text: 'dailyObjectives.drinkWaterMindful', category: 'nutricao', xpReward: 10, completed: false },
   { id: 'mealNoPhone', text: 'dailyObjectives.mealNoPhone', category: 'nutricao', xpReward: 10, completed: false },
   { id: 'dailyFeeling', text: 'dailyObjectives.dailyFeeling', category: 'mental', xpReward: 10, completed: false }
+,
+  {
+    id: "morningWater",
+    text: "dailyObjectives.morningWater",
+    category: "nutricao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "fruitPortion",
+    text: "dailyObjectives.fruitPortion",
+    category: "nutricao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "vegetableMeal",
+    text: "dailyObjectives.vegetableMeal",
+    category: "nutricao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "slowFirstBites",
+    text: "dailyObjectives.slowFirstBites",
+    category: "nutricao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "noticeHunger",
+    text: "dailyObjectives.noticeHunger",
+    category: "nutricao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "prepareHealthySnack",
+    text: "dailyObjectives.prepareHealthySnack",
+    category: "nutricao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "waterBottle",
+    text: "dailyObjectives.waterBottle",
+    category: "nutricao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "standAndMove",
+    text: "dailyObjectives.standAndMove",
+    category: "corporeo",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "neckStretch",
+    text: "dailyObjectives.neckStretch",
+    category: "corporeo",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "bodyScan",
+    text: "dailyObjectives.bodyScan",
+    category: "corporeo",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "shortDance",
+    text: "dailyObjectives.shortDance",
+    category: "corporeo",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "stairsMovement",
+    text: "dailyObjectives.stairsMovement",
+    category: "corporeo",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "freshAirWindow",
+    text: "dailyObjectives.freshAirWindow",
+    category: "corporeo",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "restEyes",
+    text: "dailyObjectives.restEyes",
+    category: "corporeo",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "slowWalkFive",
+    text: "dailyObjectives.slowWalkFive",
+    category: "corporeo",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "threeGoodThings",
+    text: "dailyObjectives.threeGoodThings",
+    category: "mental",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "nameEmotion",
+    text: "dailyObjectives.nameEmotion",
+    category: "mental",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "thoughtNotFact",
+    text: "dailyObjectives.thoughtNotFact",
+    category: "mental",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "oneMinuteSilence",
+    text: "dailyObjectives.oneMinuteSilence",
+    category: "mental",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "noticeWithoutJudging",
+    text: "dailyObjectives.noticeWithoutJudging",
+    category: "mental",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "writeOneNeed",
+    text: "dailyObjectives.writeOneNeed",
+    category: "mental",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "selfKindness",
+    text: "dailyObjectives.selfKindness",
+    category: "mental",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "worryLater",
+    text: "dailyObjectives.worryLater",
+    category: "mental",
+    xpReward: 5,
+    difficulty: "medium",
+    completed: false
+  },
+  {
+    id: "acceptUncertainty",
+    text: "dailyObjectives.acceptUncertainty",
+    category: "mental",
+    xpReward: 10,
+    difficulty: "medium",
+    completed: false
+  },
+  {
+    id: "noticeProgress",
+    text: "dailyObjectives.noticeProgress",
+    category: "mental",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "thankSomeone",
+    text: "dailyObjectives.thankSomeone",
+    category: "social",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "listenFully",
+    text: "dailyObjectives.listenFully",
+    category: "social",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "checkOnSomeone",
+    text: "dailyObjectives.checkOnSomeone",
+    category: "social",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "shareFeeling",
+    text: "dailyObjectives.shareFeeling",
+    category: "social",
+    xpReward: 10,
+    difficulty: "medium",
+    completed: false
+  },
+  {
+    id: "smallConnection",
+    text: "dailyObjectives.smallConnection",
+    category: "social",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "sayNoKindly",
+    text: "dailyObjectives.sayNoKindly",
+    category: "social",
+    xpReward: 10,
+    difficulty: "medium",
+    completed: false
+  },
+  {
+    id: "askHowSomeoneIs",
+    text: "dailyObjectives.askHowSomeoneIs",
+    category: "social",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "twoMinuteStart",
+    text: "dailyObjectives.twoMinuteStart",
+    category: "acao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "prepareTomorrow",
+    text: "dailyObjectives.prepareTomorrow",
+    category: "acao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "oneThingAtTime",
+    text: "dailyObjectives.oneThingAtTime",
+    category: "acao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "clearNotifications",
+    text: "dailyObjectives.clearNotifications",
+    category: "acao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "fiveMinuteDeclutter",
+    text: "dailyObjectives.fiveMinuteDeclutter",
+    category: "acao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "doSmallDecision",
+    text: "dailyObjectives.doSmallDecision",
+    category: "acao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  },
+  {
+    id: "leaveComfortSmall",
+    text: "dailyObjectives.leaveComfortSmall",
+    category: "acao",
+    xpReward: 10,
+    difficulty: "medium",
+    completed: false
+  },
+  {
+    id: "finishDelayedThing",
+    text: "dailyObjectives.finishDelayedThing",
+    category: "acao",
+    xpReward: 10,
+    difficulty: "medium",
+    completed: false
+  },
+  {
+    id: "screenFreeTen",
+    text: "dailyObjectives.screenFreeTen",
+    category: "acao",
+    xpReward: 5,
+    difficulty: "easy",
+    completed: false
+  }
 ];
 
 

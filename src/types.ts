@@ -45,6 +45,7 @@ export interface SharePost {
   authorId: string;
   userName: string;
   feeling: string; // e.g. "Ansioso", "Calmo", "Grato", "Agitado"
+  topic?: string; // e.g. "ansiedade", "stress", "sono"; optional for legacy posts
   message: string;
   timestamp: string;
 

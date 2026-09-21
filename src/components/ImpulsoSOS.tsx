@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { saveEpisode } from "./Impulso";
+import { appendPersonalEvents } from "../data/personal/personalEventStorage";
+import { createPersonalEventId, makePersonalEvent } from "../data/personal/personalEvent";
 import type {
   Emotion,
   Intensity,
@@ -273,8 +275,9 @@ const getPsychoeducationMessage = () => {
      * O motor reativo consegue assim analisar imediatamente
      * a diferença entre intensidade inicial e final.
      */
+    const completedAt = new Date().toISOString();
     saveEpisode({
-      createdAt: new Date().toISOString(),
+      createdAt: completedAt,
       need: impulseNeed ?? undefined,
       initialIntensity: intensity,
       finalIntensity,
@@ -284,6 +287,25 @@ const getPsychoeducationMessage = () => {
       completed: true,
       xpEarned: 30,
     });
+
+    // Alimenta o modelo pessoal com o resultado real da intervenção.
+    // Assim a CONFIA aprende também quando algo não reduz a intensidade.
+    appendPersonalEvents([
+      makePersonalEvent({
+        id: createPersonalEventId("intervention", completedAt),
+        type: "intervention",
+        timestamp: completedAt,
+        source: "impulso",
+        value: finalIntensity,
+        metadata: {
+          interventionId: "impulso",
+          initialIntensity: intensity,
+          finalIntensity,
+          need: impulseNeed ?? undefined,
+          trigger: trigger ?? undefined,
+        },
+      }),
+    ]);
 
     // CONFIA_COMPANION_EVENT_IMPULSE_COMPLETED
     emitCompanionBrainEvent(

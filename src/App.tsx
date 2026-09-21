@@ -299,6 +299,7 @@ const [showCommunityTerms, setShowCommunityTerms] = useState(false);
 
 // Chat privado da comunidade
 const [chatPost, setChatPost] = useState<SharePost | null>(null);
+const [chatIdOverride, setChatIdOverride] = useState<string | null>(null);
 
 // Conversa privada mais recente ainda não lida pelo utilizador.
 // Guardamos apenas os dados necessários para abrir o chat
@@ -1347,6 +1348,7 @@ useEffect(() => {
 
   const openUnreadConversation = async () => {
     try {
+      setChatIdOverride(pendingCommunityChat.id);
       setChatPost(matchingPost);
 
       const user = auth.currentUser;
@@ -1920,10 +1922,10 @@ alert(t("blockError"));
   }
 };
   // Create Community Post
-const handleAddPost = async (feeling: string, message: string) => {
+const handleAddPost = async (feeling: string, topic: string, message: string) => {
   try {
     const { createCommunityPost } = await import("./data/community/communityService");
-    const created = await createCommunityPost(feeling, message);
+    const created = await createCommunityPost(feeling, topic, message);
 
     const newPost: SharePost = {
       ...created,
@@ -1949,6 +1951,7 @@ const handleAddPost = async (feeling: string, message: string) => {
   const handleShareWeeklyTrophy = async () => {
     await handleAddPost(
       t("trophyRoom.communityFeeling"),
+      "progresso",
       t("trophyRoom.communityMessage")
     );
   };
@@ -1977,6 +1980,7 @@ const handleLikePost = async (
 
 // Abre o chat privado associado a uma publicação
 const handleOpenChat = (post: SharePost) => {
+  setChatIdOverride(null);
   setChatPost(post);
 };
 
@@ -2057,6 +2061,276 @@ className="flex items-center justify-center w-24 h-24 relative"
               <div className="space-y-4">
 
 
+{/* ======================================================
+    CONFIA 3C.1 — MOMENTO DE HOJE
+
+    Primeira manifestação visual do Ritual Diário.
+
+    Não substitui:
+    - A CONFIA percebeu;
+    - Para ti agora;
+    - primeiro contacto;
+    - Reactive Engine.
+
+    Apenas dá contexto à chegada do utilizador naquele dia.
+====================================================== */}
+{dailyContext &&
+ dailyContext.state !== "first_contact" && (
+  <section
+    className="relative mt-4 overflow-hidden rounded-[30px] border border-[#B85F48]/20 bg-gradient-to-br from-[#FFF8F3] via-white to-[#FFFDFB] px-5 py-4 shadow-[0_12px_32px_rgba(92,64,52,0.055)]"
+    aria-label={t("dailyMoment.eyebrow")}
+  >
+    {/* detalhe atmosférico — CSS puro */}
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#F8E4D8]/35 blur-2xl"
+    />
+
+    <div
+      aria-hidden="true"
+      className="absolute left-0 top-5 h-14 w-[3px] rounded-r-full bg-gradient-to-b from-[#B85F48]/70 to-[#B85F48]/15"
+    />
+
+    <div className="relative flex items-start gap-3.5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/20 bg-white/90 shadow-sm">
+        <Sparkles
+          size={18}
+          strokeWidth={1.8}
+          className="text-[#934A38]"
+        />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
+          {t("dailyMoment.eyebrow")}
+        </p>
+
+        <h2 className="mt-1 text-[15px] font-black leading-snug text-[#2F2926]">
+          {dailyContext.state === "return_after_absence"
+            ? t("dailyMoment.return.title")
+            : dailyContext.state === "first_today"
+              ? t("dailyMoment.firstToday.title")
+              : t("dailyMoment.continueToday.title")}
+        </h2>
+
+        <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#8A6A5D]">
+          {dailyContext.state === "return_after_absence"
+            ? t("dailyMoment.return.text")
+            : dailyContext.state === "first_today"
+              ? (
+                  <>
+                    {/* CONFIA 3E.2 — LINGUAGEM DE APRENDIZAGEM */}
+                    {dailyContext.dailyLearningLevel === "learned_impulse"
+                      ? t("dailyMoment.learning.learnedImpulse")
+                      : dailyContext.dailyLearningLevel === "effective_impulse"
+                        ? t("dailyMoment.learning.effectiveImpulse")
+                        : dailyContext.dailyLearningLevel === "repeated_signals"
+                          ? t("dailyMoment.learning.repeatedSignals")
+                          : dailyContext.dailyLearningLevel === "early_learning"
+                            ? t("dailyMoment.learning.early")
+                            : t("dailyMoment.learning.neutral")}
+                  </>
+                )
+              : t("dailyMoment.continueToday.text")}
+        </p>
+
+        {dailyContext.state === "return_after_absence" &&
+         typeof dailyContext.daysSincePreviousOpen === "number" &&
+         dailyContext.daysSincePreviousOpen >= 2 && (
+          <div className="mt-3 inline-flex items-center rounded-full border border-[#B85F48]/15 bg-white/80 px-3 py-1.5">
+            <span className="text-[9px] font-bold text-[#9A7567]">
+              {t("dailyMoment.return.days", {
+                count: dailyContext.daysSincePreviousOpen,
+              })}
+            </span>
+          </div>
+        )}
+
+        {/* ======================================================
+            CONFIA 5D.2 — CURIOSIDADE EVOLUTIVA
+
+            Torna visível a aprendizagem já existente.
+            Não representa percentagem, ranking ou progressão
+            independente.
+        ====================================================== */}
+        {dailyContext.dailyLearningLevel !== "none" && (
+          <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-[#E8DDD7]/45 bg-white/45 px-3.5 py-2.5">
+            <div
+              aria-hidden="true"
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#B85F48]/20 bg-[#FFF9F5]"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-[#934A38]/70" />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[8px] font-black uppercase tracking-[0.14em] text-[#B79587]">
+                {t("dailyMoment.evolvingInsight.eyebrow")}
+              </p>
+
+              <p className="mt-0.5 text-[10px] font-bold leading-relaxed text-[#806D65]">
+                {/* CONFIA 5E.2 — CURIOSIDADE CONCRETA */}
+                {homeNowMemory?.kind === "impulseLearning" &&
+                 homeNowMemory.need &&
+                 homeNowMemory.needCount >= 2
+                  ? t(
+                      `dailyMoment.concreteInsight.impulse.${homeNowMemory.need}`
+                    )
+                  : homeNowMemory?.kind === "continuity" &&
+                      homeNowMemory.repeatedNeed &&
+                      homeNowMemory.repeatedNeedCount >= 2
+                    ? t(
+                        `dailyMoment.concreteInsight.impulse.${homeNowMemory.repeatedNeed}`
+                      )
+                    : homeNowMemory?.kind === "continuity" &&
+                        homeNowMemory.repeatedCheckInNeed &&
+                        homeNowMemory.repeatedCheckInNeedCount >= 2
+                      ? t(
+                          "dailyMoment.concreteInsight.checkIn",
+                          {
+                            need: t(
+                              `dailyCheckIn.needs.${homeNowMemory.repeatedCheckInNeed}`,
+                              {
+                                defaultValue:
+                                  homeNowMemory.repeatedCheckInNeed,
+                              }
+                            ),
+                            count:
+                              homeNowMemory.repeatedCheckInNeedCount,
+                            dates:
+                              homeCompanionRelationalMemory
+                                ?.recentCheckIns
+                                ?.slice(-3)
+                                .filter(
+                                  (item) =>
+                                    item.need ===
+                                    homeNowMemory.repeatedCheckInNeed
+                                )
+                                .map((item) => item.date)
+                                .join(", ") || "—",
+                          }
+                        )
+                      : homeNowMemory?.kind === "continuity" &&
+                          homeNowMemory.moodRecordCount >= 3 &&
+                          homeNowMemory.moodDirection === "improving"
+                        ? t(
+                            "dailyMoment.concreteInsight.moodImproving"
+                          )
+                        : homeNowMemory?.kind === "continuity" &&
+                            homeNowMemory.moodRecordCount >= 3 &&
+                            homeNowMemory.moodDirection === "declining"
+                          ? t(
+                              "dailyMoment.concreteInsight.moodDeclining"
+                            )
+                          : homeNowMemory?.kind === "continuity" &&
+                              homeNowMemory.moodRecordCount >= 3 &&
+                              homeNowMemory.moodDirection === "stable"
+                            ? t(
+                                "dailyMoment.concreteInsight.moodStable"
+                              )
+                            : dailyContext.dailyLearningLevel === "learned_impulse"
+                              ? t("dailyMoment.evolvingInsight.learnedImpulse")
+                              : dailyContext.dailyLearningLevel === "effective_impulse"
+                                ? t("dailyMoment.evolvingInsight.effectiveImpulse")
+                                : dailyContext.dailyLearningLevel === "repeated_signals"
+                                  ? t("dailyMoment.evolvingInsight.repeatedSignals")
+                                  : t("dailyMoment.evolvingInsight.early")}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ======================================================
+            CONFIA 5C — CONTINUIDADE DO REGRESSO
+
+            Reconhece continuidade temporal confirmada entre
+            a abertura atual e a abertura anterior.
+
+            Não atribui um registo específico ao dia anterior.
+            Não cria streak nem recompensa.
+        ====================================================== */}
+        {dailyContext.state === "first_today" &&
+         dailyContext.daysSincePreviousOpen === 1 && (
+          <div className="mt-3 rounded-2xl border border-[#B85F48]/15 bg-gradient-to-r from-[#FFF9F5]/80 to-white/70 px-3.5 py-3">
+            <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#934A38]">
+              {t("dailyMoment.continuityReturn.eyebrow")}
+            </p>
+
+            <p className="mt-1 text-[10px] font-semibold leading-relaxed text-[#806D65]">
+              {dailyContext.dailyLearningLevel === "learned_impulse"
+                ? t("dailyMoment.continuityReturn.learnedImpulse")
+                : dailyContext.dailyLearningLevel === "effective_impulse"
+                  ? t("dailyMoment.continuityReturn.effectiveImpulse")
+                  : dailyContext.dailyLearningLevel === "repeated_signals"
+                    ? t("dailyMoment.continuityReturn.repeatedSignals")
+                    : dailyContext.dailyLearningLevel === "early_learning"
+                      ? t("dailyMoment.continuityReturn.early")
+                      : t("dailyMoment.continuityReturn.neutral")}
+            </p>
+          </div>
+        )}
+
+        {/* ======================================================
+            CONFIA 5B — SEMENTE DE AMANHÃ
+
+            Surge apenas na primeira abertura do dia.
+            Cria continuidade sem promessa artificial,
+            streak, recompensa ou penalização.
+        ====================================================== */}
+        {dailyContext.state === "first_today" && (
+          <div className="mt-3 flex items-start gap-2.5 rounded-2xl border border-[#E8DDD7]/60 bg-white/60 px-3.5 py-3">
+            <div
+              aria-hidden="true"
+              className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#D9A66F]"
+            />
+
+            <p className="text-[10px] font-semibold leading-relaxed text-[#8A746A]">
+              {dailyContext.dailyLearningLevel === "learned_impulse"
+                ? t("dailyMoment.tomorrow.learnedImpulse")
+                : dailyContext.dailyLearningLevel === "effective_impulse"
+                  ? t("dailyMoment.tomorrow.effectiveImpulse")
+                  : dailyContext.dailyLearningLevel === "repeated_signals"
+                    ? t("dailyMoment.tomorrow.repeatedSignals")
+                    : dailyContext.dailyLearningLevel === "early_learning"
+                      ? t("dailyMoment.tomorrow.early")
+                      : t("dailyMoment.tomorrow.neutral")}
+            </p>
+          </div>
+        )}
+
+        {dailyContext.suggestedAction &&
+         homeNowAction &&
+         dailyContext.suggestedAction === homeNowAction.kind && (
+          <div className="mt-4 border-t border-[#E8DDD7]/60 pt-3">
+            {/* CONFIA 3D — AÇÃO INTELIGENTE DO DIA */}
+            <p className="text-[9px] font-bold leading-relaxed text-[var(--cf-muted)]">
+              {t("dailyMoment.actionHint")}
+            </p>
+
+            <button
+              type="button"
+              onClick={handleHomeNowAction}
+              className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-2xl border border-[#B85F48]/20 bg-white/85 px-4 py-2 text-[10px] font-black text-[#934A38] shadow-[0_5px_16px_rgba(92,64,52,0.045)] transition-[transform,opacity,background-color] active:scale-[0.98] active:opacity-75"
+            >
+              <span>
+                {t(homeNowAction.actionKey)}
+              </span>
+
+              <span
+                aria-hidden="true"
+                className="text-sm leading-none"
+              >
+                →
+              </span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+)}
+
+
+
 <LazySection>
 <ConfiaCompanionHome
   avatar={avatar}
@@ -2116,6 +2390,7 @@ className="flex items-center justify-center w-24 h-24 relative"
   }}
 />
 </LazySection>
+
 
 {/* O teu espaço — navegação secundária premium */}
 {homeScreen === "home" && (
@@ -2312,251 +2587,6 @@ className="flex items-center justify-center w-24 h-24 relative"
 )}
 
 
-{/* ======================================================
-    CONFIA 3C.1 — MOMENTO DE HOJE
-
-    Primeira manifestação visual do Ritual Diário.
-
-    Não substitui:
-    - A CONFIA percebeu;
-    - Para ti agora;
-    - primeiro contacto;
-    - Reactive Engine.
-
-    Apenas dá contexto à chegada do utilizador naquele dia.
-====================================================== */}
-{dailyContext &&
- dailyContext.state !== "first_contact" && (
-  <section
-    className="relative mt-4 overflow-hidden rounded-[30px] border border-[#B85F48]/20 bg-gradient-to-br from-[#FFF8F3] via-white to-[#FFFDFB] px-5 py-4 shadow-[0_12px_32px_rgba(92,64,52,0.055)]"
-    aria-label={t("dailyMoment.eyebrow")}
-  >
-    {/* detalhe atmosférico — CSS puro */}
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#F8E4D8]/35 blur-2xl"
-    />
-
-    <div
-      aria-hidden="true"
-      className="absolute left-0 top-5 h-14 w-[3px] rounded-r-full bg-gradient-to-b from-[#B85F48]/70 to-[#B85F48]/15"
-    />
-
-    <div className="relative flex items-start gap-3.5">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/20 bg-white/90 shadow-sm">
-        <Sparkles
-          size={18}
-          strokeWidth={1.8}
-          className="text-[#934A38]"
-        />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
-          {t("dailyMoment.eyebrow")}
-        </p>
-
-        <h2 className="mt-1 text-[15px] font-black leading-snug text-[#2F2926]">
-          {dailyContext.state === "return_after_absence"
-            ? t("dailyMoment.return.title")
-            : dailyContext.state === "first_today"
-              ? t("dailyMoment.firstToday.title")
-              : t("dailyMoment.continueToday.title")}
-        </h2>
-
-        <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#8A6A5D]">
-          {dailyContext.state === "return_after_absence"
-            ? t("dailyMoment.return.text")
-            : dailyContext.state === "first_today"
-              ? (
-                  <>
-                    {/* CONFIA 3E.2 — LINGUAGEM DE APRENDIZAGEM */}
-                    {dailyContext.dailyLearningLevel === "learned_impulse"
-                      ? t("dailyMoment.learning.learnedImpulse")
-                      : dailyContext.dailyLearningLevel === "effective_impulse"
-                        ? t("dailyMoment.learning.effectiveImpulse")
-                        : dailyContext.dailyLearningLevel === "repeated_signals"
-                          ? t("dailyMoment.learning.repeatedSignals")
-                          : dailyContext.dailyLearningLevel === "early_learning"
-                            ? t("dailyMoment.learning.early")
-                            : t("dailyMoment.learning.neutral")}
-                  </>
-                )
-              : t("dailyMoment.continueToday.text")}
-        </p>
-
-        {dailyContext.state === "return_after_absence" &&
-         typeof dailyContext.daysSincePreviousOpen === "number" &&
-         dailyContext.daysSincePreviousOpen >= 2 && (
-          <div className="mt-3 inline-flex items-center rounded-full border border-[#B85F48]/15 bg-white/80 px-3 py-1.5">
-            <span className="text-[9px] font-bold text-[#9A7567]">
-              {t("dailyMoment.return.days", {
-                count: dailyContext.daysSincePreviousOpen,
-              })}
-            </span>
-          </div>
-        )}
-
-        {/* ======================================================
-            CONFIA 5D.2 — CURIOSIDADE EVOLUTIVA
-
-            Torna visível a aprendizagem já existente.
-            Não representa percentagem, ranking ou progressão
-            independente.
-        ====================================================== */}
-        {dailyContext.dailyLearningLevel !== "none" && (
-          <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-[#E8DDD7]/45 bg-white/45 px-3.5 py-2.5">
-            <div
-              aria-hidden="true"
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#B85F48]/20 bg-[#FFF9F5]"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#934A38]/70" />
-            </div>
-
-            <div className="min-w-0">
-              <p className="text-[8px] font-black uppercase tracking-[0.14em] text-[#B79587]">
-                {t("dailyMoment.evolvingInsight.eyebrow")}
-              </p>
-
-              <p className="mt-0.5 text-[10px] font-bold leading-relaxed text-[#806D65]">
-                {/* CONFIA 5E.2 — CURIOSIDADE CONCRETA */}
-                {homeNowMemory?.kind === "impulseLearning" &&
-                 homeNowMemory.need &&
-                 homeNowMemory.needCount >= 2
-                  ? t(
-                      `dailyMoment.concreteInsight.impulse.${homeNowMemory.need}`
-                    )
-                  : homeNowMemory?.kind === "continuity" &&
-                      homeNowMemory.repeatedNeed &&
-                      homeNowMemory.repeatedNeedCount >= 2
-                    ? t(
-                        `dailyMoment.concreteInsight.impulse.${homeNowMemory.repeatedNeed}`
-                      )
-                    : homeNowMemory?.kind === "continuity" &&
-                        homeNowMemory.repeatedCheckInNeed &&
-                        homeNowMemory.repeatedCheckInNeedCount >= 2
-                      ? t(
-                          "dailyMoment.concreteInsight.checkIn"
-                        )
-                      : homeNowMemory?.kind === "continuity" &&
-                          homeNowMemory.moodRecordCount >= 3 &&
-                          homeNowMemory.moodDirection === "improving"
-                        ? t(
-                            "dailyMoment.concreteInsight.moodImproving"
-                          )
-                        : homeNowMemory?.kind === "continuity" &&
-                            homeNowMemory.moodRecordCount >= 3 &&
-                            homeNowMemory.moodDirection === "declining"
-                          ? t(
-                              "dailyMoment.concreteInsight.moodDeclining"
-                            )
-                          : homeNowMemory?.kind === "continuity" &&
-                              homeNowMemory.moodRecordCount >= 3 &&
-                              homeNowMemory.moodDirection === "stable"
-                            ? t(
-                                "dailyMoment.concreteInsight.moodStable"
-                              )
-                            : dailyContext.dailyLearningLevel === "learned_impulse"
-                              ? t("dailyMoment.evolvingInsight.learnedImpulse")
-                              : dailyContext.dailyLearningLevel === "effective_impulse"
-                                ? t("dailyMoment.evolvingInsight.effectiveImpulse")
-                                : dailyContext.dailyLearningLevel === "repeated_signals"
-                                  ? t("dailyMoment.evolvingInsight.repeatedSignals")
-                                  : t("dailyMoment.evolvingInsight.early")}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* ======================================================
-            CONFIA 5C — CONTINUIDADE DO REGRESSO
-
-            Reconhece continuidade temporal confirmada entre
-            a abertura atual e a abertura anterior.
-
-            Não atribui um registo específico ao dia anterior.
-            Não cria streak nem recompensa.
-        ====================================================== */}
-        {dailyContext.state === "first_today" &&
-         dailyContext.daysSincePreviousOpen === 1 && (
-          <div className="mt-3 rounded-2xl border border-[#B85F48]/15 bg-gradient-to-r from-[#FFF9F5]/80 to-white/70 px-3.5 py-3">
-            <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#934A38]">
-              {t("dailyMoment.continuityReturn.eyebrow")}
-            </p>
-
-            <p className="mt-1 text-[10px] font-semibold leading-relaxed text-[#806D65]">
-              {dailyContext.dailyLearningLevel === "learned_impulse"
-                ? t("dailyMoment.continuityReturn.learnedImpulse")
-                : dailyContext.dailyLearningLevel === "effective_impulse"
-                  ? t("dailyMoment.continuityReturn.effectiveImpulse")
-                  : dailyContext.dailyLearningLevel === "repeated_signals"
-                    ? t("dailyMoment.continuityReturn.repeatedSignals")
-                    : dailyContext.dailyLearningLevel === "early_learning"
-                      ? t("dailyMoment.continuityReturn.early")
-                      : t("dailyMoment.continuityReturn.neutral")}
-            </p>
-          </div>
-        )}
-
-        {/* ======================================================
-            CONFIA 5B — SEMENTE DE AMANHÃ
-
-            Surge apenas na primeira abertura do dia.
-            Cria continuidade sem promessa artificial,
-            streak, recompensa ou penalização.
-        ====================================================== */}
-        {dailyContext.state === "first_today" && (
-          <div className="mt-3 flex items-start gap-2.5 rounded-2xl border border-[#E8DDD7]/60 bg-white/60 px-3.5 py-3">
-            <div
-              aria-hidden="true"
-              className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#D9A66F]"
-            />
-
-            <p className="text-[10px] font-semibold leading-relaxed text-[#8A746A]">
-              {dailyContext.dailyLearningLevel === "learned_impulse"
-                ? t("dailyMoment.tomorrow.learnedImpulse")
-                : dailyContext.dailyLearningLevel === "effective_impulse"
-                  ? t("dailyMoment.tomorrow.effectiveImpulse")
-                  : dailyContext.dailyLearningLevel === "repeated_signals"
-                    ? t("dailyMoment.tomorrow.repeatedSignals")
-                    : dailyContext.dailyLearningLevel === "early_learning"
-                      ? t("dailyMoment.tomorrow.early")
-                      : t("dailyMoment.tomorrow.neutral")}
-            </p>
-          </div>
-        )}
-
-        {dailyContext.suggestedAction &&
-         homeNowAction &&
-         dailyContext.suggestedAction === homeNowAction.kind && (
-          <div className="mt-4 border-t border-[#E8DDD7]/60 pt-3">
-            {/* CONFIA 3D — AÇÃO INTELIGENTE DO DIA */}
-            <p className="text-[9px] font-bold leading-relaxed text-[var(--cf-muted)]">
-              {t("dailyMoment.actionHint")}
-            </p>
-
-            <button
-              type="button"
-              onClick={handleHomeNowAction}
-              className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-2xl border border-[#B85F48]/20 bg-white/85 px-4 py-2 text-[10px] font-black text-[#934A38] shadow-[0_5px_16px_rgba(92,64,52,0.045)] transition-[transform,opacity,background-color] active:scale-[0.98] active:opacity-75"
-            >
-              <span>
-                {t(homeNowAction.actionKey)}
-              </span>
-
-              <span
-                aria-hidden="true"
-                className="text-sm leading-none"
-              >
-                →
-              </span>
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  </section>
-)}
 
 {homeScreen === "home" && (
   <>
@@ -3513,7 +3543,11 @@ className="flex items-center justify-center w-24 h-24 relative"
         <LazySection>
 <CommunityChat
           post={chatPost}
-          onClose={() => setChatPost(null)}
+          initialChatId={chatIdOverride}
+          onClose={() => {
+            setChatPost(null);
+            setChatIdOverride(null);
+          }}
         />
 </LazySection>
       )}

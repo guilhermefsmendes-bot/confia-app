@@ -106,6 +106,7 @@ export interface ReactiveRecentMemory {
    */
   latestCheckIn?: ReactiveMemoryCheckIn;
   previousCheckIn?: ReactiveMemoryCheckIn;
+  recentCheckIns: ReactiveMemoryCheckIn[];
 
   latestNeed?: string;
 
@@ -944,6 +945,7 @@ export function buildReactiveRecentMemory(
 
     latestCheckIn,
     previousCheckIn,
+    recentCheckIns: checkIns.slice(-3),
 
     latestNeed:
       latestCheckIn?.need,

@@ -55,6 +55,7 @@ export function subscribeToCommunityPosts(
           authorId: data.authorId || "",
           userName: data.userName || "Guardião Anon",
           feeling: data.feeling || "Calmo",
+          topic: typeof data.topic === "string" ? data.topic : undefined,
           message: data.message || "",
           timestamp,
           yellowLikes: data.yellowLikes || 0,
@@ -104,13 +105,14 @@ export async function blockCommunityUser(blockedUserId: string) {
   });
 }
 
-export async function createCommunityPost(feeling: string, message: string) {
+export async function createCommunityPost(feeling: string, topic: string, message: string) {
   const user = await ensureAuth();
   const userName = `Guardião Anon_${Math.floor(100 + Math.random() * 900)}`;
   const docRef = await addDoc(collection(db, "posts"), {
     authorId: user.uid,
     userName,
     feeling,
+    topic,
     message,
     yellowLikes: 0,
     greenLikes: 0,
@@ -126,6 +128,7 @@ export async function createCommunityPost(feeling: string, message: string) {
     authorId: user.uid,
     userName,
     feeling,
+    topic,
     message,
     timestamp: "justNow",
     yellowLikes: 0,

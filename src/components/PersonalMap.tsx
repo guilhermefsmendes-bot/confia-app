@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Compass, Info, Sparkles, ThumbsDown, ThumbsUp } from "lucide-react";
+import { ArrowLeft, Brain, Compass, Info, MessageSquareHeart, Plus, Sparkles, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
+import { buildPersonalTwinSummary, buildReplayMoments } from "../data/personal/confiaReplay";
+import { addManualNote, readFutureMessages, readManualNotes, removeManualNote, revealFutureMessage, saveFutureMessage, SELF_MEMORY_UPDATED_EVENT, type ManualNoteKind } from "../data/personal/selfMemory";
 import { readPersonalEvents, appendPersonalEvents, PERSONAL_EVENTS_UPDATED_EVENT } from "../data/personal/personalEventStorage";
 import { buildPersonalModel, findAnalogousMoments } from "../data/personal/personalModel";
 import { buildPersonalInsights, explainInsight } from "../data/personal/personalInsights";
@@ -15,10 +17,19 @@ type Props = { onBack: () => void };
 export default function PersonalMap({ onBack }: Props) {
   const { t } = useTranslation();
   const [personalEventRevision, setPersonalEventRevision] = useState(0);
+  const [memoryRevision, setMemoryRevision] = useState(0);
+  const [manualKind, setManualKind] = useState<ManualNoteKind>("helps");
+  const [manualText, setManualText] = useState("");
+  const [futureText, setFutureText] = useState("");
   useEffect(() => {
     const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
+    const handleMemoryUpdated = () => setMemoryRevision(revision => revision + 1);
     window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
-    return () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+    window.addEventListener(SELF_MEMORY_UPDATED_EVENT, handleMemoryUpdated);
+    return () => {
+      window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+      window.removeEventListener(SELF_MEMORY_UPDATED_EVENT, handleMemoryUpdated);
+    };
   }, []);
   const events = useMemo(() => readPersonalEvents(), [personalEventRevision]);
   const model = useMemo(() => buildPersonalModel(events), [events]);
@@ -28,6 +39,11 @@ export default function PersonalMap({ onBack }: Props) {
     return target ? findAnalogousMoments(events, target, 3) : [];
   }, [events]);
   const insights = useMemo(() => applyInsightLifecycle(buildPersonalInsights(events)), [events]);
+  const replay = useMemo(() => buildReplayMoments(events), [events]);
+  const twin = useMemo(() => buildPersonalTwinSummary(events), [events]);
+  const manualNotes = useMemo(() => readManualNotes(), [memoryRevision]);
+  const futureMessages = useMemo(() => readFutureMessages(), [memoryRevision]);
+  const dueFutureMessages = futureMessages.filter(item => new Date(item.revealAt).getTime() <= Date.now());
   const shownInsightIds = useRef(new Set<string>());
   useEffect(() => {
     recordPersonalAnalytics("personal_map_viewed");
@@ -58,6 +74,71 @@ export default function PersonalMap({ onBack }: Props) {
           <Metric label={t("personalMap.days")} value={model.activeDays} />
           <Metric label={t("personalMap.completeness")} value={`${Math.round(model.completeness * 100)}%`} />
         </div>
+      </section>
+
+      <section className="mt-4 rounded-[30px] border border-[#EADBD3] bg-[#332824] p-5 text-white shadow-[0_18px_50px_rgba(51,40,36,.18)] sm:p-6">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10"><Brain size={20} /></div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[.2em] text-[#E6B9A3]">Gémeo emocional</p>
+            <h2 className="mt-1 text-xl font-black">O que já aprendi sobre ti</h2>
+            <p className="mt-2 text-xs leading-5 text-white/70">{twin.observationCount} observações · {twin.insightCount} padrões com evidência.</p>
+          </div>
+        </div>
+        <div className="mt-4 space-y-2">
+          {twin.strongest.length ? twin.strongest.map(item => (
+            <div key={item.id} className="rounded-2xl bg-white/10 p-3 text-xs leading-5">
+              {item.messageKey ? t(item.messageKey, item.messageValues) : item.message}
+            </div>
+          )) : <p className="rounded-2xl bg-white/10 p-3 text-xs text-white/70">Ainda estou a aprender. Não vou inventar conclusões antes de ter dados suficientes.</p>}
+          {twin.helpfulInterventionRate !== undefined && (
+            <p className="text-[11px] font-bold text-[#E6B9A3]">Nas intervenções registadas, {twin.helpfulInterventionRate}% terminaram com intensidade inferior à inicial.</p>
+          )}
+        </div>
+      </section>
+
+      {replay.length > 0 && (
+        <section className="mt-4 rounded-[30px] border border-[#DCC8BD] bg-gradient-to-br from-[#FFF7F2] to-white p-5 shadow-sm sm:p-6">
+          <p className="text-[10px] font-black uppercase tracking-[.2em] text-[#B86B52]">CONFIA Replay</p>
+          <h2 className="mt-1 text-xl font-black text-[#3F2C27]">Já estiveste aqui antes.</h2>
+          <p className="mt-2 text-xs leading-5 text-[#806D65]">Momentos teus semelhantes ao registo mais recente. Não é uma previsão — é a tua própria história.</p>
+          <div className="mt-4 space-y-2">
+            {replay.map(item => (
+              <article key={item.id} className="rounded-2xl border border-[#F0E3DC] bg-white p-4">
+                <div className="flex items-center justify-between gap-3"><b className="text-xs text-[#3F2C27]">{item.date}</b><span className="rounded-full bg-[#F5ECE7] px-2 py-1 text-xs font-black text-[#B86B52]">{item.mood}/10</span></div>
+                {item.note && <p className="mt-2 text-xs italic leading-5 text-[#806D65]">“{item.note}”</p>}
+                {item.recovery && <p className="mt-2 text-[11px] font-bold leading-5 text-[#587563]">{item.recovery.daysLater === 0 ? "Mais tarde nesse dia" : item.recovery.daysLater === 1 ? "No dia seguinte" : `${item.recovery.daysLater} dias depois`}, registaste {item.recovery.mood}/10.</p>}
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="mt-4 rounded-[30px] border border-white bg-white/90 p-5 shadow-sm sm:p-6">
+        <div className="flex items-center gap-2"><MessageSquareHeart size={18} className="text-[#B86B52]" /><h2 className="text-xl font-black text-[#3F2C27]">O meu manual vivo</h2></div>
+        <p className="mt-1 text-xs leading-5 text-[#806D65]">Guarda coisas que queres que a CONFIA se lembre quando precisares delas.</p>
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+          {([
+            ["early_signal","Sinais iniciais"],["helps","Ajuda-me"],["does_not_help","Não ajuda"],["support_person","Pessoas"],["drains_me","Drena-me"],["victory","Vitórias"]
+          ] as [ManualNoteKind,string][]).map(([id,label]) => (
+            <button key={id} type="button" onClick={() => setManualKind(id)} className={"min-h-10 shrink-0 rounded-full px-3 text-[10px] font-black " + (manualKind === id ? "bg-[#3F2C27] text-white" : "bg-[#F7EFEB] text-[#795B50]")}>{label}</button>
+          ))}
+        </div>
+        <div className="mt-3 flex gap-2">
+          <input value={manualText} onChange={e => setManualText(e.target.value.slice(0,500))} placeholder="Algo importante sobre mim…" className="min-h-11 min-w-0 flex-1 rounded-2xl border border-[#E8DDD4] px-3 text-sm outline-none focus:ring-2 focus:ring-[#B86B52]/30" />
+          <button type="button" disabled={!manualText.trim()} onClick={() => { addManualNote(manualKind, manualText); setManualText(""); }} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#587563] text-white disabled:opacity-40"><Plus size={17}/></button>
+        </div>
+        <div className="mt-3 space-y-2">
+          {manualNotes.slice(0,8).map(note => <div key={note.id} className="flex items-start justify-between gap-3 rounded-2xl bg-[#FFF9F5] p-3"><div><span className="text-[9px] font-black uppercase tracking-wide text-[#B86B52]">{note.kind.replaceAll("_"," ")}</span><p className="mt-1 text-xs font-semibold leading-5 text-[#5E4A43]">{note.text}</p></div><button type="button" onClick={() => removeManualNote(note.id)} className="p-2 text-[#A48D83]" aria-label="Apagar"><Trash2 size={14}/></button></div>)}
+        </div>
+      </section>
+
+      <section className="mt-4 rounded-[30px] border border-[#E8DDD4] bg-[#FFF9F5] p-5 shadow-sm sm:p-6">
+        <p className="text-[10px] font-black uppercase tracking-[.2em] text-[#B86B52]">Mensagem para o meu futuro Eu</p>
+        <h2 className="mt-1 text-xl font-black text-[#3F2C27]">Diz hoje algo que possas precisar de ouvir mais tarde.</h2>
+        {dueFutureMessages.slice(0,2).map(item => <div key={item.id} className="mt-3 rounded-2xl bg-white p-4"><p className="text-xs font-bold leading-5 text-[#5E4A43]">“{item.text}”</p><p className="mt-2 text-[10px] text-[#9A8177]">Escreveste isto em {item.createdAt.slice(0,10)}.</p>{!item.revealedAt && <button type="button" onClick={() => revealFutureMessage(item.id)} className="mt-2 text-[10px] font-black text-[#587563]">Guardar como relida</button>}</div>)}
+        <textarea value={futureText} onChange={e => setFutureText(e.target.value.slice(0,1200))} rows={3} placeholder="O que gostarias que o teu Eu futuro se lembrasse?" className="mt-4 w-full rounded-2xl border border-[#E8DDD4] bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-[#B86B52]/30" />
+        <button type="button" disabled={!futureText.trim()} onClick={() => { saveFutureMessage(futureText, 6); setFutureText(""); }} className="mt-2 min-h-11 w-full rounded-2xl bg-[#3F2C27] px-4 text-xs font-black text-white disabled:opacity-40">Guardar para daqui a 6 meses</button>
       </section>
 
       <section className="mt-4 overflow-hidden rounded-[30px] border border-white bg-white/90 p-5 shadow-[0_16px_45px_rgba(93,65,53,.08)] sm:p-6">

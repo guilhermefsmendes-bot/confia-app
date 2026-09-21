@@ -5,14 +5,16 @@ import {
   MessageSquarePlus,
   Smile,
   Send,
-  CheckCircle
+  CheckCircle,
+  Tag
 } from 'lucide-react';
 import { SharePost } from '../types';
 import { useTranslation } from 'react-i18next';
+import CommunityCircles from './CommunityCircles';
 
 interface PartilhaFeedProps {
   posts: SharePost[];
-  onAddPost: (feeling: string, message: string) => void;
+  onAddPost: (feeling: string, topic: string, message: string) => void;
   onLikePost: (
     id: string,
     reaction: "yellow" | "green" | "red"
@@ -62,6 +64,21 @@ const FEELINGS_LIST = [
   }
 ];
 
+const TOPICS_LIST = [
+  { id: 'ansiedade', label: 'Ansiedade', emoji: '🌊' },
+  { id: 'stress', label: 'Stress', emoji: '⚡' },
+  { id: 'saude-mental', label: 'Saúde mental', emoji: '🧠' },
+  { id: 'cansaco', label: 'Cansaço', emoji: '🌙' },
+  { id: 'solidao', label: 'Solidão', emoji: '🤍' },
+  { id: 'relacoes', label: 'Relações', emoji: '🤝' },
+  { id: 'trabalho-estudos', label: 'Trabalho / Estudos', emoji: '💼' },
+  { id: 'familia', label: 'Família', emoji: '🏡' },
+  { id: 'sono', label: 'Sono', emoji: '😴' },
+  { id: 'autoestima', label: 'Autoestima', emoji: '🌱' },
+  { id: 'progresso', label: 'Progresso / Vitória', emoji: '✨' },
+  { id: 'outro', label: 'Outro', emoji: '💭' }
+];
+
 export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   posts,
   onAddPost,
@@ -74,6 +91,8 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   const { t } = useTranslation();
 
   const [selectedFeeling, setSelectedFeeling] = useState('Calmo');
+  const [selectedTopic, setSelectedTopic] = useState('ansiedade');
+  const [activeTopic, setActiveTopic] = useState('all');
   const [message, setMessage] = useState('');
   const [showCompose, setShowCompose] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
@@ -84,7 +103,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
 
     if (!message.trim()) return;
 
-    onAddPost(selectedFeeling, message.trim());
+    onAddPost(selectedFeeling, selectedTopic, message.trim());
 
     setMessage('');
     setShowCompose(false);
@@ -203,6 +222,35 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
             </div>
           </div>
 
+          {/* Topic Selection */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-[#2F2926] flex items-center gap-1">
+              <Tag size={14} className="text-[#B85F48]" />
+              Sobre o que queres falar?
+            </label>
+            <p className="text-[10px] text-[var(--cf-muted)]">
+              Escolhe o tema que melhor representa a tua partilha.
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {TOPICS_LIST.map(topic => (
+                <button
+                  key={topic.id}
+                  type="button"
+                  onClick={() => setSelectedTopic(topic.id)}
+                  className={
+                    "px-3 py-2 rounded-xl border text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer " +
+                    (selectedTopic === topic.id
+                      ? "bg-[#2F2926] border-[#2F2926] text-white shadow-sm"
+                      : "bg-white border-[#E8DDD7] text-[#795B50] hover:border-[#B85F48]/40")
+                  }
+                >
+                  <span>{topic.emoji}</span>
+                  <span>{topic.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Text Area */}
           <div className="space-y-1.5">
             <textarea
@@ -241,11 +289,49 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
         </motion.form>
       )}
 
+      <CommunityCircles posts={posts} onOpenChat={onOpenChat} />
+
+      {/* Topic filters */}
+      <div className="overflow-x-auto -mx-1 px-1">
+        <div className="flex gap-2 pb-1 min-w-max">
+          <button
+            type="button"
+            onClick={() => setActiveTopic('all')}
+            className={
+              "px-3 py-2 rounded-full text-[10px] font-black border transition " +
+              (activeTopic === 'all'
+                ? "bg-[#B85F48] text-white border-[#B85F48]"
+                : "bg-white text-[#795B50] border-[#E8DDD7]")
+            }
+          >
+            Todas
+          </button>
+          {TOPICS_LIST.map(topic => (
+            <button
+              key={topic.id}
+              type="button"
+              onClick={() => setActiveTopic(topic.id)}
+              className={
+                "px-3 py-2 rounded-full text-[10px] font-bold border transition " +
+                (activeTopic === topic.id
+                  ? "bg-[#B85F48] text-white border-[#B85F48]"
+                  : "bg-white text-[#795B50] border-[#E8DDD7]")
+              }
+            >
+              {topic.emoji} {topic.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Feed Stack */}
       <div className="space-y-3.5">
         <AnimatePresence initial={false}>
-          {posts.map(post => {
+          {posts
+            .filter(post => activeTopic === 'all' || post.topic === activeTopic)
+            .map(post => {
             const tag = getFeelingStyles(post.feeling);
+            const topic = TOPICS_LIST.find(item => item.id === post.topic);
 
             const canChat =
               post.userReaction !== undefined ||
@@ -297,6 +383,15 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
                     <span>{tag.text}</span>
                   </span>
                 </div>
+
+                {topic && (
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF7F2] border border-[#E8CFC2] px-2.5 py-1 text-[10px] font-black text-[#934A38]">
+                      <span>{topic.emoji}</span>
+                      <span>{topic.label}</span>
+                    </span>
+                  </div>
+                )}
 
                 {/* Message text */}
                 <p className="text-xs text-[#2F2926] leading-relaxed font-semibold">

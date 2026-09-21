@@ -1639,7 +1639,7 @@
         "control": "Regaining a sense of control already seems to have helped in more than one moment.",
         "support": "Seeking support already seems to have helped in more than one moment."
       },
-      "checkIn": "A need has appeared more than once across your check-ins.",
+      "checkIn": "The need “{{need}}” appeared {{count}} times in your 3 most recent check-ins. Records: {{dates}}.",
       "moodImproving": "Across several recent entries, your mood has shown a more favourable direction.",
       "moodDeclining": "Across several recent entries, your mood has shown a more difficult direction.",
       "moodStable": "Across several recent entries, your mood has remained in a similar direction."
@@ -1830,8 +1830,8 @@
   },
   "personalMap": {
     "backAria": "Back",
-    "title": "My Map",
-    "subtitle": "A view of what CONFIA has actually observed in you.",
+    "title": "My Manual",
+    "subtitle": "What CONFIA is learning about how you work — built only from your own records.",
     "observations": "observations",
     "days": "days",
     "completeness": "coverage",
@@ -1919,11 +1919,15 @@
       "moderate": "There are repeated signals",
       "high": "There is consistent evidence"
     },
-    "weekday": "Your records show a recurring difference on one weekday.",
-    "recoveryPattern": "When a record was lower, there are occasions where your following records show a meaningful recovery.",
-    "goalAssociationUp": "In your records, days with completed goals have coincided with a higher average state.",
-    "goalAssociationDown": "In your records, days with completed goals have coincided with a lower average state.",
-    "personalChange": "Your recent pattern is different from the previous period, based on your own records."
+    "weekday": "A recurring weekday difference was observed in {{count}} records between {{first}} and {{last}}.",
+    "recoveryPattern": "{{count}} recoveries were observed where a low record was followed by a meaningful increase, between {{first}} and {{last}}.",
+    "goalAssociationUp": "Across {{pairedDays}} days with completed goals versus {{comparisonDays}} comparison days, average state was higher. Period: {{first}} to {{last}}.",
+    "goalAssociationDown": "Across {{pairedDays}} days with completed goals versus {{comparisonDays}} comparison days, average state was lower. Period: {{first}} to {{last}}.",
+    "personalChange": "A comparison of {{count}} records between {{first}} and {{last}} shows a difference between the recent and previous period.",
+    "repeatedNeed": "The need “{{label}}” appeared {{count}} times between {{first}} and {{last}}.",
+    "trendUp": "Your average state increased across {{count}} records between {{first}} and {{last}}.",
+    "trendDown": "Your average state decreased across {{count}} records between {{first}} and {{last}}.",
+    "interventionEffect": "Across {{count}} Impulse uses analysed between {{first}} and {{last}}, intensity decreased repeatedly."
   },
   "blindVent": {
     "eyebrow": "EPHEMERAL SPACE",

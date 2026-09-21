@@ -61,6 +61,7 @@ function buildTrendInsight(valid: PersonalEvent[], now: Date): PersonalInsight |
     novelty: "new", actionability: "medium", supportingEventIds: recent.map(event => event.id),
     message: direction === "up" ? "Nos teus registos recentes, o teu estado médio tem subido." : "Nos teus registos recentes, o teu estado médio tem descido.",
     messageKey: direction === "up" ? "personalInsights.trendUp" : "personalInsights.trendDown",
+    messageValues: { count: recent.length, first: recent[0].localDate, last: recent[recent.length - 1].localDate },
   };
 }
 
@@ -118,7 +119,7 @@ function buildGoalAssociationInsight(events: PersonalEvent[], now: Date): Person
       ? "Nos teus registos, os dias com objetivos concluídos têm coincidido com um estado médio mais alto."
       : "Nos teus registos, os dias com objetivos concluídos têm coincidido com um estado médio mais baixo.",
     messageKey: delta > 0 ? "personalInsights.goalAssociationUp" : "personalInsights.goalAssociationDown",
-    messageValues: { pairedDays: paired.length, comparisonDays: unpaired.length },
+    messageValues: { pairedDays: paired.length, comparisonDays: unpaired.length, first: [...moodsByDay.keys()].sort()[0], last: lastDate },
   };
 }
 
@@ -143,6 +144,7 @@ function buildInterventionInsight(valid: PersonalEvent[], now: Date): PersonalIn
     timesShown: 0, novelty: "new", actionability: "high", supportingEventIds: recent.map(event => event.id),
     message: "Nos teus episódios registados, a intensidade baixou depois de algumas intervenções.",
     messageKey: "personalInsights.interventionEffect",
+    messageValues: { count: recent.length, first: first.localDate, last: last.localDate },
   };
 }
 
@@ -169,7 +171,7 @@ function buildWeekdayInsight(valid: PersonalEvent[], now: Date): PersonalInsight
     id: `insight_weekday_${day}_${last.localDate}`, type: "weekday", generatedAt: now.toISOString(), periodStart: recent[0].localDate, periodEnd: last.localDate,
     evidenceCount: values.length, confidence, direction: delta > 0 ? "up" : "down", variables: [`weekday:${day}`], status: values.length >= 5 ? "consistent" : "possible",
     fingerprint: `weekday:mood:${day}:${delta > 0 ? "up" : "down"}`, firstSeen: recent[0].localDate, lastSeen: last.localDate, timesShown: 0, novelty: "new", actionability: "medium", supportingEventIds: recent.filter(e => new Date(e.timestamp).getDay() === day).map(e => e.id),
-    message: "Os teus registos mostram uma diferença recorrente num dia da semana.", messageKey: "personalInsights.weekday", messageValues: { day: String(day) },
+    message: "Os teus registos mostram uma diferença recorrente num dia da semana.", messageKey: "personalInsights.weekday", messageValues: { day: String(day), count: values.length, first: recent[0].localDate, last: last.localDate },
   };
 }
 
@@ -192,7 +194,7 @@ function buildRecoveryInsight(valid: PersonalEvent[], now: Date): PersonalInsigh
     id: `insight_recovery_${last.localDate}`, type: "recovery_pattern", generatedAt: now.toISOString(), periodStart: first.localDate, periodEnd: last.localDate,
     evidenceCount: changes.length, confidence: calculateInsightConfidence(changes.length, Math.min(1, changes.length / 5), Math.min(1, recent.length / 30), 0.7, Math.min(1, average / 3), Math.min(1, new Set(supporting).size / 8)),
     direction: "up", variables: ["mood_recovery"], status: changes.length >= 5 ? "consistent" : "possible", fingerprint: "recovery:mood:repeated", firstSeen: first.localDate, lastSeen: last.localDate, timesShown: 0, novelty: "new", actionability: "high", supportingEventIds: [...new Set(supporting)],
-    message: "Quando um registo esteve mais baixo, há ocasiões em que os registos seguintes mostram uma recuperação significativa.", messageKey: "personalInsights.recoveryPattern",
+    message: "Quando um registo esteve mais baixo, há ocasiões em que os registos seguintes mostram uma recuperação significativa.", messageKey: "personalInsights.recoveryPattern", messageValues: { count: changes.length, first: first.localDate, last: last.localDate },
   };
 }
 
@@ -205,7 +207,7 @@ function buildPersonalChangeInsight(valid: PersonalEvent[], now: Date): Personal
   const last = recent[recent.length - 1];
   return {
     id: `insight_change_30d_${last.localDate}`, type: "personal_change", generatedAt: now.toISOString(), periodStart: previous[0].localDate, periodEnd: last.localDate,
-    evidenceCount: recent.length + previous.length, confidence: calculateInsightConfidence(recent.length + previous.length, Math.min(1, Math.abs(delta) / 2), Math.min(1, recent.length / 14), 0.8, Math.min(1, Math.abs(delta) / 2), Math.min(1, recent.length / 14)), direction: delta > 0 ? "up" : "down", variables: ["mood:30d_vs_previous_30d"], status: recent.length >= 12 ? "consistent" : "possible", fingerprint: `personal_change:mood:${delta > 0 ? "up" : "down"}`, firstSeen: previous[0].localDate, lastSeen: last.localDate, timesShown: 0, novelty: "new", actionability: "medium", supportingEventIds: [...previous, ...recent].map(e => e.id), message: "O teu padrão recente está diferente do período anterior, segundo os teus próprios registos.", messageKey: "personalInsights.personalChange",
+    evidenceCount: recent.length + previous.length, confidence: calculateInsightConfidence(recent.length + previous.length, Math.min(1, Math.abs(delta) / 2), Math.min(1, recent.length / 14), 0.8, Math.min(1, Math.abs(delta) / 2), Math.min(1, recent.length / 14)), direction: delta > 0 ? "up" : "down", variables: ["mood:30d_vs_previous_30d"], status: recent.length >= 12 ? "consistent" : "possible", fingerprint: `personal_change:mood:${delta > 0 ? "up" : "down"}`, firstSeen: previous[0].localDate, lastSeen: last.localDate, timesShown: 0, novelty: "new", actionability: "medium", supportingEventIds: [...previous, ...recent].map(e => e.id), message: "O teu padrão recente está diferente do período anterior, segundo os teus próprios registos.", messageKey: "personalInsights.personalChange", messageValues: { count: recent.length + previous.length, first: previous[0].localDate, last: last.localDate },
   };
 }
 
@@ -237,7 +239,12 @@ export function buildPersonalInsights(events: PersonalEvent[], now = new Date())
       actionability: pattern.type === "repeated_need" ? "medium" : "high", supportingEventIds: pattern.supportingEventIds,
       message: describePersonalPattern(pattern),
       messageKey: pattern.type === "habit_association" ? "personalInsights.habitAssociation" : pattern.type === "time_of_day" ? "personalInsights.timeOfDay" : "personalInsights.repeatedNeed",
-      messageValues: { label: pattern.label },
+      messageValues: {
+        label: pattern.label,
+        count: pattern.evidenceCount,
+        first: pattern.firstSeen,
+        last: pattern.lastSeen,
+      },
     });
   }
   return insights;

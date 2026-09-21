@@ -1666,7 +1666,7 @@
         "control": "Recuperar o controlo já parece ter ajudado em mais do que um momento.",
         "support": "Procurar apoio já parece ter ajudado em mais do que um momento."
       },
-      "checkIn": "Há uma necessidade que tem aparecido mais do que uma vez nos teus check-ins.",
+      "checkIn": "A necessidade “{{need}}” apareceu {{count}} vezes nos teus 3 check-ins mais recentes. Registos: {{dates}}.",
       "moodImproving": "Em vários registos recentes, o teu humor tem mostrado uma direção mais favorável.",
       "moodDeclining": "Em vários registos recentes, o teu humor tem mostrado uma direção mais difícil.",
       "moodStable": "Em vários registos recentes, o teu humor tem-se mantido numa direção semelhante."
@@ -1857,8 +1857,8 @@
   },
   "personalMap": {
     "backAria": "Voltar",
-    "title": "O Meu Mapa",
-    "subtitle": "Uma leitura do que a CONFIA já observou em ti.",
+    "title": "Manual de Mim",
+    "subtitle": "O que a CONFIA está a aprender sobre a forma como tu funcionas — construído apenas a partir dos teus registos.",
     "observations": "observações",
     "days": "dias",
     "completeness": "cobertura",
@@ -1946,11 +1946,15 @@
       "moderate": "Há alguns sinais repetidos",
       "high": "Há evidência consistente"
     },
-    "weekday": "Os teus registos mostram uma diferença recorrente num dia da semana.",
-    "recoveryPattern": "Quando um registo esteve mais baixo, há ocasiões em que os registos seguintes mostram uma recuperação significativa.",
-    "goalAssociationUp": "Nos teus registos, os dias com objetivos concluídos têm coincidido com um estado médio mais alto.",
-    "goalAssociationDown": "Nos teus registos, os dias com objetivos concluídos têm coincidido com um estado médio mais baixo.",
-    "personalChange": "O teu padrão recente está diferente do período anterior, segundo os teus próprios registos."
+    "weekday": "Foi observada uma diferença neste dia da semana em {{count}} registos, entre {{first}} e {{last}}.",
+    "recoveryPattern": "Foram observadas {{count}} recuperações em que um registo baixo foi seguido por uma subida significativa, entre {{first}} e {{last}}.",
+    "goalAssociationUp": "Em {{pairedDays}} dias com objetivos concluídos, comparados com {{comparisonDays}} dias sem essa conclusão, o estado médio foi mais alto. Período: {{first}} a {{last}}.",
+    "goalAssociationDown": "Em {{pairedDays}} dias com objetivos concluídos, comparados com {{comparisonDays}} dias sem essa conclusão, o estado médio foi mais baixo. Período: {{first}} a {{last}}.",
+    "personalChange": "A comparação de {{count}} registos entre {{first}} e {{last}} mostra uma diferença entre o período recente e o anterior.",
+    "repeatedNeed": "A necessidade “{{label}}” apareceu {{count}} vezes entre {{first}} e {{last}}.",
+    "trendUp": "O teu estado médio subiu ao longo de {{count}} registos, entre {{first}} e {{last}}.",
+    "trendDown": "O teu estado médio desceu ao longo de {{count}} registos, entre {{first}} e {{last}}.",
+    "interventionEffect": "Em {{count}} utilizações do Impulso analisadas entre {{first}} e {{last}}, a intensidade baixou de forma repetida."
   },
   "blindVent": {
     "eyebrow": "ESPAÇO EFÉMERO",

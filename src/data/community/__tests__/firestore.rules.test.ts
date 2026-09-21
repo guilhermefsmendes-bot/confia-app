@@ -11,6 +11,7 @@ const post = (authorId: string) => ({
   authorId,
   userName: "Test User",
   feeling: "calm",
+  topic: "stress",
   message: "A valid test post",
   yellowLikes: 0,
   greenLikes: 0,
@@ -35,6 +36,13 @@ describe("Firestore security rules", () => {
 
   it("rejects creating a post for another user", async () => {
     await assertFails(setDoc(doc(db("alice"), "posts/p2"), post("bob")));
+  });
+
+  it("rejects an unknown community topic", async () => {
+    await assertFails(setDoc(doc(db("alice"), "posts/p-topic-invalid"), {
+      ...post("alice"),
+      topic: "unsupported-topic",
+    }));
   });
 
   it("allows a user to add exactly one reaction", async () => {
@@ -88,6 +96,24 @@ describe("Firestore security rules", () => {
       createdAt: Timestamp.fromMillis(1_700_000_000_000),
       lastMessage: "",
       lastMessageAt: Timestamp.fromMillis(1_700_000_000_000),
+    }));
+  });
+
+  it("allows chat unread state to be written by the sender and cleared by the recipient", async () => {
+    await assertSucceeds(updateDoc(doc(db("bob"), "chats/p-chat_alice_bob"), {
+      lastMessage: "hello",
+      lastMessageAt: Timestamp.fromMillis(1_700_000_100_000),
+      lastSenderId: "bob",
+      unreadBy: ["alice"],
+    }));
+
+    await assertSucceeds(updateDoc(doc(db("alice"), "chats/p-chat_alice_bob"), {
+      unreadBy: [],
+    }));
+
+    await assertFails(updateDoc(doc(db("bob"), "chats/p-chat_alice_bob"), {
+      lastSenderId: "alice",
+      unreadBy: ["bob"],
     }));
   });
 

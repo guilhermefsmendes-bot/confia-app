@@ -25,6 +25,7 @@ import { emitCompanionInteraction } from "../data/reactive/companionBrain/compan
 interface CommunityChatProps {
   post: SharePost;
   onClose: () => void;
+  initialChatId?: string | null;
 }
 
 interface ChatMessage {
@@ -36,7 +37,8 @@ interface ChatMessage {
 
 export const CommunityChat: React.FC<CommunityChatProps> = ({
   post,
-  onClose
+  onClose,
+  initialChatId = null
 }) => {
   const { t } = useTranslation();
 
@@ -111,6 +113,26 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         }
 
         const myUid = user.uid;
+
+        // Uma notificação não lida identifica uma conversa concreta.
+        // Usar esse ID evita abrir o chat errado quando várias pessoas
+        // responderam à mesma publicação.
+        if (initialChatId) {
+          const requestedChat = await getDoc(doc(db, "chats", initialChatId));
+          const requestedData = requestedChat.data();
+          if (
+            requestedChat.exists() &&
+            Array.isArray(requestedData?.participants) &&
+            requestedData.participants.includes(myUid) &&
+            requestedData.postId === post.id
+          ) {
+            if (!cancelled) {
+              setChatId(initialChatId);
+              setLoading(false);
+            }
+            return;
+          }
+        }
 
         /*
          * PRIMEIRO:
@@ -215,7 +237,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [post.id, post.authorId]);
+  }, [post.id, post.authorId, initialChatId]);
 
   // Escutar mensagens em tempo real
   useEffect(() => {
@@ -391,6 +413,23 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
           >
             <X size={18} />
           </button>
+        </div>
+
+        {/* Contexto da conversa: mantém visível a publicação que originou o apoio. */}
+        <div className="border-b border-slate-100 bg-white px-5 py-3">
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-[#FFF3EC] px-2.5 py-1 text-[9px] font-black text-[#934A38]">
+              {post.feeling}
+            </span>
+            {post.topic && (
+              <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[9px] font-bold text-slate-500">
+                #{post.topic.replace(/-/g, " ")}
+              </span>
+            )}
+          </div>
+          <p className="mt-2 line-clamp-2 text-[11px] font-semibold leading-5 text-[#6D5A53]">
+            {post.message}
+          </p>
         </div>
 
         {/* Mensagens */}

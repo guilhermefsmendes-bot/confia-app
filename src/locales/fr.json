@@ -1537,7 +1537,7 @@
         "control": "Retrouver un sentiment de contrôle semble déjà avoir aidé à plus d’un moment.",
         "support": "Chercher du soutien semble déjà avoir aidé à plus d’un moment."
       },
-      "checkIn": "Un besoin est apparu plus d’une fois dans tes check-ins.",
+      "checkIn": "Le besoin « {{need}} » est apparu {{count}} fois dans tes 3 check-ins les plus récents. Relevés : {{dates}}.",
       "moodImproving": "Sur plusieurs entrées récentes, ton humeur a montré une direction plus favorable.",
       "moodDeclining": "Sur plusieurs entrées récentes, ton humeur a montré une direction plus difficile.",
       "moodStable": "Sur plusieurs entrées récentes, ton humeur est restée dans une direction similaire."
@@ -1728,8 +1728,8 @@
   },
   "personalMap": {
     "backAria": "Back",
-    "title": "Ma carte",
-    "subtitle": "A view of what CONFIA has actually observed in you.",
+    "title": "Mon Manuel",
+    "subtitle": "Ce que CONFIA apprend sur ta façon de fonctionner, uniquement à partir de tes propres relevés.",
     "observations": "observations",
     "days": "days",
     "completeness": "coverage",
@@ -1817,11 +1817,15 @@
       "moderate": "Des signaux se répètent",
       "high": "Les éléments sont cohérents"
     },
-    "weekday": "Tes relevés montrent une différence récurrente un jour de la semaine.",
-    "recoveryPattern": "Lorsqu’un relevé était plus bas, les relevés suivants montrent parfois une récupération significative.",
-    "goalAssociationUp": "Dans tes données, les jours où des objectifs ont été accomplis ont coïncidé avec un état moyen plus élevé.",
-    "goalAssociationDown": "Dans tes données, les jours où des objectifs ont été accomplis ont coïncidé avec un état moyen plus bas.",
-    "personalChange": "Ton profil récent diffère de la période précédente, selon tes propres relevés."
+    "weekday": "A recurring weekday difference was observed in {{count}} records between {{first}} and {{last}}.",
+    "recoveryPattern": "{{count}} recoveries were observed where a low record was followed by a meaningful increase, between {{first}} and {{last}}.",
+    "goalAssociationUp": "Across {{pairedDays}} days with completed goals versus {{comparisonDays}} comparison days, average state was higher. Period: {{first}} to {{last}}.",
+    "goalAssociationDown": "Across {{pairedDays}} days with completed goals versus {{comparisonDays}} comparison days, average state was lower. Period: {{first}} to {{last}}.",
+    "personalChange": "A comparison of {{count}} records between {{first}} and {{last}} shows a difference between the recent and previous period.",
+    "repeatedNeed": "Le besoin « {{label}} » est apparu {{count}} fois entre {{first}} et {{last}}.",
+    "trendUp": "Your average state increased across {{count}} records between {{first}} and {{last}}.",
+    "trendDown": "Your average state decreased across {{count}} records between {{first}} and {{last}}.",
+    "interventionEffect": "Across {{count}} Impulse uses analysed between {{first}} and {{last}}, intensity decreased repeatedly."
   },
   "blindVent": {
     "eyebrow": "ESPACE ÉPHÉMÈRE",

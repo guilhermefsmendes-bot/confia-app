@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Plus, Trash2, Heart, Award, Smile, Coffee, Users, Sparkles, ArrowRight, CircleCheckBig, Footprints } from 'lucide-react';
+import { Check, Plus, Trash2, Heart, Award, Smile, Coffee, Users, Sparkles, ArrowRight, CircleCheckBig, Footprints, Route, ShieldCheck, X } from 'lucide-react';
 import { Objective } from '../types';
 import { useTranslation } from "react-i18next";
 import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
+import { GOAL_JOURNEYS_UPDATED_EVENT, readGoalJourney, recordGoalAttempt, summarizeGoalJourney, updateGoalJourney, type GoalBlocker, type GoalLevel } from "../data/personal/goalJourney";
 interface ObjectivosListProps {
   objectives: Objective[];
   onToggleComplete: (id: string) => void;
@@ -22,6 +23,90 @@ const { t } = useTranslation();
   const [newText, setNewText] = useState('');
   const [newCategory, setNewCategory] = useState<'corporeo' | 'mental' | 'social' | 'nutricao'>('mental');
   const [showForm, setShowForm] = useState(false);
+  const [journeyRevision, setJourneyRevision] = useState(0);
+  const [editingJourneyId, setEditingJourneyId] = useState<string | null>(null);
+  const [blockedObjectiveId, setBlockedObjectiveId] = useState<string | null>(null);
+  const [whyDraft, setWhyDraft] = useState("");
+  const [minimumDraft, setMinimumDraft] = useState("");
+  const [normalDraft, setNormalDraft] = useState("");
+  const [extraDraft, setExtraDraft] = useState("");
+
+  useEffect(() => {
+    const refresh = () => setJourneyRevision(value => value + 1);
+    window.addEventListener(GOAL_JOURNEYS_UPDATED_EVENT, refresh);
+    return () => window.removeEventListener(GOAL_JOURNEYS_UPDATED_EVENT, refresh);
+  }, []);
+
+  const journeys = useMemo(() => {
+    void journeyRevision;
+    return new Map(objectives.map(objective => [objective.id, readGoalJourney(objective.id)]));
+  }, [objectives, journeyRevision]);
+
+  const blockerLabels: Record<GoalBlocker, string> = {
+    energy: "Sem energia", anxiety: "Ansiedade", forgot: "Esqueci-me",
+    time: "Sem tempo", too_hard: "Era demasiado difícil", motivation: "Perdi a vontade", other: "Outra coisa"
+  };
+
+  const deriveJourneySteps = (objective: Objective) => {
+    const normal = t(objective.text);
+    const lower = normal.toLocaleLowerCase("pt-PT");
+    const timed = normal.match(/(\d+)\s*(minutos?|mins?)/i);
+    if (timed) {
+      const amount = Number(timed[1]);
+      const minimumAmount = Math.max(1, Math.round(amount / 3));
+      const extraAmount = Math.max(amount + 1, amount * 2);
+      return {
+        minimum: normal.replace(timed[0], `${minimumAmount} minuto${minimumAmount === 1 ? "" : "s"}`),
+        normal,
+        extra: normal.replace(timed[0], `${extraAmount} minutos`),
+      };
+    }
+    if (lower.includes("caminh") || lower.includes("exerc") || lower.includes("trein")) {
+      return { minimum: "Faz apenas 5 minutos.", normal, extra: "Faz o passo habitual e acrescenta mais 10 minutos, se te souber bem." };
+    }
+    if (lower.includes("escrev") || lower.includes("regist")) {
+      return { minimum: "Escreve apenas uma frase.", normal, extra: "Escreve durante mais alguns minutos e regista o que descobriste." };
+    }
+    if (lower.includes("falar") || lower.includes("mensagem") || lower.includes("contact")) {
+      return { minimum: "Dá apenas o primeiro passo: envia uma mensagem curta.", normal, extra: "Se te sentires confortável, prolonga a conversa um pouco." };
+    }
+    return {
+      minimum: "Faz a versão mais pequena possível deste passo durante 2 minutos.",
+      normal,
+      extra: "Repete o passo ou prolonga-o um pouco, apenas se te sentires capaz.",
+    };
+  };
+
+  const startJourneyEdit = (objective: Objective) => {
+    const journey = readGoalJourney(objective.id);
+    setEditingJourneyId(objective.id);
+    const suggested = deriveJourneySteps(objective);
+    setWhyDraft(journey?.why || "");
+    setMinimumDraft(journey?.minimum || suggested.minimum);
+    setNormalDraft(journey?.normal || suggested.normal);
+    setExtraDraft(journey?.extra || suggested.extra);
+  };
+
+  const saveJourney = () => {
+    if (!editingJourneyId) return;
+    updateGoalJourney(editingJourneyId, {
+      why: whyDraft.trim() || undefined,
+      minimum: minimumDraft.trim() || undefined,
+      normal: normalDraft.trim() || undefined,
+      extra: extraDraft.trim() || undefined,
+    });
+    setEditingJourneyId(null);
+  };
+
+  const recordCompletionLevel = (objective: Objective, level: GoalLevel) => {
+    recordGoalAttempt(objective.id, { date: new Date().toISOString(), outcome: "done", level });
+    if (!objective.completed) handleObjectiveToggle(objective);
+  };
+
+  const recordBlocker = (objective: Objective, blocker: GoalBlocker) => {
+    recordGoalAttempt(objective.id, { date: new Date().toISOString(), outcome: "blocked", blocker });
+    setBlockedObjectiveId(null);
+  };
 
   /**
    * 2G — microcelebração transitória.
@@ -401,19 +486,56 @@ const { t } = useTranslation();
               </p>
 
               <p className="mt-2 text-xs font-medium leading-relaxed text-[#8A7770]">
-                {t("objectivesPremium.nextStepHint")}
+                {journeys.get(featuredObjective.id)?.why
+                  ? <>Porque isto importa: <b>{journeys.get(featuredObjective.id)?.why}</b></>
+                  : "A CONFIA preparou três versões deste passo para poderes avançar mesmo quando o dia não corre como planeado."}
               </p>
 
-              <button
-                type="button"
-                onClick={() =>
-                  handleObjectiveToggle(featuredObjective)
-                }
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#B85F48] to-[#934A38] px-4 py-3.5 text-xs font-black text-white shadow-md shadow-[#B85F48]/20 transition-transform active:scale-[0.98] cursor-pointer"
-              >
-                <Check size={16} strokeWidth={3} />
-                {t("objectivesPremium.completeStep")}
-              </button>
+              {(() => {
+                const journey = journeys.get(featuredObjective.id);
+                const suggested = deriveJourneySteps(featuredObjective);
+                const steps = {
+                  minimum: journey?.minimum || suggested.minimum,
+                  normal: journey?.normal || suggested.normal,
+                  extra: journey?.extra || suggested.extra,
+                };
+                const summary = summarizeGoalJourney(journey);
+                const successfulAttempts = journey?.attempts.filter(item => item.outcome === "done").slice(-6) || [];
+                const suggestProgression = successfulAttempts.length >= 5;
+                return (
+                  <>
+                    <div className="mt-4 rounded-2xl border border-[#EADBD3] bg-white/90 p-3">
+                      <p className="text-[9px] font-black uppercase tracking-[.16em] text-[#A06E5B]">O teu passo de hoje</p>
+                      <div className="mt-3 space-y-2">
+                        {([
+                          ["minimum", "🌱", "Se hoje estiver difícil", steps.minimum],
+                          ["normal", "🌿", "O passo atual", steps.normal],
+                          ["extra", "🌳", "Se te sentires capaz de ir mais longe", steps.extra],
+                        ] as [GoalLevel,string,string,string][]).map(([level,emoji,label,text]) => (
+                          <button key={level} type="button" onClick={() => recordCompletionLevel(featuredObjective, level)} className="flex min-h-[62px] w-full items-start gap-3 rounded-2xl border border-[#F0E5DF] bg-[#FFFCFA] p-3 text-left transition hover:border-[#B85F48]/35">
+                            <span className="text-lg leading-none" aria-hidden="true">{emoji}</span>
+                            <span className="min-w-0"><span className="block text-[9px] font-black uppercase tracking-wide text-[#934A38]">{label}</span><span className="mt-1 block text-[11px] font-bold leading-4 text-[#55433D]">{text}</span></span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="mt-3 text-center text-[9px] font-black uppercase tracking-[.14em] text-[#A88A7D]">Como correu hoje?</p>
+                    <button type="button" onClick={() => setBlockedObjectiveId(featuredObjective.id)} className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-[#F7F2EE] px-3 text-[10px] font-black text-[#765D52]"><ShieldCheck size={14}/>Hoje não consegui</button>
+                    <button type="button" onClick={() => startJourneyEdit(featuredObjective)} className="mt-2 flex min-h-9 w-full items-center justify-center gap-2 px-3 text-[10px] font-black text-[#934A38]"><Route size={13}/>Personalizar este caminho</button>
+                    {suggestProgression && (
+                      <div className="mt-3 rounded-2xl border border-[#DCE9DF] bg-[#F2F8F3] p-3 text-[10px] font-bold leading-4 text-[#587563]">
+                        Este passo já parece estar a ganhar consistência: avançaste em {successfulAttempts.length} das últimas tentativas registadas. Se continuar a sentir-se confortável, podes tornar o nível seguinte no teu passo habitual.
+                      </div>
+                    )}
+                    {summary.topBlocker && summary.topBlockerCount >= 2 && (
+                      <div className="mt-3 rounded-2xl bg-[#FFF1EA] p-3 text-[10px] font-bold leading-4 text-[#7A5145]">
+                        A CONFIA reparou: “{blockerLabels[summary.topBlocker]}” foi indicado em {summary.topBlockerCount} tentativas deste caminho. Talvez valha a pena tornar o próximo passo mais pequeno.
+                      </div>
+                    )}
+                    {summary.returnAfterGap && <div className="mt-2 rounded-2xl bg-[#EEF5F0] p-3 text-[10px] font-bold text-[#587563]">Vitória invisível: houve uma pausa de pelo menos 5 dias e voltaste a este caminho.</div>}
+                  </>
+                );
+              })()}
             </div>
           </motion.div>
         ) : allObjectivesCompleted ? (
@@ -570,6 +692,31 @@ const { t } = useTranslation();
           </div>
         </section>
       )}
+      <AnimatePresence>
+        {editingJourneyId && (() => {
+          const objective = objectives.find(item => item.id === editingJourneyId);
+          if (!objective) return null;
+          return <motion.section initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="rounded-[28px] border border-[#B85F48]/25 bg-white p-5 shadow-md">
+            <div className="flex items-start justify-between gap-3"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#934A38]">O meu caminho</p><h3 className="mt-1 text-base font-black text-[#2F2926]">{t(objective.text)}</h3></div><button type="button" onClick={() => setEditingJourneyId(null)} className="p-2 text-slate-400"><X size={16}/></button></div>
+            <label className="mt-4 block text-[10px] font-black text-[#765D52]">Porque quero isto?</label><textarea value={whyDraft} onChange={e=>setWhyDraft(e.target.value.slice(0,300))} rows={2} placeholder="A razão que gostarias de recordar num dia difícil…" className="mt-1 w-full rounded-2xl border border-[#E8DDD4] p-3 text-xs outline-none"/>
+            <div className="mt-3 grid gap-2">
+              <input value={minimumDraft} onChange={e=>setMinimumDraft(e.target.value.slice(0,180))} placeholder="🌱 Mínimo — num dia difícil…" className="min-h-11 rounded-2xl border border-[#E8DDD4] px-3 text-xs outline-none"/>
+              <input value={normalDraft} onChange={e=>setNormalDraft(e.target.value.slice(0,180))} placeholder="🌿 Normal — o passo habitual…" className="min-h-11 rounded-2xl border border-[#E8DDD4] px-3 text-xs outline-none"/>
+              <input value={extraDraft} onChange={e=>setExtraDraft(e.target.value.slice(0,180))} placeholder="🌳 Extra — se tiveres espaço…" className="min-h-11 rounded-2xl border border-[#E8DDD4] px-3 text-xs outline-none"/>
+            </div>
+            <button type="button" onClick={saveJourney} className="mt-4 min-h-11 w-full rounded-2xl bg-[#3F2C27] text-xs font-black text-white">Guardar o meu caminho</button>
+          </motion.section>;
+        })()}
+        {blockedObjectiveId && (() => {
+          const objective = objectives.find(item => item.id === blockedObjectiveId);
+          if (!objective) return null;
+          return <motion.section initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="rounded-[28px] border border-[#E8DDD4] bg-[#FFF9F5] p-5">
+            <div className="flex items-start justify-between"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#A06E5B]">Sem culpa. Só queremos perceber.</p><h3 className="mt-1 text-base font-black text-[#2F2926]">O que tornou isto difícil hoje?</h3></div><button type="button" onClick={()=>setBlockedObjectiveId(null)} className="p-2 text-slate-400"><X size={16}/></button></div>
+            <div className="mt-4 grid grid-cols-2 gap-2">{(Object.entries(blockerLabels) as [GoalBlocker,string][]).map(([id,label])=><button key={id} type="button" onClick={()=>recordBlocker(objective,id)} className="min-h-11 rounded-2xl border border-[#E8DDD4] bg-white px-3 text-[10px] font-black text-[#6B554D]">{label}</button>)}</div>
+          </motion.section>;
+        })()}
+      </AnimatePresence>
+
       {/* 2D — Objetivo criado pelo utilizador */}
       {!showForm ? (
         <button

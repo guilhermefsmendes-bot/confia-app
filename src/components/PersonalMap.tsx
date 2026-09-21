@@ -80,9 +80,9 @@ export default function PersonalMap({ onBack }: Props) {
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10"><Brain size={20} /></div>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[.2em] text-[#E6B9A3]">Gémeo emocional</p>
-            <h2 className="mt-1 text-xl font-black">O que já aprendi sobre ti</h2>
-            <p className="mt-2 text-xs leading-5 text-white/70">{twin.observationCount} observações · {twin.insightCount} padrões com evidência.</p>
+            <p className="text-[10px] font-black uppercase tracking-[.2em] text-[#E6B9A3]">{t("personalMap.twin.eyebrow")}</p>
+            <h2 className="mt-1 text-xl font-black">{t("personalMap.twin.title")}</h2>
+            <p className="mt-2 text-xs leading-5 text-white/70">{t("personalMap.twin.evidence", { observations: twin.observationCount, insights: twin.insightCount })}</p>
           </div>
         </div>
         <div className="mt-4 space-y-2">
@@ -90,9 +90,9 @@ export default function PersonalMap({ onBack }: Props) {
             <div key={item.id} className="rounded-2xl bg-white/10 p-3 text-xs leading-5">
               {item.messageKey ? t(item.messageKey, item.messageValues) : item.message}
             </div>
-          )) : <p className="rounded-2xl bg-white/10 p-3 text-xs text-white/70">Ainda estou a aprender. Não vou inventar conclusões antes de ter dados suficientes.</p>}
+          )) : <p className="rounded-2xl bg-white/10 p-3 text-xs text-white/70">{t("personalMap.twin.learning")}</p>}
           {twin.helpfulInterventionRate !== undefined && (
-            <p className="text-[11px] font-bold text-[#E6B9A3]">Nas intervenções registadas, {twin.helpfulInterventionRate}% terminaram com intensidade inferior à inicial.</p>
+            <p className="text-[11px] font-bold text-[#E6B9A3]">{t("personalMap.twin.interventions", { rate: twin.helpfulInterventionRate })}</p>
           )}
         </div>
       </section>
@@ -100,8 +100,8 @@ export default function PersonalMap({ onBack }: Props) {
       {replay.length > 0 && (
         <section className="mt-4 rounded-[30px] border border-[#DCC8BD] bg-gradient-to-br from-[#FFF7F2] to-white p-5 shadow-sm sm:p-6">
           <p className="text-[10px] font-black uppercase tracking-[.2em] text-[#B86B52]">CONFIA Replay</p>
-          <h2 className="mt-1 text-xl font-black text-[#3F2C27]">Já estiveste aqui antes.</h2>
-          <p className="mt-2 text-xs leading-5 text-[#806D65]">Momentos teus semelhantes ao registo mais recente. Não é uma previsão — é a tua própria história.</p>
+          <h2 className="mt-1 text-xl font-black text-[#3F2C27]">{t("personalMap.replay.title")}</h2>
+          <p className="mt-2 text-xs leading-5 text-[#806D65]">{t("personalMap.replay.subtitle")}</p>
           <div className="mt-4 space-y-2">
             {replay.map(item => (
               <article key={item.id} className="rounded-2xl border border-[#F0E3DC] bg-white p-4">
@@ -115,8 +115,8 @@ export default function PersonalMap({ onBack }: Props) {
       )}
 
       <section className="mt-4 rounded-[30px] border border-white bg-white/90 p-5 shadow-sm sm:p-6">
-        <div className="flex items-center gap-2"><MessageSquareHeart size={18} className="text-[#B86B52]" /><h2 className="text-xl font-black text-[#3F2C27]">O meu manual vivo</h2></div>
-        <p className="mt-1 text-xs leading-5 text-[#806D65]">Guarda coisas que queres que a CONFIA se lembre quando precisares delas.</p>
+        <div className="flex items-center gap-2"><MessageSquareHeart size={18} className="text-[#B86B52]" /><h2 className="text-xl font-black text-[#3F2C27]">{t("personalMap.manual.title")}</h2></div>
+        <p className="mt-1 text-xs leading-5 text-[#806D65]">{t("personalMap.manual.subtitle")}</p>
         <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
           {([
             ["early_signal","Sinais iniciais"],["helps","Ajuda-me"],["does_not_help","Não ajuda"],["support_person","Pessoas"],["drains_me","Drena-me"],["victory","Vitórias"]
@@ -125,20 +125,20 @@ export default function PersonalMap({ onBack }: Props) {
           ))}
         </div>
         <div className="mt-3 flex gap-2">
-          <input value={manualText} onChange={e => setManualText(e.target.value.slice(0,500))} placeholder="Algo importante sobre mim…" className="min-h-11 min-w-0 flex-1 rounded-2xl border border-[#E8DDD4] px-3 text-sm outline-none focus:ring-2 focus:ring-[#B86B52]/30" />
+          <input value={manualText} onChange={e => setManualText(e.target.value.slice(0,500))} placeholder={t("personalMap.manual.placeholder")} className="min-h-11 min-w-0 flex-1 rounded-2xl border border-[#E8DDD4] px-3 text-sm outline-none focus:ring-2 focus:ring-[#B86B52]/30" />
           <button type="button" disabled={!manualText.trim()} onClick={() => { addManualNote(manualKind, manualText); setManualText(""); }} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#587563] text-white disabled:opacity-40"><Plus size={17}/></button>
         </div>
         <div className="mt-3 space-y-2">
-          {manualNotes.slice(0,8).map(note => <div key={note.id} className="flex items-start justify-between gap-3 rounded-2xl bg-[#FFF9F5] p-3"><div><span className="text-[9px] font-black uppercase tracking-wide text-[#B86B52]">{note.kind.replaceAll("_"," ")}</span><p className="mt-1 text-xs font-semibold leading-5 text-[#5E4A43]">{note.text}</p></div><button type="button" onClick={() => removeManualNote(note.id)} className="p-2 text-[#A48D83]" aria-label="Apagar"><Trash2 size={14}/></button></div>)}
+          {manualNotes.slice(0,8).map(note => <div key={note.id} className="flex items-start justify-between gap-3 rounded-2xl bg-[#FFF9F5] p-3"><div><span className="text-[9px] font-black uppercase tracking-wide text-[#B86B52]">{note.kind.replaceAll("_"," ")}</span><p className="mt-1 text-xs font-semibold leading-5 text-[#5E4A43]">{note.text}</p></div><button type="button" onClick={() => removeManualNote(note.id)} className="p-2 text-[#A48D83]" aria-label={t("personalMap.manual.delete")}><Trash2 size={14}/></button></div>)}
         </div>
       </section>
 
       <section className="mt-4 rounded-[30px] border border-[#E8DDD4] bg-[#FFF9F5] p-5 shadow-sm sm:p-6">
-        <p className="text-[10px] font-black uppercase tracking-[.2em] text-[#B86B52]">Mensagem para o meu futuro Eu</p>
-        <h2 className="mt-1 text-xl font-black text-[#3F2C27]">Diz hoje algo que possas precisar de ouvir mais tarde.</h2>
-        {dueFutureMessages.slice(0,2).map(item => <div key={item.id} className="mt-3 rounded-2xl bg-white p-4"><p className="text-xs font-bold leading-5 text-[#5E4A43]">“{item.text}”</p><p className="mt-2 text-[10px] text-[#9A8177]">Escreveste isto em {item.createdAt.slice(0,10)}.</p>{!item.revealedAt && <button type="button" onClick={() => revealFutureMessage(item.id)} className="mt-2 text-[10px] font-black text-[#587563]">Guardar como relida</button>}</div>)}
-        <textarea value={futureText} onChange={e => setFutureText(e.target.value.slice(0,1200))} rows={3} placeholder="O que gostarias que o teu Eu futuro se lembrasse?" className="mt-4 w-full rounded-2xl border border-[#E8DDD4] bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-[#B86B52]/30" />
-        <button type="button" disabled={!futureText.trim()} onClick={() => { saveFutureMessage(futureText, 6); setFutureText(""); }} className="mt-2 min-h-11 w-full rounded-2xl bg-[#3F2C27] px-4 text-xs font-black text-white disabled:opacity-40">Guardar para daqui a 6 meses</button>
+        <p className="text-[10px] font-black uppercase tracking-[.2em] text-[#B86B52]">{t("personalMap.future.eyebrow")}</p>
+        <h2 className="mt-1 text-xl font-black text-[#3F2C27]">{t("personalMap.future.title")}</h2>
+        {dueFutureMessages.slice(0,2).map(item => <div key={item.id} className="mt-3 rounded-2xl bg-white p-4"><p className="text-xs font-bold leading-5 text-[#5E4A43]">“{item.text}”</p><p className="mt-2 text-[10px] text-[#9A8177]">{t("personalMap.future.writtenOn", { date: item.createdAt.slice(0,10) })}</p>{!item.revealedAt && <button type="button" onClick={() => revealFutureMessage(item.id)} className="mt-2 text-[10px] font-black text-[#587563]">{t("personalMap.future.markRead")}</button>}</div>)}
+        <textarea value={futureText} onChange={e => setFutureText(e.target.value.slice(0,1200))} rows={3} placeholder={t("personalMap.future.placeholder")} className="mt-4 w-full rounded-2xl border border-[#E8DDD4] bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-[#B86B52]/30" />
+        <button type="button" disabled={!futureText.trim()} onClick={() => { saveFutureMessage(futureText, 6); setFutureText(""); }} className="mt-2 min-h-11 w-full rounded-2xl bg-[#3F2C27] px-4 text-xs font-black text-white disabled:opacity-40">{t("personalMap.future.saveSixMonths")}</button>
       </section>
 
       <section className="mt-4 overflow-hidden rounded-[30px] border border-white bg-white/90 p-5 shadow-[0_16px_45px_rgba(93,65,53,.08)] sm:p-6">

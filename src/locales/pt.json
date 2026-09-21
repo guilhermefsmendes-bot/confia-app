@@ -570,7 +570,8 @@
       },
       "habits": {
         "title": "Hábitos que Estou a Trabalhar",
-        "description": "Acompanha os hábitos que queres mudar."
+        "description": "Acompanha os hábitos que queres mudar.",
+        "continue": "Continuar"
       },
       "evolution": {
         "title": "A Minha Evolução",
@@ -583,7 +584,11 @@
       "plan": {
         "title": "Plano Personalizado",
         "description": "Recebe objetivos adaptados ao teu perfil."
-      }
+      },
+      "premiumDescription": "Descobre como a tua mente funciona, identifica padrões que influenciam as tuas emoções e cria novas formas de avançar.",
+      "featureMind": "Compreende os teus pensamentos e reações",
+      "featurePatterns": "Identifica padrões automáticos que se repetem",
+      "featureGrowth": "Desenvolve novas formas de responder"
     },
     "title": "Conhece os teus Padrões",
     "subtitle": "Descobre os hábitos e rotinas que podem estar a alimentar a tua ansiedade.",
@@ -736,6 +741,39 @@
       "q22": "Comparo frequentemente a minha vida ou o meu desempenho com o dos outros.",
       "q23": "Sinto que os outros lidam melhor com situações difíceis do que eu.",
       "q24": "As comparações fazem-me sentir menos confiante."
+    },
+    "noAssessmentData": "Sem dados de avaliação.",
+    "plan": {
+      "personalizedHint": "🌱 O teu plano personalizado será criado com base nos teus padrões identificados.",
+      "title": "Plano personalizado",
+      "description": "Transforma o que descobriste em pequenos passos."
+    },
+    "strength": "Ponto forte",
+    "challenge": "Desafio",
+    "continue": "Continuar",
+    "writeHabit": "Escreve um hábito…",
+    "evolution": {
+      "title": "Evolução recente",
+      "lastSevenDays": "Últimos 7 dias",
+      "smallProgress": "Pequenos progressos também contam.",
+      "betterDays": "Dias melhores:",
+      "harderDays": "Dias mais difíceis:"
+    },
+    "library": {
+      "title": "Biblioteca dos Padrões",
+      "description": "Compreende melhor os padrões que estás a observar.",
+      "brain": {
+        "title": "Cérebro e padrões",
+        "description": "Aprende como respostas automáticas podem ganhar força com a repetição."
+      },
+      "confirmation": {
+        "title": "Procura de confirmação",
+        "description": "Percebe como procurar certeza pode aliviar no momento e manter o ciclo."
+      },
+      "cycle": {
+        "title": "Ciclo da ansiedade",
+        "description": "Reconhece as etapas que podem manter preocupação e desconforto."
+      }
     }
   },
   "patternsNew": {
@@ -1616,7 +1654,8 @@
       "title": "Bom ter-te de volta",
       "text": "Não há nada para recuperar. Podemos simplesmente começar pelo momento em que estás agora.",
       "days_one": "Passou {{count}} dia desde a última vez que abriste a CONFIA",
-      "days_other": "Passaram {{count}} dias desde a última vez que abriste a CONFIA"
+      "days_other": "Passaram {{count}} dias desde a última vez que abriste a CONFIA",
+      "days": "Voltaste após {{count}} dias."
     },
     "firstToday": {
       "title": "O teu momento de hoje",
@@ -1911,7 +1950,41 @@
       "personal_change": "Mudança recente",
       "pattern_disappearance": "Mudança de padrão",
       "default": "Sinal observado"
-    }
+    },
+    "twin": {
+      "eyebrow": "Gémeo emocional",
+      "title": "O que já aprendi sobre ti",
+      "evidence": "{{observations}} observações · {{insights}} padrões com evidência.",
+      "learning": "Ainda estou a aprender. Não vou inventar conclusões antes de ter dados suficientes.",
+      "interventions": "Nas intervenções registadas, {{rate}}% terminaram com intensidade inferior à inicial."
+    },
+    "replay": {
+      "title": "Já estiveste aqui antes.",
+      "subtitle": "Momentos teus semelhantes ao registo mais recente. Não é uma previsão — é a tua própria história."
+    },
+    "manual": {
+      "title": "O meu manual vivo",
+      "subtitle": "Guarda coisas que queres que a CONFIA se lembre quando precisares delas.",
+      "placeholder": "Algo importante sobre mim…",
+      "delete": "Apagar",
+      "kinds": {
+        "early_signal": "Sinais iniciais",
+        "helps": "Ajuda-me",
+        "does_not_help": "Não ajuda",
+        "support_person": "Pessoas",
+        "drains_me": "Drena-me",
+        "victory": "Vitórias"
+      }
+    },
+    "future": {
+      "eyebrow": "Mensagem para o meu futuro Eu",
+      "title": "Diz hoje algo que possas precisar de ouvir mais tarde.",
+      "writtenOn": "Escreveste isto em {{date}}.",
+      "markRead": "Guardar como relida",
+      "placeholder": "O que gostarias que o teu Eu futuro se lembrasse?",
+      "saveSixMonths": "Guardar para daqui a 6 meses"
+    },
+    "signalsDetected": "{{count}} sinais detetados"
   },
   "companionPresence": {
     "present": "Presença CONFIA",
@@ -1989,7 +2062,8 @@
     "inProgress": "Só mais um pouco…",
     "completed": "Concluído",
     "start": "Começar",
-    "completedButton": "Feito"
+    "completedButton": "Feito",
+    "progress": "Progresso"
   },
   "invisibleAchievements": {
     "eyebrow": "PEQUENAS CONQUISTAS",
@@ -2110,7 +2184,10 @@
     "calm": "calmo",
     "anxious": "ansioso",
     "low": "baixo",
-    "neutral": "neutro"
+    "neutral": "neutro",
+    "privateSupportNote": "Este pedido é anónimo e não inclui o conteúdo privado dos teus registos.",
+    "voicePlaceholder": "Fala ou escreve livremente sobre este momento…",
+    "toneSignal": "Sinal lexical: {{tone}}"
   },
   "companionRelationship": {
     "firstContact": "Olá. Estou aqui contigo. Não precisas de me contar tudo de uma vez — podemos começar simplesmente por como estás neste momento.",
@@ -2299,5 +2376,85 @@
     "shared": "Partilhado ✓",
     "communityFeeling": "Orgulhoso",
     "communityMessage": "🏆 Completei os 7 dias do meu objetivo semanal na CONFIA."
+  },
+  "objectivesJourney": {
+    "whyItMatters": "Porque isto importa:",
+    "threeVersionsHint": "A CONFIA preparou três versões deste passo para poderes avançar mesmo quando o dia não corre como planeado.",
+    "todayStep": "O teu passo de hoje",
+    "levels": {
+      "minimum": "Se hoje estiver difícil",
+      "normal": "O passo atual",
+      "extra": "Se te sentires capaz de ir mais longe"
+    },
+    "howDidItGo": "Como correu hoje?",
+    "couldNotToday": "Hoje não consegui",
+    "customizePath": "Personalizar este caminho",
+    "progression": "Este passo já parece estar a ganhar consistência: avançaste em {{count}} das últimas tentativas registadas. Se continuar a sentir-se confortável, podes tornar o nível seguinte no teu passo habitual.",
+    "repeatedBlocker": "A CONFIA reparou: “{{blocker}}” foi indicado em {{count}} tentativas deste caminho. Talvez valha a pena tornar o próximo passo mais pequeno.",
+    "invisibleWin": "Vitória invisível: houve uma pausa de pelo menos 5 dias e voltaste a este caminho.",
+    "myPath": "O meu caminho",
+    "whyWantThis": "Porque quero isto?",
+    "whyPlaceholder": "A razão que gostarias de recordar num dia difícil…",
+    "minimumPlaceholder": "🌱 Mínimo — num dia difícil…",
+    "normalPlaceholder": "🌿 Normal — o passo habitual…",
+    "extraPlaceholder": "🌳 Extra — se tiveres espaço…",
+    "savePath": "Guardar o meu caminho",
+    "noGuilt": "Sem culpa. Só queremos perceber.",
+    "whatMadeHard": "O que tornou isto difícil hoje?",
+    "blockers": {
+      "energy": "Sem energia",
+      "anxiety": "Ansiedade",
+      "forgot": "Esqueci-me",
+      "time": "Sem tempo",
+      "tooHard": "Era demasiado difícil",
+      "motivation": "Perdi a vontade",
+      "other": "Outra coisa"
+    },
+    "steps": {
+      "timedMinimum": "Faz apenas {{count}} minuto.",
+      "timedMinimum_plural": "Faz apenas {{count}} minutos.",
+      "timedExtra": "Faz {{count}} minutos, apenas se te sentires capaz.",
+      "defaultMinimum": "Faz a versão mais pequena possível deste passo durante 2 minutos.",
+      "defaultExtra": "Repete o passo ou prolonga-o um pouco, apenas se te sentires capaz."
+    }
+  },
+  "communityTopics": {
+    "all": "Todas",
+    "question": "Sobre o que queres falar?",
+    "hint": "Escolhe o tema que melhor representa a tua partilha.",
+    "ansiedade": "Ansiedade",
+    "stress": "Stress",
+    "saude-mental": "Saúde mental",
+    "cansaco": "Cansaço",
+    "solidao": "Solidão",
+    "relacoes": "Relações",
+    "trabalho-estudos": "Trabalho / Estudos",
+    "familia": "Família",
+    "sono": "Sono",
+    "autoestima": "Autoestima",
+    "progresso": "Progresso / Vitória",
+    "outro": "Outro"
+  },
+  "communityCircles": {
+    "eyebrow": "Círculos CONFIA",
+    "title": "Pessoas a passar por algo semelhante",
+    "subtitle": "Sem seguidores nem rankings. Apenas apoio entre pessoas.",
+    "support": "Apoiar / conversar"
+  },
+  "newMessage": "Nova mensagem",
+  "loading": "A carregar…",
+  "chatLoading": "A carregar conversa…",
+  "chatEmpty": "Ainda não há mensagens.",
+  "chatStartMessage": "Podes começar a conversa por aqui.",
+  "chatPlaceholder": "Escreve uma mensagem…",
+  "chatSend": "Enviar mensagem",
+  "objectiveEmotionalLink": "Este objetivo esteve associado a {{count}} registos emocionais.",
+  "abandonExercise": "Abandonar exercício",
+  "focusAnother": "Focar noutra coisa",
+  "stopQuestion": "O que precisas realmente agora?",
+  "stopTitle": "Parar por um momento",
+  "successTip": "Pequenos passos também contam.",
+  "common": {
+    "back": "Voltar"
   }
 }

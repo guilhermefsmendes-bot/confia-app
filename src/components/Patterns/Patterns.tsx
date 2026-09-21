@@ -50,7 +50,7 @@ if (step === "results") {
   if (!currentProfile) {
     return (
       <div className="p-6 text-center">
-        Sem dados de avaliação.
+        {t("patterns.noAssessmentData")}
       </div>
     );
   }
@@ -162,7 +162,7 @@ if (step === "plan") {
       </p>
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-        🌱 O teu plano personalizado será criado com base nos teus padrões identificados.
+        {t("patterns.plan.personalizedHint")}
       </div>
 
     </div>

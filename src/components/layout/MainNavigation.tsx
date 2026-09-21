@@ -41,8 +41,8 @@ export function MainNavigation({
                 {index === 4 && hasUnreadCommunityMessage && (
                   <span
                     className="absolute -right-2 -top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white"
-                    aria-label="Nova mensagem"
-                    title="Nova mensagem"
+                    aria-label={t("newMessage")}
+                    title={t("newMessage")}
                   />
                 )}
               </div>

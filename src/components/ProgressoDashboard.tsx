@@ -267,7 +267,7 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
               >
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-[#2F2926] font-mono flex items-center gap-1">
-                    🗓️ {rating.date === getLocalCalendarDate() ? 'Hoje' : rating.date}
+                    🗓️ {rating.date === getLocalCalendarDate() ? t("today") : rating.date}
                   </span>
                   {rating.note && (
                     <p className="text-[10px] text-[var(--cf-text-soft)] font-semibold italic">

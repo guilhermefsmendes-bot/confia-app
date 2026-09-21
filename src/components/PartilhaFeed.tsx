@@ -65,18 +65,12 @@ const FEELINGS_LIST = [
 ];
 
 const TOPICS_LIST = [
-  { id: 'ansiedade', label: 'Ansiedade', emoji: '🌊' },
-  { id: 'stress', label: 'Stress', emoji: '⚡' },
-  { id: 'saude-mental', label: 'Saúde mental', emoji: '🧠' },
-  { id: 'cansaco', label: 'Cansaço', emoji: '🌙' },
-  { id: 'solidao', label: 'Solidão', emoji: '🤍' },
-  { id: 'relacoes', label: 'Relações', emoji: '🤝' },
-  { id: 'trabalho-estudos', label: 'Trabalho / Estudos', emoji: '💼' },
-  { id: 'familia', label: 'Família', emoji: '🏡' },
-  { id: 'sono', label: 'Sono', emoji: '😴' },
-  { id: 'autoestima', label: 'Autoestima', emoji: '🌱' },
-  { id: 'progresso', label: 'Progresso / Vitória', emoji: '✨' },
-  { id: 'outro', label: 'Outro', emoji: '💭' }
+  { id: 'ansiedade', emoji: '🌊' }, { id: 'stress', emoji: '⚡' },
+  { id: 'saude-mental', emoji: '🧠' }, { id: 'cansaco', emoji: '🌙' },
+  { id: 'solidao', emoji: '🤍' }, { id: 'relacoes', emoji: '🤝' },
+  { id: 'trabalho-estudos', emoji: '💼' }, { id: 'familia', emoji: '🏡' },
+  { id: 'sono', emoji: '😴' }, { id: 'autoestima', emoji: '🌱' },
+  { id: 'progresso', emoji: '✨' }, { id: 'outro', emoji: '💭' }
 ];
 
 export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
@@ -226,10 +220,10 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
           <div className="space-y-2">
             <label className="text-xs font-bold text-[#2F2926] flex items-center gap-1">
               <Tag size={14} className="text-[#B85F48]" />
-              Sobre o que queres falar?
+              {t("communityTopics.question")}
             </label>
             <p className="text-[10px] text-[var(--cf-muted)]">
-              Escolhe o tema que melhor representa a tua partilha.
+              {t("communityTopics.hint")}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {TOPICS_LIST.map(topic => (
@@ -245,7 +239,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
                   }
                 >
                   <span>{topic.emoji}</span>
-                  <span>{topic.label}</span>
+                  <span>{t("communityTopics." + topic.id)}</span>
                 </button>
               ))}
             </div>
@@ -304,7 +298,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
                 : "bg-white text-[#795B50] border-[#E8DDD7]")
             }
           >
-            Todas
+            {t("communityTopics.all")}
           </button>
           {TOPICS_LIST.map(topic => (
             <button
@@ -318,7 +312,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
                   : "bg-white text-[#795B50] border-[#E8DDD7]")
               }
             >
-              {topic.emoji} {topic.label}
+              {topic.emoji} {t("communityTopics." + topic.id)}
             </button>
           ))}
         </div>
@@ -388,7 +382,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
                   <div>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF7F2] border border-[#E8CFC2] px-2.5 py-1 text-[10px] font-black text-[#934A38]">
                       <span>{topic.emoji}</span>
-                      <span>{topic.label}</span>
+                      <span>{t("communityTopics." + topic.id)}</span>
                     </span>
                   </div>
                 )}

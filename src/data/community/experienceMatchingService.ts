@@ -4,7 +4,6 @@ import {
   getDoc,
   limit,
   onSnapshot,
-  orderBy,
   query,
   serverTimestamp,
   setDoc,
@@ -125,18 +124,18 @@ export function subscribeExperienceMatchRequests(cb: (requests: ExperienceMatchR
 export async function requestExperienceMatch(post: SharePost, experienceTag: ExperienceMatchingId) {
   const user = await ensureUser();
   if (!post.id || !post.authorId || post.authorId === user.uid || post.experienceTag !== experienceTag) return null;
-  const requestId = `${user.uid}_${post.id}`;
+  const requestId = user.uid + "_" + post.id;
   const ref = doc(db, "communityMatchRequests", requestId);
   const existingSnap = await getDoc(ref);
   if (existingSnap.exists()) {
     const x = existingSnap.data();
     return {
       id: existingSnap.id,
-      requesterId: x.requesterId,
-      recipientId: x.recipientId,
-      postId: x.postId,
-      experienceTag: x.experienceTag,
-      status: x.status,
+      requesterId: x.requesterId || "",
+      recipientId: x.recipientId || "",
+      postId: x.postId || "",
+      experienceTag: isExperienceMatchingId(x.experienceTag) ? x.experienceTag : experienceTag,
+      status: ["pending","accepted","declined","cancelled"].includes(x.status) ? x.status : "pending",
       createdAtMs: x.createdAt?.toMillis?.() ?? 0
     } as ExperienceMatchRequest;
   }
@@ -148,7 +147,7 @@ export async function requestExperienceMatch(post: SharePost, experienceTag: Exp
     status: "pending",
     createdAt: serverTimestamp()
   });
-  return { id: ref.id, requesterId:user.uid, recipientId:post.authorId, postId:post.id, experienceTag, status:"pending" as const, createdAtMs:Date.now() };
+  return { id: requestId, requesterId:user.uid, recipientId:post.authorId, postId:post.id, experienceTag, status:"pending" as const, createdAtMs:Date.now() };
 }
 
 export async function respondToExperienceMatch(request: ExperienceMatchRequest, accept: boolean) {

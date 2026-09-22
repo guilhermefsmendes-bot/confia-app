@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Brain, Compass, Info, MessageSquareHeart, Plus, Sparkles, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 import { buildPersonalTwinSummary, buildReplayMoments } from "../data/personal/confiaReplay";
-import { buildForecastSignals, buildRecall, buildCounterfactualSignals } from "../data/personal/premiumIntelligence";
+import { buildForecastSignals, buildRecall, buildCounterfactualSignals, buildPersonalIntelligenceSnapshot } from "../data/personal/premiumIntelligence";
 import { addManualNote, readFutureMessages, readManualNotes, removeManualNote, revealFutureMessage, saveFutureMessage, SELF_MEMORY_UPDATED_EVENT, type ManualNoteKind } from "../data/personal/selfMemory";
 import { readPersonalEvents, appendPersonalEvents, PERSONAL_EVENTS_UPDATED_EVENT } from "../data/personal/personalEventStorage";
 import { buildPersonalModel, findAnalogousMoments } from "../data/personal/personalModel";
@@ -45,6 +45,7 @@ export default function PersonalMap({ onBack }: Props) {
   const forecasts = useMemo(() => buildForecastSignals(events), [events]);
   const recall = useMemo(() => buildRecall(events), [events]);
   const counterfactuals = useMemo(() => buildCounterfactualSignals(events), [events]);
+  const longitudinal = useMemo(() => buildPersonalIntelligenceSnapshot(events), [events]);
   const manualNotes = useMemo(() => readManualNotes(), [memoryRevision]);
   const futureMessages = useMemo(() => readFutureMessages(), [memoryRevision]);
   const dueFutureMessages = futureMessages.filter(item => new Date(item.revealAt).getTime() <= Date.now());
@@ -78,6 +79,13 @@ export default function PersonalMap({ onBack }: Props) {
           <Metric label={t("personalMap.days")} value={model.activeDays} />
           <Metric label={t("personalMap.completeness")} value={`${Math.round(model.completeness * 100)}%`} />
         </div>
+      </section>
+
+      <section className="mt-4 rounded-[30px] border border-[#E5D7C7] bg-[#FFFCF7] p-5 shadow-sm sm:p-6">
+        <div className="flex items-start gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#3F2C27] text-white"><Sparkles size={19}/></div><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-[#B86B52]">CONFIA · Memória viva</p><h2 className="mt-1 text-xl font-black text-[#3F2C27]">O que a tua história está a ensinar</h2><p className="mt-2 text-xs leading-5 text-[#806D65]">A CONFIA observa o agora, 7, 30 e 90 dias e a tua história completa. Compara-te contigo próprio e conserva também os dados que contradizem um padrão.</p></div></div>
+        <div className="mt-4 grid grid-cols-5 gap-1.5">{longitudinal.timeScales.map(scale => <div key={scale.label} className="rounded-2xl border border-[#F0E3DC] bg-white px-2 py-3 text-center"><b className="block text-[10px] text-[#3F2C27]">{scale.label}</b><span className="mt-1 block text-[9px] text-[#9A8177]">{scale.activeDays}d</span></div>)}</div>
+        {longitudinal.strongestLearning ? <div className="mt-4 rounded-2xl bg-[#F6EFEA] p-4"><p className="text-[9px] font-black uppercase tracking-[.15em] text-[#8A684E]">Aprendizagem mais sólida agora</p><p className="mt-2 text-xs font-semibold leading-5 text-[#51463F]">{longitudinal.strongestLearning.text}</p></div> : <p className="mt-4 rounded-2xl bg-[#F6EFEA] p-4 text-xs leading-5 text-[#806D65]">Ainda estou a aprender. Não vou transformar poucos registos numa conclusão sobre ti.</p>}
+        {longitudinal.interventions.some(item => item.state === "changed" || item.state === "weakening") && <p className="mt-3 rounded-2xl border border-[#E8D8C7] bg-white p-3 text-[11px] font-semibold leading-5 text-[#735F56]">Detetei pelo menos uma aprendizagem que está a mudar. A CONFIA dá mais peso ao teu padrão recente do que a uma memória antiga.</p>}
       </section>
 
       <section className="mt-4 rounded-[30px] border border-[#EADBD3] bg-[#332824] p-5 text-white shadow-[0_18px_50px_rgba(51,40,36,.18)] sm:p-6">

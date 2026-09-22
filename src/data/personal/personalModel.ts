@@ -12,6 +12,8 @@ export interface PersonalModel {
   moodDirection: "up" | "down" | "stable" | "unknown";
   repeatedNeeds: Array<{ need: string; count: number }>;
   recentInterventions: number;
+  timeScales: Array<{ label: "24h" | "7d" | "30d" | "90d" | "history"; observationCount: number; activeDays: number; moodAverage?: number }>;
+  personalChange?: { recent30d?: number; previous30d?: number; delta?: number; direction: "up" | "down" | "stable" | "unknown" };
 }
 
 const average = (values: number[]) => values.length ? values.reduce((a, b) => a + b, 0) / values.length : undefined;
@@ -51,6 +53,19 @@ export function buildPersonalModel(events: PersonalEvent[], now = new Date()): P
     moodDirection = delta >= 0.75 ? "up" : delta <= -0.75 ? "down" : "stable";
   }
 
+  const scale = (label: "24h" | "7d" | "30d" | "90d" | "history", days?: number) => {
+    const cutoff = days === undefined ? -Infinity : now.getTime() - days * 86400000;
+    const selected = sorted.filter(event => new Date(event.timestamp).getTime() >= cutoff);
+    const selectedMoods = selected.map(event => moodValue(event)).filter((value): value is number => value !== undefined);
+    return { label, observationCount: selected.length, activeDays: new Set(selected.map(event => event.localDate)).size, moodAverage: average(selectedMoods) };
+  };
+  const timeScales = [scale("24h", 1), scale("7d", 7), scale("30d", 30), scale("90d", 90), scale("history")];
+  const recent30d = timeScales[2].moodAverage;
+  const previous30dEvents = moodEvents.filter(event => { const value = new Date(event.timestamp).getTime(); return value >= now.getTime() - 60 * 86400000 && value < now.getTime() - 30 * 86400000; });
+  const previous30d = average(previous30dEvents.map(event => moodValue(event)!));
+  const changeDelta = recent30d !== undefined && previous30d !== undefined ? recent30d - previous30d : undefined;
+  const personalChange = { recent30d, previous30d, delta: changeDelta, direction: changeDelta === undefined ? "unknown" as const : changeDelta >= .75 ? "up" as const : changeDelta <= -.75 ? "down" as const : "stable" as const };
+
   return {
     generatedAt: now.toISOString(),
     observationCount: sorted.length,
@@ -63,6 +78,8 @@ export function buildPersonalModel(events: PersonalEvent[], now = new Date()): P
     moodDirection,
     repeatedNeeds,
     recentInterventions: sorted.filter(event => event.type === "intervention" && new Date(event.timestamp).getTime() >= recentCutoff).length,
+    timeScales,
+    personalChange,
   };
 }
 

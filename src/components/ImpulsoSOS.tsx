@@ -39,6 +39,8 @@ import {
 import { emitCompanionBrainEvent } from "../data/reactive/companionBrain";
 import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
 import { getExperimentLearningForSOS } from "../data/personal/personalExperiments";
+import { readPersonalEvents } from "../data/personal/personalEventStorage";
+import { getBestPersonalIntervention } from "../data/personal/premiumIntelligence";
 
 interface ImpulsoSOSProps {
   onAddXp: (amount: number) => void;
@@ -158,6 +160,14 @@ const daysWithoutUse =
     rememberedImpulse?.need;
 
   const [experimentLearning] = useState(() => getExperimentLearningForSOS());
+  const personalEvents = useMemo(() => readPersonalEvents(), []);
+  const personalInterventionMemories = useMemo(() => ({
+    calm: getBestPersonalIntervention(personalEvents, "calm"),
+    mind: getBestPersonalIntervention(personalEvents, "mind"),
+    control: getBestPersonalIntervention(personalEvents, "control"),
+    support: getBestPersonalIntervention(personalEvents, "support"),
+  }), [personalEvents]);
+  const personalInterventionMemory = impulseNeed ? personalInterventionMemories[impulseNeed] : undefined;
 
 
   // Estados do Cronómetro (180 segundos = 3 minutos)
@@ -635,6 +645,12 @@ const getPsychoeducationMessage = () => {
             <p className="text-sm font-black text-[#2F2926]">
               {t("impulsePremium.question")}
             </p>
+
+            {personalInterventionMemory && personalInterventionMemory.attempts >= 4 && (
+              <div className="mb-4 rounded-[22px] border border-[#E5D7C7] bg-[#FFFBF4] p-4">
+                <div className="flex items-start gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] bg-white"><Brain size={16} className="text-[#8A684E]" /></div><div><p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#8A684E]">Memória longitudinal</p><p className="mt-1 text-[11px] font-bold leading-5 text-[#51463F]">Na tua própria história, este percurso coincidiu com melhoria em {personalInterventionMemory.improved} de {personalInterventionMemory.attempts} utilizações.</p><p className="mt-1 text-[9px] leading-4 text-[#8C817A]">{personalInterventionMemory.state === "changed" ? "O padrão recente mudou; a CONFIA não assume que o que ajudava antes continua a ajudar agora." : "É uma associação dos teus registos, não uma garantia nem uma relação causal."}</p></div></div>
+              </div>
+            )}
 
             {experimentLearning && experimentTemplateKey && (
               <div className="mb-4 rounded-[22px] border border-[#D6E2D9] bg-[#F3F8F4] p-4">

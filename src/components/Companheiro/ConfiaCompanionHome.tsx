@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useEffect, useState } from "react";
-import { Sparkles, Heart, CircleDot } from "lucide-react";
+import { Sparkles, Heart, CircleDot, Backpack, ShoppingBag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "../Avatar";
@@ -65,6 +65,8 @@ interface ConfiaCompanionHomeProps {
       | "patterns"
       | "progress"
       | "record"
+      | "inventory"
+      | "shop"
   ) => void;
   worldMood:
     | "growing"
@@ -1344,7 +1346,10 @@ function ConfiaCompanionHome({
             <p className="truncate text-[10px] text-[#9A8177]">{presenceDetail}</p>
           </div>
         </div>
-        <Heart size={14} className="shrink-0 text-[#D79A82]" aria-hidden="true" />
+        <div className="ml-2 flex shrink-0 items-center gap-1 border-l border-[#EADDD7]/80 pl-2">
+          <button type="button" onClick={() => onCompanionAction("inventory")} className="flex h-8 w-8 items-center justify-center rounded-full text-[#8A7066] transition-colors hover:bg-[#FFF4EC] hover:text-[#934A38]" aria-label={t("inventory")} title={t("inventory")}><Backpack size={14} strokeWidth={1.8} /></button>
+          <button type="button" onClick={() => onCompanionAction("shop")} className="flex h-8 w-8 items-center justify-center rounded-full text-[#8A7066] transition-colors hover:bg-[#FFF4EC] hover:text-[#934A38]" aria-label={t("shop")} title={t("shop")}><ShoppingBag size={14} strokeWidth={1.8} /></button>
+        </div>
       </div>
 
       {/* ====================================================

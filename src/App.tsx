@@ -2399,6 +2399,18 @@ className="flex items-center justify-center w-24 h-24 relative"
     if (target === "record") {
       setHomeScreen("home");
       setCurrentTab(0);
+      return;
+    }
+
+    if (target === "inventory") {
+      setHomeScreen("inventory");
+      setCurrentTab(0);
+      return;
+    }
+
+    if (target === "shop") {
+      setHomeScreen("shop");
+      setCurrentTab(0);
     }
   }}
 />

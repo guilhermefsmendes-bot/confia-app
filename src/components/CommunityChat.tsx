@@ -47,6 +47,8 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const isExperienceGroup = Boolean(initialChatId?.startsWith("circle_"));
+  const [groupParticipants, setGroupParticipants] = useState<string[]>([]);
 
   const currentUser = auth.currentUser;
 
@@ -81,11 +83,23 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
     return post.authorId || null;
   };
 
+  useEffect(() => {
+    if (!isExperienceGroup || !initialChatId) return;
+    const stop = onSnapshot(doc(db, "experienceMatchCircles", initialChatId), snap => {
+      const data = snap.data();
+      setGroupParticipants(Array.isArray(data?.participants) ? data.participants : []);
+      setChatId(snap.exists() ? initialChatId : null);
+      setLoading(false);
+    });
+    return () => stop();
+  }, [isExperienceGroup, initialChatId]);
+
   // Criar ou encontrar a conversa
   useEffect(() => {
     let cancelled = false;
 
     const createOrFindChat = async () => {
+      if (isExperienceGroup) return;
       try {
         setLoading(true);
 
@@ -237,7 +251,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [post.id, post.authorId, initialChatId]);
+  }, [post.id, post.authorId, initialChatId, isExperienceGroup]);
 
   // Escutar mensagens em tempo real
   useEffect(() => {
@@ -245,7 +259,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
 
     const messagesRef = collection(
       db,
-      "chats",
+      isExperienceGroup ? "experienceMatchCircles" : "chats",
       chatId,
       "messages"
     );
@@ -277,7 +291,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
     );
 
     return () => unsubscribe();
-  }, [chatId]);
+  }, [chatId, isExperienceGroup]);
 
   const handleSend = async () => {
     const text = message.trim();
@@ -290,6 +304,13 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
 
     try {
       let activeChatId = chatId;
+
+      if (isExperienceGroup && activeChatId) {
+        await addDoc(collection(db, "experienceMatchCircles", activeChatId, "messages"), { senderId: currentUser.uid, text, createdAt: serverTimestamp() });
+        emitCompanionInteraction("community_interaction", "community");
+        setMessage("");
+        return;
+      }
 
       // Se o chat ainda não foi criado, cria/encontra agora.
       if (!activeChatId) {
@@ -397,11 +418,11 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-[#FFF8F4]">
           <div>
             <h2 className="text-sm font-black text-[#2F2926]">
-              {t("communityChat")}
+              {isExperienceGroup ? t("experienceMatching.groupName") : t("communityChat")}
             </h2>
 
             <p className="text-[10px] text-[#934A38] font-semibold mt-0.5">
-              {post.userName}
+              {isExperienceGroup ? t("experienceMatching.groupMembers", { count: groupParticipants.length }) : post.userName}
             </p>
           </div>
 

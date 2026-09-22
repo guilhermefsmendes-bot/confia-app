@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { HeartHandshake, MessageCircle, ShieldCheck, UserRoundSearch, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { HeartHandshake, MessageCircle, ShieldCheck, UserRoundSearch, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { auth } from "../firebaseAuth";
 import type { SharePost } from "../types";
@@ -9,9 +9,14 @@ import {
   type ExperienceMatchPreference
 } from "../data/community/experienceMatching";
 import {
+  joinExperienceMatchCircle,
+  leaveExperienceMatchCircle,
   requestExperienceMatch,
   respondToExperienceMatch,
   saveExperienceMatchProfile,
+  subscribeExperienceMatchCircles,
+  type ExperienceConversationMode,
+  type ExperienceMatchCircle,
   type ExperienceMatchProfile,
   type ExperienceMatchRequest
 } from "../data/community/experienceMatchingService";
@@ -29,6 +34,9 @@ export default function ExperienceMatchingPanel({ posts, profile, requests, bloc
   const uid = auth.currentUser?.uid;
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [circles, setCircles] = useState<ExperienceMatchCircle[]>([]);
+
+  useEffect(() => subscribeExperienceMatchCircles(setCircles), []);
 
   const requestByPost = useMemo(() => new Map(
     requests.filter(r => r.requesterId === uid).map(r => [r.postId, r])
@@ -63,6 +71,12 @@ export default function ExperienceMatchingPanel({ posts, profile, requests, bloc
   const setPreference = async (preference: ExperienceMatchPreference) => {
     setSaving(true);
     try { await saveExperienceMatchProfile({ ...profile, preference }); }
+    finally { setSaving(false); }
+  };
+
+  const setConversationMode = async (conversationMode: ExperienceConversationMode) => {
+    setSaving(true);
+    try { await saveExperienceMatchProfile({ ...profile, conversationMode }); }
     finally { setSaving(false); }
   };
 
@@ -109,6 +123,17 @@ export default function ExperienceMatchingPanel({ posts, profile, requests, bloc
             ))}
           </div>
         </div>
+        <div className="mt-4">
+          <p className="mb-2 text-[10px] font-black text-[#4A3933]">{t("experienceMatching.conversationModeTitle")}</p>
+          <div className="grid grid-cols-3 gap-2">
+            {(["one_to_one","group","either"] as ExperienceConversationMode[]).map(mode => (
+              <button type="button" key={mode} disabled={saving} onClick={() => setConversationMode(mode)}
+                className={(profile.conversationMode === mode ? "border-[#A85F45] bg-[#FFF2EC] text-[#934A38]" : "border-[#E8DDD7] bg-white text-[#806D65]") + " rounded-xl border p-2 text-[9px] font-bold"}>
+                {t("experienceMatching.conversationMode." + mode)}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="mt-3 flex gap-2 rounded-xl bg-[#F7F5F2] p-3 text-[9px] leading-4 text-[#806D65]">
           <ShieldCheck size={16} className="shrink-0 text-[#587563]"/>
           <span>{t("experienceMatching.privacy")}</span>
@@ -136,7 +161,7 @@ export default function ExperienceMatchingPanel({ posts, profile, requests, bloc
         </div>
       )}
 
-      {profile.active && (
+      {profile.active && profile.conversationMode !== "group" && (
         <div>
           <h4 className="text-xs font-black text-[#332925]">{t("experienceMatching.matchesTitle")}</h4>
           <p className="mt-1 text-[9px] leading-4 text-[#806D65]">{t("experienceMatching.matchesText")}</p>
@@ -151,6 +176,23 @@ export default function ExperienceMatchingPanel({ posts, profile, requests, bloc
                 {req?.status === "pending" ? <div className="mt-2 rounded-xl bg-[#FFF7F2] p-2 text-center text-[9px] font-bold text-[#934A38]">{t("experienceMatching.requestSent")}</div>
                 : req?.status === "accepted" ? <button type="button" onClick={()=>onOpenMatchedChat(post, "match_"+req.id)} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#587563] px-3 py-2.5 text-[10px] font-black text-white"><MessageCircle size={14}/>{t("experienceMatching.openConversation")}</button>
                 : <button type="button" disabled={busyId===post.id} onClick={async()=>{setBusyId(post.id);try{await requestExperienceMatch(post,post.experienceTag as ExperienceMatchingId)}finally{setBusyId(null)}}} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#A85F45] px-3 py-2.5 text-[10px] font-black text-white"><MessageCircle size={14}/>{t("experienceMatching.wantToTalk")}</button>}
+              </div>;
+            })}
+          </div>
+        </div>
+      )}
+
+      {profile.active && profile.conversationMode !== "one_to_one" && (
+        <div className="rounded-2xl border border-[#D9D5E8] bg-[#F8F7FC] p-4">
+          <h4 className="flex items-center gap-2 text-xs font-black text-[#51496B]"><Users size={17}/>{t("experienceMatching.groupsTitle")}</h4>
+          <p className="mt-1 text-[9px] leading-4 text-[#756E88]">{t("experienceMatching.groupsText")}</p>
+          <div className="mt-3 space-y-2">
+            {profile.activeTags.map(tag => {
+              const circle = circles.find(c => c.experienceTag === tag);
+              return <div key={tag} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3">
+                <div><b className="block text-[10px] text-[#51496B]">{t("experienceMatching.experiences." + tag)}</b><span className="text-[9px] text-[#8B849A]">{circle ? t("experienceMatching.groupMembers", { count: circle.participants.length }) : t("experienceMatching.groupWaiting")}</span></div>
+                {circle ? <div className="flex gap-1"><button type="button" onClick={()=>onOpenMatchedChat({ ...posts.find(p=>p.experienceTag===tag)!, id: circle.id, authorId: circle.participants[0], userName: t("experienceMatching.groupName"), feeling: "🫂", topic: "", message: t("experienceMatching.groupContext", { experience: t("experienceMatching.experiences."+tag) }) } as SharePost, circle.id)} className="rounded-xl bg-[#51496B] px-3 py-2 text-[9px] font-black text-white">{t("experienceMatching.openGroup")}</button><button type="button" onClick={()=>leaveExperienceMatchCircle(circle.id)} className="rounded-xl px-2 text-[9px] font-bold text-[#8B849A]">{t("experienceMatching.leaveGroup")}</button></div>
+                : <button type="button" disabled={busyId===tag} onClick={async()=>{setBusyId(tag);try{await joinExperienceMatchCircle(tag)}finally{setBusyId(null)}}} className="rounded-xl bg-[#6A617F] px-3 py-2 text-[9px] font-black text-white">{t("experienceMatching.joinGroup")}</button>}
               </div>;
             })}
           </div>

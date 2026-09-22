@@ -2593,6 +2593,21 @@
       "moving_city": "Moving city",
       "family_problems": "Family problems",
       "rumination": "Repetitive thoughts"
-    }
+    },
+    "conversationModeTitle": "How would you rather talk?",
+    "conversationMode": {
+      "one_to_one": "One person",
+      "group": "Group up to 8",
+      "either": "Either"
+    },
+    "groupsTitle": "Experience Matching circles",
+    "groupsText": "Small anonymous groups of up to 8 people who selected the same experience.",
+    "groupMembers": "{{count}}/8 people",
+    "groupWaiting": "You have not joined this circle yet",
+    "groupName": "Anonymous circle",
+    "groupContext": "Private group about {{experience}}",
+    "openGroup": "Open group",
+    "leaveGroup": "Leave",
+    "joinGroup": "Join group"
   }
 }

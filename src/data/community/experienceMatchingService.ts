@@ -8,6 +8,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  runTransaction,
   where
 } from "firebase/firestore";
 import { auth, signInAnonymously } from "../../firebaseAuth";
@@ -19,10 +20,22 @@ import {
   type ExperienceMatchPreference
 } from "./experienceMatching";
 
+export type ExperienceConversationMode = "one_to_one" | "group" | "either";
+
 export interface ExperienceMatchProfile {
   active: boolean;
   activeTags: ExperienceMatchingId[];
   preference: ExperienceMatchPreference;
+  conversationMode: ExperienceConversationMode;
+}
+
+export interface ExperienceMatchCircle {
+  id: string;
+  experienceTag: ExperienceMatchingId;
+  participants: string[];
+  capacity: number;
+  status: "open" | "full";
+  createdAtMs: number;
 }
 
 export interface ExperienceMatchRequest {
@@ -46,7 +59,7 @@ export function subscribeExperienceMatchProfile(cb: (profile: ExperienceMatchPro
   const stopAuth = auth.onAuthStateChanged(user => {
     stopDoc?.();
     if (!user) {
-      cb({ active: false, activeTags: [], preference: "either" });
+      cb({ active: false, activeTags: [], preference: "either", conversationMode: "either" });
       return;
     }
     stopDoc = onSnapshot(doc(db, "communityMatchProfiles", user.uid), snap => {
@@ -59,6 +72,9 @@ export function subscribeExperienceMatchProfile(cb: (profile: ExperienceMatchPro
         activeTags,
         preference: ["same_now", "been_there", "either"].includes(data?.preference)
           ? data!.preference
+          : "either",
+        conversationMode: ["one_to_one", "group", "either"].includes(data?.conversationMode)
+          ? data!.conversationMode
           : "either"
       });
     });
@@ -74,6 +90,7 @@ export async function saveExperienceMatchProfile(profile: ExperienceMatchProfile
     active: profile.active && tags.length > 0,
     activeTags: tags,
     preference: profile.preference,
+    conversationMode: profile.conversationMode,
     updatedAt: serverTimestamp()
   }, { merge: true });
 }
@@ -173,4 +190,97 @@ export async function respondToExperienceMatch(request: ExperienceMatchRequest, 
     unreadBy: []
   });
   return chatId;
+}
+
+
+export function subscribeExperienceMatchCircles(cb: (circles: ExperienceMatchCircle[]) => void) {
+  let stopQuery: (() => void) | undefined;
+  const stopAuth = auth.onAuthStateChanged(user => {
+    stopQuery?.();
+    if (!user) { cb([]); return; }
+    stopQuery = onSnapshot(
+      query(collection(db, "experienceMatchCircles"), where("participants", "array-contains", user.uid), limit(20)),
+      snap => cb(snap.docs.map(d => {
+        const x = d.data();
+        return {
+          id: d.id,
+          experienceTag: isExperienceMatchingId(x.experienceTag) ? x.experienceTag : "stress",
+          participants: Array.isArray(x.participants) ? x.participants : [],
+          capacity: 8,
+          status: x.status === "full" ? "full" : "open",
+          createdAtMs: x.createdAt?.toMillis?.() ?? 0
+        };
+      }))
+    );
+  });
+  return () => { stopQuery?.(); stopAuth(); };
+}
+
+export async function joinExperienceMatchCircle(experienceTag: ExperienceMatchingId) {
+  const user = await ensureUser();
+  const profileSnap = await getDoc(doc(db, "communityMatchProfiles", user.uid));
+  const profile = profileSnap.data();
+  if (profile?.active !== true || !Array.isArray(profile.activeTags) || !profile.activeTags.includes(experienceTag)) {
+    throw new Error("matching-not-active");
+  }
+
+  const shardCount = 12;
+  const preferredShard = Math.abs([...user.uid].reduce((acc, ch) => ((acc * 31) + ch.charCodeAt(0)) | 0, 0)) % shardCount;
+  let circleId = "";
+  let circleRef = doc(db, "experienceMatchCircles", "placeholder");
+  for (let offset = 0; offset < shardCount; offset += 1) {
+    const shard = (preferredShard + offset) % shardCount;
+    const candidateId = "circle_" + experienceTag + "_" + shard;
+    const candidateRef = doc(db, "experienceMatchCircles", candidateId);
+    const candidate = await getDoc(candidateRef);
+    const participants = candidate.exists() && Array.isArray(candidate.data().participants) ? candidate.data().participants : [];
+    if (!candidate.exists() || participants.includes(user.uid) || participants.length < 8) {
+      circleId = candidateId;
+      circleRef = candidateRef;
+      break;
+    }
+  }
+  if (!circleId) throw new Error("all-circles-full");
+  await runTransaction(db, async transaction => {
+    const snap = await transaction.get(circleRef);
+    if (!snap.exists()) {
+      transaction.set(circleRef, {
+        experienceTag,
+        participants: [user.uid],
+        capacity: 8,
+        status: "open",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return;
+    }
+    const data = snap.data();
+    const participants: string[] = Array.isArray(data.participants) ? data.participants : [];
+    if (participants.includes(user.uid)) return;
+    if (participants.length >= 8) throw new Error("circle-full");
+    const next = [...participants, user.uid];
+    transaction.update(circleRef, {
+      participants: next,
+      status: next.length >= 8 ? "full" : "open",
+      updatedAt: serverTimestamp()
+    });
+  });
+  return circleId;
+}
+
+export async function leaveExperienceMatchCircle(circleId: string) {
+  const user = await ensureUser();
+  const ref = doc(db, "experienceMatchCircles", circleId);
+  await runTransaction(db, async transaction => {
+    const snap = await transaction.get(ref);
+    if (!snap.exists()) return;
+    const data = snap.data();
+    const participants: string[] = Array.isArray(data.participants) ? data.participants : [];
+    if (!participants.includes(user.uid)) return;
+    transaction.update(ref, {
+      participants: participants.filter(uid => uid !== user.uid),
+      status: "open",
+      updatedAt: serverTimestamp()
+    });
+  });
 }

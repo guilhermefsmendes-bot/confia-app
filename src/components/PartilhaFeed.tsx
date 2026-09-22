@@ -103,7 +103,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   const [confirmIdentify, setConfirmIdentify] = useState<string | null>(null);
   const [selectedExperience, setSelectedExperience] = useState<ExperienceMatchingId | "">("");
   const [communityView, setCommunityView] = useState<"feed" | "matching">("feed");
-  const [matchProfile, setMatchProfile] = useState<ExperienceMatchProfile>({ active: false, activeTags: [], preference: "either" });
+  const [matchProfile, setMatchProfile] = useState<ExperienceMatchProfile>({ active: false, activeTags: [], preference: "either", conversationMode: "either" });
   const [matchRequests, setMatchRequests] = useState<ExperienceMatchRequest[]>([]);
   const [blockedMatchUsers, setBlockedMatchUsers] = useState<string[]>([]);
 

@@ -2587,6 +2587,21 @@
       "moving_city": "Mudança de cidade",
       "family_problems": "Problemas familiares",
       "rumination": "Pensamentos repetitivos"
-    }
+    },
+    "conversationModeTitle": "Como preferes conversar?",
+    "conversationMode": {
+      "one_to_one": "Uma pessoa",
+      "group": "Grupo até 8",
+      "either": "Tanto faz"
+    },
+    "groupsTitle": "Círculos de Experience Matching",
+    "groupsText": "Pequenos grupos anónimos com até 8 pessoas que escolheram a mesma experiência.",
+    "groupMembers": "{{count}}/8 pessoas",
+    "groupWaiting": "Ainda não entraste neste círculo",
+    "groupName": "Círculo anónimo",
+    "groupContext": "Grupo privado sobre {{experience}}",
+    "openGroup": "Abrir grupo",
+    "leaveGroup": "Sair",
+    "joinGroup": "Entrar no grupo"
   }
 }

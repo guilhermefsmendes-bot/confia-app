@@ -161,6 +161,7 @@ describe("Firestore security rules", () => {
       active: true,
       activeTags: ["separation_divorce"],
       preference: "same_now",
+      conversationMode: "either",
       updatedAt: Timestamp.fromMillis(1_700_000_000_000),
     }));
     await assertSucceeds(getDoc(doc(db("bob"), "communityMatchProfiles/bob")));

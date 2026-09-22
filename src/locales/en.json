@@ -1977,7 +1977,11 @@
     },
     "replay": {
       "title": "You have been here before.",
-      "subtitle": "Your own moments that resemble your latest entry. This is not a prediction — it is your own history."
+      "subtitle": "Your own moments that resemble your latest entry. This is not a prediction — it is your own history.",
+      "laterSameDay": "Later that day",
+      "nextDay": "The next day",
+      "daysLater": "{{count}} days later",
+      "recorded": "you recorded {{mood}}/10."
     },
     "manual": {
       "title": "My living manual",
@@ -1985,12 +1989,12 @@
       "placeholder": "Something important about me…",
       "delete": "Delete",
       "kinds": {
-        "early_signal": "Early signs",
+        "earlySignal": "Early signs",
         "helps": "Helps me",
-        "does_not_help": "Does not help",
-        "support_person": "People",
-        "drains_me": "Drains me",
-        "victory": "Wins"
+        "doesNotHelp": "Does not help",
+        "people": "People",
+        "drains": "Drains me",
+        "victories": "Wins"
       }
     },
     "future": {
@@ -2001,7 +2005,29 @@
       "placeholder": "What would you like your future self to remember?",
       "saveSixMonths": "Save for 6 months from now"
     },
-    "signalsDetected": "{{count}} signals detected"
+    "signalsDetected": "{{count}} signals detected",
+    "homeLearning": "What CONFIA is learning with you",
+    "liveMemory": {
+      "eyebrow": "Living memory",
+      "title": "What your history is teaching",
+      "subtitle": "CONFIA looks at now, 7, 30 and 90 days, and your complete history. It compares you with yourself and also keeps evidence that contradicts a pattern.",
+      "strongest": "Strongest learning right now",
+      "learning": "I am still learning. I will not turn a few records into a conclusion about you.",
+      "changed": "At least one learning pattern is changing. CONFIA gives more weight to your recent pattern than to an older memory."
+    },
+    "historyAsk": {
+      "title": "Ask my history",
+      "subtitle": "Answers come only from your own records. You can always see why CONFIA reached an answer.",
+      "why": "Why am I saying this?",
+      "questions": {
+        "whatHelps": "What helps me?",
+        "whenHarder": "When is it harder?",
+        "changing": "Have I been changing?",
+        "beenHere": "Have I felt this before?",
+        "recovered": "How did I recover?",
+        "knowMe": "What do you know about me?"
+      }
+    }
   },
   "companionPresence": {
     "present": "CONFIA presence",
@@ -2677,5 +2703,11 @@
     "requestRemoval": "Request removal from group",
     "leave": "Leave this conversation",
     "privateNote": "Blocking immediately hides that person’s messages from you. Reports and removal requests are private and are made available for moderation."
+  },
+  "sosLongitudinal": {
+    "title": "Longitudinal memory",
+    "improved": "In your own history, this path coincided with improvement in {{improved}} of {{attempts}} uses.",
+    "changed": "The recent pattern changed; CONFIA does not assume that what helped before still helps now.",
+    "association": "This is an association in your own records, not a guarantee or a causal relationship."
   }
 }

@@ -2427,7 +2427,7 @@ className="flex items-center justify-center w-24 h-24 relative"
       <div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF3EC]"><Sparkles size={18} className="text-[#934A38]"/></div><div className="min-w-0 flex-1"><span className="block text-[9px] font-black uppercase tracking-[.16em] text-[#934A38]">CONFIA</span><span className="text-sm font-black text-[#2F2926]">{t("companion")}</span></div><span className="text-[#934A38]">→</span></div>
     </button>
     <button type="button" onClick={() => { emitCompanionInteraction("reflection_opened","map",{from:"home",to:"map"}); setHomeScreen("map"); }} className="mt-2 w-full rounded-[22px] border border-[#E8DDD7] bg-[#FFF9F5] px-4 py-3 text-left">
-      <div className="flex items-center gap-3"><Compass size={17} className="text-[#934A38]"/><div className="flex-1"><span className="block text-xs font-black text-[#4A352F]">{t("personalMap.title")}</span><span className="mt-0.5 block text-[10px] text-[#806D65]">O que a CONFIA está a aprender contigo</span></div><span className="text-[#934A38]">→</span></div>
+      <div className="flex items-center gap-3"><Compass size={17} className="text-[#934A38]"/><div className="flex-1"><span className="block text-xs font-black text-[#4A352F]">{t("personalMap.title")}</span><span className="mt-0.5 block text-[10px] text-[#806D65]">{t("personalMap.homeLearning")}</span></div><span className="text-[#934A38]">→</span></div>
     </button>
     <button type="button" onClick={() => setHomeScreen("settings")} className="mt-2 flex w-full items-center justify-end gap-1.5 px-2 py-2 text-[9px] font-bold text-[var(--cf-muted)]"><Settings size={12}/>{t("settings")}</button>
   </section>

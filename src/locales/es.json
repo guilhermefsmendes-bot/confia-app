@@ -1977,7 +1977,11 @@
     },
     "replay": {
       "title": "Ya has estado aquí antes.",
-      "subtitle": "Momentos tuyos parecidos al registro más reciente. No es una predicción: es tu propia historia."
+      "subtitle": "Momentos tuyos parecidos al registro más reciente. No es una predicción: es tu propia historia.",
+      "laterSameDay": "Más tarde ese día",
+      "nextDay": "Al día siguiente",
+      "daysLater": "{{count}} días después",
+      "recorded": "registraste {{mood}}/10."
     },
     "manual": {
       "title": "Mi manual vivo",
@@ -1985,12 +1989,12 @@
       "placeholder": "Algo importante sobre mí…",
       "delete": "Eliminar",
       "kinds": {
-        "early_signal": "Señales iniciales",
+        "earlySignal": "Señales iniciales",
         "helps": "Me ayuda",
-        "does_not_help": "No ayuda",
-        "support_person": "Personas",
-        "drains_me": "Me agota",
-        "victory": "Victorias"
+        "doesNotHelp": "No ayuda",
+        "people": "Personas",
+        "drains": "Me agota",
+        "victories": "Logros"
       }
     },
     "future": {
@@ -2001,7 +2005,29 @@
       "placeholder": "¿Qué te gustaría que recordara tu yo futuro?",
       "saveSixMonths": "Guardar para dentro de 6 meses"
     },
-    "signalsDetected": "{{count}} señales detectadas"
+    "signalsDetected": "{{count}} señales detectadas",
+    "homeLearning": "Lo que CONFIA está aprendiendo contigo",
+    "liveMemory": {
+      "eyebrow": "Memoria viva",
+      "title": "Lo que tu historia está enseñando",
+      "subtitle": "CONFIA observa el momento actual, 7, 30 y 90 días y todo tu historial. Te compara contigo mismo y conserva también los datos que contradicen un patrón.",
+      "strongest": "Aprendizaje más sólido ahora",
+      "learning": "Todavía estoy aprendiendo. No convertiré unos pocos registros en una conclusión sobre ti.",
+      "changed": "Al menos un aprendizaje está cambiando. CONFIA da más peso a tu patrón reciente que a un recuerdo antiguo."
+    },
+    "historyAsk": {
+      "title": "Pregunta a mi historia",
+      "subtitle": "Respuestas basadas únicamente en tus propios registros. Siempre puedes ver por qué CONFIA llegó a esa respuesta.",
+      "why": "¿Por qué digo esto?",
+      "questions": {
+        "whatHelps": "¿Qué me ayuda?",
+        "whenHarder": "¿Cuándo estoy peor?",
+        "changing": "¿He cambiado?",
+        "beenHere": "¿Ya me he sentido así?",
+        "recovered": "¿Cómo me recuperé?",
+        "knowMe": "¿Qué sabes de mí?"
+      }
+    }
   },
   "companionPresence": {
     "present": "Presencia CONFIA",
@@ -2677,5 +2703,11 @@
     "requestRemoval": "Pedir expulsión del grupo",
     "leave": "Salir de esta conversación",
     "privateNote": "Bloquear oculta inmediatamente los mensajes de esa persona para ti. Las denuncias y solicitudes de expulsión son privadas y quedan disponibles para moderación."
+  },
+  "sosLongitudinal": {
+    "title": "Memoria longitudinal",
+    "improved": "En tu propio historial, este recorrido coincidió con una mejora en {{improved}} de {{attempts}} usos.",
+    "changed": "El patrón reciente cambió; CONFIA no da por hecho que lo que ayudaba antes siga ayudando ahora.",
+    "association": "Es una asociación en tus propios registros, no una garantía ni una relación causal."
   }
 }

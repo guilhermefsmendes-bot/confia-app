@@ -1977,7 +1977,11 @@
     },
     "replay": {
       "title": "Tu es déjà passé par là.",
-      "subtitle": "Des moments de ton histoire qui ressemblent à ton dernier enregistrement. Ce n’est pas une prédiction — c’est ta propre histoire."
+      "subtitle": "Des moments de ton histoire qui ressemblent à ton dernier enregistrement. Ce n’est pas une prédiction — c’est ta propre histoire.",
+      "laterSameDay": "Plus tard ce jour-là",
+      "nextDay": "Le lendemain",
+      "daysLater": "{{count}} jours plus tard",
+      "recorded": "tu as enregistré {{mood}}/10."
     },
     "manual": {
       "title": "Mon manuel vivant",
@@ -1985,12 +1989,12 @@
       "placeholder": "Quelque chose d’important sur moi…",
       "delete": "Supprimer",
       "kinds": {
-        "early_signal": "Signaux précoces",
+        "earlySignal": "Signaux précoces",
         "helps": "M’aide",
-        "does_not_help": "N’aide pas",
-        "support_person": "Personnes",
-        "drains_me": "M’épuise",
-        "victory": "Victoires"
+        "doesNotHelp": "N’aide pas",
+        "people": "Personnes",
+        "drains": "M’épuise",
+        "victories": "Victoires"
       }
     },
     "future": {
@@ -2001,7 +2005,29 @@
       "placeholder": "De quoi aimerais-tu que ton futur toi se souvienne ?",
       "saveSixMonths": "Enregistrer pour dans 6 mois"
     },
-    "signalsDetected": "{{count}} signaux détectés"
+    "signalsDetected": "{{count}} signaux détectés",
+    "homeLearning": "Ce que CONFIA apprend avec toi",
+    "liveMemory": {
+      "eyebrow": "Mémoire vivante",
+      "title": "Ce que ton histoire nous apprend",
+      "subtitle": "CONFIA observe le présent, 7, 30 et 90 jours ainsi que ton historique complet. Elle te compare à toi-même et conserve aussi les données qui contredisent un schéma.",
+      "strongest": "Apprentissage le plus solide actuellement",
+      "learning": "J’apprends encore. Je ne transformerai pas quelques données en conclusion sur toi.",
+      "changed": "Au moins un apprentissage est en train de changer. CONFIA accorde plus de poids à ton schéma récent qu’à un ancien souvenir."
+    },
+    "historyAsk": {
+      "title": "Interroger mon histoire",
+      "subtitle": "Les réponses reposent uniquement sur tes propres données. Tu peux toujours voir pourquoi CONFIA est arrivée à cette réponse.",
+      "why": "Pourquoi est-ce que je dis cela ?",
+      "questions": {
+        "whatHelps": "Qu’est-ce qui m’aide ?",
+        "whenHarder": "Quand est-ce plus difficile ?",
+        "changing": "Est-ce que je change ?",
+        "beenHere": "Ai-je déjà ressenti cela ?",
+        "recovered": "Comment ai-je récupéré ?",
+        "knowMe": "Que sais-tu de moi ?"
+      }
+    }
   },
   "companionPresence": {
     "present": "Présence CONFIA",
@@ -2677,5 +2703,11 @@
     "requestRemoval": "Demander le retrait du groupe",
     "leave": "Quitter cette conversation",
     "privateNote": "Le blocage masque immédiatement les messages de cette personne pour toi. Les signalements et demandes de retrait sont privés et transmis à la modération."
+  },
+  "sosLongitudinal": {
+    "title": "Mémoire longitudinale",
+    "improved": "Dans ton propre historique, ce parcours a coïncidé avec une amélioration lors de {{improved}} utilisations sur {{attempts}}.",
+    "changed": "Le schéma récent a changé ; CONFIA ne suppose pas que ce qui aidait auparavant aide encore maintenant.",
+    "association": "Il s’agit d’une association dans tes propres données, pas d’une garantie ni d’une relation causale."
   }
 }

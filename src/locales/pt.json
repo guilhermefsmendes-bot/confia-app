@@ -588,7 +588,8 @@
       "premiumDescription": "Descobre como a tua mente funciona, identifica padrões que influenciam as tuas emoções e cria novas formas de avançar.",
       "featureMind": "Compreende os teus pensamentos e reações",
       "featurePatterns": "Identifica padrões automáticos que se repetem",
-      "featureGrowth": "Desenvolve novas formas de responder"
+      "featureGrowth": "Desenvolve novas formas de responder",
+      "start": "Começar descoberta"
     },
     "title": "Conhece os teus Padrões",
     "subtitle": "Descobre os hábitos e rotinas que podem estar a alimentar a tua ansiedade.",
@@ -688,7 +689,8 @@
       "smoking": "Fumar para lidar com ansiedade ou stress",
       "alcohol": "Consumir álcool para aliviar emoções difíceis",
       "emotionalEating": "Comer para aliviar ansiedade ou emoções",
-      "continue": "Criar o meu plano"
+      "continue": "Criar o meu plano",
+      "confirmation": "Procurar constantemente confirmação dos outros"
     },
     "dashboard": {
       "title": "O teu plano de evolução",
@@ -1963,7 +1965,11 @@
     },
     "replay": {
       "title": "Já estiveste aqui antes.",
-      "subtitle": "Momentos teus semelhantes ao registo mais recente. Não é uma previsão — é a tua própria história."
+      "subtitle": "Momentos teus semelhantes ao registo mais recente. Não é uma previsão — é a tua própria história.",
+      "laterSameDay": "Mais tarde nesse dia",
+      "nextDay": "No dia seguinte",
+      "daysLater": "{{count}} dias depois",
+      "recorded": "registaste {{mood}}/10."
     },
     "manual": {
       "title": "O meu manual vivo",
@@ -1971,12 +1977,12 @@
       "placeholder": "Algo importante sobre mim…",
       "delete": "Apagar",
       "kinds": {
-        "early_signal": "Sinais iniciais",
+        "earlySignal": "Sinais iniciais",
         "helps": "Ajuda-me",
-        "does_not_help": "Não ajuda",
-        "support_person": "Pessoas",
-        "drains_me": "Drena-me",
-        "victory": "Vitórias"
+        "doesNotHelp": "Não ajuda",
+        "people": "Pessoas",
+        "drains": "Drena-me",
+        "victories": "Vitórias"
       }
     },
     "future": {
@@ -1987,7 +1993,29 @@
       "placeholder": "O que gostarias que o teu Eu futuro se lembrasse?",
       "saveSixMonths": "Guardar para daqui a 6 meses"
     },
-    "signalsDetected": "{{count}} sinais detetados"
+    "signalsDetected": "{{count}} sinais detetados",
+    "homeLearning": "O que a CONFIA está a aprender contigo",
+    "liveMemory": {
+      "eyebrow": "Memória viva",
+      "title": "O que a tua história está a ensinar",
+      "subtitle": "A CONFIA observa o agora, 7, 30 e 90 dias e a tua história completa. Compara-te contigo próprio e conserva também os dados que contradizem um padrão.",
+      "strongest": "Aprendizagem mais sólida agora",
+      "learning": "Ainda estou a aprender. Não vou transformar poucos registos numa conclusão sobre ti.",
+      "changed": "Detetei pelo menos uma aprendizagem que está a mudar. A CONFIA dá mais peso ao teu padrão recente do que a uma memória antiga."
+    },
+    "historyAsk": {
+      "title": "Pergunta à minha história",
+      "subtitle": "Perguntas respondidas apenas a partir dos teus próprios registos. Podes sempre ver porque é que a CONFIA chegou à resposta.",
+      "why": "Porque digo isto?",
+      "questions": {
+        "whatHelps": "O que me ajuda?",
+        "whenHarder": "Quando fico pior?",
+        "changing": "Tenho mudado?",
+        "beenHere": "Já estive assim?",
+        "recovered": "Como recuperei?",
+        "knowMe": "O que sabes sobre mim?"
+      }
+    }
   },
   "companionPresence": {
     "present": "Presença CONFIA",
@@ -2671,5 +2699,15 @@
     "requestRemoval": "Pedir remoção do grupo",
     "leave": "Sair desta conversa",
     "privateNote": "Bloquear oculta imediatamente as mensagens dessa pessoa para ti. Denúncias e pedidos de remoção são privados e ficam disponíveis para moderação."
-  }
+  },
+  "sosLongitudinal": {
+    "title": "Memória longitudinal",
+    "improved": "Na tua própria história, este percurso coincidiu com melhoria em {{improved}} de {{attempts}} utilizações.",
+    "changed": "O padrão recente mudou; a CONFIA não assume que o que ajudava antes continua a ajudar agora.",
+    "association": "É uma associação dos teus registos, não uma garantia nem uma relação causal."
+  },
+  "drinkWater": "Bebe água devagar e com atenção",
+  "mindfulMeal": "Faz uma refeição com atenção plena",
+  "relaxFace": "Relaxa o maxilar e o rosto",
+  "sosTechnique": "Usa uma técnica SOS quando sentires ansiedade"
 }

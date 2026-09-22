@@ -2456,5 +2456,87 @@
   "successTip": "Pequenos passos também contam.",
   "common": {
     "back": "Voltar"
+  },
+  "communityPremium": {
+    "eyebrow": "apoio humano",
+    "title": "Encontra quem te compreende",
+    "subtitle": "Experiências reais, apoio anónimo e encontros pelo que estás a viver — não por diagnósticos.",
+    "passedThrough": "Já passei por isto",
+    "publish": "Partilhar",
+    "otherSide": {
+      "title": "Do Outro Lado",
+      "sub": "Palavras de quem já atravessou algo semelhante.",
+      "fromOtherSide": "Uma mensagem do outro lado",
+      "placeholder": "O que gostarias de dizer a alguém que está agora onde tu já estiveste?"
+    },
+    "match": {
+      "title": "Alguém como eu, agora",
+      "sub": "Encontra alguém por experiência vivida.",
+      "disclaimer": "O match usa apenas a experiência escolhida e nunca presume diagnósticos.",
+      "compatible": "Experiência em comum",
+      "none": "Ainda não há ninguém disponível com esta experiência. Podes voltar mais tarde."
+    },
+    "circles": {
+      "title": "Círculos de 7 dias",
+      "sub": "Pequenos espaços temporários em torno de uma experiência.",
+      "explain": "Os círculos desaparecem ao fim de 7 dias para manter o espaço leve e centrado no momento.",
+      "placeholder": "O que gostarias de partilhar neste círculo?",
+      "create": "Criar círculo de 7 dias"
+    },
+    "poll": {
+      "title": "Alguém já sentiu isto?",
+      "sub": "Pergunta à comunidade sem transformar experiências em diagnósticos.",
+      "disclaimer": "As respostas refletem experiências de utilizadores. Não são uma avaliação médica nem indicam a causa de um sintoma.",
+      "placeholder": "Ex.: Alguém já passou por vontade de urinar a todo o momento?",
+      "create": "Publicar inquérito",
+      "options": {
+        "no": "Não",
+        "yes": "Sim",
+        "a_lot": "Bastante",
+        "with_you": "Estou contigo"
+      }
+    },
+    "giveBack": {
+      "title": "Retribuir",
+      "sub": "Deixa algo útil para quem está numa fase que já conheces.",
+      "prompt": "Pensa numa fase difícil que já atravessaste. O que gostarias que alguém te tivesse dito nessa altura?",
+      "placeholder": "Escreve uma mensagem curta e humana…",
+      "action": "Deixar mensagem"
+    },
+    "experiences": {
+      "rumination": "Pensamentos repetitivos",
+      "sleep": "Sono",
+      "work": "Trabalho/estudos",
+      "loneliness": "Solidão",
+      "panic": "Momentos de pânico",
+      "body_sensations": "Sensações físicas",
+      "family": "Família",
+      "relationships": "Relações"
+    }
+  },
+  "personalPremium": {
+    "title": "O que a CONFIA está a antecipar e a recordar",
+    "subtitle": "Leituras baseadas apenas nos teus próprios registos. A CONFIA mostra a evidência e evita conclusões quando os dados ainda são insuficientes.",
+    "evidence": "{{count}} observações · {{dates}}",
+    "associationOnly": "Isto é uma associação observada nos teus registos, não prova uma causa.",
+    "forecast": {
+      "title": "CONFIA Forecast",
+      "need": "A necessidade “{{need}}” repetiu-se {{count}} vezes e surgiu {{recent}} vezes nos teus registos mais recentes. Pode valer a pena observá-la agora.",
+      "weekday": "Neste dia da semana encontrámos {{count}} registos anteriores abaixo do teu padrão recente. É um sinal para observar, não uma previsão clínica."
+    },
+    "recall": {
+      "title": "CONFIA Recall · Já estiveste aqui",
+      "body": "Em {{date}} registaste {{mood}}/10. {{days}} dias depois tinhas registado {{recovery}}/10. O passado não prevê hoje, mas recorda que estados semelhantes já mudaram."
+    },
+    "counterfactual": {
+      "title": "Counterfactual Me",
+      "body": "Entre momentos comparáveis, encontrámos {{withCount}} intervalos com utilização do Impulso (alteração média {{withDelta}}) e {{withoutCount}} sem utilização registada ({{withoutDelta}})."
+    }
+  },
+  "companionAging": {
+    "first_contact": "a conhecer-te",
+    "early_learning": "a aprender contigo · {{count}} registos",
+    "established": "já conhece os teus ritmos · {{count}} registos",
+    "personal_discovery": "cresceu contigo · {{count}} registos"
   }
 }

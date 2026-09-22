@@ -2462,5 +2462,87 @@
   "chatStartMessage": "Puedes empezar la conversación aquí.",
   "chatPlaceholder": "Escribe un mensaje…",
   "chatSend": "Enviar mensaje",
-  "objectiveEmotionalLink": "Este objetivo estuvo asociado a {{count}} registros emocionales."
+  "objectiveEmotionalLink": "Este objetivo estuvo asociado a {{count}} registros emocionales.",
+  "communityPremium": {
+    "eyebrow": "apoyo humano",
+    "title": "Encuentra a quien te comprende",
+    "subtitle": "Experiencias reales, apoyo anónimo y encuentros por lo que estás viviendo, no por diagnósticos.",
+    "passedThrough": "Ya pasé por esto",
+    "publish": "Compartir",
+    "otherSide": {
+      "title": "Del Otro Lado",
+      "sub": "Palabras de quien ya atravesó algo parecido.",
+      "fromOtherSide": "Un mensaje del otro lado",
+      "placeholder": "¿Qué le dirías a alguien que está donde tú estuviste?"
+    },
+    "match": {
+      "title": "Alguien como yo, ahora",
+      "sub": "Encuentra a alguien por experiencia vivida.",
+      "disclaimer": "El match usa solo la experiencia elegida y nunca presupone diagnósticos.",
+      "compatible": "Experiencia en común",
+      "none": "Todavía no hay nadie disponible con esta experiencia."
+    },
+    "circles": {
+      "title": "Círculos de 7 días",
+      "sub": "Pequeños espacios temporales sobre una experiencia.",
+      "explain": "Los círculos desaparecen tras 7 días para mantener el espacio centrado en el presente.",
+      "placeholder": "¿Qué quieres compartir en este círculo?",
+      "create": "Crear círculo de 7 días"
+    },
+    "poll": {
+      "title": "¿Alguien ha sentido esto?",
+      "sub": "Pregunta a la comunidad sin convertir experiencias en diagnósticos.",
+      "disclaimer": "Las respuestas reflejan experiencias de usuarios. No son una evaluación médica ni indican la causa de un síntoma.",
+      "placeholder": "Ej.: ¿Alguien ha tenido ganas de orinar todo el tiempo?",
+      "create": "Publicar encuesta",
+      "options": {
+        "no": "No",
+        "yes": "Sí",
+        "a_lot": "Bastante",
+        "with_you": "Estoy contigo"
+      }
+    },
+    "giveBack": {
+      "title": "Retribuir",
+      "sub": "Deja algo útil para quien está en una fase que ya conoces.",
+      "prompt": "Piensa en una fase difícil que ya atravesaste. ¿Qué te habría gustado oír entonces?",
+      "placeholder": "Escribe un mensaje breve y humano…",
+      "action": "Dejar mensaje"
+    },
+    "experiences": {
+      "rumination": "Pensamientos repetitivos",
+      "sleep": "Sueño",
+      "work": "Trabajo/estudios",
+      "loneliness": "Soledad",
+      "panic": "Momentos de pánico",
+      "body_sensations": "Sensaciones físicas",
+      "family": "Familia",
+      "relationships": "Relaciones"
+    }
+  },
+  "personalPremium": {
+    "title": "Lo que CONFIA está anticipando y recordando",
+    "subtitle": "Lecturas basadas solo en tus propios registros. CONFIA muestra la evidencia y evita conclusiones cuando faltan datos.",
+    "evidence": "{{count}} observaciones · {{dates}}",
+    "associationOnly": "Es una asociación observada en tus registros, no una prueba de causa.",
+    "forecast": {
+      "title": "CONFIA Forecast",
+      "need": "La necesidad “{{need}}” apareció {{count}} veces y {{recent}} veces en tus registros más recientes. Puede valer la pena observarla ahora.",
+      "weekday": "Encontramos {{count}} registros previos de este día por debajo de tu patrón reciente. Es una señal para observar, no una predicción clínica."
+    },
+    "recall": {
+      "title": "CONFIA Recall · Ya estuviste aquí",
+      "body": "El {{date}} registraste {{mood}}/10. {{days}} días después registraste {{recovery}}/10. El pasado no predice hoy, pero estados parecidos ya cambiaron."
+    },
+    "counterfactual": {
+      "title": "Counterfactual Me",
+      "body": "En momentos comparables encontramos {{withCount}} intervalos con uso de Impulso (cambio medio {{withDelta}}) y {{withoutCount}} sin uso registrado ({{withoutDelta}})."
+    }
+  },
+  "companionAging": {
+    "first_contact": "conociéndote",
+    "early_learning": "aprendiendo contigo · {{count}} registros",
+    "established": "ya conoce tus ritmos · {{count}} registros",
+    "personal_discovery": "ha crecido contigo · {{count}} registros"
+  }
 }

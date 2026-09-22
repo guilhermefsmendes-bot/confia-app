@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Brain, Compass, Info, MessageSquareHeart, Plus, Sparkles, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 import { buildPersonalTwinSummary, buildReplayMoments } from "../data/personal/confiaReplay";
+import { buildForecastSignals, buildRecall, buildCounterfactualSignals } from "../data/personal/premiumIntelligence";
 import { addManualNote, readFutureMessages, readManualNotes, removeManualNote, revealFutureMessage, saveFutureMessage, SELF_MEMORY_UPDATED_EVENT, type ManualNoteKind } from "../data/personal/selfMemory";
 import { readPersonalEvents, appendPersonalEvents, PERSONAL_EVENTS_UPDATED_EVENT } from "../data/personal/personalEventStorage";
 import { buildPersonalModel, findAnalogousMoments } from "../data/personal/personalModel";
@@ -41,6 +42,9 @@ export default function PersonalMap({ onBack }: Props) {
   const insights = useMemo(() => applyInsightLifecycle(buildPersonalInsights(events)), [events]);
   const replay = useMemo(() => buildReplayMoments(events), [events]);
   const twin = useMemo(() => buildPersonalTwinSummary(events), [events]);
+  const forecasts = useMemo(() => buildForecastSignals(events), [events]);
+  const recall = useMemo(() => buildRecall(events), [events]);
+  const counterfactuals = useMemo(() => buildCounterfactualSignals(events), [events]);
   const manualNotes = useMemo(() => readManualNotes(), [memoryRevision]);
   const futureMessages = useMemo(() => readFutureMessages(), [memoryRevision]);
   const dueFutureMessages = futureMessages.filter(item => new Date(item.revealAt).getTime() <= Date.now());
@@ -110,6 +114,19 @@ export default function PersonalMap({ onBack }: Props) {
                 {item.recovery && <p className="mt-2 text-[11px] font-bold leading-5 text-[#587563]">{item.recovery.daysLater === 0 ? "Mais tarde nesse dia" : item.recovery.daysLater === 1 ? "No dia seguinte" : `${item.recovery.daysLater} dias depois`}, registaste {item.recovery.mood}/10.</p>}
               </article>
             ))}
+          </div>
+        </section>
+      )}
+
+      {(forecasts.length > 0 || recall.length > 0 || counterfactuals.length > 0) && (
+        <section className="mt-4 rounded-[30px] border border-[#E1D2CA] bg-gradient-to-br from-[#3F2C27] to-[#6D4D43] p-5 text-white shadow-lg sm:p-6">
+          <p className="text-[10px] font-black uppercase tracking-[.2em] text-[#E6B9A3]">CONFIA Intelligence</p>
+          <h2 className="mt-1 text-xl font-black">{t("personalPremium.title")}</h2>
+          <p className="mt-2 text-xs leading-5 text-white/70">{t("personalPremium.subtitle")}</p>
+          <div className="mt-4 space-y-3">
+            {forecasts.map(item => <article key={item.id} className="rounded-2xl bg-white/10 p-4"><b className="text-xs">{t("personalPremium.forecast.title")}</b><p className="mt-2 text-[11px] leading-5 text-white/80">{item.need ? t("personalPremium.forecast.need",{need:item.need,count:item.evidenceCount,recent:item.recentCount}) : t("personalPremium.forecast.weekday",{count:item.evidenceCount})}</p><p className="mt-2 text-[9px] text-[#E6B9A3]">{t("personalPremium.evidence",{count:item.evidenceCount,dates:item.dates.join(", ")})}</p></article>)}
+            {recall.slice(0,1).map(item => <article key={"recall_"+item.id} className="rounded-2xl bg-white/10 p-4"><b className="text-xs">{t("personalPremium.recall.title")}</b><p className="mt-2 text-[11px] leading-5 text-white/80">{t("personalPremium.recall.body",{date:item.date,mood:item.mood,recovery:item.recovery?.mood,days:item.recovery?.daysLater})}</p></article>)}
+            {counterfactuals.map(item => <article key={item.id} className="rounded-2xl bg-white/10 p-4"><b className="text-xs">{t("personalPremium.counterfactual.title")}</b><p className="mt-2 text-[11px] leading-5 text-white/80">{t("personalPremium.counterfactual.body",{withCount:item.withCount,withoutCount:item.withoutCount,withDelta:item.withDelta,withoutDelta:item.withoutDelta})}</p><p className="mt-2 text-[9px] text-[#E6B9A3]">{t("personalPremium.associationOnly")}</p></article>)}
           </div>
         </section>
       )}

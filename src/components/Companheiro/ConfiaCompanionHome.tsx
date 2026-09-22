@@ -1326,6 +1326,7 @@ function ConfiaCompanionHome({
           >
             {t("level")} {avatar.level}
           </span>
+          <span className="text-[9px] font-bold text-[#B07A67]">· {t("companionAging." + relationshipStage, { count: relationshipObservationCount })}</span>
         </div>
       </div>
 

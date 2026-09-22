@@ -1922,10 +1922,10 @@ alert(t("blockError"));
   }
 };
   // Create Community Post
-const handleAddPost = async (feeling: string, topic: string, message: string) => {
+const handleAddPost = async (feeling: string, topic: string, message: string, options?: { experienceTag?: string; supportMode?: "share" | "other_side" | "seeking_match" | "give_back"; circleExpiresAt?: number }) => {
   try {
     const { createCommunityPost } = await import("./data/community/communityService");
-    const created = await createCommunityPost(feeling, topic, message);
+    const created = await createCommunityPost(feeling, topic, message, options);
 
     const newPost: SharePost = {
       ...created,
@@ -1982,6 +1982,19 @@ const handleLikePost = async (
 const handleOpenChat = (post: SharePost) => {
   setChatIdOverride(null);
   setChatPost(post);
+};
+
+const handleConnectCommunityMatch = async (post: SharePost) => {
+  try {
+    if (!post.userReaction) {
+      const { reactToCommunityPost } = await import("./data/community/communityService");
+      await reactToCommunityPost(post.id, "red", post.userReaction);
+    }
+    setChatIdOverride(null);
+    setChatPost(post);
+  } catch (error) {
+    console.error("Erro ao ligar utilizadores por experiência:", error);
+  }
 };
 
 // Visual text helper for slider values (0-10)
@@ -3463,6 +3476,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                 onAddPost={handleAddPost}
                 onLikePost={handleLikePost}
                 onOpenChat={handleOpenChat}
+                onConnectMatch={handleConnectCommunityMatch}
                 onDeletePost={handleDeletePost}
                 onReportPost={handleReportPost}
                 onBlockUser={handleBlockUser}

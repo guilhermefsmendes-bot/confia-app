@@ -11,15 +11,17 @@ import {
 import { SharePost } from '../types';
 import { useTranslation } from 'react-i18next';
 import CommunityCircles from './CommunityCircles';
+import CommunityPremiumHub from './CommunityPremiumHub';
 
 interface PartilhaFeedProps {
   posts: SharePost[];
-  onAddPost: (feeling: string, topic: string, message: string) => void;
+  onAddPost: (feeling: string, topic: string, message: string, options?: { experienceTag?: string; supportMode?: "share" | "other_side" | "seeking_match" | "give_back"; circleExpiresAt?: number }) => Promise<void> | void;
   onLikePost: (
     id: string,
     reaction: "yellow" | "green" | "red"
   ) => void;
   onOpenChat: (post: SharePost) => void;
+  onConnectMatch: (post: SharePost) => Promise<void> | void;
   onDeletePost: (id: string) => void;
   onReportPost: (post: SharePost, reason: string) => void;
   onBlockUser: (id: string) => void;
@@ -78,6 +80,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   onAddPost,
   onLikePost,
   onOpenChat,
+  onConnectMatch,
   onDeletePost,
   onReportPost,
   onBlockUser
@@ -282,6 +285,8 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
           </div>
         </motion.form>
       )}
+
+      <CommunityPremiumHub posts={posts} onConnect={onConnectMatch} onCreate={onAddPost} onOpenChat={onOpenChat} />
 
       <CommunityCircles posts={posts} onOpenChat={onOpenChat} />
 
@@ -492,7 +497,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
                     }
                   >
                     <span className="text-sm">❤️</span>
-                    <span>{post.redLikes}</span>
+                    <span>{t("communityPremium.passedThrough")} · {post.redLikes}</span>
                   </button>
 
                   {/* Chat */}

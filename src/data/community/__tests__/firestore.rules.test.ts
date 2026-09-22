@@ -117,6 +117,20 @@ describe("Firestore security rules", () => {
     }));
   });
 
+  it("allows one community experience poll vote and rejects a second vote", async () => {
+    const options = [
+      { id: "no", label: "no", count: 0, voterIds: [] },
+      { id: "yes", label: "yes", count: 0, voterIds: [] },
+      { id: "a_lot", label: "a_lot", count: 0, voterIds: [] },
+      { id: "with_you", label: "with_you", count: 0, voterIds: [] },
+    ];
+    await assertSucceeds(setDoc(doc(db("alice"), "communityPolls/q1"), { authorId: "alice", question: "Has anyone felt this?", topic: "experiencia", options, createdAt: Timestamp.fromMillis(1_700_000_000_000) }));
+    const voted = options.map((o, i) => i === 1 ? { ...o, count: 1, voterIds: ["bob"] } : o);
+    await assertSucceeds(updateDoc(doc(db("bob"), "communityPolls/q1"), { options: voted }));
+    const second = voted.map((o, i) => i === 2 ? { ...o, count: 1, voterIds: ["bob"] } : o);
+    await assertFails(updateDoc(doc(db("bob"), "communityPolls/q1"), { options: second }));
+  });
+
   it("rejects an unrelated user from creating a chat", async () => {
     await assertFails(setDoc(doc(db("mallory"), "chats/p-chat_alice_mallory"), {
       participants: ["alice", "mallory"],

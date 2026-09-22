@@ -2462,5 +2462,87 @@
   "chatStartMessage": "You can start the conversation here.",
   "chatPlaceholder": "Write a message…",
   "chatSend": "Send message",
-  "objectiveEmotionalLink": "This goal was associated with {{count}} emotional records."
+  "objectiveEmotionalLink": "This goal was associated with {{count}} emotional records.",
+  "communityPremium": {
+    "eyebrow": "human support",
+    "title": "Find someone who gets it",
+    "subtitle": "Real experiences, anonymous support and matching by what you are living through — not diagnoses.",
+    "passedThrough": "I have been through this",
+    "publish": "Share",
+    "otherSide": {
+      "title": "The Other Side",
+      "sub": "Words from people who have been through something similar.",
+      "fromOtherSide": "A message from the other side",
+      "placeholder": "What would you tell someone who is where you once were?"
+    },
+    "match": {
+      "title": "Someone like me, now",
+      "sub": "Find someone through lived experience.",
+      "disclaimer": "Matching only uses the experience you choose and never assumes a diagnosis.",
+      "compatible": "Shared experience",
+      "none": "No one with this experience is available yet. You can check again later."
+    },
+    "circles": {
+      "title": "7-day circles",
+      "sub": "Small temporary spaces around a shared experience.",
+      "explain": "Circles expire after 7 days to keep support light and focused on the present.",
+      "placeholder": "What would you like to share in this circle?",
+      "create": "Create 7-day circle"
+    },
+    "poll": {
+      "title": "Has anyone felt this?",
+      "sub": "Ask the community without turning experience into diagnosis.",
+      "disclaimer": "Answers reflect user experiences. They are not a medical assessment and do not identify the cause of a symptom.",
+      "placeholder": "E.g. Has anyone ever felt the urge to urinate all the time?",
+      "create": "Publish poll",
+      "options": {
+        "no": "No",
+        "yes": "Yes",
+        "a_lot": "A lot",
+        "with_you": "I am with you"
+      }
+    },
+    "giveBack": {
+      "title": "Give back",
+      "sub": "Leave something useful for someone in a phase you already know.",
+      "prompt": "Think of a difficult phase you have been through. What would you have wanted someone to tell you then?",
+      "placeholder": "Write a short, human message…",
+      "action": "Leave message"
+    },
+    "experiences": {
+      "rumination": "Racing/repetitive thoughts",
+      "sleep": "Sleep",
+      "work": "Work/studies",
+      "loneliness": "Loneliness",
+      "panic": "Panic moments",
+      "body_sensations": "Body sensations",
+      "family": "Family",
+      "relationships": "Relationships"
+    }
+  },
+  "personalPremium": {
+    "title": "What CONFIA is anticipating and remembering",
+    "subtitle": "Readings based only on your own records. CONFIA shows the evidence and avoids conclusions when data is insufficient.",
+    "evidence": "{{count}} observations · {{dates}}",
+    "associationOnly": "This is an association observed in your records, not proof of cause.",
+    "forecast": {
+      "title": "CONFIA Forecast",
+      "need": "The need “{{need}}” appeared {{count}} times and {{recent}} times in your most recent records. It may be worth noticing now.",
+      "weekday": "We found {{count}} previous records on this weekday below your recent pattern. This is a signal to notice, not a clinical prediction."
+    },
+    "recall": {
+      "title": "CONFIA Recall · You have been here before",
+      "body": "On {{date}} you recorded {{mood}}/10. {{days}} days later you recorded {{recovery}}/10. The past does not predict today, but similar states have changed before."
+    },
+    "counterfactual": {
+      "title": "Counterfactual Me",
+      "body": "Across comparable moments, we found {{withCount}} intervals with Impulso use (average change {{withDelta}}) and {{withoutCount}} without recorded use ({{withoutDelta}})."
+    }
+  },
+  "companionAging": {
+    "first_contact": "getting to know you",
+    "early_learning": "learning with you · {{count}} records",
+    "established": "knows your rhythms · {{count}} records",
+    "personal_discovery": "has grown with you · {{count}} records"
+  }
 }

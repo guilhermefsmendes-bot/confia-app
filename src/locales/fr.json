@@ -2462,5 +2462,87 @@
   "chatStartMessage": "Tu peux commencer la conversation ici.",
   "chatPlaceholder": "Écris un message…",
   "chatSend": "Envoyer le message",
-  "objectiveEmotionalLink": "Cet objectif a été associé à {{count}} relevés émotionnels."
+  "objectiveEmotionalLink": "Cet objectif a été associé à {{count}} relevés émotionnels.",
+  "communityPremium": {
+    "eyebrow": "soutien humain",
+    "title": "Trouve quelqu’un qui te comprend",
+    "subtitle": "Expériences réelles, soutien anonyme et rencontres selon le vécu, pas selon un diagnostic.",
+    "passedThrough": "Je suis déjà passé par là",
+    "publish": "Partager",
+    "otherSide": {
+      "title": "De l’Autre Côté",
+      "sub": "Des mots de personnes ayant traversé quelque chose de similaire.",
+      "fromOtherSide": "Un message de l’autre côté",
+      "placeholder": "Que dirais-tu à quelqu’un qui se trouve là où tu étais autrefois ?"
+    },
+    "match": {
+      "title": "Quelqu’un comme moi, maintenant",
+      "sub": "Trouve quelqu’un par expérience vécue.",
+      "disclaimer": "Le rapprochement utilise uniquement l’expérience choisie et ne suppose jamais de diagnostic.",
+      "compatible": "Expérience commune",
+      "none": "Personne avec cette expérience n’est disponible pour le moment."
+    },
+    "circles": {
+      "title": "Cercles de 7 jours",
+      "sub": "Petits espaces temporaires autour d’une expérience.",
+      "explain": "Les cercles expirent après 7 jours pour rester centrés sur le moment présent.",
+      "placeholder": "Que souhaites-tu partager dans ce cercle ?",
+      "create": "Créer un cercle de 7 jours"
+    },
+    "poll": {
+      "title": "Quelqu’un a déjà ressenti ça ?",
+      "sub": "Interroge la communauté sans transformer une expérience en diagnostic.",
+      "disclaimer": "Les réponses reflètent des expériences d’utilisateurs. Elles ne constituent pas une évaluation médicale et n’indiquent pas la cause d’un symptôme.",
+      "placeholder": "Ex. : Quelqu’un a déjà eu envie d’uriner tout le temps ?",
+      "create": "Publier le sondage",
+      "options": {
+        "no": "Non",
+        "yes": "Oui",
+        "a_lot": "Beaucoup",
+        "with_you": "Je suis avec toi"
+      }
+    },
+    "giveBack": {
+      "title": "Redonner",
+      "sub": "Laisse quelque chose d’utile à une personne qui traverse une étape que tu connais.",
+      "prompt": "Pense à une période difficile que tu as traversée. Qu’aurais-tu aimé entendre à ce moment-là ?",
+      "placeholder": "Écris un message court et humain…",
+      "action": "Laisser un message"
+    },
+    "experiences": {
+      "rumination": "Pensées répétitives",
+      "sleep": "Sommeil",
+      "work": "Travail/études",
+      "loneliness": "Solitude",
+      "panic": "Moments de panique",
+      "body_sensations": "Sensations physiques",
+      "family": "Famille",
+      "relationships": "Relations"
+    }
+  },
+  "personalPremium": {
+    "title": "Ce que CONFIA anticipe et se rappelle",
+    "subtitle": "Des lectures fondées uniquement sur tes propres données. CONFIA montre les preuves et évite les conclusions lorsque les données sont insuffisantes.",
+    "evidence": "{{count}} observations · {{dates}}",
+    "associationOnly": "Il s’agit d’une association observée dans tes données, pas d’une preuve de causalité.",
+    "forecast": {
+      "title": "CONFIA Forecast",
+      "need": "Le besoin « {{need}} » est apparu {{count}} fois, dont {{recent}} fois dans tes données les plus récentes. Cela peut valoir la peine de l’observer maintenant.",
+      "weekday": "Nous avons trouvé {{count}} observations antérieures ce jour de la semaine sous ton niveau récent. C’est un signal à observer, pas une prédiction clinique."
+    },
+    "recall": {
+      "title": "CONFIA Recall · Tu es déjà passé par là",
+      "body": "Le {{date}}, tu avais noté {{mood}}/10. {{days}} jours plus tard, tu avais noté {{recovery}}/10. Le passé ne prédit pas aujourd’hui, mais des états similaires ont déjà changé."
+    },
+    "counterfactual": {
+      "title": "Counterfactual Me",
+      "body": "Dans des moments comparables, nous avons trouvé {{withCount}} intervalles avec Impulso (variation moyenne {{withDelta}}) et {{withoutCount}} sans utilisation enregistrée ({{withoutDelta}})."
+    }
+  },
+  "companionAging": {
+    "first_contact": "apprend à te connaître",
+    "early_learning": "apprend avec toi · {{count}} observations",
+    "established": "connaît déjà tes rythmes · {{count}} observations",
+    "personal_discovery": "a grandi avec toi · {{count}} observations"
+  }
 }

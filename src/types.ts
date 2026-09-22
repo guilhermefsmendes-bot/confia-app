@@ -46,8 +46,13 @@ export interface SharePost {
   userName: string;
   feeling: string; // e.g. "Ansioso", "Calmo", "Grato", "Agitado"
   topic?: string; // e.g. "ansiedade", "stress", "sono"; optional for legacy posts
+  experienceTag?: string; // lived experience, never a diagnosis
+  supportMode?: "share" | "other_side" | "seeking_match" | "give_back" | "poll";
+  circleExpiresAt?: number;
+  poll?: { question: string; options: Array<{ id: string; label: string; count: number; voterIds?: string[] }> };
   message: string;
   timestamp: string;
+  createdAtMs?: number;
 
   yellowLikes: number;
   greenLikes: number;

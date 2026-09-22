@@ -58,6 +58,10 @@ export function subscribeToCommunityPosts(
           topic: typeof data.topic === "string" ? data.topic : undefined,
           message: data.message || "",
           timestamp,
+          createdAtMs: createdAt && typeof createdAt.toMillis === "function" ? createdAt.toMillis() : 0,
+          experienceTag: typeof data.experienceTag === "string" ? data.experienceTag : undefined,
+          supportMode: ["share", "other_side", "seeking_match", "give_back", "poll"].includes(data.supportMode) ? data.supportMode as SharePost["supportMode"] : undefined,
+          circleExpiresAt: typeof data.circleExpiresAt === "number" ? data.circleExpiresAt : undefined,
           yellowLikes: data.yellowLikes || 0,
           greenLikes: data.greenLikes || 0,
           redLikes: data.redLikes || 0,
@@ -105,7 +109,7 @@ export async function blockCommunityUser(blockedUserId: string) {
   });
 }
 
-export async function createCommunityPost(feeling: string, topic: string, message: string) {
+export async function createCommunityPost(feeling: string, topic: string, message: string, options?: { experienceTag?: string; supportMode?: "share" | "other_side" | "seeking_match" | "give_back"; circleExpiresAt?: number }) {
   const user = await ensureAuth();
   const userName = `Guardião Anon_${Math.floor(100 + Math.random() * 900)}`;
   const docRef = await addDoc(collection(db, "posts"), {
@@ -114,6 +118,9 @@ export async function createCommunityPost(feeling: string, topic: string, messag
     feeling,
     topic,
     message,
+    ...(options?.experienceTag ? { experienceTag: options.experienceTag.slice(0, 80) } : {}),
+    ...(options?.supportMode ? { supportMode: options.supportMode } : {}),
+    ...(options?.circleExpiresAt ? { circleExpiresAt: options.circleExpiresAt } : {}),
     yellowLikes: 0,
     greenLikes: 0,
     redLikes: 0,
@@ -130,6 +137,10 @@ export async function createCommunityPost(feeling: string, topic: string, messag
     feeling,
     topic,
     message,
+    experienceTag: options?.experienceTag,
+    supportMode: options?.supportMode,
+    circleExpiresAt: options?.circleExpiresAt,
+    createdAtMs: Date.now(),
     timestamp: "justNow",
     yellowLikes: 0,
     greenLikes: 0,

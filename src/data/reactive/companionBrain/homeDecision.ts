@@ -6,6 +6,8 @@ import { buildCompanionLongitudinalMoodMemory } from "./companionBrainLongitudin
 import { collectCompanionData } from "../../companionData";
 import { buildCompanionBrainContext } from "./companionBrainContext";
 import { evaluateCompanionContext } from "./companionBrainOrchestrator";
+import { readPersonalEvents } from "../../personal/personalEventStorage";
+import { buildPersonalIntelligenceSnapshot } from "../../personal/premiumIntelligence";
 
 export type HomeDecisionInput = {
   currentTab: number;
@@ -48,6 +50,7 @@ export function getHomeCompanionBrainDecision(input: HomeDecisionInput) {
     longitudinalImpulse: buildCompanionLongitudinalImpulseMemory(companionCollectedData.impulse, now),
     crossMemory: buildCompanionCrossMemory(ratings, companionCollectedData.impulse, now),
     personalDiscovery,
+    personalIntelligence: buildPersonalIntelligenceSnapshot(readPersonalEvents(), now),
     sessionActivityCount: countRecentCompanionBrainEvents(60),
   });
   return evaluateCompanionContext(context);

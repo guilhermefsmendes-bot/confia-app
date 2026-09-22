@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Brain, Compass, Info, MessageSquareHeart, Plus, Sparkles, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
 import { buildPersonalTwinSummary, buildReplayMoments } from "../data/personal/confiaReplay";
-import { buildForecastSignals, buildRecall, buildCounterfactualSignals, buildPersonalIntelligenceSnapshot } from "../data/personal/premiumIntelligence";
+import { buildForecastSignals, buildRecall, buildCounterfactualSignals, buildPersonalIntelligenceSnapshot, askMyHistory, type HistoryQuestion } from "../data/personal/premiumIntelligence";
 import { addManualNote, readFutureMessages, readManualNotes, removeManualNote, revealFutureMessage, saveFutureMessage, SELF_MEMORY_UPDATED_EVENT, type ManualNoteKind } from "../data/personal/selfMemory";
 import { readPersonalEvents, appendPersonalEvents, PERSONAL_EVENTS_UPDATED_EVENT } from "../data/personal/personalEventStorage";
 import { buildPersonalModel, findAnalogousMoments } from "../data/personal/personalModel";
@@ -21,6 +21,7 @@ export default function PersonalMap({ onBack }: Props) {
   const [memoryRevision, setMemoryRevision] = useState(0);
   const [manualKind, setManualKind] = useState<ManualNoteKind>("helps");
   const [manualText, setManualText] = useState("");
+  const [historyQuestion, setHistoryQuestion] = useState<HistoryQuestion | null>(null);
   const [futureText, setFutureText] = useState("");
   useEffect(() => {
     const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
@@ -46,6 +47,7 @@ export default function PersonalMap({ onBack }: Props) {
   const recall = useMemo(() => buildRecall(events), [events]);
   const counterfactuals = useMemo(() => buildCounterfactualSignals(events), [events]);
   const longitudinal = useMemo(() => buildPersonalIntelligenceSnapshot(events), [events]);
+  const historyAnswer = useMemo(() => historyQuestion ? askMyHistory(events, historyQuestion) : null, [events, historyQuestion]);
   const manualNotes = useMemo(() => readManualNotes(), [memoryRevision]);
   const futureMessages = useMemo(() => readFutureMessages(), [memoryRevision]);
   const dueFutureMessages = futureMessages.filter(item => new Date(item.revealAt).getTime() <= Date.now());
@@ -86,6 +88,13 @@ export default function PersonalMap({ onBack }: Props) {
         <div className="mt-4 grid grid-cols-5 gap-1.5">{longitudinal.timeScales.map(scale => <div key={scale.label} className="rounded-2xl border border-[#F0E3DC] bg-white px-2 py-3 text-center"><b className="block text-[10px] text-[#3F2C27]">{scale.label}</b><span className="mt-1 block text-[9px] text-[#9A8177]">{scale.activeDays}d</span></div>)}</div>
         {longitudinal.strongestLearning ? <div className="mt-4 rounded-2xl bg-[#F6EFEA] p-4"><p className="text-[9px] font-black uppercase tracking-[.15em] text-[#8A684E]">Aprendizagem mais sólida agora</p><p className="mt-2 text-xs font-semibold leading-5 text-[#51463F]">{longitudinal.strongestLearning.text}</p></div> : <p className="mt-4 rounded-2xl bg-[#F6EFEA] p-4 text-xs leading-5 text-[#806D65]">Ainda estou a aprender. Não vou transformar poucos registos numa conclusão sobre ti.</p>}
         {longitudinal.interventions.some(item => item.state === "changed" || item.state === "weakening") && <p className="mt-3 rounded-2xl border border-[#E8D8C7] bg-white p-3 text-[11px] font-semibold leading-5 text-[#735F56]">Detetei pelo menos uma aprendizagem que está a mudar. A CONFIA dá mais peso ao teu padrão recente do que a uma memória antiga.</p>}
+      </section>
+
+      <section className="mt-4 rounded-[30px] border border-[#E2D6CD] bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex items-center gap-2"><MessageSquareHeart size={18} className="text-[#B86B52]"/><h2 className="text-xl font-black text-[#3F2C27]">Pergunta à minha história</h2></div>
+        <p className="mt-2 text-xs leading-5 text-[#806D65]">Perguntas respondidas apenas a partir dos teus próprios registos. Podes sempre ver porque é que a CONFIA chegou à resposta.</p>
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-1">{([{id:"what_helps",label:"O que me ajuda?"},{id:"when_harder",label:"Quando fico pior?"},{id:"am_i_changing",label:"Tenho mudado?"},{id:"have_i_been_here",label:"Já estive assim?"},{id:"how_i_recovered",label:"Como recuperei?"},{id:"what_do_you_know",label:"O que sabes sobre mim?"}] as Array<{id:HistoryQuestion;label:string}>).map(item=><button key={item.id} type="button" onClick={()=>setHistoryQuestion(item.id)} className={"min-h-10 shrink-0 rounded-full px-3 text-[10px] font-black "+(historyQuestion===item.id?"bg-[#3F2C27] text-white":"bg-[#F7EFEB] text-[#795B50]")}>{item.label}</button>)}</div>
+        {historyAnswer && <div className="mt-4 rounded-2xl bg-[#FFF9F5] p-4"><p className="text-xs font-bold leading-5 text-[#51463F]">{historyAnswer.answer}</p><details className="mt-3"><summary className="cursor-pointer text-[10px] font-black text-[#8A684E]">Porque digo isto?</summary><p className="mt-2 text-[10px] leading-5 text-[#806D65]">{historyAnswer.why}</p><p className="mt-1 text-[9px] font-bold uppercase tracking-wide text-[#A48D83]">{historyAnswer.evidenceClass} · {historyAnswer.evidenceCount} registos de evidência</p></details></div>}
       </section>
 
       <section className="mt-4 rounded-[30px] border border-[#EADBD3] bg-[#332824] p-5 text-white shadow-[0_18px_50px_rgba(51,40,36,.18)] sm:p-6">

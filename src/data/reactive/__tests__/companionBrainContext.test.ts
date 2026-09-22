@@ -23,6 +23,7 @@ test("companion context preserves personal discovery", () => {
     morningCompleted: true,
     afternoonCompleted: false,
     longitudinalMood,
+    personalIntelligence: { generatedAt: "2026-09-22T00:00:00.000Z", timeScales: [], interventions: [], recoveries: [], testedLearning: [], safeguards: { personalBaseline: true, contradictionsRetained: true, nonCausalLanguage: true, insufficientDataAllowed: true } },
     personalDiscovery: {
       id: "insight-1",
       messageKey: "personalInsights.test",
@@ -32,6 +33,8 @@ test("companion context preserves personal discovery", () => {
       actionability: "high",
     },
   });
+
+  assert.equal(context.personalIntelligence?.safeguards.contradictionsRetained, true);
 
   assert.deepEqual(context.personalDiscovery, {
     id: "insight-1",

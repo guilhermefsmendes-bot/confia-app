@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { saveEpisode } from "./Impulso";
 import { appendPersonalEvents } from "../data/personal/personalEventStorage";
 import { createPersonalEventId, makePersonalEvent } from "../data/personal/personalEvent";

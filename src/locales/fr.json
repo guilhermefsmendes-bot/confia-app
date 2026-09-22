@@ -2650,5 +2650,6 @@
     "openGroup": "Ouvrir le groupe",
     "leaveGroup": "Quitter",
     "joinGroup": "Rejoindre"
-  }
+  },
+  "companionBrain.personalLearningChanged": "Quelque chose qui semblait t’aider montre récemment un schéma différent. Je réapprends avec toi."
 }

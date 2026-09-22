@@ -11,6 +11,7 @@ import type {
   CompanionLongitudinalMoodMemory,
 } from "./companionBrainLongitudinalMemory";
 import type { CompanionBrainEvent } from "./companionBrainTypes";
+import type { PersonalIntelligenceSnapshot } from "../../personal/premiumIntelligence";
 /**
  * CONFIA — COMPANION BRAIN
  *
@@ -87,6 +88,8 @@ export interface CompanionBrainContext {
    * Descoberta longitudinal pronta a traduzir, quando existe evidência suficiente.
    * Nunca contém notas emocionais nem conteúdo livre do utilizador.
    */
+  personalIntelligence?: PersonalIntelligenceSnapshot;
+
   personalDiscovery?: {
     id: string;
     messageKey: string;
@@ -144,6 +147,8 @@ export function buildCompanionBrainContext(input: {
    * Descoberta longitudinal pronta a traduzir, quando existe evidência suficiente.
    * Nunca contém notas emocionais nem conteúdo livre do utilizador.
    */
+  personalIntelligence?: PersonalIntelligenceSnapshot;
+
   personalDiscovery?: {
     id: string;
     messageKey: string;
@@ -195,5 +200,6 @@ export function buildCompanionBrainContext(input: {
       input.crossMemory,
     personalDiscovery:
       input.personalDiscovery,
+    personalIntelligence: input.personalIntelligence,
   };
 }

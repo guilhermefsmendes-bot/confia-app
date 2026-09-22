@@ -2650,5 +2650,6 @@
     "openGroup": "Open group",
     "leaveGroup": "Leave",
     "joinGroup": "Join group"
-  }
+  },
+  "companionBrain.personalLearningChanged": "Something that seemed to help you is showing a different pattern recently. I am relearning with you."
 }

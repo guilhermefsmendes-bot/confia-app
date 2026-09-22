@@ -77,6 +77,20 @@ export function buildCompanionCandidates(
   context: CompanionBrainContext
 ): CompanionBrainCandidate[] {
   const candidates: CompanionBrainCandidate[] = [];
+  const personalIntelligence = context.personalIntelligence;
+  const changingLearning = personalIntelligence?.interventions.find(item => item.state === "changed" || item.state === "weakening");
+  if (changingLearning && changingLearning.attempts >= 4) {
+    candidates.push({
+      id: `personal_learning_change:${changingLearning.id}`,
+      translationKey: "companionBrain.personalLearningChanged",
+      translationValues: { attempts: changingLearning.attempts },
+      category: "discovery", emotion: "curious", priority: 84,
+      reason: "A previously observed personal response changed in the recent window.",
+      cooldownMinutes: 10080,
+      metadata: { longitudinal: true, patternDrift: true, evidenceCount: changingLearning.attempts, confidence: changingLearning.confidence },
+    });
+  }
+
   const personalDiscovery = context.personalDiscovery;
   if (personalDiscovery && personalDiscovery.actionability !== "low") {
     candidates.push({

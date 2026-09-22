@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, RotateCcw, Heart, Sparkles, Smile, ShieldAlert } from 'lucide-react';
-import { SOOTHING_PHRASES } from '../data/initialData';
+import { getAdaptiveHugMessage, type HugNeed, type HugTone } from '../data/hugAdaptiveMessages';
 import { useTranslation } from "react-i18next";
 import { App } from '@capacitor/app';
 interface AbracoTimerProps {
@@ -50,7 +50,7 @@ const DOODLE_PROMPT_KEYS = [
 ] as const;
 
 export const AbracoTimer: React.FC<AbracoTimerProps> = ({ onAddXp, onRegisterStop }) => {
-const { t } = useTranslation();
+const { t, i18n } = useTranslation();
   const TOTAL_SECONDS = 300; // 5 minutes
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
   const [isActive, setIsActive] = useState(false);
@@ -64,6 +64,8 @@ const { t } = useTranslation();
 
   const [fiveMinuteOutcome, setFiveMinuteOutcome] =
     useState<FiveMinuteOutcome | null>(null);
+  const [hugNeed, setHugNeed] = useState<HugNeed | null>(null);
+  const [hugTone, setHugTone] = useState<HugTone | null>(null);
 
   const [soundEnabled, setSoundEnabled] =
     useState(false);
@@ -114,7 +116,7 @@ useEffect(() => {
     if (!isActive) return;
 
     const phraseTimer = setInterval(() => {
-      setPhraseIdx(prev => (prev + 1) % SOOTHING_PHRASES.length);
+      setPhraseIdx(prev => prev + 1);
     }, 15000);
 
     return () => clearInterval(phraseTimer);
@@ -858,6 +860,8 @@ const registerFiveMinuteOutcome = (
 
     sessions.push({
       mood: fiveMinuteMood,
+      need: hugNeed,
+      tone: hugTone,
       outcome,
       completedAt: new Date().toISOString(),
     });
@@ -876,6 +880,11 @@ const registerFiveMinuteOutcome = (
     // localStorage não esteja disponível.
   }
 };
+
+const hugQuestionnaireReady = Boolean(fiveMinuteMood && hugNeed && hugTone);
+const adaptiveHugMessage = fiveMinuteMood && hugNeed && hugTone
+  ? getAdaptiveHugMessage(i18n.resolvedLanguage || i18n.language, fiveMinuteMood, hugNeed, hugTone, fiveMinutePhase as 0 | 1 | 2 | 3, phraseIdx)
+  : t("startHugMessage");
 
 const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -967,6 +976,23 @@ const formatTime = (seconds: number) => {
           </div>
 
           {fiveMinuteMood && (
+            <>
+              <p className="mt-5 text-xs font-black text-[#2F2926]">{t("fiveMinutes.needQuestion")}</p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {(["calm","strength","company","clarity","pause"] as HugNeed[]).map(need => (
+                  <button key={need} type="button" disabled={isActive} onClick={() => setHugNeed(need)} aria-pressed={hugNeed===need} className={`min-h-[48px] rounded-[16px] border px-3 py-2 text-[11px] font-bold transition ${hugNeed===need ? "border-[#B85F48]/45 bg-[#F8E8DF] text-[#5F504A]" : "border-[#E8DDD7]/75 bg-white text-[#6F625D]"}`}>{t(`fiveMinutes.needs.${need}`)}</button>
+                ))}
+              </div>
+              <p className="mt-5 text-xs font-black text-[#2F2926]">{t("fiveMinutes.toneQuestion")}</p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {(["warm","encouraging","reflective","quiet"] as HugTone[]).map(tone => (
+                  <button key={tone} type="button" disabled={isActive} onClick={() => setHugTone(tone)} aria-pressed={hugTone===tone} className={`min-h-[48px] rounded-[16px] border px-3 py-2 text-[11px] font-bold transition ${hugTone===tone ? "border-[#B85F48]/45 bg-[#F8E8DF] text-[#5F504A]" : "border-[#E8DDD7]/75 bg-white text-[#6F625D]"}`}>{t(`fiveMinutes.tones.${tone}`)}</button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {hugQuestionnaireReady && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -979,9 +1005,7 @@ const formatTime = (seconds: number) => {
               </p>
 
               <p className="mt-1.5 text-sm font-bold leading-relaxed text-[#2F2926]">
-                {getFiveMinuteGuideKey()
-                  ? t(getFiveMinuteGuideKey()!)
-                  : null}
+                {adaptiveHugMessage}
               </p>
             </motion.div>
           )}
@@ -1074,7 +1098,7 @@ key={phraseIdx}
             className="text-center"
           >
             <p className="text-sm font-semibold text-[#2F2926] max-w-xs mx-auto leading-relaxed italic">
-{isActive ? t(SOOTHING_PHRASES[phraseIdx]) : t("startHugMessage")}
+{isActive ? adaptiveHugMessage : t("startHugMessage")}
             </p>
           </motion.div>
         </AnimatePresence>
@@ -1443,6 +1467,7 @@ key={phraseIdx}
 
         <button type="button"
           onClick={handleToggle}
+          disabled={!hugQuestionnaireReady && !isActive}
           className={`px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider font-display shadow-lg transition-all flex items-center gap-2 cursor-pointer ${
             isActive
               ? 'bg-[#B85F48] hover:bg-[#D59375] text-white shadow-[#B85F48]/25'

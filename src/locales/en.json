@@ -2412,6 +2412,21 @@
         "There's nothing you need to complete. You can simply be here.",
         "Take with you only the feeling of having stopped for a few minutes."
       ]
+    },
+    "needQuestion": "What would you like from these minutes?",
+    "toneQuestion": "How would you like CONFIA to be with you?",
+    "needs": {
+      "calm": "Feel calmer",
+      "strength": "Find strength",
+      "company": "Feel accompanied",
+      "clarity": "Organize my thoughts",
+      "pause": "Simply pause"
+    },
+    "tones": {
+      "warm": "Warm",
+      "encouraging": "Encouraging",
+      "reflective": "Reflective",
+      "quiet": "Quieter"
     }
   },
   "trophyRoom": {

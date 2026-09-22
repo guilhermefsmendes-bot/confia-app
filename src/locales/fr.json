@@ -2412,6 +2412,21 @@
         "Tu n'as rien à terminer. Tu peux simplement être ici.",
         "Emporte seulement avec toi la sensation d'avoir fait une pause pendant quelques minutes."
       ]
+    },
+    "needQuestion": "Qu’aimerais-tu recevoir de ces quelques minutes ?",
+    "toneQuestion": "Comment veux-tu que CONFIA soit avec toi ?",
+    "needs": {
+      "calm": "Me calmer",
+      "strength": "Retrouver de la force",
+      "company": "Me sentir accompagné",
+      "clarity": "Organiser mes pensées",
+      "pause": "Simplement faire une pause"
+    },
+    "tones": {
+      "warm": "Chaleureuse",
+      "encouraging": "Encourageante",
+      "reflective": "Réflexive",
+      "quiet": "Plus silencieuse"
     }
   },
   "trophyRoom": {

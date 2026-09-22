@@ -2398,6 +2398,21 @@
         "Não tens nada para completar. Podes simplesmente estar aqui.",
         "Leva contigo apenas a sensação de teres parado durante alguns minutos."
       ]
+    },
+    "needQuestion": "O que gostarias de receber destes minutos?",
+    "toneQuestion": "Como queres que a CONFIA esteja contigo?",
+    "needs": {
+      "calm": "Acalmar",
+      "strength": "Ganhar força",
+      "company": "Sentir companhia",
+      "clarity": "Organizar pensamentos",
+      "pause": "Apenas parar"
+    },
+    "tones": {
+      "warm": "Acolhedora",
+      "encouraging": "Encorajadora",
+      "reflective": "Reflexiva",
+      "quiet": "Mais silenciosa"
     }
   },
   "trophyRoom": {

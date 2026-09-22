@@ -942,7 +942,7 @@
       "availableXp": "XP disponible"
     }
   },
-  "communityChat": "Chat",
+  "communityChat": "Discuter",
   "shareCornerTitle": "Coin du Partage",
   "currentFeeling": "Quel est ton sentiment actuel ?",
   "identifyFirstChat": "❤️ Identifie-toi d'abord pour démarrer le chat",
@@ -2544,5 +2544,55 @@
     "early_learning": "apprend avec toi · {{count}} observations",
     "established": "connaît déjà tes rythmes · {{count}} observations",
     "personal_discovery": "a grandi avec toi · {{count}} observations"
+  },
+  "experienceMatching": {
+    "community": "Communauté",
+    "menu": "Quelqu’un comme moi",
+    "setupTitle": "Experience Matching",
+    "setupText": "Choisis jusqu’à 3 expériences. Lorsqu’une publication compatible apparaît, CONFIA peut te proposer de discuter sans exposer tes choix à la communauté.",
+    "active": "Matching actif",
+    "inactive": "Activer",
+    "maxThree": "Tu peux choisir jusqu’à 3 expériences.",
+    "whoTitle": "Qui aimerais-tu rencontrer ?",
+    "privacy": "Tes choix de matching restent privés. Une conversation ne commence qu’après intérêt et acceptation.",
+    "incomingTitle": "Quelqu’un souhaite discuter avec toi",
+    "incomingText": "Cette personne a choisi cette expérience et s’est reconnue dans ta publication. La conversation ne commence que si tu acceptes.",
+    "accept": "Accepter la conversation",
+    "decline": "Pas maintenant",
+    "matchesTitle": "Correspondances possibles",
+    "matchesText": "Publications récentes liées aux expériences que tu as choisies.",
+    "waiting": "Aucune publication compatible pour le moment. Tu peux continuer à utiliser CONFIA normalement.",
+    "compatible": "Expérience similaire",
+    "requestSent": "Demande envoyée · en attente d’acceptation",
+    "openConversation": "Ouvrir la conversation",
+    "wantToTalk": "Je veux discuter",
+    "matchReady": "Votre conversation est prête",
+    "openPrivateChat": "Ouvrir le chat privé et anonyme",
+    "postExperienceTitle": "Cette publication est-elle liée à une expérience ?",
+    "postExperienceHint": "Facultatif. Aide CONFIA à rapprocher les personnes ayant choisi des expériences similaires.",
+    "noExperience": "Aucune / je préfère ne pas préciser",
+    "preference": {
+      "same_now": "Vit la même chose maintenant",
+      "been_there": "Est déjà passé par là",
+      "either": "Peu importe"
+    },
+    "experiences": {
+      "separation_divorce": "Séparation / divorce",
+      "grief": "Deuil",
+      "loneliness": "Solitude",
+      "work_difficulties": "Difficultés au travail",
+      "parenting": "Parentalité",
+      "relationship_problems": "Problèmes de couple",
+      "job_change": "Changement d’emploi",
+      "sleep_difficulties": "Difficultés de sommeil",
+      "stress": "Stress",
+      "panic_attacks": "Crises de panique",
+      "body_sensations": "Inquiétude liée aux sensations physiques",
+      "low_self_esteem": "Faible estime de soi",
+      "caregiving": "Prendre soin de quelqu’un",
+      "moving_city": "Changement de ville",
+      "family_problems": "Problèmes familiaux",
+      "rumination": "Pensées répétitives"
+    }
   }
 }

@@ -155,4 +155,69 @@ describe("Firestore security rules", () => {
       createdAt: Timestamp.fromMillis(1_700_000_000_000),
     }));
   });
+  it("keeps Experience Matching preferences private", async () => {
+    await assertSucceeds(setDoc(doc(db("bob"), "communityMatchProfiles/bob"), {
+      ownerId: "bob",
+      active: true,
+      activeTags: ["separation_divorce"],
+      preference: "same_now",
+      updatedAt: Timestamp.fromMillis(1_700_000_000_000),
+    }));
+    await assertSucceeds(getDoc(doc(db("bob"), "communityMatchProfiles/bob")));
+    await assertFails(getDoc(doc(db("alice"), "communityMatchProfiles/bob")));
+  });
+
+  it("requires a valid active experience before creating a match request", async () => {
+    await assertSucceeds(setDoc(doc(db("alice"), "posts/p-match"), {
+      ...post("alice"),
+      topic: "relacoes",
+      experienceTag: "separation_divorce",
+      supportMode: "share",
+    }));
+
+    await assertSucceeds(setDoc(doc(db("bob"), "communityMatchRequests/bob_p-match"), {
+      requesterId: "bob",
+      recipientId: "alice",
+      postId: "p-match",
+      experienceTag: "separation_divorce",
+      status: "pending",
+      createdAt: Timestamp.fromMillis(1_700_000_000_000),
+    }));
+
+    await assertFails(setDoc(doc(db("mallory"), "communityMatchRequests/mallory_p-match"), {
+      requesterId: "mallory",
+      recipientId: "alice",
+      postId: "p-match",
+      experienceTag: "separation_divorce",
+      status: "pending",
+      createdAt: Timestamp.fromMillis(1_700_000_000_000),
+    }));
+  });
+
+  it("creates an Experience Matching chat only after recipient acceptance", async () => {
+    const chatPayload = {
+      participants: ["alice", "bob"],
+      authorId: "alice",
+      postId: "p-match",
+      matchRequestId: "bob_p-match",
+      createdAt: Timestamp.fromMillis(1_700_000_000_000),
+      lastMessage: "",
+      lastMessageAt: Timestamp.fromMillis(1_700_000_000_000),
+      unreadBy: [],
+    };
+
+    await assertFails(setDoc(doc(db("alice"), "chats/match_bob_p-match"), chatPayload));
+
+    await assertSucceeds(updateDoc(doc(db("alice"), "communityMatchRequests/bob_p-match"), {
+      status: "accepted",
+      respondedAt: Timestamp.fromMillis(1_700_000_100_000),
+    }));
+
+    await assertSucceeds(setDoc(doc(db("alice"), "chats/match_bob_p-match"), chatPayload));
+    await assertFails(updateDoc(doc(db("bob"), "communityMatchRequests/bob_p-match"), {
+      status: "declined",
+      respondedAt: Timestamp.fromMillis(1_700_000_200_000),
+    }));
+  });
+
 });

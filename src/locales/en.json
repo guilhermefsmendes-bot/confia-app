@@ -942,7 +942,7 @@
       }
     }
   },
-  "communityChat": "Chat",
+  "communityChat": "Talk privately",
   "shareCornerTitle": "Sharing Corner",
   "currentFeeling": "How are you feeling right now?",
   "identifyFirstChat": "❤️ Identify yourself first to start the chat",
@@ -2544,5 +2544,55 @@
     "early_learning": "learning with you · {{count}} records",
     "established": "knows your rhythms · {{count}} records",
     "personal_discovery": "has grown with you · {{count}} records"
+  },
+  "experienceMatching": {
+    "community": "Community",
+    "menu": "Someone like me",
+    "setupTitle": "Experience Matching",
+    "setupText": "Choose up to 3 experiences. When a compatible post appears, CONFIA can show you the possibility of talking — without exposing your choices to the community.",
+    "active": "Matching active",
+    "inactive": "Activate",
+    "maxThree": "You can choose up to 3 experiences.",
+    "whoTitle": "Who would you like to meet?",
+    "privacy": "Your matching choices are private. A conversation only starts when there is interest and acceptance.",
+    "incomingTitle": "Someone would like to talk to you",
+    "incomingText": "This person selected this experience and related to your post. The conversation only starts if you accept.",
+    "accept": "Accept conversation",
+    "decline": "Not now",
+    "matchesTitle": "Possible matches",
+    "matchesText": "Recent posts connected to the experiences you selected.",
+    "waiting": "No compatible post has appeared yet. You can keep using CONFIA normally.",
+    "compatible": "Similar experience",
+    "requestSent": "Request sent · waiting for acceptance",
+    "openConversation": "Open conversation",
+    "wantToTalk": "I want to talk",
+    "matchReady": "Your conversation is ready",
+    "openPrivateChat": "Open private anonymous chat",
+    "postExperienceTitle": "Is this post connected to an experience?",
+    "postExperienceHint": "Optional. Helps CONFIA connect people who chose similar lived experiences.",
+    "noExperience": "None / prefer not to say",
+    "preference": {
+      "same_now": "Going through it now",
+      "been_there": "Has been through it",
+      "either": "Either"
+    },
+    "experiences": {
+      "separation_divorce": "Separation / divorce",
+      "grief": "Grief",
+      "loneliness": "Loneliness",
+      "work_difficulties": "Difficulties at work",
+      "parenting": "Parenting",
+      "relationship_problems": "Relationship problems",
+      "job_change": "Job change",
+      "sleep_difficulties": "Sleep difficulties",
+      "stress": "Stress",
+      "panic_attacks": "Panic attacks",
+      "body_sensations": "Concern about body sensations",
+      "low_self_esteem": "Low self-esteem",
+      "caregiving": "Caring for someone",
+      "moving_city": "Moving city",
+      "family_problems": "Family problems",
+      "rumination": "Repetitive thoughts"
+    }
   }
 }

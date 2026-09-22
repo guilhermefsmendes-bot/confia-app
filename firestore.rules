@@ -39,6 +39,17 @@ service cloud.firestore {
 
   match /databases/{database}/documents {
 
+    function validAcceptedExperienceMatch(chatData) {
+      return chatData.keys().hasAny(['matchRequestId'])
+        && chatData.matchRequestId is string
+        && exists(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId))
+        && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.status == 'accepted'
+        && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.postId == chatData.postId
+        && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.requesterId in chatData.participants
+        && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.recipientId in chatData.participants
+        && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.recipientId == chatData.authorId;
+    }
+
     // =====================================================
     // PUBLICAÇÕES DA COMUNIDADE
     // =====================================================
@@ -76,6 +87,27 @@ service cloud.firestore {
               'outro'
             ]
           )
+        )
+        && (
+          !request.resource.data.keys().hasAny(['experienceTag'])
+          || (
+            request.resource.data.experienceTag is string
+            && request.resource.data.experienceTag in [
+              'separation_divorce','grief','loneliness','work_difficulties',
+              'parenting','relationship_problems','job_change','sleep_difficulties',
+              'stress','panic_attacks','body_sensations','low_self_esteem',
+              'caregiving','moving_city','family_problems','rumination',
+              'sleep','work','panic','family','relationships'
+            ]
+          )
+        )
+        && (
+          !request.resource.data.keys().hasAny(['supportMode'])
+          || request.resource.data.supportMode in ['share','other_side','seeking_match','give_back']
+        )
+        && (
+          !request.resource.data.keys().hasAny(['circleExpiresAt'])
+          || request.resource.data.circleExpiresAt is number
         )
         && request.resource.data.message is string
         && request.resource.data.message.size() > 0
@@ -178,6 +210,56 @@ service cloud.firestore {
     }
 
     // =====================================================
+    // EXPERIENCE MATCHING — preferências privadas e pedidos bilaterais
+    // =====================================================
+    match /communityMatchProfiles/{userId} {
+      allow get: if request.auth != null && request.auth.uid == userId;
+      allow list: if false;
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.active is bool
+        && request.resource.data.activeTags is list
+        && request.resource.data.activeTags.size() <= 3
+        && request.resource.data.preference in ['same_now','been_there','either']
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /communityMatchRequests/{requestId} {
+      allow get, list: if request.auth != null
+        && (request.auth.uid == resource.data.requesterId || request.auth.uid == resource.data.recipientId);
+
+      allow create: if request.auth != null
+        && request.resource.data.requesterId == request.auth.uid
+        && request.resource.data.recipientId is string
+        && request.resource.data.recipientId != request.auth.uid
+        && request.resource.data.postId is string
+        && request.resource.data.experienceTag is string
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt is timestamp
+        && get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.authorId == request.resource.data.recipientId
+        && get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.experienceTag == request.resource.data.experienceTag
+        && get(/databases/$(database)/documents/communityMatchProfiles/$(request.auth.uid)).data.active == true
+        && request.resource.data.experienceTag in get(/databases/$(database)/documents/communityMatchProfiles/$(request.auth.uid)).data.activeTags;
+
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.recipientId
+        && resource.data.status == 'pending'
+        && request.resource.data.requesterId == resource.data.requesterId
+        && request.resource.data.recipientId == resource.data.recipientId
+        && request.resource.data.postId == resource.data.postId
+        && request.resource.data.experienceTag == resource.data.experienceTag
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.status in ['accepted','declined']
+        && request.resource.data.respondedAt is timestamp
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','respondedAt']);
+
+      allow delete: if request.auth != null
+        && (request.auth.uid == resource.data.requesterId || request.auth.uid == resource.data.recipientId);
+    }
+
+    // =====================================================
     // CHATS PRIVADOS
     // =====================================================
     match /chats/{chatId} {
@@ -231,7 +313,8 @@ service cloud.firestore {
           /databases/$(database)/documents/posts/$(request.resource.data.postId)
         ).data.authorId
         && (
-          request.auth.uid == request.resource.data.authorId
+          validAcceptedExperienceMatch(request.resource.data)
+          || request.auth.uid == request.resource.data.authorId
           || request.auth.uid in get(
             /databases/$(database)/documents/posts/$(request.resource.data.postId)
           ).data.yellowLikedBy
@@ -243,7 +326,8 @@ service cloud.firestore {
           ).data.redLikedBy
         )
         && (
-          request.auth.uid != request.resource.data.authorId
+          validAcceptedExperienceMatch(request.resource.data)
+          || request.auth.uid != request.resource.data.authorId
           || (
             (
               request.resource.data.participants[0] == request.resource.data.authorId

@@ -1984,6 +1984,11 @@ const handleOpenChat = (post: SharePost) => {
   setChatPost(post);
 };
 
+const handleOpenMatchedChat = (post: SharePost, chatId: string) => {
+  setChatIdOverride(chatId);
+  setChatPost(post);
+};
+
 const handleConnectCommunityMatch = async (post: SharePost) => {
   try {
     if (!post.userReaction) {
@@ -3477,6 +3482,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                 onLikePost={handleLikePost}
                 onOpenChat={handleOpenChat}
                 onConnectMatch={handleConnectCommunityMatch}
+                onOpenMatchedChat={handleOpenMatchedChat}
                 onDeletePost={handleDeletePost}
                 onReportPost={handleReportPost}
                 onBlockUser={handleBlockUser}

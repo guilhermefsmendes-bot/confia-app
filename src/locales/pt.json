@@ -928,7 +928,7 @@
       }
     }
   },
-  "communityChat": "Chat",
+  "communityChat": "Conversar",
   "shareCornerTitle": "Cantinho da Partilha",
   "currentFeeling": "Qual é o teu sentimento atual?",
   "identifyFirstChat": "❤️ Identifica-te primeiro para iniciar o chat",
@@ -2538,5 +2538,55 @@
     "early_learning": "a aprender contigo · {{count}} registos",
     "established": "já conhece os teus ritmos · {{count}} registos",
     "personal_discovery": "cresceu contigo · {{count}} registos"
+  },
+  "experienceMatching": {
+    "community": "Comunidade",
+    "menu": "Alguém como eu",
+    "setupTitle": "Experience Matching",
+    "setupText": "Escolhe até 3 experiências. Quando surgir uma partilha compatível, a CONFIA mostra-te a possibilidade de conversar — sem expor as tuas escolhas à comunidade.",
+    "active": "Matching ativo",
+    "inactive": "Ativar",
+    "maxThree": "Podes escolher até 3 experiências.",
+    "whoTitle": "Quem gostarias de encontrar?",
+    "privacy": "As tuas escolhas de matching são privadas. Só existe conversa quando há interesse e aceitação.",
+    "incomingTitle": "Alguém quer conversar contigo",
+    "incomingText": "Esta pessoa escolheu esta experiência e identificou-se com a tua partilha. A conversa só começa se aceitares.",
+    "accept": "Aceitar conversa",
+    "decline": "Agora não",
+    "matchesTitle": "Possíveis correspondências",
+    "matchesText": "Partilhas recentes ligadas às experiências que escolheste.",
+    "waiting": "Ainda não apareceu uma partilha compatível. Podes continuar a usar a CONFIA normalmente.",
+    "compatible": "Experiência semelhante",
+    "requestSent": "Pedido enviado · à espera de aceitação",
+    "openConversation": "Abrir conversa",
+    "wantToTalk": "Quero conversar",
+    "matchReady": "A vossa conversa está pronta",
+    "openPrivateChat": "Abrir chat privado e anónimo",
+    "postExperienceTitle": "Esta partilha está ligada a alguma experiência?",
+    "postExperienceHint": "Opcional. Ajuda a CONFIA a aproximar pessoas que escolheram passar por algo semelhante.",
+    "noExperience": "Nenhuma / prefiro não indicar",
+    "preference": {
+      "same_now": "A passar pelo mesmo agora",
+      "been_there": "Já passou por isto",
+      "either": "Tanto faz"
+    },
+    "experiences": {
+      "separation_divorce": "Separação / divórcio",
+      "grief": "Luto",
+      "loneliness": "Solidão",
+      "work_difficulties": "Dificuldades no trabalho",
+      "parenting": "Parentalidade",
+      "relationship_problems": "Problemas numa relação",
+      "job_change": "Mudança de emprego",
+      "sleep_difficulties": "Dificuldades de sono",
+      "stress": "Stress",
+      "panic_attacks": "Ataques de pânico",
+      "body_sensations": "Preocupação com sensações físicas",
+      "low_self_esteem": "Baixa autoestima",
+      "caregiving": "Cuidar de alguém",
+      "moving_city": "Mudança de cidade",
+      "family_problems": "Problemas familiares",
+      "rumination": "Pensamentos repetitivos"
+    }
   }
 }

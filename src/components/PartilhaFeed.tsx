@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { auth } from '../firebaseAuth';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -6,12 +6,17 @@ import {
   Smile,
   Send,
   CheckCircle,
-  Tag
+  Tag,
+  HeartHandshake,
+  MessagesSquare
 } from 'lucide-react';
 import { SharePost } from '../types';
 import { useTranslation } from 'react-i18next';
 import CommunityCircles from './CommunityCircles';
 import CommunityPremiumHub from './CommunityPremiumHub';
+import ExperienceMatchingPanel from './ExperienceMatchingPanel';
+import { EXPERIENCE_MATCHING_IDS, type ExperienceMatchingId } from '../data/community/experienceMatching';
+import { subscribeBlockedUserIds, subscribeExperienceMatchProfile, subscribeExperienceMatchRequests, type ExperienceMatchProfile, type ExperienceMatchRequest } from '../data/community/experienceMatchingService';
 
 interface PartilhaFeedProps {
   posts: SharePost[];
@@ -22,6 +27,7 @@ interface PartilhaFeedProps {
   ) => void;
   onOpenChat: (post: SharePost) => void;
   onConnectMatch: (post: SharePost) => Promise<void> | void;
+  onOpenMatchedChat: (post: SharePost, chatId: string) => void;
   onDeletePost: (id: string) => void;
   onReportPost: (post: SharePost, reason: string) => void;
   onBlockUser: (id: string) => void;
@@ -81,6 +87,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   onLikePost,
   onOpenChat,
   onConnectMatch,
+  onOpenMatchedChat,
   onDeletePost,
   onReportPost,
   onBlockUser
@@ -94,15 +101,28 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   const [showCompose, setShowCompose] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
   const [confirmIdentify, setConfirmIdentify] = useState<string | null>(null);
+  const [selectedExperience, setSelectedExperience] = useState<ExperienceMatchingId | "">("");
+  const [communityView, setCommunityView] = useState<"feed" | "matching">("feed");
+  const [matchProfile, setMatchProfile] = useState<ExperienceMatchProfile>({ active: false, activeTags: [], preference: "either" });
+  const [matchRequests, setMatchRequests] = useState<ExperienceMatchRequest[]>([]);
+  const [blockedMatchUsers, setBlockedMatchUsers] = useState<string[]>([]);
+
+  useEffect(() => subscribeExperienceMatchProfile(setMatchProfile), []);
+  useEffect(() => subscribeExperienceMatchRequests(setMatchRequests), []);
+  useEffect(() => subscribeBlockedUserIds(setBlockedMatchUsers), []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!message.trim()) return;
 
-    onAddPost(selectedFeeling, selectedTopic, message.trim());
+    onAddPost(selectedFeeling, selectedTopic, message.trim(), selectedExperience ? {
+      experienceTag: selectedExperience,
+      supportMode: "share"
+    } : undefined);
 
     setMessage('');
+    setSelectedExperience('');
     setShowCompose(false);
     setSuccessMsg(true);
 
@@ -141,6 +161,19 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
         </p>
       </div>
 
+      <div className="grid grid-cols-2 gap-2 px-1">
+        <button type="button" onClick={() => setCommunityView("feed")} className={(communityView === "feed" ? "bg-[#2F2926] text-white" : "bg-white text-[#6F554B] border border-[#E8DDD7]") + " flex min-h-12 items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black"}>
+          <MessagesSquare size={16}/>{t("experienceMatching.community")}
+        </button>
+        <button type="button" onClick={() => setCommunityView("matching")} className={(communityView === "matching" ? "bg-[#A85F45] text-white" : "bg-white text-[#934A38] border border-[#E5CFC5]") + " relative flex min-h-12 items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black"}>
+          <HeartHandshake size={16}/>{t("experienceMatching.menu")}
+          {matchRequests.some(r => r.recipientId === auth.currentUser?.uid && r.status === "pending") && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-white ring-2 ring-[#A85F45]"/>}
+        </button>
+      </div>
+
+      {communityView === "matching" ? (
+        <ExperienceMatchingPanel posts={posts} profile={matchProfile} requests={matchRequests} blockedUserIds={blockedMatchUsers} onOpenMatchedChat={onOpenMatchedChat}/>
+      ) : <>
       {/* Success Notification */}
       <AnimatePresence>
         {successMsg && (
@@ -524,6 +557,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
                     }
                   >
                     <span className="text-sm">💬</span>
+                    <span>{t("communityChat")}</span>
                   </button>
 
                   {/* Hashtag */}
@@ -579,6 +613,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
           })}
         </AnimatePresence>
       </div>
+      </>}
     </div>
   );
 };

@@ -1491,7 +1491,10 @@
     "supportStepText": "You don't have to solve everything right now. Just acknowledge what you're feeling and allow yourself not to carry this moment alone.",
     "supportPrompt": "If there is someone you feel safe with, you could consider sending a simple message. You don't have to explain everything.",
     "supportExample": "You could say: “I'm having a difficult moment. Can you stay with me for a little while?”",
-    "supportContinue": "When you're ready, let's notice how you feel now."
+    "supportContinue": "When you're ready, let's notice how you feel now.",
+    "personalEvidence": "CONFIA has already learned something with you",
+    "personalEvidenceText": "“{{experiment}}” coincided with improvement in {{better}} of {{done}} of your records. If it fits this moment, it may be worth considering.",
+    "personalEvidenceCaution": "This is an association in your own records, not a guarantee or proof of cause."
   },
   "impulseExperience": {
     "step": "Step {{current}} of {{total}}",
@@ -2012,18 +2015,56 @@
     "steadySignal": "The current signal looks steady."
   },
   "experiments": {
-    "title": "Micro-experiments",
-    "subtitle": "Test one of your hypotheses and measure what changes.",
-    "hypothesisPlaceholder": "My hypothesis…",
-    "metricPlaceholder": "What I will observe…",
-    "baseline": "Baseline (1–10)",
-    "target": "Target (1–10)",
-    "start": "Start experiment",
-    "complete": "Record outcome",
-    "completed": "Experiment completed",
-    "metric": "Metric: {{metric}}",
-    "outcomePrompt": "What did you observe?",
-    "cancel": "Cancel"
+    "title": "Discover what works for me",
+    "subtitle": "Small tests that help CONFIA learn with you — without universal recipes or rushed conclusions.",
+    "suggestionEyebrow": "An idea to test",
+    "tryDays": "Try for {{count}} days",
+    "chooseAnother": "I want to test something else",
+    "activeEyebrow": "Testing with you",
+    "progress": "{{done}} of {{total}} days recorded",
+    "todayPrompt": "How did you feel after doing this today?",
+    "notDone": "I did not do it today",
+    "todayRecorded": "Today’s check-in is saved.",
+    "discoveries": "What we are discovering",
+    "effect": {
+      "better": "Better",
+      "same": "Same",
+      "worse": "Worse"
+    },
+    "result": {
+      "better": "It seems to have helped in these records",
+      "worse": "It does not seem to have helped in these records",
+      "mixed": "The result was mixed",
+      "notEnough": "We still need more records"
+    },
+    "evidence": "Done {{done}} times · better {{better}} · worse {{worse}}",
+    "nonCausal": "This describes what happened in your records. It does not prove this change caused the result.",
+    "templates": {
+      "windDown": {
+        "title": "A calmer evening",
+        "hypothesis": "Let’s observe whether a calmer transition before sleep coincides with a different next day.",
+        "action": "For 5 days, take 10 minutes before sleep without tasks or news.",
+        "metric": "How you feel afterwards"
+      },
+      "shortWalk": {
+        "title": "10 minutes to change context",
+        "hypothesis": "Let’s observe whether a short walk coincides with a change in how you feel.",
+        "action": "For 5 days, take a calm 10-minute walk during a transition in your day.",
+        "metric": "How you feel afterwards"
+      },
+      "screenPause": {
+        "title": "A short screen break",
+        "hypothesis": "Let’s observe whether a short screen break coincides with any difference in your state.",
+        "action": "For 5 days, choose one moment for 15 minutes without screens.",
+        "metric": "How you feel afterwards"
+      },
+      "worryNote": {
+        "title": "Put the thought on paper",
+        "hypothesis": "Let’s observe whether briefly writing down what is occupying your mind coincides with a change.",
+        "action": "For 5 days, write for 3 minutes about what is worrying you without trying to solve it.",
+        "metric": "How you feel afterwards"
+      }
+    }
   },
   "personalInsights": {
     "patternDisappearance": "A pattern that appeared before has stopped showing up in your recent records.",

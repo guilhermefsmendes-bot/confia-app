@@ -1,107 +1,24 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, FlaskConical, CheckCircle2, X } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Lightbulb, Sparkles } from "lucide-react";
 import { appendPersonalEvents } from "../data/personal/personalEventStorage";
 import { makePersonalEvent } from "../data/personal/personalEvent";
 import { recordPersonalAnalytics } from "../data/personal/personalAnalytics";
 import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
-
-type Experiment = {
-  id: string;
-  hypothesis: string;
-  metric: string;
-  startedAt: string;
-  completedAt?: string;
-  baseline?: number;
-  target?: number;
-  status: "active" | "complete";
-  outcome?: string;
-};
-const KEY = "confia_personal_experiments_v1";
-const load = (): Experiment[] => {
-  try { const raw = localStorage.getItem(KEY); return raw ? JSON.parse(raw) : []; }
-  catch { return []; }
-};
+import { EXPERIMENT_TEMPLATES, experimentSummary, readExperiments, recommendExperimentTemplate, recordExperimentMeasure, writeExperiments, type ExperimentCheck, type ExperimentTemplate, type PersonalExperiment } from "../data/personal/personalExperiments";
 
 export default function PersonalExperiments({ onBack }: { onBack: () => void }) {
-  const { t } = useTranslation();
-  const [items, setItems] = useState<Experiment[]>(load);
-  const [hypothesis, setHypothesis] = useState("");
-  const [metric, setMetric] = useState("");
-  const [baseline, setBaseline] = useState("");
-  const [target, setTarget] = useState("");
-  const [completingId, setCompletingId] = useState<string | null>(null);
-  const [outcome, setOutcome] = useState("");
-  useEffect(() => localStorage.setItem(KEY, JSON.stringify(items)), [items]);
-
-  const start = () => {
-    if (!hypothesis.trim() || !metric.trim()) return;
-    const id = `experiment_${Date.now().toString(36)}`;
-    const now = new Date().toISOString();
-    const baselineValue = baseline.trim() ? Number(baseline) : undefined;
-    const targetValue = target.trim() ? Number(target) : undefined;
-    const item: Experiment = { id, hypothesis: hypothesis.trim(), metric: metric.trim(), startedAt: now, baseline: Number.isFinite(baselineValue) ? baselineValue : undefined, target: Number.isFinite(targetValue) ? targetValue : undefined, status: "active" };
-    setItems(current => [item, ...current]);
-    recordPersonalAnalytics("experiment_started");
-
-    emitCompanionInteraction(
-      "experiment_started",
-      "experiments"
-    );
-
-    appendPersonalEvents([makePersonalEvent({ id: `pe_experiment_start_${id}`, type: "experiment", timestamp: now, source: "microexperiment", value: true, metadata: { experimentId: id, phase: "start", hypothesis: item.hypothesis, targetMetric: item.metric, baseline: item.baseline, target: item.target } })]);
-    setHypothesis(""); setMetric(""); setBaseline(""); setTarget("");
-  };
-
-  const complete = (item: Experiment) => {
-    const cleanOutcome = outcome.trim();
-    if (!cleanOutcome) return;
-    const now = new Date().toISOString();
-    setItems(current => current.map(value => value.id === item.id ? { ...value, status: "complete", completedAt: now, outcome: cleanOutcome } : value));
-    recordPersonalAnalytics("experiment_completed");
-
-    emitCompanionInteraction(
-      "experiment_completed",
-      "experiments"
-    );
-
-    appendPersonalEvents([makePersonalEvent({ id: `pe_experiment_complete_${item.id}`, type: "experiment", timestamp: now, source: "microexperiment", value: cleanOutcome, metadata: { experimentId: item.id, phase: "complete", targetMetric: item.metric, baseline: item.baseline, target: item.target, outcome: cleanOutcome } })]);
-    setCompletingId(null); setOutcome("");
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FFF9F4] to-[#F1EAE4] p-5 pb-24">
-      <button type="button" onClick={onBack} className="mb-5 flex min-h-11 items-center gap-2 text-[#795B50] font-semibold" aria-label={t("back")}> <ArrowLeft size={17} /> {t("back")}</button>
-      <div className="rounded-[30px] border border-[#E8DDD4] bg-white p-6 shadow-md">
-        <div className="flex items-center gap-3"><FlaskConical className="text-[#934A38]" aria-hidden="true" /><div><h1 className="text-2xl font-black text-[#4A352F]">{t("experiments.title")}</h1><p className="text-sm text-[#806D65]">{t("experiments.subtitle")}</p></div></div>
-        <div className="mt-5 space-y-3">
-          <label className="sr-only" htmlFor="experiment-hypothesis">{t("experiments.hypothesisPlaceholder")}</label>
-          <input id="experiment-hypothesis" value={hypothesis} onChange={e => setHypothesis(e.target.value)} placeholder={t("experiments.hypothesisPlaceholder")} className="w-full rounded-2xl border border-[#E8DDD4] bg-[#FFFDFC] p-3 text-sm outline-none focus:ring-2 focus:ring-[#934A38]/30" />
-          <label className="sr-only" htmlFor="experiment-metric">{t("experiments.metricPlaceholder")}</label>
-          <input id="experiment-metric" value={metric} onChange={e => setMetric(e.target.value)} placeholder={t("experiments.metricPlaceholder")} className="w-full rounded-2xl border border-[#E8DDD4] bg-[#FFFDFC] p-3 text-sm outline-none focus:ring-2 focus:ring-[#934A38]/30" />
-          <div className="grid grid-cols-2 gap-3">
-            <div><label className="sr-only" htmlFor="experiment-baseline">{t("experiments.baseline")}</label><input id="experiment-baseline" inputMode="decimal" type="number" min="1" max="10" step="0.1" value={baseline} onChange={e => setBaseline(e.target.value)} placeholder={t("experiments.baseline")} className="w-full rounded-2xl border border-[#E8DDD4] bg-[#FFFDFC] p-3 text-sm outline-none focus:ring-2 focus:ring-[#934A38]/30" /></div>
-            <div><label className="sr-only" htmlFor="experiment-target">{t("experiments.target")}</label><input id="experiment-target" inputMode="decimal" type="number" min="1" max="10" step="0.1" value={target} onChange={e => setTarget(e.target.value)} placeholder={t("experiments.target")} className="w-full rounded-2xl border border-[#E8DDD4] bg-[#FFFDFC] p-3 text-sm outline-none focus:ring-2 focus:ring-[#934A38]/30" /></div>
-          </div>
-          <button type="button" onClick={start} disabled={!hypothesis.trim() || !metric.trim()} className="min-h-11 w-full rounded-2xl bg-[#587563] p-3 font-bold text-white disabled:opacity-40">{t("experiments.start")}</button>
-        </div>
-      </div>
-      {items.map(item => (
-        <article key={item.id} className="mt-4 rounded-[24px] border border-[#E8DDD4] bg-white p-5 shadow-sm">
-          <p className="text-sm font-black text-[#4A352F]">{item.hypothesis}</p>
-          <p className="mt-2 text-xs text-[#806D65]">{t("experiments.metric", { metric: item.metric })}</p>
-          {(item.baseline !== undefined || item.target !== undefined) && <p className="mt-2 text-[11px] font-semibold text-[#967E74]">{item.baseline !== undefined ? `${t("experiments.baseline")}: ${item.baseline}` : ""}{item.baseline !== undefined && item.target !== undefined ? " · " : ""}{item.target !== undefined ? `${t("experiments.target")}: ${item.target}` : ""}</p>}
-          {item.status === "active" && completingId !== item.id && <button type="button" onClick={() => setCompletingId(item.id)} className="mt-4 flex min-h-11 items-center gap-2 rounded-xl bg-[#F4E7DF] px-3 py-2 text-xs font-bold text-[#6D5A53]"><CheckCircle2 size={15} /> {t("experiments.complete")}</button>}
-          {completingId === item.id && (
-            <div className="mt-4 rounded-2xl bg-[#FFF9F5] p-3">
-              <div className="flex items-center justify-between"><label htmlFor={`outcome-${item.id}`} className="text-xs font-bold text-[#6D5A53]">{t("experiments.outcomePrompt")}</label><button type="button" onClick={() => { setCompletingId(null); setOutcome(""); }} className="p-2" aria-label={t("experiments.cancel")}><X size={15} /></button></div>
-              <textarea id={`outcome-${item.id}`} value={outcome} onChange={e => setOutcome(e.target.value)} rows={3} className="mt-2 w-full rounded-xl border border-[#E8DDD4] bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-[#934A38]/30" />
-              <button type="button" onClick={() => complete(item)} disabled={!outcome.trim()} className="mt-2 min-h-11 w-full rounded-xl bg-[#587563] px-3 py-2 text-xs font-bold text-white disabled:opacity-40">{t("experiments.complete")}</button>
-            </div>
-          )}
-          {item.status === "complete" && <p className="mt-3 text-xs font-bold text-[#587563]">{t("experiments.completed")}{item.outcome ? ` — ${item.outcome}` : ""}</p>}
-        </article>
-      ))}
-    </div>
-  );
+ const {t}=useTranslation(); const [items,setItems]=useState<PersonalExperiment[]>(readExperiments); const [selected,setSelected]=useState<ExperimentTemplate|null>(null); const recommended=useMemo(recommendExperimentTemplate,[]);
+ const active=items.find(x=>x.status==="active"); const completed=items.filter(x=>x.status==="complete").slice(0,4);
+ const save=(next:PersonalExperiment[])=>{setItems(next);writeExperiments(next)};
+ const start=(template:ExperimentTemplate)=>{ const now=new Date().toISOString(); const item:PersonalExperiment={id:`experiment_${Date.now().toString(36)}`,templateId:template.id,hypothesis:t(template.hypothesisKey),metric:t(template.metricKey),startedAt:now,status:"active",durationDays:template.days,checks:[]}; save([item,...items]); recordPersonalAnalytics("experiment_started"); emitCompanionInteraction("experiment_started","experiments"); appendPersonalEvents([makePersonalEvent({id:`pe_experiment_start_${item.id}`,type:"experiment",timestamp:now,source:"microexperiment",value:true,metadata:{experimentId:item.id,phase:"start",hypothesis:item.hypothesis,targetMetric:item.metric}})]); setSelected(null); };
+ const check=(effect:ExperimentCheck["effect"],done=true)=>{if(!active)return;const date=new Date().toISOString().slice(0,10);const nextCheck={date,done,effect}; const checks=[...(active.checks||[]).filter(x=>x.date!==date),nextCheck]; const shouldComplete=checks.length>=(active.durationDays||5); const next={...active,checks,status:shouldComplete?"complete":"active",completedAt:shouldComplete?new Date().toISOString():undefined} as PersonalExperiment; save(items.map(x=>x.id===active.id?next:x));recordExperimentMeasure(active,nextCheck);if(shouldComplete){recordPersonalAnalytics("experiment_completed");emitCompanionInteraction("experiment_completed","experiments");}};
+ const today=active?.checks?.find(x=>x.date===new Date().toISOString().slice(0,10));
+ return <div className="min-h-screen bg-gradient-to-b from-[#FFF9F4] to-[#F1EAE4] p-5 pb-24"><button onClick={onBack} className="mb-5 flex min-h-11 items-center gap-2 font-semibold text-[#795B50]"><ArrowLeft size={17}/>{t("back")}</button>
+ <header className="rounded-[30px] bg-[#2F2926] p-6 text-white shadow-lg"><span className="text-[9px] font-black uppercase tracking-[.18em] text-[#E9B9A5]">CONFIA LAB</span><h1 className="mt-2 text-2xl font-black">{t("experiments.title")}</h1><p className="mt-2 text-xs leading-5 text-white/70">{t("experiments.subtitle")}</p></header>
+ {!active&&<><section className="mt-4 rounded-[26px] border border-[#E4D7CF] bg-white p-5"><div className="flex gap-3"><div className="rounded-2xl bg-[#FFF1E9] p-3"><Lightbulb size={19} className="text-[#A85F45]"/></div><div><p className="text-[9px] font-black uppercase tracking-wider text-[#A85F45]">{t("experiments.suggestionEyebrow")}</p><h2 className="mt-1 text-base font-black text-[#352D29]">{t(recommended.titleKey)}</h2></div></div><p className="mt-3 text-xs leading-5 text-[#75645D]">{t(recommended.hypothesisKey)}</p><div className="mt-3 rounded-2xl bg-[#F8F5F2] p-3 text-xs font-semibold text-[#5E514B]">{t(recommended.actionKey)}</div><button onClick={()=>start(recommended)} className="mt-4 min-h-12 w-full rounded-2xl bg-[#587563] px-4 text-xs font-black text-white">{t("experiments.tryDays",{count:recommended.days})}</button></section>
+ <button onClick={()=>setSelected(selected?null:recommended)} className="mt-3 w-full text-center text-[10px] font-bold text-[#806D65]">{t("experiments.chooseAnother")}</button>{selected&&<div className="mt-3 space-y-2">{EXPERIMENT_TEMPLATES.filter(x=>x.id!==recommended.id).map(x=><button key={x.id} onClick={()=>start(x)} className="flex w-full items-center justify-between rounded-2xl border border-[#E8DDD4] bg-white p-4 text-left"><span><b className="block text-xs text-[#4A352F]">{t(x.titleKey)}</b><span className="mt-1 block text-[10px] text-[#806D65]">{t(x.actionKey)}</span></span><ChevronRight size={16}/></button>)}</div>}</>}
+ {active&&<section className="mt-4 rounded-[28px] border border-[#D9E3DC] bg-white p-5"><span className="text-[9px] font-black uppercase tracking-wider text-[#587563]">{t("experiments.activeEyebrow")}</span><h2 className="mt-2 text-lg font-black text-[#352D29]">{active.templateId?t(`experiments.templates.${active.templateId==='wind_down'?'windDown':active.templateId==='short_walk'?'shortWalk':active.templateId==='screen_pause'?'screenPause':'worryNote'}.title`):active.hypothesis}</h2><p className="mt-2 text-xs leading-5 text-[#75645D]">{active.hypothesis}</p><div className="mt-4 flex gap-1">{Array.from({length:active.durationDays||5}).map((_,i)=><div key={i} className={(i<(active.checks?.length||0)?"bg-[#587563]":"bg-[#EAE4E0]")+" h-2 flex-1 rounded-full"}/>)}</div><p className="mt-2 text-[9px] text-[#94827A]">{t("experiments.progress",{done:active.checks?.length||0,total:active.durationDays||5})}</p>{!today?<div className="mt-5"><p className="text-xs font-black text-[#4A352F]">{t("experiments.todayPrompt")}</p><div className="mt-3 grid grid-cols-3 gap-2">{(["better","same","worse"] as const).map(v=><button key={v} onClick={()=>check(v,true)} className="rounded-2xl border border-[#E8DDD4] bg-[#FFFDFC] p-3 text-[10px] font-bold text-[#6D5A53]">{t(`experiments.effect.${v}`)}</button>)}</div><button onClick={()=>check(null,false)} className="mt-2 w-full py-2 text-[10px] font-bold text-[#9A8880]">{t("experiments.notDone")}</button></div>:<div className="mt-5 flex items-center gap-2 rounded-2xl bg-[#EDF4EF] p-4 text-xs font-bold text-[#587563]"><Check size={16}/>{t("experiments.todayRecorded")}</div>}</section>}
+ {completed.length>0&&<section className="mt-5"><h2 className="text-sm font-black text-[#4A352F]">{t("experiments.discoveries")}</h2>{completed.map(item=>{const s=experimentSummary(item);return <article key={item.id} className="mt-2 rounded-2xl bg-white p-4"><div className="flex gap-2"><Sparkles size={16} className="text-[#A85F45]"/><div><b className="text-xs text-[#4A352F]">{s.enough?t(`experiments.result.${s.direction}`):t("experiments.result.notEnough")}</b><p className="mt-1 text-[10px] leading-4 text-[#806D65]">{t("experiments.evidence",{done:s.done,better:s.better,worse:s.worse})}</p><p className="mt-2 text-[9px] leading-4 text-[#9A8880]">{t("experiments.nonCausal")}</p></div></div></article>})}</section>}
+ </div>;
 }

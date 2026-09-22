@@ -38,6 +38,7 @@ import {
 } from "../data/reactive/reactiveHistoryStorage";
 import { emitCompanionBrainEvent } from "../data/reactive/companionBrain";
 import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
+import { getExperimentLearningForSOS } from "../data/personal/personalExperiments";
 
 interface ImpulsoSOSProps {
   onAddXp: (amount: number) => void;
@@ -155,6 +156,8 @@ const daysWithoutUse =
 
   const rememberedNeed =
     rememberedImpulse?.need;
+
+  const [experimentLearning] = useState(() => getExperimentLearningForSOS());
 
 
   // Estados do Cronómetro (180 segundos = 3 minutos)
@@ -562,6 +565,7 @@ const getPsychoeducationMessage = () => {
       rememberedNeed
         ? getNeedLabel(rememberedNeed)
         : undefined;
+    const experimentTemplateKey = experimentLearning?.item.templateId === "wind_down" ? "windDown" : experimentLearning?.item.templateId === "short_walk" ? "shortWalk" : experimentLearning?.item.templateId === "screen_pause" ? "screenPause" : experimentLearning?.item.templateId === "worry_note" ? "worryNote" : null;
 
 
     const beginImpulse = () => {
@@ -631,6 +635,12 @@ const getPsychoeducationMessage = () => {
             <p className="text-sm font-black text-[#2F2926]">
               {t("impulsePremium.question")}
             </p>
+
+            {experimentLearning && experimentTemplateKey && (
+              <div className="mb-4 rounded-[22px] border border-[#D6E2D9] bg-[#F3F8F4] p-4">
+                <div className="flex items-start gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] bg-white"><Lightbulb size={16} className="text-[#587563]" /></div><div><p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#587563]">{t("impulseAdaptive.personalEvidence")}</p><p className="mt-1 text-[11px] font-bold leading-5 text-[#405148]">{t("impulseAdaptive.personalEvidenceText", { experiment: t(`experiments.templates.${experimentTemplateKey}.title`), better: experimentLearning.summary.better, done: experimentLearning.summary.done })}</p><p className="mt-1 text-[9px] leading-4 text-[#7B8C82]">{t("impulseAdaptive.personalEvidenceCaution")}</p></div></div>
+              </div>
+            )}
 
             {rememberedImpulse &&
               rememberedNeedLabel && (

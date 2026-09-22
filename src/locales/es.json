@@ -1491,7 +1491,10 @@
     "supportStepText": "No necesitas resolverlo todo ahora. Reconoce simplemente lo que estás sintiendo y permítete no cargar con este momento solo.",
     "supportPrompt": "Si hay alguien con quien te sientas seguro, puedes considerar enviarle un mensaje sencillo. No necesitas explicarlo todo.",
     "supportExample": "Puedes decir: “Estoy pasando por un momento difícil. ¿Puedes estar conmigo un rato?”",
-    "supportContinue": "Cuando estés preparado, vamos a ver cómo estás ahora."
+    "supportContinue": "Cuando estés preparado, vamos a ver cómo estás ahora.",
+    "personalEvidence": "CONFIA ya ha aprendido algo contigo",
+    "personalEvidenceText": "“{{experiment}}” coincidió con una mejora en {{better}} de {{done}} registros tuyos. Si encaja ahora, puede ser una opción a considerar.",
+    "personalEvidenceCaution": "Es una asociación en tus propios registros, no una garantía ni una prueba de causalidad."
   },
   "impulseExperience": {
     "step": "Paso {{current}} de {{total}}",
@@ -2012,18 +2015,56 @@
     "steadySignal": "La señal actual parece estable."
   },
   "experiments": {
-    "title": "Microexperimentos",
-    "subtitle": "Prueba una hipótesis tuya y mide qué cambia.",
-    "hypothesisPlaceholder": "Mi hipótesis…",
-    "metricPlaceholder": "Qué voy a observar…",
-    "baseline": "Base (1–10)",
-    "target": "Objetivo (1–10)",
-    "start": "Empezar experimento",
-    "complete": "Registrar resultado",
-    "completed": "Experimento completado",
-    "metric": "Métrica: {{metric}}",
-    "outcomePrompt": "¿Qué observaste?",
-    "cancel": "Cancelar"
+    "title": "Descubrir qué funciona conmigo",
+    "subtitle": "Pequeñas pruebas para que CONFIA aprenda contigo, sin recetas universales ni conclusiones rápidas.",
+    "suggestionEyebrow": "Una idea para probar",
+    "tryDays": "Probar durante {{count}} días",
+    "chooseAnother": "Quiero probar otra cosa",
+    "activeEyebrow": "Probando contigo",
+    "progress": "{{done}} de {{total}} días registrados",
+    "todayPrompt": "¿Cómo te sentiste después de hacerlo hoy?",
+    "notDone": "Hoy no lo hice",
+    "todayRecorded": "El registro de hoy está guardado.",
+    "discoveries": "Lo que estamos descubriendo",
+    "effect": {
+      "better": "Mejor",
+      "same": "Igual",
+      "worse": "Peor"
+    },
+    "result": {
+      "better": "Parece haber ayudado en estos registros",
+      "worse": "No parece haber ayudado en estos registros",
+      "mixed": "El resultado fue mixto",
+      "notEnough": "Aún necesitamos más registros"
+    },
+    "evidence": "Lo hiciste {{done}} veces · mejor {{better}} · peor {{worse}}",
+    "nonCausal": "Esto describe lo ocurrido en tus registros. No demuestra que este cambio haya causado el resultado.",
+    "templates": {
+      "windDown": {
+        "title": "Una noche más tranquila",
+        "hypothesis": "Observemos si una transición más tranquila antes de dormir coincide con un día siguiente diferente.",
+        "action": "Durante 5 días, reserva 10 minutos antes de dormir sin tareas ni noticias.",
+        "metric": "Cómo te sientes después"
+      },
+      "shortWalk": {
+        "title": "10 minutos para cambiar de contexto",
+        "hypothesis": "Observemos si un paseo corto coincide con un cambio en cómo te sientes.",
+        "action": "Durante 5 días, da un paseo tranquilo de unos 10 minutos en una transición de tu día.",
+        "metric": "Cómo te sientes después"
+      },
+      "screenPause": {
+        "title": "Una pequeña pausa de pantalla",
+        "hypothesis": "Observemos si una pausa corta de pantalla coincide con alguna diferencia en tu estado.",
+        "action": "Durante 5 días, elige un momento y pasa 15 minutos sin pantallas.",
+        "metric": "Cómo te sientes después"
+      },
+      "worryNote": {
+        "title": "Sacar el pensamiento de la cabeza",
+        "hypothesis": "Observemos si escribir brevemente lo que ocupa tu mente coincide con algún cambio.",
+        "action": "Durante 5 días, escribe durante 3 minutos lo que te preocupa, sin intentar resolverlo.",
+        "metric": "Cómo te sientes después"
+      }
+    }
   },
   "personalInsights": {
     "patternDisappearance": "Un patrón que aparecía antes ha dejado de aparecer en tus registros recientes.",

@@ -1477,7 +1477,10 @@
     "supportStepText": "Não precisas de resolver tudo agora. Reconhece apenas o que estás a sentir e permite-te não carregar este momento sozinho.",
     "supportPrompt": "Se houver alguém seguro para ti, podes considerar enviar uma mensagem simples. Não precisas de explicar tudo.",
     "supportExample": "Podes dizer: “Estou a ter um momento difícil. Podes ficar comigo um pouco?”",
-    "supportContinue": "Quando estiveres pronto, vamos perceber como estás agora."
+    "supportContinue": "Quando estiveres pronto, vamos perceber como estás agora.",
+    "personalEvidence": "A CONFIA já aprendeu algo contigo",
+    "personalEvidenceText": "“{{experiment}}” coincidiu com melhoria em {{better}} de {{done}} registos teus. Se fizer sentido agora, pode ser uma opção a considerar.",
+    "personalEvidenceCaution": "É uma associação dos teus próprios registos, não uma garantia nem uma relação de causa."
   },
   "impulseExperience": {
     "step": "Passo {{current}} de {{total}}",
@@ -1998,18 +2001,56 @@
     "steadySignal": "O sinal atual parece estável."
   },
   "experiments": {
-    "title": "Microexperimentos",
-    "subtitle": "Testa uma hipótese tua e mede o que muda, sem procurar certezas rápidas.",
-    "hypothesisPlaceholder": "A minha hipótese…",
-    "metricPlaceholder": "O que vou observar…",
-    "baseline": "Base (1–10)",
-    "target": "Alvo (1–10)",
-    "start": "Começar experimento",
-    "complete": "Registar resultado",
-    "completed": "Experimento concluído",
-    "metric": "Métrica: {{metric}}",
-    "outcomePrompt": "O que observaste?",
-    "cancel": "Cancelar"
+    "title": "Descobrir o que funciona comigo",
+    "subtitle": "Pequenos testes para a CONFIA aprender contigo — sem receitas universais nem conclusões rápidas.",
+    "suggestionEyebrow": "Uma ideia para testarmos",
+    "tryDays": "Experimentar durante {{count}} dias",
+    "chooseAnother": "Quero testar outra coisa",
+    "activeEyebrow": "A testar contigo",
+    "progress": "{{done}} de {{total}} dias registados",
+    "todayPrompt": "Como te sentiste depois de fazer isto hoje?",
+    "notDone": "Hoje não fiz",
+    "todayRecorded": "O registo de hoje ficou guardado.",
+    "discoveries": "O que estamos a descobrir",
+    "effect": {
+      "better": "Melhor",
+      "same": "Igual",
+      "worse": "Pior"
+    },
+    "result": {
+      "better": "Parece ter ajudado nestes registos",
+      "worse": "Não parece ter ajudado nestes registos",
+      "mixed": "O resultado foi misto",
+      "notEnough": "Ainda precisamos de mais registos"
+    },
+    "evidence": "Fizeste {{done}} vezes · melhor em {{better}} · pior em {{worse}}",
+    "nonCausal": "Isto descreve o que aconteceu nos teus registos. Não prova que esta mudança tenha causado o resultado.",
+    "templates": {
+      "windDown": {
+        "title": "Uma noite mais calma",
+        "hypothesis": "Vamos observar se uma transição mais calma antes de dormir coincide com um dia seguinte diferente.",
+        "action": "Durante 5 dias, reserva 10 minutos antes de dormir sem tarefas nem notícias.",
+        "metric": "Como te sentes depois"
+      },
+      "shortWalk": {
+        "title": "10 minutos para mudar de contexto",
+        "hypothesis": "Vamos observar se uma caminhada curta coincide com uma mudança na forma como te sentes.",
+        "action": "Durante 5 dias, faz uma caminhada tranquila de cerca de 10 minutos num momento de transição do teu dia.",
+        "metric": "Como te sentes depois"
+      },
+      "screenPause": {
+        "title": "Uma pequena pausa do ecrã",
+        "hypothesis": "Vamos observar se uma pausa curta do ecrã coincide com alguma diferença no teu estado.",
+        "action": "Durante 5 dias, escolhe um momento e fica 15 minutos sem ecrãs.",
+        "metric": "Como te sentes depois"
+      },
+      "worryNote": {
+        "title": "Tirar o pensamento da cabeça",
+        "hypothesis": "Vamos observar se escrever brevemente aquilo que está a ocupar a tua cabeça coincide com alguma mudança.",
+        "action": "Durante 5 dias, escreve durante 3 minutos o que te está a preocupar, sem tentar resolver.",
+        "metric": "Como te sentes depois"
+      }
+    }
   },
   "personalInsights": {
     "patternDisappearance": "Um padrão que aparecia antes deixou de surgir nos registos recentes.",

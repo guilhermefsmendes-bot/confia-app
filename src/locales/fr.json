@@ -1491,7 +1491,10 @@
     "supportStepText": "Tu n'as pas besoin de tout résoudre maintenant. Reconnais simplement ce que tu ressens et autorise-toi à ne pas porter ce moment seul.",
     "supportPrompt": "S'il y a une personne avec qui tu te sens en sécurité, tu peux envisager de lui envoyer un message simple. Tu n'as pas besoin de tout expliquer.",
     "supportExample": "Tu peux dire : « Je traverse un moment difficile. Tu peux rester un peu avec moi ? »",
-    "supportContinue": "Quand tu seras prêt, regardons comment tu te sens maintenant."
+    "supportContinue": "Quand tu seras prêt, regardons comment tu te sens maintenant.",
+    "personalEvidence": "CONFIA a déjà appris quelque chose avec toi",
+    "personalEvidenceText": "« {{experiment}} » a coïncidé avec une amélioration dans {{better}} de tes {{done}} observations. Si cela correspond à ce moment, cela peut être une option.",
+    "personalEvidenceCaution": "Il s’agit d’une association dans tes propres observations, pas d’une garantie ni d’une preuve de causalité."
   },
   "impulseExperience": {
     "step": "Étape {{current}} sur {{total}}",
@@ -2012,18 +2015,56 @@
     "steadySignal": "Le signal actuel semble stable."
   },
   "experiments": {
-    "title": "Micro-expériences",
-    "subtitle": "Teste une de tes hypothèses et mesure ce qui change.",
-    "hypothesisPlaceholder": "Mon hypothèse…",
-    "metricPlaceholder": "Ce que je vais observer…",
-    "baseline": "Base (1–10)",
-    "target": "Cible (1–10)",
-    "start": "Commencer l’expérience",
-    "complete": "Enregistrer le résultat",
-    "completed": "Expérience terminée",
-    "metric": "Mesure : {{metric}}",
-    "outcomePrompt": "Qu’as-tu observé ?",
-    "cancel": "Annuler"
+    "title": "Découvrir ce qui fonctionne pour moi",
+    "subtitle": "De petits tests pour que CONFIA apprenne avec toi, sans recette universelle ni conclusion hâtive.",
+    "suggestionEyebrow": "Une idée à tester",
+    "tryDays": "Essayer pendant {{count}} jours",
+    "chooseAnother": "Je veux tester autre chose",
+    "activeEyebrow": "En test avec toi",
+    "progress": "{{done}} jours sur {{total}} enregistrés",
+    "todayPrompt": "Comment t’es-tu senti après l’avoir fait aujourd’hui ?",
+    "notDone": "Je ne l’ai pas fait aujourd’hui",
+    "todayRecorded": "Le suivi d’aujourd’hui est enregistré.",
+    "discoveries": "Ce que nous découvrons",
+    "effect": {
+      "better": "Mieux",
+      "same": "Pareil",
+      "worse": "Moins bien"
+    },
+    "result": {
+      "better": "Cela semble avoir aidé dans ces observations",
+      "worse": "Cela ne semble pas avoir aidé dans ces observations",
+      "mixed": "Le résultat est mitigé",
+      "notEnough": "Il nous faut encore des observations"
+    },
+    "evidence": "Fait {{done}} fois · mieux {{better}} · moins bien {{worse}}",
+    "nonCausal": "Cela décrit ce qui s’est passé dans tes observations. Cela ne prouve pas que ce changement ait causé le résultat.",
+    "templates": {
+      "windDown": {
+        "title": "Une soirée plus calme",
+        "hypothesis": "Observons si une transition plus calme avant le sommeil coïncide avec un lendemain différent.",
+        "action": "Pendant 5 jours, prends 10 minutes avant de dormir sans tâches ni actualités.",
+        "metric": "Comment tu te sens ensuite"
+      },
+      "shortWalk": {
+        "title": "10 minutes pour changer de contexte",
+        "hypothesis": "Observons si une courte marche coïncide avec un changement dans ton ressenti.",
+        "action": "Pendant 5 jours, fais une marche tranquille d’environ 10 minutes lors d’une transition de ta journée.",
+        "metric": "Comment tu te sens ensuite"
+      },
+      "screenPause": {
+        "title": "Une courte pause écran",
+        "hypothesis": "Observons si une courte pause d’écran coïncide avec une différence dans ton état.",
+        "action": "Pendant 5 jours, choisis un moment et reste 15 minutes sans écran.",
+        "metric": "Comment tu te sens ensuite"
+      },
+      "worryNote": {
+        "title": "Mettre la pensée sur papier",
+        "hypothesis": "Observons si écrire brièvement ce qui occupe ton esprit coïncide avec un changement.",
+        "action": "Pendant 5 jours, écris pendant 3 minutes ce qui te préoccupe sans chercher à le résoudre.",
+        "metric": "Comment tu te sens ensuite"
+      }
+    }
   },
   "personalInsights": {
     "patternDisappearance": "Un schéma qui apparaissait auparavant ne ressort plus dans tes relevés récents.",

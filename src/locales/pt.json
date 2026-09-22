@@ -2645,5 +2645,16 @@
     "leaveGroup": "Sair",
     "joinGroup": "Entrar no grupo"
   },
-  "companionBrain.personalLearningChanged": "Algo que parecia ajudar-te está a mostrar um padrão diferente recentemente. Estou a reaprender contigo."
+  "companionBrain.personalLearningChanged": "Algo que parecia ajudar-te está a mostrar um padrão diferente recentemente. Estou a reaprender contigo.",
+  "communitySafety": {
+    "menu": "Segurança da conversa",
+    "title": "Segurança e controlo",
+    "participant": "Participante {{count}}",
+    "endAndBlock": "Terminar e bloquear",
+    "block": "Bloquear para mim",
+    "report": "Denunciar",
+    "requestRemoval": "Pedir remoção do grupo",
+    "leave": "Sair desta conversa",
+    "privateNote": "Bloquear oculta imediatamente as mensagens dessa pessoa para ti. Denúncias e pedidos de remoção são privados e ficam disponíveis para moderação."
+  }
 }

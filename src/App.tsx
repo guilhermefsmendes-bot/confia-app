@@ -74,11 +74,6 @@ const CommunityChat = lazy(() => import("./components/CommunityChat").then(m => 
 const TriageModal = lazy(() => import("./components/TriageModal").then(m => ({ default: m.TriageModal })));
 import { AbracoTimer } from "./components/AbracoTimer";
 const BlindVent = lazy(() => import("./components/BlindVent"));
-import MicroHabitCard from "./components/MicroHabits/MicroHabitCard";
-import InvisibleAchievements from "./components/InvisibleAchievements/InvisibleAchievements";
-import CatastrophicThoughtTranslator from "./components/CatastrophicThoughtTranslator";
-import PredictiveMoodCurve from "./components/PredictiveMoodCurve";
-import AdvancedWellbeingTools from "./components/AdvancedWellbeingTools";
 
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
@@ -2410,197 +2405,19 @@ className="flex items-center justify-center w-24 h-24 relative"
 </LazySection>
 
 
-{/* O teu espaço — navegação secundária premium */}
+{/* O teu espaço — superfície deliberadamente simples.
+    Os motores avançados continuam disponíveis contextualmente;
+    não competem todos pela atenção diária. */}
 {homeScreen === "home" && (
-  <section
-    className="relative overflow-hidden rounded-[30px] border border-[#E8DDD7]/70 bg-gradient-to-br from-white via-[#FFFDFC] to-[#FFF6F1] shadow-[0_12px_32px_rgba(92,64,52,0.055)]"
-    aria-label={t("homeSpace.title")}
-  >
-    {/* Cabeçalho */}
-    <div className="relative px-5 pb-4 pt-5">
-      <div
-        aria-hidden="true"
-        className="absolute left-5 top-0 h-px w-10 bg-[#B85F48]/45"
-      />
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38]">
-        {t("homeSpace.title")}
-      </p>
-
-      <p className="mt-1 text-[11px] font-semibold text-[var(--cf-muted)]">
-        {t("homeSpace.subtitle")}
-      </p>
-    </div>
-
-    {/* Amigo — protagonista */}
-    <div className="px-3">
-      <button
-        type="button"
-        onClick={() => {
-  emitCompanionInteraction(
-    "companion_contact",
-    "companion",
-    { from: "home", to: "companion" }
-  );
-  setHomeScreen("companion");
-}}
-        className="relative w-full overflow-hidden flex items-center justify-between gap-4 rounded-[24px] border border-[#B85F48]/20 bg-gradient-to-br from-white via-white to-[#FFF3EC] px-4 py-4 text-left shadow-[0_8px_22px_rgba(92,64,52,0.055)] transition-colors duration-200 active:bg-[#FFF8F4]"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute -right-7 -top-8 h-24 w-24 rounded-full bg-[#F4D8C9]/20"
-        />
-
-        <div className="relative flex min-w-0 items-center gap-3.5">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-[#B85F48]/15 bg-gradient-to-br from-[#FFF8F4] to-[#F3E2D8] shadow-[0_5px_14px_rgba(92,64,52,0.04)]">
-            <Sparkles
-              size={19}
-              strokeWidth={1.8}
-              className="text-[#934A38]"
-            />
-          </div>
-
-          <div className="min-w-0">
-            <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#934A38]">
-              CONFIA
-            </p>
-
-            <p className="mt-0.5 text-sm font-black text-[#2F2926]">
-              {t("companion")}
-            </p>
-          </div>
-        </div>
-
-        <span
-          aria-hidden="true"
-          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#B85F48]/15 bg-white/90 text-base font-light text-[#934A38] shadow-sm"
-        >
-          →
-        </span>
-      </button>
-    </div>
-
-    {/* Áreas do espaço */}
-    <div className="mt-3 grid grid-cols-3 gap-2 px-3">
-      {/* Hábitos */}
-      <button
-        type="button"
-        onClick={() => {
-          // CONFIA_COMPANION_OPEN_PATTERNS
-          emitCompanionBrainEvent(
-            "context_changed",
-            {
-              from: "home",
-              to: "patterns",
-            }
-          );
-
-          setPatternsPage("menu");
-          setHomeScreen("patterns");
-        }}
-        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
-      >
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#B85F48]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
-          <ChartNoAxesCombined
-            size={16}
-            strokeWidth={1.8}
-            className="text-[#934A38]"
-          />
-        </div>
-
-        <span className="text-[10px] font-bold text-[#6D5A53]">
-          {t("patternsPremium.habits")}
-        </span>
-      </button>
-
-      {/* Inventário */}
-      <button
-        type="button"
-        onClick={() => {
-  emitCompanionInteraction(
-    "area_opened",
-    "inventory",
-    { from: "home", to: "inventory" }
-  );
-  setHomeScreen("inventory");
-}}
-        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
-      >
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#B85F48]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
-          <Backpack
-            size={16}
-            strokeWidth={1.8}
-            className="text-[#934A38]"
-          />
-        </div>
-
-        <span className="text-[10px] font-bold text-[#6D5A53]">
-          {t("inventory")}
-        </span>
-      </button>
-
-      {/* Loja */}
-      <button
-        type="button"
-        onClick={() => setHomeScreen("shop")}
-        className="group flex min-h-[88px] flex-col items-center justify-center gap-2.5 rounded-[20px] border border-[#E8DDD7]/60 bg-white/65 px-2 shadow-[0_5px_16px_rgba(92,64,52,0.035)] transition-colors duration-200 active:bg-[#FFF8F4]"
-      >
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[#B85F48]/10 bg-gradient-to-br from-[#FFF7F2] to-[#F8EAE2]">
-          <Store
-            size={16}
-            strokeWidth={1.8}
-            className="text-[#934A38]"
-          />
-        </div>
-
-        <span className="text-[10px] font-bold text-[#6D5A53]">
-          {t("shop")}
-        </span>
-      </button>
-    </div>
-
-    {/* Inteligência pessoal — descoberta e experimentação */}
-    <div className="mt-3 grid grid-cols-2 gap-2 px-3">
-      <button type="button" onClick={() => {
-  emitCompanionInteraction(
-    "reflection_opened",
-    "map",
-    { from: "home", to: "map" }
-  );
-  setHomeScreen("map");
-}} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#B85F48]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white"><Compass size={17} className="text-[#934A38]" /></div>
-        <div><span className="block text-[10px] font-black uppercase tracking-wide text-[#934A38]">CONFIA</span><span className="text-xs font-bold text-[#6D5A53]">{t("personalMap.title")}</span></div>
-      </button>
-      <button type="button" onClick={() => {
-  emitCompanionInteraction(
-    "area_opened",
-    "experiments",
-    { from: "home", to: "experiments" }
-  );
-  setHomeScreen("experiments");
-}} className="flex min-h-[78px] items-center gap-3 rounded-[20px] border border-[#B85F48]/15 bg-[#FFF8F4] px-3 text-left shadow-sm">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white"><Sparkles size={17} className="text-[#934A38]" /></div>
-        <div><span className="block text-[10px] font-black uppercase tracking-wide text-[#934A38]">CONFIA</span><span className="text-xs font-bold text-[#6D5A53]">{t("experiments.title")}</span></div>
-      </button>
-    </div>
-
-    {/* Definições — utilidade secundária */}
-    <div className="mx-4 mt-3 border-t border-[#E8DDD7]/55">
-      <button
-        type="button"
-        onClick={() => setHomeScreen("settings")}
-        className="flex w-full items-center justify-end gap-1.5 px-1 py-3.5 text-[var(--cf-muted)] transition-colors duration-200 active:text-[#934A38]"
-      >
-        <Settings
-          size={13}
-          strokeWidth={1.8}
-        />
-
-        <span className="text-[9px] font-bold">
-          {t("settings")}
-        </span>
-      </button>
-    </div>
+  <section className="relative overflow-hidden rounded-[30px] border border-[#E8DDD7]/70 bg-gradient-to-br from-white via-[#FFFDFC] to-[#FFF6F1] p-4 shadow-[0_12px_32px_rgba(92,64,52,0.055)]" aria-label={t("homeSpace.title")}>
+    <div className="px-1 pb-3"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38]">{t("homeSpace.title")}</p><p className="mt-1 text-[11px] font-semibold text-[var(--cf-muted)]">{t("homeSpace.subtitle")}</p></div>
+    <button type="button" onClick={() => { emitCompanionInteraction("companion_contact","companion",{from:"home",to:"companion"}); setHomeScreen("companion"); }} className="w-full rounded-[24px] border border-[#B85F48]/20 bg-white px-4 py-4 text-left shadow-sm">
+      <div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF3EC]"><Sparkles size={18} className="text-[#934A38]"/></div><div className="min-w-0 flex-1"><span className="block text-[9px] font-black uppercase tracking-[.16em] text-[#934A38]">CONFIA</span><span className="text-sm font-black text-[#2F2926]">{t("companion")}</span></div><span className="text-[#934A38]">→</span></div>
+    </button>
+    <button type="button" onClick={() => { emitCompanionInteraction("reflection_opened","map",{from:"home",to:"map"}); setHomeScreen("map"); }} className="mt-2 w-full rounded-[22px] border border-[#E8DDD7] bg-[#FFF9F5] px-4 py-3 text-left">
+      <div className="flex items-center gap-3"><Compass size={17} className="text-[#934A38]"/><div className="flex-1"><span className="block text-xs font-black text-[#4A352F]">{t("personalMap.title")}</span><span className="mt-0.5 block text-[10px] text-[#806D65]">O que a CONFIA está a aprender contigo</span></div><span className="text-[#934A38]">→</span></div>
+    </button>
+    <button type="button" onClick={() => setHomeScreen("settings")} className="mt-2 flex w-full items-center justify-end gap-1.5 px-2 py-2 text-[9px] font-bold text-[var(--cf-muted)]"><Settings size={12}/>{t("settings")}</button>
   </section>
 )}
 
@@ -3456,13 +3273,6 @@ className="flex items-center justify-center w-24 h-24 relative"
         {t("blindVent.open")}
       </button>
     </div>
-    <MicroHabitCard onCompleted={handleMicroHabitCompleted} />
-    <InvisibleAchievements checkInDays={new Set(ratings.map((rating) => rating.date)).size} completedObjectives={objectives.filter((objective) => objective.completed).length} />
-    <div className="mt-4" />
-    <CatastrophicThoughtTranslator />
-    <div className="mt-4" />
-    <PredictiveMoodCurve ratings={ratings} />
-    <AdvancedWellbeingTools ratings={ratings} objectives={objectives} />
     <div className="h-3" />
     <ImpulsoSOS onAddXp={addXp} />
   </motion.div>

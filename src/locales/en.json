@@ -2651,5 +2651,16 @@
     "leaveGroup": "Leave",
     "joinGroup": "Join group"
   },
-  "companionBrain.personalLearningChanged": "Something that seemed to help you is showing a different pattern recently. I am relearning with you."
+  "companionBrain.personalLearningChanged": "Something that seemed to help you is showing a different pattern recently. I am relearning with you.",
+  "communitySafety": {
+    "menu": "Conversation safety",
+    "title": "Safety and control",
+    "participant": "Participant {{count}}",
+    "endAndBlock": "End and block",
+    "block": "Block for me",
+    "report": "Report",
+    "requestRemoval": "Request removal from group",
+    "leave": "Leave this conversation",
+    "privateNote": "Blocking immediately hides that person’s messages from you. Reports and removal requests are private and are made available for moderation."
+  }
 }

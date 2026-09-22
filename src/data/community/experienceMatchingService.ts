@@ -2,6 +2,7 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   limit,
   onSnapshot,
   query,
@@ -283,4 +284,36 @@ export async function leaveExperienceMatchCircle(circleId: string) {
       updatedAt: serverTimestamp()
     });
   });
+}
+
+export async function blockCircleParticipant(circleId: string, blockedUserId: string) {
+  const user = await ensureUser();
+  if (!blockedUserId || blockedUserId === user.uid) throw new Error("invalid-block");
+  const circleRef = doc(db, "experienceMatchCircles", circleId);
+  const circleSnap = await getDoc(circleRef);
+  if (!circleSnap.exists()) throw new Error("circle-not-found");
+  const participants: string[] = Array.isArray(circleSnap.data().participants) ? circleSnap.data().participants : [];
+  if (!participants.includes(user.uid) || !participants.includes(blockedUserId)) throw new Error("not-circle-participant");
+  await setDoc(doc(db, "blocks", `${user.uid}_${blockedUserId}`), { blockerId: user.uid, blockedUserId, circleId, createdAt: serverTimestamp() });
+  // Em conversa de duas pessoas, bloquear termina imediatamente o contacto.
+  if (participants.length === 2) await leaveExperienceMatchCircle(circleId);
+}
+
+export async function reportCircleParticipant(circleId: string, reportedUserId: string, reason: string) {
+  const user = await ensureUser();
+  const cleanReason = reason.trim().slice(0, 500);
+  if (!cleanReason || !reportedUserId || reportedUserId === user.uid) throw new Error("invalid-report");
+  const circleSnap = await getDoc(doc(db, "experienceMatchCircles", circleId));
+  const participants: string[] = circleSnap.exists() && Array.isArray(circleSnap.data().participants) ? circleSnap.data().participants : [];
+  if (!participants.includes(user.uid) || !participants.includes(reportedUserId)) throw new Error("not-circle-participant");
+  await setDoc(doc(db, "reports", `circle_${circleId}_${user.uid}_${reportedUserId}`), { reporterId:user.uid, reportedUserId, postId:"circle:"+circleId, circleId, reason:cleanReason, createdAt:serverTimestamp() });
+}
+
+export async function requestCircleParticipantRemoval(circleId: string, targetUserId: string) {
+  const user = await ensureUser();
+  if (!targetUserId || targetUserId === user.uid) throw new Error("invalid-removal-request");
+  const circleSnap = await getDoc(doc(db, "experienceMatchCircles", circleId));
+  const participants: string[] = circleSnap.exists() && Array.isArray(circleSnap.data().participants) ? circleSnap.data().participants : [];
+  if (participants.length < 3 || !participants.includes(user.uid) || !participants.includes(targetUserId)) throw new Error("invalid-removal-request");
+  await setDoc(doc(db, "reports", `removal_${circleId}_${user.uid}_${targetUserId}`), { reporterId:user.uid, reportedUserId:targetUserId, postId:"circle:"+circleId, circleId, reason:"Pedido de remoção da conversa de grupo", kind:"circle_removal_request", createdAt:serverTimestamp() });
 }

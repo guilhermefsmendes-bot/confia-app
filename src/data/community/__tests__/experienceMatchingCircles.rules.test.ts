@@ -70,4 +70,13 @@ describe("Experience Matching circles", () => {  it("enforces the eight member c
     }));
     await assertFails(getDoc(doc(db("u9"), message)));
   });
+  it("does not let one member expel another directly", async () => {
+    const circle = "experienceMatchCircles/circle_safety_direct";
+    await assertSucceeds(setDoc(doc(db("u1"), circle), { experienceTag:"stress", participants:["u1"], capacity:8, status:"open", createdAt:now, updatedAt:now }));
+    await assertSucceeds(updateDoc(doc(db("u2"), circle), { participants:["u1","u2"], status:"open", updatedAt:now }));
+    await assertSucceeds(updateDoc(doc(db("u3"), circle), { participants:["u1","u2","u3"], status:"open", updatedAt:now }));
+    await assertFails(updateDoc(doc(db("u1"), circle), { participants:["u1","u3"], status:"open", updatedAt:now }));
+  });
+
+
 });

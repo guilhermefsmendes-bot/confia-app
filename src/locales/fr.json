@@ -2651,5 +2651,16 @@
     "leaveGroup": "Quitter",
     "joinGroup": "Rejoindre"
   },
-  "companionBrain.personalLearningChanged": "Quelque chose qui semblait t’aider montre récemment un schéma différent. Je réapprends avec toi."
+  "companionBrain.personalLearningChanged": "Quelque chose qui semblait t’aider montre récemment un schéma différent. Je réapprends avec toi.",
+  "communitySafety": {
+    "menu": "Sécurité de la conversation",
+    "title": "Sécurité et contrôle",
+    "participant": "Participant {{count}}",
+    "endAndBlock": "Terminer et bloquer",
+    "block": "Bloquer pour moi",
+    "report": "Signaler",
+    "requestRemoval": "Demander le retrait du groupe",
+    "leave": "Quitter cette conversation",
+    "privateNote": "Le blocage masque immédiatement les messages de cette personne pour toi. Les signalements et demandes de retrait sont privés et transmis à la modération."
+  }
 }

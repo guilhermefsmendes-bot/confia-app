@@ -14,13 +14,14 @@ import {
   where,
   limit
 } from "firebase/firestore";
-import { X, Send } from "lucide-react";
+import { X, Send, Shield, MoreVertical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { db } from "../firebaseFirestore";
 import { auth } from "../firebaseAuth";
 import { SharePost } from "../types";
 
 import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
+import { blockCircleParticipant, reportCircleParticipant, requestCircleParticipantRemoval, leaveExperienceMatchCircle, subscribeBlockedUserIds } from "../data/community/experienceMatchingService";
 
 interface CommunityChatProps {
   post: SharePost;
@@ -49,8 +50,14 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
   const [sending, setSending] = useState(false);
   const isExperienceGroup = Boolean(initialChatId?.startsWith("circle_"));
   const [groupParticipants, setGroupParticipants] = useState<string[]>([]);
+  const [safetyOpen, setSafetyOpen] = useState(false);
+  const [safetyTarget, setSafetyTarget] = useState<string | null>(null);
+  const [safetyBusy, setSafetyBusy] = useState(false);
+  const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
 
   const currentUser = auth.currentUser;
+
+  useEffect(() => subscribeBlockedUserIds(setBlockedUserIds), []);
 
   /*
    * Descobre com quem a conversa deve acontecer.
@@ -410,6 +417,19 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
     }
   };
 
+  const safetyAction = async (action: "block" | "report" | "remove" | "leave") => {
+    if (!isExperienceGroup || !chatId || !currentUser || safetyBusy) return;
+    setSafetyBusy(true);
+    try {
+      if (action === "leave") { await leaveExperienceMatchCircle(chatId); onClose(); return; }
+      if (!safetyTarget) return;
+      if (action === "block") { await blockCircleParticipant(chatId, safetyTarget); if (groupParticipants.length === 2) onClose(); }
+      if (action === "report") await reportCircleParticipant(chatId, safetyTarget, "Comportamento inadequado na conversa de grupo");
+      if (action === "remove") await requestCircleParticipantRemoval(chatId, safetyTarget);
+      setSafetyOpen(false); setSafetyTarget(null);
+    } catch (error) { console.error("Erro na ação de segurança da comunidade:", error); } finally { setSafetyBusy(false); }
+  };
+
   return (
     <div className="fixed inset-0 z-[100] bg-black/30 flex items-end sm:items-center justify-center p-0 sm:p-5">
       <div className="w-full sm:max-w-md h-[85vh] sm:h-[650px] bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl flex flex-col overflow-hidden">
@@ -426,6 +446,8 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
             </p>
           </div>
 
+          <div className="flex items-center gap-2">
+          {isExperienceGroup && <button type="button" onClick={() => setSafetyOpen(v => !v)} className="w-9 h-9 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-500" aria-label={t("communitySafety.menu")}><MoreVertical size={17}/></button>}
           <button
             type="button"
             onClick={onClose}
@@ -433,8 +455,15 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
             aria-label={t("close")}
           >
             <X size={18} />
-          </button>
+          </button></div>
         </div>
+        {isExperienceGroup && safetyOpen && <div className="border-b border-slate-100 bg-white px-4 py-3">
+          <div className="flex items-center gap-2 text-[10px] font-black text-[#6D5A53]"><Shield size={14}/>{t("communitySafety.title")}</div>
+          <div className="mt-2 flex gap-2 overflow-x-auto">{groupParticipants.filter(uid => uid !== currentUser?.uid).map((uid,index)=><button key={uid} type="button" onClick={()=>setSafetyTarget(uid)} className={(safetyTarget===uid?"bg-[#3F2C27] text-white":"bg-[#F7F5F2] text-[#6D5A53]")+" shrink-0 rounded-full px-3 py-2 text-[9px] font-bold"}>{t("communitySafety.participant",{count:index+1})}</button>)}</div>
+          {safetyTarget && <div className="mt-3 grid grid-cols-2 gap-2"><button disabled={safetyBusy} onClick={()=>safetyAction("block")} className="rounded-xl bg-[#FFF1EC] p-2 text-[9px] font-black text-[#A6533D]">{groupParticipants.length===2?t("communitySafety.endAndBlock"):t("communitySafety.block")}</button><button disabled={safetyBusy} onClick={()=>safetyAction("report")} className="rounded-xl bg-[#FFF1EC] p-2 text-[9px] font-black text-[#A6533D]">{t("communitySafety.report")}</button>{groupParticipants.length>=3&&<button disabled={safetyBusy} onClick={()=>safetyAction("remove")} className="col-span-2 rounded-xl bg-[#F7F5F2] p-2 text-[9px] font-black text-[#6D5A53]">{t("communitySafety.requestRemoval")}</button>}</div>}
+          <button disabled={safetyBusy} onClick={()=>safetyAction("leave")} className="mt-3 w-full py-2 text-[9px] font-bold text-slate-500">{t("communitySafety.leave")}</button>
+          <p className="mt-1 text-[9px] leading-4 text-slate-400">{t("communitySafety.privateNote")}</p>
+        </div>}
 
         {/* Contexto da conversa: mantém visível a publicação que originou o apoio. */}
         <div className="border-b border-slate-100 bg-white px-5 py-3">
@@ -479,7 +508,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
             </div>
 
           ) : (
-            messages.map((item) => {
+            messages.filter(item => item.senderId === currentUser?.uid || !blockedUserIds.includes(item.senderId)).map((item) => {
               const mine =
                 item.senderId === currentUser?.uid;
 

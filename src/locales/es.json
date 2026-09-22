@@ -2651,5 +2651,16 @@
     "leaveGroup": "Salir",
     "joinGroup": "Entrar al grupo"
   },
-  "companionBrain.personalLearningChanged": "Algo que parecía ayudarte está mostrando un patrón diferente recientemente. Estoy reaprendiendo contigo."
+  "companionBrain.personalLearningChanged": "Algo que parecía ayudarte está mostrando un patrón diferente recientemente. Estoy reaprendiendo contigo.",
+  "communitySafety": {
+    "menu": "Seguridad de la conversación",
+    "title": "Seguridad y control",
+    "participant": "Participante {{count}}",
+    "endAndBlock": "Terminar y bloquear",
+    "block": "Bloquear para mí",
+    "report": "Denunciar",
+    "requestRemoval": "Pedir expulsión del grupo",
+    "leave": "Salir de esta conversación",
+    "privateNote": "Bloquear oculta inmediatamente los mensajes de esa persona para ti. Las denuncias y solicitudes de expulsión son privadas y quedan disponibles para moderación."
+  }
 }

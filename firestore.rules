@@ -573,7 +573,10 @@ service cloud.firestore {
         && request.resource.data.reportedUserId is string
         && request.resource.data.reason is string
         && request.resource.data.reason.size() > 0
-        && request.resource.data.reason.size() <= 500;
+        && request.resource.data.reason.size() <= 500
+        && (!request.resource.data.keys().hasAny(['circleId']) || request.resource.data.circleId is string)
+        && (!request.resource.data.keys().hasAny(['kind']) || request.resource.data.kind is string)
+        && (!request.resource.data.keys().hasAny(['circleId']) || (request.auth.uid in get(/databases/$(database)/documents/experienceMatchCircles/$(request.resource.data.circleId)).data.participants && request.resource.data.reportedUserId in get(/databases/$(database)/documents/experienceMatchCircles/$(request.resource.data.circleId)).data.participants));
 
       allow list, get, delete: if request.auth != null
         && resource.data.reporterId == request.auth.uid;
@@ -584,7 +587,8 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.blockerId == request.auth.uid
         && request.resource.data.blockedUserId is string
-        && request.resource.data.blockedUserId != request.auth.uid;
+        && request.resource.data.blockedUserId != request.auth.uid
+        && (!request.resource.data.keys().hasAny(['circleId']) || (request.auth.uid in get(/databases/$(database)/documents/experienceMatchCircles/$(request.resource.data.circleId)).data.participants && request.resource.data.blockedUserId in get(/databases/$(database)/documents/experienceMatchCircles/$(request.resource.data.circleId)).data.participants));
 
       allow list, get, delete: if request.auth != null
         && resource.data.blockerId == request.auth.uid;

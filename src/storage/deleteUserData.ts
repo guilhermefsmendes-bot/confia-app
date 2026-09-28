@@ -1,5 +1,8 @@
+import { clearNativeNotices } from "../notifications/service";
+import { pauseHabitSyncForDeletion, resumeHabitSyncAfterDeletionError } from "../data/habits/sync";
 import {
   collection,
+  limit,
   getDocs,
   query,
   where,
@@ -11,6 +14,12 @@ import { db } from "../firebaseFirestore";
 import { auth } from "../firebaseAuth";
 
 export async function deleteAllUserData(): Promise<void> {
+  await clearNativeNotices();
+  await pauseHabitSyncForDeletion();
+  try { await deleteUserDataAndHabits(); }
+  catch (error) { resumeHabitSyncAfterDeletionError(); throw error; }
+}
+async function deleteUserDataAndHabits(): Promise<void> {
   const user = auth.currentUser;
 
   if (!user) {
@@ -19,6 +28,13 @@ export async function deleteAllUserData(): Promise<void> {
 
   const uid = user.uid;
 
+  for (const name of ["devices", "preferences"]) {
+    while (true) {
+      const page = await getDocs(query(collection(db,"users",uid,name),limit(100)));
+      if (page.empty) break;
+      const batch=writeBatch(db);page.docs.forEach(d=>batch.delete(d.ref));await batch.commit();
+    }
+  }
   // 1. Procurar todas as publicações do utilizador
   const postsQuery = query(
     collection(db, "posts"),
@@ -145,6 +161,15 @@ export async function deleteAllUserData(): Promise<void> {
   for (let start = 0; start < operations.length; start += 400) {
     const batch = writeBatch(db);
     operations.slice(start, start + 400).forEach(operation => operation(batch));
+    await batch.commit();
+  }
+
+  // Private habit records are paginated; parent/user deletion does not cascade.
+  while (true) {
+    const entries = await getDocs(query(collection(db, "users", uid, "habitRecords"), limit(200)));
+    if (entries.empty) break;
+    const batch = writeBatch(db);
+    entries.docs.forEach(entry => batch.delete(entry.ref));
     await batch.commit();
   }
 

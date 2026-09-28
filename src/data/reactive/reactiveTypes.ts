@@ -1,5 +1,6 @@
 import { ReactiveIntent } from "./reactiveIntent";
 import type { ReactiveRecentMemory } from "./reactiveRecentMemory";
+import type { PersonalSignalSnapshot } from "../personal/personalSignalEngine";
 
 /**
  * CONFIA — MOTOR REATIVO
@@ -180,6 +181,9 @@ export interface ReactiveContext {
   hasPreviousData: boolean;
 
   daysSinceLastRecord?: number;
+
+  /** Shared habit/lifestyle intelligence calculated locally and reused. */
+  personalSignals?: PersonalSignalSnapshot;
 };
 
 
@@ -278,4 +282,7 @@ export interface ReactiveResult {
    * 1 = muito claro
    */
   confidence: number;
+
+  /** Same signal snapshot used by Home/Companion; no second analysis pass. */
+  personalSignals?: PersonalSignalSnapshot;
 }

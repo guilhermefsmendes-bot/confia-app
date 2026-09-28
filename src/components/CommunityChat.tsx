@@ -27,6 +27,7 @@ interface CommunityChatProps {
   post: SharePost;
   onClose: () => void;
   initialChatId?: string | null;
+  initialMessageId?: string;
 }
 
 interface ChatMessage {
@@ -39,7 +40,8 @@ interface ChatMessage {
 export const CommunityChat: React.FC<CommunityChatProps> = ({
   post,
   onClose,
-  initialChatId = null
+  initialChatId = null,
+  initialMessageId
 }) => {
   const { t } = useTranslation();
 
@@ -56,6 +58,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
   const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
 
   const currentUser = auth.currentUser;
+  useEffect(()=>{if(initialMessageId)document.getElementById("community-message-"+initialMessageId)?.scrollIntoView({block:"center",behavior:"instant"});},[messages,initialMessageId]);
 
   useEffect(() => subscribeBlockedUserIds(setBlockedUserIds), []);
 
@@ -271,6 +274,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
       "messages"
     );
 
+    let cancelled=false;
     // Mantemos a conversa limitada às 100 mensagens mais recentes.
     // Isto evita leituras ilimitadas à medida que a conversa cresce.
     const messagesQuery = query(
@@ -291,14 +295,19 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
             .reverse();
 
         setMessages(loadedMessages);
+        if(initialMessageId&&!loadedMessages.some(m=>m.id===initialMessageId)){
+          void getDoc(doc(messagesRef,initialMessageId)).then(found=>{
+            if(!cancelled&&found.exists())setMessages(current=>current.some(m=>m.id===found.id)?current:[{id:found.id,...found.data()} as ChatMessage,...current]);
+          }).catch(()=>{});
+        }
       },
       (error) => {
         console.error("Erro ao carregar mensagens:", error);
       }
     );
 
-    return () => unsubscribe();
-  }, [chatId, isExperienceGroup]);
+    return () => {cancelled=true;unsubscribe();};
+  }, [chatId, isExperienceGroup, initialMessageId]);
 
   const handleSend = async () => {
     const text = message.trim();
@@ -515,6 +524,8 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
               return (
                 <div
                   key={item.id}
+                  id={"community-message-"+item.id}
+                  aria-current={item.id===initialMessageId?"true":undefined}
                   className={`flex ${
                     mine
                       ? "justify-end"

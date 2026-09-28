@@ -154,7 +154,7 @@
   "home": "Accueil",
   "hug": "Câlin",
   "objectives": "Objectifs",
-  "impulse": "Impulsion",
+  "impulse": "Habitudes",
   "progress": "Progrès",
   "tagline": "Ton refuge de sérénité",
   "avatarName": "Paix",
@@ -1023,7 +1023,7 @@
   "companionMessageObjectives": "Tu as réussi à accomplir une bonne partie de tes objectifs. Cela montre de la constance et surtout l'envie de prendre soin de toi.",
   "companionSuggestionObjectives": "Tu n'as pas besoin de tout faire. Continue à valoriser chaque petite action que tu réussis à accomplir.",
   "companionGratitudeObjectives": "Reconnais aujourd'hui une petite victoire personnelle. Le progrès se trouve aussi dans les choses simples.",
-  "companionMessageImpulse": "Tes données montrent que tu as réussi à réduire l'intensité lors de certains moments difficiles grâce à Impulsion.",
+  "companionMessageImpulse": "Tes données montrent que tu as réussi à réduire l'intensité lors de certains moments difficiles grâce à soutien immédiat.",
   "companionSuggestionImpulse": "Lorsqu'un nouveau moment de forte intensité survient, rappelle-toi que tu disposes déjà d'outils qui peuvent t'aider à le traverser.",
   "companionGratitudeImpulse": "Remercie-toi d'avoir pris le temps de t'occuper de toi lorsque tu en avais besoin.",
   "companionMessagePositive": "Tes données récentes montrent des signes positifs. Une évolution mérite d'être reconnue.",
@@ -1263,7 +1263,7 @@
         "small20": "Il y a un petit pas en avant. Plutôt que d'essayer d'en faire beaucoup ensuite, tu peux choisir une seule chose simple que tu aimerais maintenir.",
         "small21": "Ce moment mérite d'être retenu : il y a eu un petit changement positif. Il n'a pas besoin de signifier davantage pour compter.",
         "clear04": "Il y a un progrès clair en ce moment. Il y a aussi quelque chose d'important dans ton parcours récent : tu as continué à être présent dans tes suivis. Les deux méritent d'être reconnus.",
-        "clear05": "Le progrès est clair ici. Récemment, il y a aussi eu au moins un moment où une stratégie d'Impulsion a aidé à réduire l'intensité. Il peut être utile de garder cette expérience comme point de repère.",
+        "clear05": "Le progrès est clair ici. Récemment, il y a aussi eu au moins un moment où une stratégie d'soutien immédiat a aidé à réduire l'intensité. Il peut être utile de garder cette expérience comme point de repère.",
         "clear06": "Il y a un progrès clair dans ce suivi. Dans tes check-ins récents, le besoin de calme est également apparu plus d'une fois. Il peut être utile d'observer comment ce besoin se présente maintenant.",
         "clear07": "Ce suivi montre un progrès clair. En même temps, le besoin de soutien est apparu dans tes check-ins récents. Ces deux informations peuvent coexister et méritent toutes les deux ton attention.",
         "clear08": "Il y a un progrès clair ici. Dans tes derniers check-ins, tu as aussi mentionné plus d'une fois le besoin de prendre soin de ton esprit. Cela peut être un bon moment pour observer ce qui semble différent maintenant.",
@@ -1281,13 +1281,13 @@
         "clear20": "Le pas en avant est clair. Plutôt que d'essayer d'en faire trop à cause de cela, il peut suffire de choisir une chose simple à poursuivre.",
         "clear21": "Ce moment mérite d'être marqué : tes suivis montrent un progrès clair. C'est déjà une information importante en soi.",
         "setback03": "Il y a un passage plus difficile en ce moment, mais tes suivis récents montrent aussi que tu as continué à être présent. Un moment plus difficile n'efface pas cette régularité.",
-        "setback04": "Ce moment est plus difficile. Malgré cela, il existe une expérience récente où une stratégie d'Impulsion a aidé à réduire l'intensité. Cela ne résout pas automatiquement ce que tu ressens maintenant, mais c'est un repère qui existe déjà dans ton parcours.",
+        "setback04": "Ce moment est plus difficile. Malgré cela, il existe une expérience récente où une stratégie d'soutien immédiat a aidé à réduire l'intensité. Cela ne résout pas automatiquement ce que tu ressens maintenant, mais c'est un repère qui existe déjà dans ton parcours.",
         "setback05": "Il y a un passage plus difficile maintenant et le besoin de calme est apparu plus d'une fois dans tes check-ins récents. Cela peut être un moment pour laisser de la place à ce besoin sans exiger que tout s'améliore immédiatement.",
         "setback06": "Ce moment semble plus difficile et, récemment, le besoin de soutien est également apparu dans tes check-ins. Tu n'as pas besoin d'ignorer cette difficulté simplement parce qu'il y avait eu du progrès auparavant.",
         "setback07": "Il y a un passage plus difficile en ce moment. Dans tes check-ins récents, tu as aussi mentionné le besoin de prendre soin de ton esprit. Il peut être utile d'observer ce qui semble différent maintenant sans tirer de conclusion sur l'ensemble de tes progrès.",
         "setback08": "Ce suivi montre un passage plus difficile, mais tes données récentes indiquent encore une direction plus positive de l'humeur. Les deux peuvent coexister : un moment plus difficile ne signifie pas nécessairement que les progrès précédents ont disparu.",
         "setback09": "Il y a un passage plus difficile maintenant, même après avoir indiqué plusieurs fois récemment que tu te sentais bien. Cela ne rend pas les suivis précédents moins réels et ce moment n'a pas besoin de ressembler aux précédents.",
-        "setback10": "Ce moment est plus difficile, mais il existe déjà au moins une stratégie récente d'Impulsion qui a aidé à réduire l'intensité. Si cela semble pertinent maintenant, tu peux la considérer comme une option, pas comme une obligation.",
+        "setback10": "Ce moment est plus difficile, mais il existe déjà au moins une stratégie récente d'soutien immédiat qui a aidé à réduire l'intensité. Si cela semble pertinent maintenant, tu peux la considérer comme une option, pas comme une obligation.",
         "setback11": "Un moment plus difficile après une période de progrès ne signifie pas que tu es revenu au point de départ. Ce suivi n'est qu'une partie du parcours.",
         "setback12": "Cette difficulté peut peser davantage précisément parce que tu avais remarqué des progrès auparavant. Malgré cela, un moment difficile n'annule pas ce qui a déjà changé.",
         "setback13": "Il est compréhensible que ce changement attire ton attention. Tu n'as pas besoin de minimiser ce que tu ressens maintenant simplement parce qu'il y avait eu du progrès auparavant.",
@@ -1300,12 +1300,12 @@
         "setback20": "Il peut être utile d'observer ce qui est différent aujourd'hui : le contexte, l'énergie, les pensées ou les événements. Sans chercher tout de suite une explication définitive.",
         "setback21": "La prochaine étape n'a pas besoin de compenser cette difficulté. Elle peut simplement être quelque chose de petit qui rende ce moment un peu plus facile à traverser.",
         "difficult03": "Tes suivis récents montrent une période exigeante, mais ils montrent aussi que tu as continué à être présent. Cette régularité n'efface pas la difficulté, mais elle fait réellement partie de cette période.",
-        "difficult04": "Cette période a été exigeante. Malgré cela, il existe une expérience récente où une stratégie d'Impulsion a aidé à réduire l'intensité. Cela ne signifie pas qu'elle fonctionnera toujours, mais c'est une ressource qui t'a déjà été utile.",
+        "difficult04": "Cette période a été exigeante. Malgré cela, il existe une expérience récente où une stratégie d'soutien immédiat a aidé à réduire l'intensité. Cela ne signifie pas qu'elle fonctionnera toujours, mais c'est une ressource qui t'a déjà été utile.",
         "difficult05": "Cette période semble beaucoup te demander et le besoin de calme est apparu à plusieurs reprises dans tes check-ins récents. Il peut être utile de laisser de la place à ce besoin sans attendre un changement immédiat.",
         "difficult06": "Tes suivis indiquent une période exigeante et le besoin de soutien est également apparu plus d'une fois. Tu n'as pas besoin de traverser ce moment comme si ce besoin n'existait pas.",
         "difficult07": "Cette période a été exigeante et, dans tes check-ins récents, le besoin de prendre soin de ton esprit est revenu plusieurs fois. Il peut être utile d'observer ce qui occupe le plus ton espace mental sans devoir déjà trouver une explication.",
         "difficult08": "Même pendant une période exigeante, tu as continué à faire tes suivis et à observer ce qui se passe pour toi. Cela ne rend pas cette période plus facile, mais montre que tu continues à prêter attention à ton parcours.",
-        "difficult09": "Cette période a été difficile, mais il existe au moins une stratégie récente d'Impulsion qui a aidé à réduire l'intensité. Si cela semble pertinent maintenant, tu peux la considérer comme une prochaine étape possible, pas comme une obligation.",
+        "difficult09": "Cette période a été difficile, mais il existe au moins une stratégie récente d'soutien immédiat qui a aidé à réduire l'intensité. Si cela semble pertinent maintenant, tu peux la considérer comme une prochaine étape possible, pas comme une obligation.",
         "difficult10": "Tes suivis actuels montrent une période plus exigeante, même si récemment tu avais aussi indiqué plusieurs fois que tu te sentais bien. Ces moments font toujours partie de ton parcours, même si ton expérience est différente maintenant.",
         "difficult11": "Tes suivis montrent que cette période a été exigeante. Tu n'as pas besoin d'avoir une réponse à tout maintenant ; reconnaître le poids de ce moment est déjà important.",
         "difficult12": "Si ces derniers jours t'ont demandé davantage, il est logique que cela apparaisse dans tes suivis. Tu n'as pas besoin de minimiser ce que tu ressens.",
@@ -1319,7 +1319,7 @@
         "difficult20": "Traverser une période exigeante ne signifie pas que tu as échoué à quelque chose. Pour l'instant, observer ce qui se passe peut être plus important que d'exiger un progrès immédiat.",
         "difficult21": "Tu n'as pas besoin de trouver une grande solution pour cette période. Une prochaine étape petite, concrète et réaliste peut suffire pour ce moment.",
         "stable02": "Tes suivis sont restés relativement stables et tu as continué à être présent ces derniers jours. Cette régularité est une information importante, même lorsqu'il n'y a pas de grands changements.",
-        "stable03": "Tes suivis sont relativement stables et il existe une expérience récente où une stratégie d'Impulsion a aidé à réduire l'intensité. Cela ne signifie pas qu'elle a causé cette stabilité, mais elle reste une ressource qui t'a déjà été utile.",
+        "stable03": "Tes suivis sont relativement stables et il existe une expérience récente où une stratégie d'soutien immédiat a aidé à réduire l'intensité. Cela ne signifie pas qu'elle a causé cette stabilité, mais elle reste une ressource qui t'a déjà été utile.",
         "stable04": "Même avec des suivis relativement stables, le besoin de calme est apparu à plusieurs reprises dans tes check-ins récents. Il peut être utile d'observer ce besoin et la place qu'il a occupée ces derniers jours.",
         "stable05": "Tes suivis sont restés relativement stables, mais le besoin de soutien est apparu plus d'une fois. Cette répétition peut être utile pour mieux comprendre ce dont tu as eu besoin récemment.",
         "stable06": "Malgré la relative stabilité de tes suivis, le besoin de prendre soin de ton esprit est revenu plusieurs fois. Il peut être utile d'observer ce qui a occupé davantage ton espace mental sans devoir déjà arriver à une conclusion.",
@@ -1339,7 +1339,7 @@
         "stable20": "Tes suivis récents montrent peu de variation. Cela peut être un bon moment pour observer ce qui est resté constant sans décider tout de suite si c'est positif ou négatif.",
         "stable21": "Il n'est pas nécessaire de changer quelque chose simplement parce que cela est resté stable. Tu peux continuer à suivre ton propre rythme et observer avec le temps si quelque chose demande de l'attention ou un changement.",
         "first02": "Un premier signe de progrès apparaît ici et tu as maintenu une présence régulière ces derniers jours. Il est encore tôt pour tirer des conclusions plus larges, mais cette combinaison mérite d'être reconnue.",
-        "first03": "C'est un premier signe de progrès et il existe aussi une expérience récente où une stratégie d'Impulsion a aidé à réduire l'intensité. L'un ne prouve pas l'autre, mais cette stratégie reste une ressource qui t'a déjà été utile.",
+        "first03": "C'est un premier signe de progrès et il existe aussi une expérience récente où une stratégie d'soutien immédiat a aidé à réduire l'intensité. L'un ne prouve pas l'autre, mais cette stratégie reste une ressource qui t'a déjà été utile.",
         "first04": "Un premier signe de progrès apparaît alors que le besoin de calme est revenu plusieurs fois dans tes check-ins. Il peut être utile d'observer ces deux éléments ensemble sans supposer que l'un explique l'autre.",
         "first05": "Un premier signe de progrès apparaît et, en même temps, le besoin de soutien s'est manifesté plus d'une fois. Le progrès n'annule pas ce besoin ; les deux peuvent faire partie de ce que tu vis actuellement.",
         "first06": "Ce premier signe de progrès apparaît pendant une période où tu as mentionné à plusieurs reprises le besoin de prendre soin de ton esprit. Il peut être utile d'observer ce qui semble différent et ce qui demande encore de l'espace, sans devoir déjà arriver à une conclusion.",
@@ -1368,7 +1368,7 @@
         "streak01": "Tu as maintenu une longue série d'enregistrements. Plus que le nombre de jours, cela montre que tu as créé un espace pour t'observer.",
         "streak02": "Ta régularité est déjà devenue une habitude. Continue à l'utiliser comme un outil sans ressentir l'obligation de maintenir une série parfaite.",
         "return03": "C'est agréable de te retrouver ici. Avant cette pause, tu avais maintenu une présence assez régulière dans tes suivis. Tu n'as rien à rattraper — nous pouvons simplement continuer à partir de là où tu en es aujourd'hui.",
-        "return04": "Bon retour. Il existe une expérience récente où une stratégie d'Impulsion t'a aidé à réduire l'intensité. Elle n'explique pas ton retour et n'a pas besoin de fonctionner à chaque fois, mais elle reste une ressource qui t'a déjà été utile.",
+        "return04": "Bon retour. Il existe une expérience récente où une stratégie d'soutien immédiat t'a aidé à réduire l'intensité. Elle n'explique pas ton retour et n'a pas besoin de fonctionner à chaque fois, mais elle reste une ressource qui t'a déjà été utile.",
         "return05": "C'est agréable de te retrouver ici. Dans tes suivis précédents, le besoin de calme était apparu plusieurs fois. Nous n'avons pas besoin de supposer qu'il est toujours le même ; nous pouvons simplement observer comment tu vas maintenant.",
         "return06": "Bon retour. Avant cette pause, le besoin de soutien était apparu plus d'une fois dans tes check-ins. Cela ne signifie pas que c'est ce dont tu as besoin aujourd'hui, mais c'est un contexte que nous pouvons garder à l'esprit sans en faire une obligation.",
         "return07": "C'est agréable de te retrouver ici. Dans tes suivis précédents, prendre soin de ton esprit était apparu plusieurs fois comme un besoin. Il peut être utile d'observer si cela a encore du sens pour toi aujourd'hui ou si quelque chose a changé depuis.",
@@ -1387,7 +1387,7 @@
         "return20": "Bon retour. Avant de penser à la suite, il peut être utile de simplement observer comment tu vas en ce moment.",
         "return21": "Nous pouvons continuer à partir d'ici sans transformer la pause en dette. Chaque nouveau suivi peut progressivement reconstruire le contexte, un jour après l'autre.",
         "consistent03": "Tu as été assez régulièrement présent dans tes suivis. Cela commence à donner à Confia davantage de contexte pour comprendre ton parcours, sans signifier que tu dois maintenir ce rythme chaque jour.",
-        "consistent04": "Ta continuité crée davantage de contexte, et il existe aussi une expérience récente où une stratégie d'Impulsion a aidé à réduire l'intensité. Elle n'a pas besoin de fonctionner à chaque fois, mais c'est une ressource qui a déjà montré qu'elle pouvait t'être utile.",
+        "consistent04": "Ta continuité crée davantage de contexte, et il existe aussi une expérience récente où une stratégie d'soutien immédiat a aidé à réduire l'intensité. Elle n'a pas besoin de fonctionner à chaque fois, mais c'est une ressource qui a déjà montré qu'elle pouvait t'être utile.",
         "consistent05": "À mesure que tes suivis gagnent en continuité, un schéma commence à apparaître : le besoin de calme s'est présenté plusieurs fois récemment. Cela ne signifie pas que c'est toujours ce dont tu as besoin, mais c'est un signal qui mérite de continuer à être observé.",
         "consistent06": "La continuité de tes suivis permet de commencer à remarquer certaines répétitions. Le besoin de soutien est apparu plus d'une fois récemment, sans pour autant définir ce dont tu as besoin à chaque moment.",
         "consistent07": "À mesure que tu construis davantage de contexte, quelque chose se répète dans tes check-ins : prendre soin de ton esprit est apparu plusieurs fois comme un besoin. Il peut être intéressant d'observer quand cela apparaît et ce qui change autour.",
@@ -1414,12 +1414,12 @@
         "consistent01": "Tu as maintenu une bonne régularité dans tes objectifs. La constance peut être plus importante que d'essayer de tout faire."
       },
       "impulse": {
-        "first01": "Tu as utilisé Impulsion pour la première fois. Cet enregistrement peut nous aider à comprendre quelles stratégies fonctionnent le mieux pour toi dans les moments intenses.",
-        "used01": "Tu t'es arrêté et tu as utilisé Impulsion lorsque tu en avais besoin. Cette pause nous donne déjà une information importante sur ta façon d'aborder la situation.",
-        "effective01": "Impulsion semble avoir aidé à réduire l'intensité. Il peut être utile de te rappeler ce que tu as fait pendant ce moment.",
+        "first01": "Tu as utilisé soutien immédiat pour la première fois. Cet enregistrement peut nous aider à comprendre quelles stratégies fonctionnent le mieux pour toi dans les moments intenses.",
+        "used01": "Tu t'es arrêté et tu as utilisé soutien immédiat lorsque tu en avais besoin. Cette pause nous donne déjà une information importante sur ta façon d'aborder la situation.",
+        "effective01": "soutien immédiat semble avoir aidé à réduire l'intensité. Il peut être utile de te rappeler ce que tu as fait pendant ce moment.",
         "effective02": "Certains signes indiquent que cette stratégie t'a aidé. Nous pouvons commencer à apprendre quels outils fonctionnent le mieux pour toi.",
         "partial01": "L'intensité a un peu diminué. La stratégie t'a peut-être aidé partiellement — et c'est aussi une information utile pour savoir quoi ajuster.",
-        "notEffective01": "Cette fois, Impulsion ne semble pas avoir réduit l'intensité. Cela ne signifie pas que tu as fait quelque chose de mal ; cela nous donne simplement plus d'informations sur ce qui peut ou non aider dans ce type de moment."
+        "notEffective01": "Cette fois, soutien immédiat ne semble pas avoir réduit l'intensité. Cela ne signifie pas que tu as fait quelque chose de mal ; cela nous donne simplement plus d'informations sur ce qui peut ou non aider dans ce type de moment."
       },
       "pattern": {
         "detected01": "Je commence à trouver une relation qui se répète dans tes enregistrements. C'est une tendance à observer, pas une conclusion définitive.",
@@ -1532,12 +1532,12 @@
     "impulse": {
       "title": "Un moment pour revenir à toi",
       "text": "D'après ce que tu as noté, il peut être utile de créer maintenant un petit espace pour t'apaiser et retrouver ton centre.",
-      "action": "Aller à Impulsion"
+      "action": "Aller à soutien immédiat"
     },
     "impulseMemory": {
       "title": "Quelque chose qui t'a déjà aidé",
-      "text": "La dernière fois que tu as utilisé Impulsion, ton intensité est passée de {{before}} à {{after}}. Tu peux essayer à nouveau cet espace si tu sens qu'il pourrait t'aider.",
-      "action": "Ouvrir Impulsion",
+      "text": "La dernière fois que tu as utilisé soutien immédiat, ton intensité est passée de {{before}} à {{after}}. Tu peux essayer à nouveau cet espace si tu sens qu'il pourrait t'aider.",
+      "action": "Ouvrir soutien immédiat",
       "eyebrow": "CONFIA S'EN SOUVIENT"
     },
     "patterns": {
@@ -1786,7 +1786,7 @@
       }
     },
     "actions": {
-      "impulse": "Ouvrir Impulsion",
+      "impulse": "Ouvrir soutien immédiat",
       "patterns": "Explorer mes schémas",
       "progress": "Voir mon évolution",
       "record": "Indiquer comment je vais"
@@ -1799,13 +1799,13 @@
   "companionBrain.morningLowFollowup": "J'ai remarqué que tu avais commencé la journée avec un moral plus bas. Quelque chose a-t-il rendu ta matinée plus difficile ?",
   "companionBrain.moodImprovedToday": "On dirait que tu vas mieux maintenant qu'au début de la journée. Quelque chose t'a aidé ?",
   "companionBrain.moodDeclinedToday": "On dirait que la journée est devenue plus difficile. S'est-il passé quelque chose que tu aimerais reconnaître ?",
-  "companionBrain.recentImpulseFollowup": "J'ai vu que tu avais eu besoin d'Impulso il y a peu. Comment vas-tu maintenant ?",
+  "companionBrain.recentImpulseFollowup": "J'ai vu que tu avais eu besoin d'soutien immédiat il y a peu. Comment vas-tu maintenant ?",
   "companionBrain.returnedAfterBreak": "Cela faisait un petit moment que tu n'étais pas passé par ici. Comment vas-tu maintenant ?",
   "companionBrain.activeSessionObservation": "Tu as été assez présent ici aujourd'hui. Y a-t-il quelque chose en particulier qui t'occupe l'esprit ?",
   "companionBrain.stableDayObservation": "Ta journée semble être restée relativement stable. Parfois, cela mérite aussi d'être remarqué.",
   "companionBrain.lowMorningRecovered": "Tu as commencé la journée avec un moral plus bas, mais les choses semblent s'être améliorées depuis. Quelque chose t'a aidé ?",
   "companionBrain.dayBecameHarder": "Tu as commencé la journée en allant mieux, mais les choses semblent être devenues plus difficiles depuis. S'est-il passé quelque chose ?",
-  "companionBrain.impulseAndMoodDecline": "J'ai vu que tu avais eu besoin d'Impulso et la journée semble aussi être devenue plus difficile. Comment vas-tu maintenant ?",
+  "companionBrain.impulseAndMoodDecline": "J'ai vu que tu avais eu besoin d'soutien immédiat et la journée semble aussi être devenue plus difficile. Comment vas-tu maintenant ?",
   "companionBrain.avatarTapped1": "Je suis là.",
   "companionBrain.avatarTapped2": "Rebonjour. Comment te sens-tu maintenant ?",
   "companionBrain.avatarTapped3": "Je suis avec toi. Quelque chose t'occupe l'esprit ?",
@@ -1828,23 +1828,23 @@
   "companionBrain.sessionReflectionAfterPatterns": "Tu as regardé tes schémas puis tu as enregistré comment tu te sens. Quelque chose est-il devenu plus clair ?",
   "companionBrain.sessionExploringApp": "Aujourd'hui, tu as exploré plusieurs parties de CONFIA. Y a-t-il quelque chose en particulier que tu essaies de comprendre ?",
   "companionBrain.sessionSeekingCompanion": "J'ai remarqué que tu es revenu vers moi plusieurs fois. Veux-tu simplement que je reste ici avec toi ?",
-  "companionBrain.sessionSupportAfterImpulse": "J'ai vu que tu es resté ici après Impulso. Comment te sens-tu maintenant ?",
+  "companionBrain.sessionSupportAfterImpulse": "J'ai vu que tu es resté ici après soutien immédiat. Comment te sens-tu maintenant ?",
   "companionBrain.longitudinalMoodImproving": "J'ai remarqué que tes derniers enregistrements se sont progressivement améliorés. C'est peut-être un petit changement, mais il mérite d'être remarqué.",
   "companionBrain.longitudinalRepeatedRecoveries": "Il y a quelque chose d'intéressant dans tes derniers jours : plus d'une fois, tu as commencé plus bas puis tu t'es senti mieux ensuite. Cela vaut peut-être la peine d'observer ce qui t'aide dans ces moments-là.",
   "companionBrain.longitudinalRepeatedLowMornings": "J'ai remarqué que certaines de tes matinées récentes ont commencé avec des évaluations plus basses. Y a-t-il quelque chose qui se répète dans tes matinées ces derniers temps ?",
   "companionBrain.longitudinalMoodDeclining": "Tes enregistrements des derniers jours semblent avoir un peu diminué. Je ne sais pas ce qui se cache derrière cela, mais cela vaut peut-être la peine d'observer ce qui a été différent.",
-  "companionBrain.longitudinalImpulseRepeatedUse": "Ces derniers jours, tu as eu recours à Impulso plusieurs fois. Y a-t-il une situation qui semble se répéter ?",
-  "companionBrain.longitudinalImpulseRepeatedEffectiveness": "Lors de tes dernières utilisations d'Impulso, l'intensité a clairement diminué à plusieurs reprises. Cela vaut peut-être la peine de te rappeler ce qui t'a aidé.",
-  "companionBrain.longitudinalImpulseEffectivePath": "Il y a peut-être quelque chose d'utile à retenir : le même type de soutien dans Impulso a été associé à une amélioration plus d'une fois ces derniers jours.",
-  "companionBrain.crossLowMorningImpulse": "J'ai remarqué que, plus d'une fois, tu as commencé la matinée avec une évaluation plus basse et que tu as aussi utilisé Impulso. Je ne sais pas s'il existe un lien, mais cela vaut peut-être la peine d'observer ce qui se répète ces jours-là.",
-  "companionBrain.crossImpulseRecovery": "Il y a un schéma intéressant ces derniers jours : plus d'une fois, tu as utilisé Impulso un jour où ton évaluation de l'après-midi était finalement plus élevée que celle du matin. Cela ne signifie pas nécessairement que l'un a causé l'autre, mais cela peut être utile à remarquer.",
-  "companionBrain.crossLowMorningImpulseRecovery": "J'ai remarqué une combinaison qui s'est produite plus d'une fois : tu as commencé plus bas le matin, utilisé Impulso ce jour-là, puis ton évaluation de l'après-midi était meilleure. Je ne sais pas si ces éléments sont directement liés, mais cela vaut peut-être la peine d'observer ce qui t'a aidé ces jours-là.",
+  "companionBrain.longitudinalImpulseRepeatedUse": "Ces derniers jours, tu as eu recours à soutien immédiat plusieurs fois. Y a-t-il une situation qui semble se répéter ?",
+  "companionBrain.longitudinalImpulseRepeatedEffectiveness": "Lors de tes dernières utilisations d'soutien immédiat, l'intensité a clairement diminué à plusieurs reprises. Cela vaut peut-être la peine de te rappeler ce qui t'a aidé.",
+  "companionBrain.longitudinalImpulseEffectivePath": "Il y a peut-être quelque chose d'utile à retenir : le même type de soutien dans soutien immédiat a été associé à une amélioration plus d'une fois ces derniers jours.",
+  "companionBrain.crossLowMorningImpulse": "J'ai remarqué que, plus d'une fois, tu as commencé la matinée avec une évaluation plus basse et que tu as aussi utilisé soutien immédiat. Je ne sais pas s'il existe un lien, mais cela vaut peut-être la peine d'observer ce qui se répète ces jours-là.",
+  "companionBrain.crossImpulseRecovery": "Il y a un schéma intéressant ces derniers jours : plus d'une fois, tu as utilisé soutien immédiat un jour où ton évaluation de l'après-midi était finalement plus élevée que celle du matin. Cela ne signifie pas nécessairement que l'un a causé l'autre, mais cela peut être utile à remarquer.",
+  "companionBrain.crossLowMorningImpulseRecovery": "J'ai remarqué une combinaison qui s'est produite plus d'une fois : tu as commencé plus bas le matin, utilisé soutien immédiat ce jour-là, puis ton évaluation de l'après-midi était meilleure. Je ne sais pas si ces éléments sont directement liés, mais cela vaut peut-être la peine d'observer ce qui t'a aidé ces jours-là.",
   "companionBrain.longitudinalLowMorningsChanging": "Il y a quelques jours, les évaluations plus basses le matin apparaissaient plus souvent, mais cela semble arriver moins fréquemment maintenant. C'est un changement qui mérite d'être remarqué.",
   "companionBrain.longitudinalLowMorningsOutdated": "Ce schéma de matinées plus basses qui apparaissait il y a quelques jours n'est plus présent dans tes enregistrements les plus récents. Quelque chose semble avoir changé.",
   "companionBrain.longitudinalRecoveryChanging": "Pendant quelques jours, une amélioration entre le matin et l'après-midi apparaissait souvent. Dans tes enregistrements les plus récents, cela semble moins présent. Cela vaut peut-être la peine d'observer ce qui a changé.",
   "companionBrain.conversationMorningRecovery": "Il y a peu, nous parlions d'une matinée plus difficile. Ton évaluation de l'après-midi est meilleure — quelque chose semble avoir changé depuis.",
   "companionBrain.conversationAfterHarderMoment": "Il y a peu, la journée semblait devenir plus difficile. Maintenant, je remarque un signal différent. Cela vaut peut-être la peine d'observer ce qui a changé entre-temps.",
-  "companionBrain.conversationAfterImpulseImprovement": "Il y a peu, nous avons parlé du moment où tu as eu besoin d'Impulso. Ton évaluation est meilleure maintenant. Je ne sais pas si les deux sont liés, mais c'est un changement qui mérite d'être remarqué.",
+  "companionBrain.conversationAfterImpulseImprovement": "Il y a peu, nous avons parlé du moment où tu as eu besoin d'soutien immédiat. Ton évaluation est meilleure maintenant. Je ne sais pas si les deux sont liés, mais c'est un changement qui mérite d'être remarqué.",
   "innerCanvas": {
     "title": "Ton ciel",
     "sixtySeconds": "TON CIEL",
@@ -1961,7 +1961,7 @@
       "weekday": "Jour de la semaine",
       "habit_association": "Habitudes et bien-être",
       "goal_association": "Objectifs et bien-être",
-      "intervention_effect": "Effet de l'Impulsion",
+      "intervention_effect": "Effet de l'soutien immédiat",
       "recovery_pattern": "Récupération émotionnelle",
       "repeated_need": "Besoin récurrent",
       "personal_change": "Changement récent",
@@ -2108,7 +2108,7 @@
     "repeatedNeed": "Le besoin « {{label}} » est apparu {{count}} fois entre {{first}} et {{last}}.",
     "trendUp": "Your average state increased across {{count}} records between {{first}} and {{last}}.",
     "trendDown": "Your average state decreased across {{count}} records between {{first}} and {{last}}.",
-    "interventionEffect": "Across {{count}} Impulse uses analysed between {{first}} and {{last}}, intensity decreased repeatedly."
+    "interventionEffect": "Across {{count}} soutien immédiat uses analysed between {{first}} and {{last}}, intensity decreased repeatedly."
   },
   "blindVent": {
     "eyebrow": "ESPACE ÉPHÉMÈRE",
@@ -2618,7 +2618,7 @@
     },
     "counterfactual": {
       "title": "Counterfactual Me",
-      "body": "Dans des moments comparables, nous avons trouvé {{withCount}} intervalles avec Impulso (variation moyenne {{withDelta}}) et {{withoutCount}} sans utilisation enregistrée ({{withoutDelta}})."
+      "body": "Dans des moments comparables, nous avons trouvé {{withCount}} intervalles avec soutien immédiat (variation moyenne {{withDelta}}) et {{withoutCount}} sans utilisation enregistrée ({{withoutDelta}})."
     }
   },
   "companionAging": {
@@ -2709,5 +2709,696 @@
     "improved": "Dans ton propre historique, ce parcours a coïncidé avec une amélioration lors de {{improved}} utilisations sur {{attempts}}.",
     "changed": "Le schéma récent a changé ; CONFIA ne suppose pas que ce qui aidait auparavant aide encore maintenant.",
     "association": "Il s’agit d’une association dans tes propres données, pas d’une garantie ni d’une relation causale."
-  }
+  },
+  "habitHub": {
+    "title": "Habitudes",
+    "subtitle": "De petits choix, à ton rythme. Mieux te connaître, jour après jour.",
+    "challenge": "Mon défi",
+    "day": "JOUR {{count}}",
+    "countdown": "avant la fin de la journée",
+    "streak": "{{count}} jours consécutifs",
+    "streak_one": "1 journée accomplie",
+    "trophy": "30 jours, et ton chemin continue. 🏆",
+    "grace": "Tu peux confirmer hier jusqu’à la fin d’aujourd’hui. Ta série attend cette saisie.",
+    "register": "Noter",
+    "history": "Historique",
+    "change": "Changer d’habitude",
+    "restart": "Recommencer un cycle",
+    "empty": "Y a-t-il quelque chose que tu aimerais faire un peu différemment ?",
+    "choose": "Choisir une habitude",
+    "primary": "Défi principal",
+    "name": "Nom de l’habitude",
+    "icon": "Icône",
+    "goal": "Qu’aimerais-tu faire différemment ?",
+    "goalExample": "Ex. : jusqu’à 2 cafés par jour",
+    "goalHelp": "Choisis un objectif simple et réaliste. Réduire, maîtriser ou éviter, sans étiquette.",
+    "create": "Créer le défi",
+    "date": "Jour de la saisie",
+    "today": "Aujourd’hui",
+    "yesterday": "Hier",
+    "current": "Série actuelle",
+    "best": "Meilleure série",
+    "last30": "Accomplis sur les 30 derniers jours",
+    "total": "Total de jours accomplis",
+    "historyNote": "L’absence de saisie ne signifie pas un échec. Les jours non confirmés peuvent interrompre le décompte consécutif, mais restent dans l’historique.",
+    "newer": "Plus récent",
+    "older": "Plus ancien",
+    "loadOlder": "Charger l’historique précédent",
+    "save": "Enregistrer",
+    "optional": "Facultatif — ne pas préciser",
+    "week": "Ta semaine",
+    "weekDates": "{{start}} — {{end}}",
+    "minutes": "{{count}} min",
+    "support": "J’ai besoin de soutien maintenant",
+    "confirmHelp": "Confirme uniquement ce que tu sais déjà de cette journée. Tu peux corriger aujourd’hui ou hier. Une journée sans saisie n’est pas un échec.",
+    "confirm": "J’ai atteint mon objectif",
+    "notToday": "Je n’y suis pas arrivé ce jour-là",
+    "restartQuestion": "La journée ne s’est pas passée comme tu le souhaitais ?",
+    "restartHelp": "La série actuelle repart de zéro. Les journées accomplies, ton meilleur résultat et ton historique sont conservés.",
+    "error": "Impossible d’enregistrer. Le formulaire reste rempli ; réessaie ou vérifie l’espace disponible sur ton appareil.",
+    "retry": "Réessayer la synchronisation",
+    "status": {
+      "done": "Accompli",
+      "notDone": "Non accompli",
+      "unknown": "Sans saisie"
+    },
+    "reasons": {
+      "once": "C’est arrivé une fois",
+      "several": "C’est arrivé plusieurs fois",
+      "fresh": "Je veux simplement recommencer"
+    },
+    "pages": {
+      "setup": "Mes habitudes",
+      "history": "Mon parcours",
+      "log": "Comment s’est passée ta journée ?",
+      "restart": "Recommencer un cycle",
+      "nutrition": "Me nourrir",
+      "exercise": "Activité physique",
+      "support": "Soutien immédiat"
+    },
+    "nutrition": {
+      "title": "Me nourrir",
+      "empty": "Tu n’as encore rien noté aujourd’hui.",
+      "summary": "Aujourd’hui : {{count}} catégories renseignées.",
+      "today": "Ce que j’ai noté aujourd’hui",
+      "help": "Renseigne seulement ce que tu souhaites. Un champ vide signifie « sans saisie » ; zéro est une quantité que tu confirmes. Sans calories ni jugement.",
+      "weekEmpty": "Ta semaine commence avec tes saisies. Le résumé apparaît après 3 jours renseignés cette semaine.",
+      "average": "Moyenne : {{value}} {{unit}} par jour renseigné · {{count}} jours renseignés",
+      "positive": "Consommation notée sur {{count}} jours"
+    },
+    "comparison": {
+      "more": "↑ Moyenne supérieure à la semaine précédente",
+      "less": "↓ Moyenne inférieure à la semaine précédente",
+      "same": "≈ Moyenne similaire à la semaine précédente"
+    },
+    "exercise": {
+      "title": "Activité physique",
+      "empty": "Tu n’as pas encore noté de mouvement aujourd’hui.",
+      "what": "Qu’as-tu fait ?",
+      "duration": "Pendant combien de temps ?",
+      "exactMinutes": "Durée en minutes (peut dépasser 60)",
+      "intensity": "Intensité — facultative",
+      "noMovement": "Pas d’activité ce jour-là — confirmer 0 min",
+      "noMovementRecorded": "Sans activité : 0 min confirmées",
+      "session": "{{activity}} · {{minutes}} min",
+      "days": "{{count}} jours avec du mouvement noté",
+      "kind": "Chaque mouvement compte. Tu peux continuer à partir de là, à ton rythme."
+    },
+    "intensity": {
+      "light": "Légère",
+      "moderate": "Modérée",
+      "intense": "Intense"
+    },
+    "sync": {
+      "local": "Enregistré sur cet appareil. La synchronisation sera disponible une fois la session connectée.",
+      "pending": "Enregistré sur cet appareil. Synchronisation en attente.",
+      "synced": "Saisies enregistrées et synchronisées.",
+      "error": "Les saisies locales ont été conservées. Impossible de synchroniser avec ton compte ; réessaie une fois connecté."
+    },
+    "insights": {
+      "title": "Ce que CONFIA remarque",
+      "empty": "CONFIA a besoin d’en savoir un peu plus sur tes journées avant de chercher des liens. Les habitudes notées et tes évaluations de l’humeur apportent ce contexte.",
+      "early": "Premier signe — davantage de données nécessaires",
+      "repeated": "Association répétée dans tes saisies",
+      "evidence": "Sur quelles saisies cela repose-t-il ?",
+      "sample": "Du {{first}} au {{last}} : {{high}} jours dans le groupe au niveau le plus élevé et {{low}} jours de comparaison, tous avec une évaluation de l’humeur.",
+      "limits": "Seuls les jours explicitement renseignés sont comparés, à partir de la moyenne quotidienne des évaluations. D’autres facteurs peuvent expliquer la différence. Ce n’est pas une évaluation clinique.",
+      "disclaimer": "Une association ne signifie pas qu’une chose provoque l’autre.",
+      "coffee_up": "Dans tes saisies, les jours avec au moins 2 cafés ont coïncidé avec une humeur moyenne plus élevée que les jours avec moins de 2 cafés notés.",
+      "coffee_down": "Dans tes saisies, les jours avec au moins 2 cafés ont coïncidé avec une humeur moyenne plus basse que les jours avec moins de 2 cafés notés.",
+      "movement_up": "Dans tes saisies, les jours avec au moins 20 minutes de mouvement ont coïncidé avec une humeur moyenne plus élevée que les jours avec moins de mouvement explicitement noté.",
+      "movement_down": "Dans tes saisies, les jours avec au moins 20 minutes de mouvement ont coïncidé avec une humeur moyenne plus basse que les jours avec moins de mouvement explicitement noté.",
+      "fruit_up": "Dans tes saisies, les jours avec au moins une portion de fruit ont coïncidé avec une humeur moyenne plus élevée que les jours où tu as confirmé zéro portion.",
+      "fruit_down": "Dans tes saisies, les jours avec au moins une portion de fruit ont coïncidé avec une humeur moyenne plus basse que les jours où tu as confirmé zéro portion.",
+      "challenge_tobacco_up": "Dans tes saisies « Tabac », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus élevée que les jours explicitement notés comme non accomplis.",
+      "challenge_tobacco_down": "Dans tes saisies « Tabac », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus basse que les jours explicitement notés comme non accomplis.",
+      "challenge_coffee_up": "Dans tes saisies « Excès de café », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus élevée que les jours explicitement notés comme non accomplis.",
+      "challenge_coffee_down": "Dans tes saisies « Excès de café », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus basse que les jours explicitement notés comme non accomplis.",
+      "challenge_alcohol_up": "Dans tes saisies « Alcool », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus élevée que les jours explicitement notés comme non accomplis.",
+      "challenge_alcohol_down": "Dans tes saisies « Alcool », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus basse que les jours explicitement notés comme non accomplis.",
+      "challenge_social_up": "Dans tes saisies « Réseaux sociaux », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus élevée que les jours explicitement notés comme non accomplis.",
+      "challenge_social_down": "Dans tes saisies « Réseaux sociaux », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus basse que les jours explicitement notés comme non accomplis.",
+      "challenge_gaming_up": "Dans tes saisies « Jeux vidéo », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus élevée que les jours explicitement notés comme non accomplis.",
+      "challenge_gaming_down": "Dans tes saisies « Jeux vidéo », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus basse que les jours explicitement notés comme non accomplis.",
+      "challenge_sugar_up": "Dans tes saisies « Sucreries / sucre », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus élevée que les jours explicitement notés comme non accomplis.",
+      "challenge_sugar_down": "Dans tes saisies « Sucreries / sucre », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus basse que les jours explicitement notés comme non accomplis.",
+      "challenge_shopping_up": "Dans tes saisies « Achats impulsifs », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus élevée que les jours explicitement notés comme non accomplis.",
+      "challenge_shopping_down": "Dans tes saisies « Achats impulsifs », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus basse que les jours explicitement notés comme non accomplis.",
+      "challenge_checking_up": "Dans tes saisies « Vérification des symptômes », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus élevée que les jours explicitement notés comme non accomplis.",
+      "challenge_checking_down": "Dans tes saisies « Vérification des symptômes », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus basse que les jours explicitement notés comme non accomplis.",
+      "challenge_sleep_up": "Dans tes saisies « Se coucher tard », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus élevée que les jours explicitement notés comme non accomplis.",
+      "challenge_sleep_down": "Dans tes saisies « Se coucher tard », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus basse que les jours explicitement notés comme non accomplis.",
+      "challenge_custom_up": "Dans tes saisies « {{habitName}} », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus élevée que les jours explicitement notés comme non accomplis.",
+      "challenge_custom_down": "Dans tes saisies « {{habitName}} », les jours où tu as atteint ton objectif ont coïncidé avec une humeur moyenne plus basse que les jours explicitement notés comme non accomplis.",
+      "lateCaffeine_up": "Dans tes entrées, les jours avec caféine l’après-midi ou le soir coïncidaient avec une humeur mieux notée. C’est une association initiale, pas une preuve de bénéfice.",
+      "lateCaffeine_down": "Dans tes entrées, les jours avec caféine l’après-midi ou le soir coïncidaient avec une humeur moins bien notée. Il faut davantage de jours ; cela ne prouve pas une cause."
+    },
+    "encouragement": {
+      "created": "Tu as choisi un premier pas. Tu n’as pas besoin de tout faire parfaitement pour avancer.",
+      "done0": "Aujourd’hui compte.",
+      "done1": "Une journée de plus construite.",
+      "done2": "Les petits choix répétés sont aussi un progrès.",
+      "day3": "3 jours. De petits choix prennent leur place.",
+      "day7": "7 jours. Un chemin se dessine.",
+      "day14": "14 jours, à ton rythme. Ce que tu as construit compte.",
+      "day30": "30 jours. Célèbre le chemin parcouru : il continue. 🏆",
+      "record": "Un nouveau repère personnel. Les petits pas mènent aussi loin.",
+      "restart": "Un écart n’efface pas les journées accomplies. Recommencer fait aussi partie du chemin.",
+      "food": "Un peu plus de contexte pour comprendre tes journées, sans jugement.",
+      "movement": "Tu as fait une place au mouvement. Ta saisie est enregistrée.",
+      "noted": "Merci d’avoir noté ta journée telle qu’elle était."
+    },
+    "habits": {
+      "tobacco": "Tabac",
+      "coffee": "Excès de café",
+      "alcohol": "Alcool",
+      "social": "Réseaux sociaux",
+      "gaming": "Jeux vidéo",
+      "sugar": "Sucreries / sucre",
+      "shopping": "Achats impulsifs",
+      "checking": "Vérification des symptômes",
+      "sleep": "Se coucher tard",
+      "custom": "Autre habitude"
+    },
+    "food": {
+      "coffee": "Café",
+      "energy": "Boissons énergisantes",
+      "soda": "Sodas et jus",
+      "water": "Eau",
+      "alcohol": "Alcool",
+      "tobacco": "Tabac",
+      "fastFood": "Restauration rapide / aliments ultra-transformés",
+      "fruit": "Fruits",
+      "vegetables": "Légumes",
+      "sweets": "Sucreries"
+    },
+    "activities": {
+      "walk": "Marche",
+      "run": "Course",
+      "gym": "Salle de sport",
+      "bike": "Vélo",
+      "swim": "Natation",
+      "sport": "Sport",
+      "yoga": "Yoga / mobilité",
+      "other": "Autre"
+    },
+    "units": {
+      "coffee": "cafés",
+      "energy": "boissons",
+      "soda": "boissons",
+      "water": "verres (≈ 250 ml)",
+      "alcohol": "boissons",
+      "tobacco": "cigarettes",
+      "fastFood": "portions",
+      "fruit": "portions",
+      "vegetables": "portions",
+      "sweets": "portions"
+    },
+    "streak_zero": "0 jour consécutif",
+    "notThatDay": "Je n’y suis pas arrivé ce jour-là",
+    "clock": {
+      "dayWord": "JOUR",
+      "history": "Voir l’historique",
+      "actions": "Options du défi",
+      "accessible": "Jour {{count}} de ton défi. Il reste {{hours}} heures et {{minutes}} minutes avant la fin de la journée.",
+      "intro1": "De petits choix, à ton rythme.",
+      "intro2": "Mieux te connaître, jour après jour."
+    },
+    "detail": {
+      "close": "Fermer",
+      "type": "Type",
+      "quantity": "Quantité",
+      "exact": "Quantité exacte",
+      "less": "Diminuer la quantité",
+      "more": "Augmenter la quantité",
+      "unit": "Unité",
+      "volume": "ml par contenant",
+      "period": "Moment de la journée (facultatif)",
+      "optional": "Plus de détails (facultatif)",
+      "time": "Heure approximative",
+      "size": "Taille",
+      "intensity": "Intensité perçue",
+      "labelHelp": "Vérifie l’étiquette si possible. La composition peut varier selon la version et le pays.",
+      "caffeine": "Contient de la caféine ?",
+      "sugar": "Contient du sucre ?",
+      "noDose": "La taille et l’intensité ne permettent pas de calculer une dose exacte de caféine.",
+      "saveItem": "Enregistrer l’aliment ou la boisson",
+      "help": "Choisis une catégorie, indique ce que tu as consommé et enregistre. Tu peux ajouter plusieurs aliments. Une absence de données reste inconnue.",
+      "add": "Ajouter",
+      "yourDay": "Ta journée",
+      "edit": "Modifier",
+      "removeItem": "Retirer {{name}}",
+      "removed": "Entrée retirée de cette journée.",
+      "legacy": "Anciens enregistrements sans détail par aliment.",
+      "legacyHelp": "Lorsque tu ajoutes des détails, les anciens totaux restent enregistrés avec un type non précisé. Tu peux les modifier.",
+      "finish": "Terminer et voir ma journée",
+      "loadMore": "Voir plus de jours",
+      "units": {
+        "item": "unités",
+        "portion": "portions",
+        "cup": "verres",
+        "can": "canettes",
+        "bottle": "bouteilles",
+        "ml": "ml",
+        "occasion": "occasions",
+        "meal": "repas",
+        "item_one": "unité",
+        "item_other": "unités",
+        "portion_one": "portion",
+        "portion_other": "portions",
+        "cup_one": "verre",
+        "cup_other": "verres",
+        "can_one": "canette",
+        "can_other": "canettes",
+        "bottle_one": "bouteille",
+        "bottle_other": "bouteilles",
+        "occasion_one": "occasion",
+        "occasion_other": "occasions",
+        "meal_one": "repas",
+        "meal_other": "repas"
+      },
+      "periods": {
+        "morning": "Matin",
+        "lunch": "Midi",
+        "afternoon": "Après-midi",
+        "evening": "Soir"
+      },
+      "sizes": {
+        "small": "Petit",
+        "medium": "Moyen",
+        "large": "Grand"
+      },
+      "intensities": {
+        "mild": "Doux",
+        "medium": "Moyen",
+        "strong": "Fort"
+      },
+      "properties": {
+        "unknown": "Je ne sais pas",
+        "yes": "Oui",
+        "no": "Non"
+      },
+      "fruitCount": {
+        "apple_one": "{{count}} pomme",
+        "apple_other": "{{count}} pommes",
+        "banana_one": "{{count}} banane",
+        "banana_other": "{{count}} bananes",
+        "orange_one": "{{count}} orange",
+        "orange_other": "{{count}} oranges",
+        "pear_one": "{{count}} poire",
+        "pear_other": "{{count}} poires",
+        "kiwi_one": "{{count}} kiwi",
+        "kiwi_other": "{{count}} kiwis",
+        "mango_one": "{{count}} mangue",
+        "mango_other": "{{count}} mangues",
+        "peach_one": "{{count}} pêche",
+        "peach_other": "{{count}} pêches",
+        "other_one": "{{count}} fruit",
+        "other_other": "{{count}} fruits"
+      }
+    },
+    "review": {
+      "daily": "Une pause pour regarder ta journée",
+      "helped": "Ce qui a soutenu ta journée",
+      "observe": "Un point à observer",
+      "tomorrow": "Une petite idée pour demain",
+      "movement": "Tu as noté {{minutes}} minutes de mouvement. L’activité physique régulière peut soutenir le bien-être.",
+      "plants": "Tu as noté des fruits ou des légumes. Ils font partie d’une alimentation variée.",
+      "noted": "Tu as pris un moment pour observer ta journée. Pas besoin de la juger bonne ou mauvaise.",
+      "late": "Tu as noté de la caféine l’après-midi ou le soir. Près du coucher, elle peut affecter le sommeil de certaines personnes ; cette entrée ne prouve pas un effet sur le tien.",
+      "energy": "Tu as noté une boisson énergisante. L’horaire et l’étiquette peuvent aider à observer sa place dans ta routine.",
+      "limited": "Une journée reste une observation. Elle ne permet pas de conclure ce qui influence ton bien-être.",
+      "empty": "Nous apprenons encore à connaître tes journées. D’autres entrées aideront à contextualiser les observations.",
+      "ideas": {
+        "caffeine": "Si cela te convient, essaie de prendre ta dernière boisson caféinée un peu plus tôt et observe ton ressenti.",
+        "repeat": "Si tu en as envie et que c’est confortable, reprends une petite partie du mouvement d’aujourd’hui, à ton rythme.",
+        "observe": "Demain, tu peux simplement remarquer un horaire ou un moment de ta routine. Observer compte aussi."
+      },
+      "limits": "Ces observations ne sont pas un diagnostic et ne remplacent pas un avis professionnel. Si quelque chose t’inquiète ou affecte ton quotidien, un professionnel de santé peut t’aider.",
+      "week": "Ta semaine",
+      "weekWindow": "7 derniers jours : {{start}} à {{end}}",
+      "food": "Alimentation",
+      "movementWeek": "{{minutes}} min enregistrées · {{days}} jours avec mouvement",
+      "measuredOnly": "Les totaux et moyennes concernent uniquement tes entrées. Les jours sans données ne comptent pas comme zéro. Les tendances personnelles figurent dans « Ce que CONFIA remarque ».",
+      "why": "Pourquoi cela peut compter",
+      "source": "Voir la source"
+    },
+    "sources": {
+      "caffeine": "Caféine",
+      "movement": "Activité physique",
+      "plants": "Alimentation saine",
+      "explain": {
+        "caffeine": "L’EFSA décrit des effets possibles de la caféine sur le sommeil, surtout près du coucher. Nous ne calculons ni doses ni effets individuels.",
+        "movement": "L’OMS reconnaît les bienfaits physiques et psychologiques d’une activité régulière. L’expérience proposée est facultative et doit respecter ton confort.",
+        "plants": "L’OMS inclut les fruits et légumes dans une alimentation variée. CONFIA ne prescrit ni régimes ni objectifs nutritionnels individuels."
+      }
+    },
+    "catalog": {
+      "coffee": {
+        "espresso": "Espresso",
+        "short": "Café serré",
+        "long": "Café allongé",
+        "americano": "Americano",
+        "filter": "Café filtre",
+        "capsule": "Capsule",
+        "instant": "Café instantané",
+        "decaf": "Décaféiné",
+        "other": "Autre",
+        "unspecified": "Ancienne entrée (type non précisé)"
+      },
+      "fruit": {
+        "apple": "Pomme",
+        "banana": "Banane",
+        "orange": "Orange",
+        "pear": "Poire",
+        "kiwi": "Kiwi",
+        "strawberry": "Fraises",
+        "berries": "Fruits rouges",
+        "grapes": "Raisins",
+        "mango": "Mangue",
+        "pineapple": "Ananas",
+        "peach": "Pêche",
+        "melon": "Melon",
+        "watermelon": "Pastèque",
+        "other": "Autre",
+        "unspecified": "Ancienne entrée (type non précisé)"
+      },
+      "vegetables": {
+        "salad": "Salade",
+        "soup": "Soupe de légumes",
+        "boiled": "Légumes cuits",
+        "grilled": "Légumes grillés",
+        "other": "Autres",
+        "unspecified": "Ancienne entrée (type non précisé)"
+      },
+      "soda": {
+        "cocaCola": "Coca-Cola",
+        "cocaColaZero": "Coca-Cola Zero",
+        "pepsi": "Pepsi",
+        "pepsiMax": "Pepsi Max",
+        "sprite": "Sprite",
+        "sevenUp": "7UP",
+        "fanta": "Fanta",
+        "guarana": "Guarana",
+        "orangeJuice": "Jus d’orange",
+        "appleJuice": "Jus de pomme",
+        "nectar": "Nectar",
+        "iceTea": "Thé glacé",
+        "freshJuice": "Jus frais",
+        "other": "Autre",
+        "unspecified": "Ancienne entrée (type non précisé)"
+      },
+      "water": {
+        "still": "Eau",
+        "sparkling": "Eau gazeuse",
+        "unspecified": "Ancienne entrée (type non précisé)"
+      },
+      "energy": {
+        "energy": "Boisson énergisante",
+        "sugarFree": "Sans sucre",
+        "other": "Autre",
+        "unspecified": "Ancienne entrée (type non précisé)"
+      },
+      "alcohol": {
+        "other": "Boisson alcoolisée",
+        "unspecified": "Ancienne entrée (type non précisé)"
+      },
+      "tobacco": {
+        "other": "Tabac",
+        "unspecified": "Ancienne entrée (type non précisé)"
+      },
+      "fastFood": {
+        "meal": "Repas",
+        "other": "Autre",
+        "unspecified": "Ancienne entrée (type non précisé)"
+      },
+      "sweets": {
+        "occasion": "Sucreries",
+        "other": "Autre",
+        "unspecified": "Ancienne entrée (type non précisé)"
+      }
+    },
+    "plans": {
+      "title": "Parcours de 15 jours",
+      "results": "Ce que cette période a montré",
+      "comparison": "Avant : {{before}} · Pendant : {{during}} {{unit}}",
+      "sample": "Moyennes de {{before}} jours avant et {{during}} jours renseignés pendant le parcours.",
+      "notEnough": "Il n’y a pas encore assez de journées renseignées pour comparer les périodes. Ton parcours reste enregistré.",
+      "mood": "Humeur moyenne enregistrée : {{before}} avant ({{beforeDays}} jours) et {{during}} pendant ({{duringDays}} jours). Cela décrit une coïncidence, pas l’effet du parcours.",
+      "resultLimits": "Seuls les jours renseignés sont comparés. La période inclut les pauses éventuelles. D’autres facteurs peuvent expliquer les différences ; ce n’est pas une évaluation clinique.",
+      "day": "Jour {{day}} sur 15",
+      "progress": "Progression des jours du parcours",
+      "adapted": "La proposition du jour est plus légère. Tu peux continuer à ton rythme.",
+      "done": "J’ai essayé aujourd’hui",
+      "notToday": "Pas aujourd’hui",
+      "noted": "C’est noté. Un jour à la fois.",
+      "kind": "Aujourd’hui ne s’est pas déroulé comme prévu. Demain, tu peux simplement continuer.",
+      "pause": "Mettre en pause",
+      "resume": "Continuer",
+      "adjust": "Choisir une version plus légère",
+      "regular": "Revenir à la proposition initiale",
+      "abandon": "Arrêter le parcours",
+      "abandonHelp": "Souhaites-tu arrêter cette expérience ? Tes entrées et ta progression seront conservées.",
+      "confirmAbandon": "Oui, arrêter cette expérience",
+      "kept": "Expérience terminée. Ton parcours reste enregistré.",
+      "invite": "Envie d’essayer un petit changement pendant 15 jours ?",
+      "choose": "Choisis une expérience",
+      "consent": "Une petite action par jour, sans exiger la perfection. Tu décides de commencer. Tu peux ajuster, suspendre ou arrêter. Une pause repousse la fin et conserve les jours précédents.",
+      "try": "Essayer",
+      "later": "Pas maintenant",
+      "dismissed": "D’accord. L’invitation reviendra dans quelques jours.",
+      "empty": "Nous apprenons encore à connaître tes journées. Les propositions arrivent après au moins cinq jours renseignés dans les deux dernières semaines, avec assez de contexte pour une petite expérience.",
+      "started": "Ton expérience commence. Aujourd’hui, observe simplement.",
+      "safety": "Ces expériences ne sont ni des régimes ni des traitements. Respecte ton confort et les conseils professionnels que tu suis déjà.",
+      "status": {
+        "active": "En cours",
+        "paused": "En pause",
+        "completed": "Terminé",
+        "abandoned": "Arrêté par toi"
+      },
+      "steps": {
+        "observe": "Aujourd’hui, observe un moment de cette habitude et note-le, sans chercher à changer quoi que ce soit.",
+        "review": "Regarde les derniers jours. Qu’est-ce qui était confortable ? Aujourd’hui, choisis simplement ce que tu aimerais reprendre.",
+        "reflect": "Aujourd’hui, prends un moment pour réfléchir à ce que tu as appris. Tu n’as pas besoin de garder ce qui ne te convenait pas."
+      },
+      "names": {
+        "caffeine": "Caféine et équilibre",
+        "hydration": "Un moment pour l’eau",
+        "plants": "Fruits et légumes à ton rythme",
+        "energy": "Observer les boissons énergisantes",
+        "movement": "Petits moments de mouvement",
+        "walk": "Une promenade à ta portée",
+        "regularity": "Trouver un rythme de mouvement",
+        "timing": "Des horaires avec une place pour toi",
+        "routine": "Une pause pour observer"
+      },
+      "actions": {
+        "caffeine": "Si cela te convient, essaie d’avancer ta dernière boisson caféinée d’environ 30 minutes. Pas besoin d’une réduction brusque.",
+        "caffeineGentle": "Aujourd’hui, remarque simplement l’heure de ta dernière boisson caféinée.",
+        "hydration": "Choisis un moment habituel pour avoir de l’eau à portée, si c’est utile. Aucune quantité n’est imposée.",
+        "hydrationGentle": "Remarque un moment où tu as envie de boire de l’eau et note-le.",
+        "plants": "Si tu en as envie, ajoute un fruit ou un légume que tu aimes à un repas habituel.",
+        "plantsGentle": "Aujourd’hui, choisis simplement un fruit ou un légume que tu aimes.",
+        "energy": "Avant une boisson énergisante, prends un instant pour observer l’heure et ce que tu recherches à ce moment.",
+        "energyGentle": "Si tu notes une boisson énergisante, ajoute simplement son horaire approximatif.",
+        "movement": "Si c’est confortable, choisis jusqu’à cinq minutes de mouvement que tu apprécies. Tu peux en faire moins ou arrêter.",
+        "movementGentle": "Choisis un mouvement confortable ou remarque une occasion de bouger. Aucune durée imposée.",
+        "walk": "Si tu en as envie et que c’est confortable, fais une courte promenade dans un lieu familier, à ton rythme.",
+        "walkGentle": "Aujourd’hui, choisis simplement un petit trajet qui te semble confortable.",
+        "regularity": "Choisis un moment possible pour reprendre un peu de mouvement familier et confortable.",
+        "regularityGentle": "Aujourd’hui, repère simplement un moment possible pour bouger, sans engagement.",
+        "timing": "Choisis un horaire de cette habitude que tu aimerais mieux observer. Note-le aujourd’hui sans chercher à tout changer.",
+        "timingGentle": "Aujourd’hui, note simplement un horaire approximatif.",
+        "routine": "Fais une petite pause dans une routine habituelle pour observer ton ressenti, sans rien devoir changer.",
+        "routineGentle": "Aujourd’hui, remarque simplement un moment de ta journée."
+      },
+      "metrics": {
+        "caffeine": "cafés par jour renseigné",
+        "hydration": "ml d’eau par jour renseigné",
+        "plants": "unités/portions notées par jour",
+        "energy": "boissons par jour renseigné",
+        "movement": "minutes par jour renseigné",
+        "walk": "minutes de marche par jour renseigné",
+        "regularity": "minutes par jour renseigné",
+        "timing": "proportion de jours renseignés avec caféine tardive (0–1)",
+        "routine": "présence d’une entrée alimentaire (0–1)"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "androidOnly": "Ces options sont disponibles dans l’application Android installée.",
+    "community": "Réponses de la Communauté",
+    "reminder": "Rappel quotidien",
+    "time": "Heure du rappel",
+    "milestones": "Progression des habitudes",
+    "future": "Réservé aux futurs avis facultatifs. Aucune notification dans cette version.",
+    "permissionTitle": "Choisir mes notifications",
+    "explain": {
+      "community": "Veux-tu recevoir un avis quand quelqu’un répond à tes partages ? Le contenu reste privé.",
+      "reminder": "Veux-tu un rappel doux pour noter ta journée à l’heure de ton choix ?"
+    },
+    "allow": "Autoriser",
+    "later": "Pas maintenant",
+    "denied": "L’autorisation n’a pas été accordée. Tu peux la modifier dans les paramètres Android.",
+    "error": "La modification n’a pas pu être enregistrée. Réessaie.",
+    "syncPending": "Les préférences de l’appareil sont enregistrées. La synchronisation des avis de la Communauté est en attente.",
+    "retry": "Réessayer la synchronisation",
+    "systemSettings": "Ouvrir les paramètres Android",
+    "addWidget": "Ajouter Mon défi à l’écran d’accueil",
+    "widgetManual": "Sur l’écran d’accueil, appuie longuement sur un espace vide, choisis Widgets et cherche CONFIA.",
+    "timingHelp": "L’heure est locale. Android peut retarder le rappel pour économiser la batterie. Si tu as déjà rempli le bilan, le rappel du jour est annulé.",
+    "unavailable": "Cette conversation n’est plus disponible ou ne correspond pas à ta session.",
+    "close": "Fermer"
+  },
+  "zen": {
+    "title": "Laisse aller",
+    "eyebrow": "UN MOMENT POUR TOI",
+    "invitation": "Maintenant, laisse sortir ce qui est encore là.",
+    "consentTitle": "Veux-tu utiliser ton souffle ?",
+    "privacy": "Pour cette expérience, CONFIA utilise le microphone uniquement pour détecter le souffle. Le son n’est ni enregistré ni envoyé.",
+    "allow": "Autoriser",
+    "noMic": "Utiliser sans microphone",
+    "useMic": "Utiliser mon souffle",
+    "calibrating": "Un instant de silence pour trouver le rythme de ton environnement.",
+    "blow": "Souffle doucement, à ton rythme. Pas besoin de forcer.",
+    "touch": "Fais glisser ton doigt pour libérer le sable.",
+    "release": "Libérer un peu",
+    "reflect": "Comment je me sens",
+    "pause": "Reste ici un instant. Prends ton temps.",
+    "canvasLabel": "Jardin de sable. Glisse pour révéler ou utilise le bouton Libérer un peu.",
+    "error": "Nous ne pouvons pas utiliser le microphone pour le moment. Tu peux continuer avec ton doigt.",
+    "question": "Comment te sens-tu maintenant ?",
+    "responses": {
+      "calmer": "Plus calme",
+      "same": "Pareil",
+      "agitated": "Encore agité"
+    },
+    "thanks": "Merci pour ce moment avec toi-même.",
+    "done": "Terminer",
+    "leave": "Quitter ce moment",
+    "pattern": "Lors de tes {{total}} dernières séances de cet exercice, tu as indiqué te sentir plus calme à {{calmer}} reprises.",
+    "messages": [
+      "Paix",
+      "Calme",
+      "Laisse passer",
+      "Un instant à la fois",
+      "Reviens au présent",
+      "Continue à respirer",
+      "Ici, maintenant",
+      "Relâche un peu"
+    ]
+  },
+  "noticeHelp": {
+    "infoLabel": "Informations sur {{name}}",
+    "state": "État des notifications",
+    "status": {
+      "granted": "Autorisées",
+      "denied": "Non autorisées",
+      "notRequested": "Pas encore configurées",
+      "unknown": "État inconnu"
+    },
+    "ready": "Tout est prêt. Tu peux recevoir ce type de notification lorsque cela est nécessaire.",
+    "blocked": "Les notifications CONFIA sont désactivées sur ton téléphone. Tu peux les activer dans les paramètres.",
+    "mismatch": "Cette option est activée dans CONFIA, mais les notifications sont bloquées dans Android.",
+    "preferenceOff": "Cette option est encore désactivée dans CONFIA.",
+    "unknownHelp": "Impossible de confirmer l’état. Tu peux le vérifier dans les paramètres du téléphone.",
+    "how": "Comment activer",
+    "enable": "Activer les notifications",
+    "fix": "Corriger dans les paramètres",
+    "open": "Ouvrir les paramètres du téléphone",
+    "battery": "Certains téléphones peuvent retarder légèrement les rappels pour économiser la batterie.",
+    "menus": "Le nom des menus peut varier selon le téléphone. L’état est actualisé à ton retour dans CONFIA.",
+    "privacyTitle": "Confidentialité",
+    "privacy": "Les notifications ne montrent pas le contenu de ta conversation sur l’écran verrouillé.",
+    "description": {
+      "community": "CONFIA peut te prévenir lorsque quelqu’un répond dans une conversation liée à une publication à laquelle tu participes.",
+      "reminder": "CONFIA peut te rappeler de faire le point sur ta journée à l’heure que tu choisis.",
+      "milestones": "Cet espace est réservé à de futures notifications facultatives sur les Habitudes. Il n’envoie pas encore de notifications."
+    },
+    "steps": {
+      "community": [
+        "Active Réponses de la Communauté dans CONFIA.",
+        "Quand Android le demande, choisis Autoriser.",
+        "Si tu as déjà refusé, appuie sur Ouvrir les paramètres du téléphone.",
+        "Autorise les notifications CONFIA et vérifie que la catégorie Réponses de la Communauté est aussi activée. Reviens ensuite dans l’app."
+      ],
+      "reminder": [
+        "Active Rappel quotidien dans CONFIA.",
+        "Choisis l’heure du rappel.",
+        "Quand Android le demande, autorise les notifications. Si tu as déjà refusé, ouvre les paramètres avec le bouton ci-dessous.",
+        "Autorise les notifications CONFIA et la catégorie Rappel quotidien. Reviens ensuite dans l’app."
+      ]
+    }
+  },
+  "homeDaily": {
+    "more": "Ma journée : observations et programmes"
+  },
+  "companionDaily": {
+    "quiet": "Je suis là, à ton rythme.",
+    "description": "Un espace pour observer tes notes et choisir la prochaine étape, sans te presser.",
+    "actions": {
+      "habits": "Voir mon défi",
+      "habitHistory": "Voir les progrès du défi",
+      "nutrition": "Voir l’alimentation",
+      "exercise": "Voir le mouvement",
+      "plans": "Voir le programme",
+      "breathe": "Respirer un peu",
+      "progress": "Voir l’évolution",
+      "patterns": "Voir les tendances"
+    },
+    "restart": [
+      "Recommencer n’efface pas les jours que tu as déjà construits.",
+      "Il y a de la place pour un nouveau départ, à ton rythme.",
+      "Le chemin déjà parcouru compte toujours. Tu peux recommencer aujourd’hui."
+    ],
+    "milestone": [
+      "{{count}} jours construits. Ce chemin mérite d’être reconnu.",
+      "Tu arrives au jour {{count}} de ton défi. Un jour à la fois.",
+      "Ton défi compte {{count}} jours. Tu peux prendre un instant pour reconnaître cet effort."
+    ],
+    "continuity": [
+      "La note d’aujourd’hui fait partie d’un chemin de {{count}} jours.",
+      "Cela fait {{count}} jours construits par de petits choix.",
+      "Une note de plus pour ton défi : {{count}} jours, à ton rythme."
+    ],
+    "planEnd": [
+      "Tu arrives au dernier jour du programme. Veux-tu revoir tes notes ?",
+      "Ton programme arrive au jour 15. Tu peux prendre le temps de regarder ces journées.",
+      "Veux-tu revoir les petites expériences de ces 15 jours ?"
+    ],
+    "planStep": [
+      "Au jour {{count}} du programme, une petite expérience est disponible.",
+      "Le programme en est au jour {{count}}. Tu peux choisir ce qui convient à ta journée.",
+      "Une proposition simple t’attend pour le jour {{count}}, sans obligation."
+    ],
+    "stillAgitated": [
+      "Après la pause, tu as noté que l’agitation était encore présente. Tu n’as pas à forcer un nouvel essai.",
+      "La pause n’a pas apporté le calme espéré. Tu peux choisir ce qui te convient maintenant.",
+      "L’agitation était encore là après la pause. Tu peux continuer avec douceur."
+    ],
+    "breathing": [
+      "Dans la plupart de tes dernières pauses notées, tu as dit ressentir plus de calme.",
+      "Dans tes notes récentes de respiration, ressentir plus de calme était la réponse la plus fréquente.",
+      "Tes dernières pauses ont plus souvent été suivies d’une note indiquant davantage de calme."
+    ],
+    "caffeine": [
+      "Aujourd’hui, tu as noté de la caféine plus tard. Tu peux observer ton repos sans conclure tout de suite.",
+      "Une prise de caféine est notée en fin de journée. Si tu veux, tu peux l’observer avec ton repos.",
+      "Ta note du jour comprend de la caféine plus tard. C’est une observation, pas une conclusion."
+    ],
+    "movement": [
+      "Tu as noté du mouvement sur {{count}} jours cette semaine. Ces petits choix méritent d’être reconnus.",
+      "Sur les sept derniers jours, tu as noté du mouvement sur {{count}} jours.",
+      "Ton historique de la semaine comprend {{count}} jours avec du mouvement."
+    ],
+    "hydration": [
+      "Tu as des notes sur l’eau pour {{count}} jours cette semaine. Veux-tu les regarder ?",
+      "Sur les sept derniers jours, tu as noté de l’eau sur {{count}} jours.",
+      "Il y a {{count}} jours avec des notes sur l’eau cette semaine. Nous pouvons observer sans juger."
+    ]
+  },
+  "companionBrain.actionRegisterMorning": "Noter la matinée",
+  "companionBrain.actionRegisterAfternoon": "Noter l’après-midi",
+  "companionBrain.actionTalkAboutIt": "Ouvrir la communauté"
 }

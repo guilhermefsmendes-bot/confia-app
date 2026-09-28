@@ -1,3 +1,5 @@
+import { loadCompanionBrainMemory } from "./companionBrainMemory";
+import { getLocalCalendarDate } from "../../../utils/date";
 import {
   rankCompanionCandidatesContextually,
 } from "./companionBrainContextualRanking";
@@ -151,6 +153,12 @@ export function decideCompanionThought(
     return null;
   }
 
+  const memory=loadCompanionBrainMemory();
+  const nowMs=now.getTime(),today=getLocalCalendarDate(now);
+  const recent=memory.shownMessages.filter(m=>Number.isFinite(Date.parse(m.shownAt))&&Date.parse(m.shownAt)<=nowMs);
+  const last=recent.at(-1);
+  if(recent.filter(m=>getLocalCalendarDate(new Date(m.shownAt))===today).length>=4)return null;
+  if(last&&nowMs-Date.parse(last.shownAt)<45*60_000)return null;
   const eligible = candidates.filter(
     (candidate) =>
       Boolean(candidate) &&
@@ -158,7 +166,11 @@ export function decideCompanionThought(
       typeof candidate.translationKey === "string" &&
       typeof candidate.priority === "number" &&
       typeof candidate.cooldownMinutes === "number" &&
-      isEligible(candidate, now)
+      candidate.priority >= 40 &&
+      !isExpired(candidate,now) &&
+      !recent.some(m=>m.id===candidate.id&&nowMs-Date.parse(m.shownAt)<candidate.cooldownMinutes*60_000) &&
+      !recent.some(m=>m.category===candidate.category&&nowMs-Date.parse(m.shownAt)<20*60_000) &&
+      !recent.some(m=>candidate.metadata?.family&&m.reason===candidate.reason&&nowMs-Date.parse(m.shownAt)<20*3600_000)
   );
 
   if (eligible.length === 0) {
@@ -172,14 +184,15 @@ export function decideCompanionThought(
       now
     );
 
-  const selected = ranked[0];
+  // Priority tiers take precedence over narrative modifiers.
+  const selected = ranked.sort((a,b)=>Number(b.priority>=80)-Number(a.priority>=80))[0];
 
   if (!selected) {
     return null;
   }
 
   return {
-    candidate: selected,
+    candidate: selectVariant(selected,recent),
     decidedAt: now.toISOString(),
   };
 }
@@ -221,4 +234,13 @@ export function inspectCompanionCandidates(
       now
     ),
   }));
+}
+
+// Rotate within a family; IDs stay factual so variants cannot bypass deduplication.
+export function selectVariant(candidate:CompanionBrainCandidate,history:ReturnType<typeof loadCompanionBrainMemory>["shownMessages"]):CompanionBrainCandidate {
+ const family=candidate.metadata?.family;if(typeof family!=="string")return candidate;
+ const keys=Array.from({length:3},(_,i)=>`companionDaily.${family}.${i}`);
+ const used=history.slice(-12).map(m=>m.translationKey);
+ const key=keys.find(k=>!used.includes(k))??keys[(keys.indexOf(used.filter(k=>k?.startsWith(`companionDaily.${family}.`)).at(-1)??"")+1)%keys.length];
+ return {...candidate,translationKey:key};
 }

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Pause, RotateCcw, Heart, Sparkles, Smile, ShieldAlert } from 'lucide-react';
 import { getAdaptiveHugMessage, type HugNeed, type HugTone } from '../data/hugAdaptiveMessages';
 import { useTranslation } from "react-i18next";
 import { App } from '@capacitor/app';
+const ZenReleaseExperience=lazy(()=>import("./ZenRelease/ZenReleaseExperience"));
 interface AbracoTimerProps {
   onAddXp: (amount: number) => void;
   onRegisterStop?: (stopFunction: () => void) => void;
@@ -17,11 +18,6 @@ type FiveMinuteMood =
   | "tired"
   | "disconnected"
   | "pause";
-
-type FiveMinuteOutcome =
-  | "better"
-  | "same"
-  | "worse";
 
 type DoodlePoint = {
   x: number;
@@ -62,8 +58,7 @@ const { t, i18n } = useTranslation();
   const [fiveMinuteMood, setFiveMinuteMood] =
     useState<FiveMinuteMood | null>(null);
 
-  const [fiveMinuteOutcome, setFiveMinuteOutcome] =
-    useState<FiveMinuteOutcome | null>(null);
+
   const [hugNeed, setHugNeed] = useState<HugNeed | null>(null);
   const [hugTone, setHugTone] = useState<HugTone | null>(null);
 
@@ -128,13 +123,13 @@ useEffect(() => {
 
     if (isActive && secondsLeft > 0) {
       interval = setInterval(() => {
-        setSecondsLeft(prev => prev - 1);
+        setSecondsLeft(prev => Math.max(0, prev - 1));
       }, 1000);
 } else if (secondsLeft === 0 && isActive) {
 stopAudio();
       setIsActive(false);
       setCompleted(true);
-      onAddXp(30); // Great effort gets +30 XP!
+      // The closing ritual has no score or reward.
 }
     return () => {
       if (interval) clearInterval(interval);
@@ -232,7 +227,7 @@ stopAudio();
   setPhraseIdx(0);
   setCompleted(false);
   setBreatheState('Inalar');
-  setFiveMinuteOutcome(null);
+
 };
   
 const DOODLE_MAX_STROKES = 120;
@@ -831,54 +826,11 @@ const selectFiveMinuteMood = (
   }
 
   setFiveMinuteMood(mood);
-  setFiveMinuteOutcome(null);
+
   setSecondsLeft(TOTAL_SECONDS);
   setCompleted(false);
   setPhraseIdx(0);
   setBreatheState("Inalar");
-};
-
-const registerFiveMinuteOutcome = (
-  outcome: FiveMinuteOutcome
-) => {
-  setFiveMinuteOutcome(outcome);
-
-  try {
-    const storageKey =
-      "confia_five_minute_sessions_v1";
-
-    const raw =
-      window.localStorage.getItem(storageKey);
-
-    const previous =
-      raw ? JSON.parse(raw) : [];
-
-    const sessions =
-      Array.isArray(previous)
-        ? previous
-        : [];
-
-    sessions.push({
-      mood: fiveMinuteMood,
-      need: hugNeed,
-      tone: hugTone,
-      outcome,
-      completedAt: new Date().toISOString(),
-    });
-
-    /**
-     * Mantemos apenas as últimas 60 experiências.
-     * É suficiente para futura aprendizagem sem deixar
-     * crescer o armazenamento indefinidamente.
-     */
-    window.localStorage.setItem(
-      storageKey,
-      JSON.stringify(sessions.slice(-60))
-    );
-  } catch {
-    // A experiência continua normalmente mesmo que
-    // localStorage não esteja disponível.
-  }
 };
 
 const hugQuestionnaireReady = Boolean(fiveMinuteMood && hugNeed && hugTone);
@@ -898,6 +850,8 @@ const formatTime = (seconds: number) => {
   const strokeWidth = 8;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - progress * circumference;
+
+  if(completed)return <Suspense fallback={<p role="status">{t("loading")}</p>}><ZenReleaseExperience durationSeconds={TOTAL_SECONDS} onDone={handleReset}/></Suspense>;
 
   return (
     <div className="flex flex-col items-center max-w-md mx-auto space-y-6 py-4">
@@ -1486,103 +1440,6 @@ key={phraseIdx}
         </button>
       </div>
 
-      {/* ==================================================
-          COMO FICASTE?
-      ================================================== */}
-
-      {completed && fiveMinuteMood && (
-        <motion.section
-          initial={{
-            opacity: 0,
-            y: 8,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          className="w-full rounded-[26px] border border-[#B85F48]/20 bg-white p-5 shadow-sm"
-        >
-          <p className="text-center text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
-            {t("fiveMinutes.finishEyebrow")}
-          </p>
-
-          <h3 className="mt-1.5 text-center text-base font-black text-[#2F2926]">
-            {t("fiveMinutes.afterQuestion")}
-          </h3>
-
-          {!fiveMinuteOutcome ? (
-            <div className="mt-4 grid grid-cols-3 gap-2">
-
-              {([
-                ["better", "🙂"],
-                ["same", "😐"],
-                ["worse", "😕"],
-              ] as const).map(
-                ([outcome, emoji]) => (
-                  <button
-                    key={outcome}
-                    type="button"
-                    onClick={() =>
-                      registerFiveMinuteOutcome(
-                        outcome
-                      )
-                    }
-                    className="rounded-[18px] border border-[#E8DDD7] bg-[#FFFDFC] px-2 py-3 text-center transition-transform active:scale-[0.97]"
-                  >
-                    <span className="block text-xl">
-                      {emoji}
-                    </span>
-
-                    <span className="mt-1 block text-[10px] font-black text-[#6D5A53]">
-                      {t(
-                        `fiveMinutes.outcomes.${outcome}`
-                      )}
-                    </span>
-                  </button>
-                )
-              )}
-
-            </div>
-          ) : (
-            <motion.div
-              initial={{
-                opacity: 0,
-              }}
-              animate={{
-                opacity: 1,
-              }}
-              className="mt-4 rounded-[18px] bg-[#FFF8F4] px-4 py-3 text-center"
-            >
-              <p className="text-xs font-bold leading-relaxed text-[#76584D]">
-                {t("fiveMinutes.thankYou")}
-              </p>
-            </motion.div>
-          )}
-        </motion.section>
-      )}
-
-      {/* Completion reward banner */}
-      <AnimatePresence>
-        {completed && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#B85F48]/10 border border-[#B85F48]/25 p-5 rounded-[24px] text-center max-w-sm space-y-1.5"
-          >
-            <div className="flex items-center justify-center text-[#934A38] gap-1">
-              <Sparkles size={16} className="animate-spin" />
-             <span className="font-extrabold text-xs uppercase tracking-widest font-display">
-  {t("sessionCompleted")}
-</span>
-            </div>
-           <p className="text-xs text-[#2F2926] leading-relaxed font-semibold">
-  {t("sessionCompletedMessage")}{" "}
-  <strong className="text-[#934A38]">+30 XP</strong>{" "}
-  {t("sessionCompletedReward")}
-</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+ <string name="notice_community">Respostas da Comunidade</string>
+ <string name="notice_reminder">Lembrete diário</string>
+ <string name="notice_reply">Alguém respondeu à tua partilha na Comunidade.</string>
+ <string name="notice_daily_1">Como correu o teu dia? Um minuto chega para deixares o teu registo.</string>
+ <string name="notice_daily_2">Uma pequena pausa para ti: queres registar como te sentes hoje?</string>
+ <string name="notice_daily_3">O teu dia merece um momento de atenção. Regista-o ao teu ritmo.</string>
+ <string name="widget_title">O meu desafio</string>
+ <string name="widget_day">DIA %1$d</string>
+ <string name="widget_streak">%1$d dias construídos</string>
+ <string name="widget_remaining">Faltam %1$dh %2$dm para concluir hoje</string>
+ <string name="widget_updated">Atualizado às %1$s</string>
+ <string name="widget_empty">Escolhe um hábito para começar</string>
+ <string name="widget_register">Registar</string>
+ <string name="widget_choose">Escolher um hábito</string>
+ <string name="widget_description">O teu desafio e o progresso do dia, no ecrã inicial.</string>
+</resources>

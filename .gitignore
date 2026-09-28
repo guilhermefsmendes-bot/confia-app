@@ -56,3 +56,8 @@ playwright-report/
 test-results/
 
 .secrets/
+
+functions/lib/
+functions/node_modules/
+android/local.properties
+.java/

@@ -1,0 +1,163 @@
+.challenge-module {
+  width: 100%;
+  text-align: center;
+  padding: .35rem 0 .5rem;
+}
+.challenge-clock {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  width: min(100%, 23rem);
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+  border-radius: 50%;
+  container-type: inline-size;
+  background-color: var(--challenge-face);
+  background-image: radial-gradient(circle at 38% 24%, #ffffffb5, transparent 62%);
+  border: 1px solid var(--challenge-edge);
+  box-shadow: 0 16px 38px -22px #71503955, inset 0 0 0 9px #ffffff55, inset 0 2px 4px #ffffffb0;
+  color: #43352b;
+  transition: background-color .8s ease, border-color .8s ease;
+  animation: challenge-clock-arrive .45s ease-out both;
+}
+.challenge-clock-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 74%;
+  gap: clamp(.25rem, 1.3cqw, .375rem);
+  z-index: 1;
+}
+.challenge-clock-heading {
+  margin: 0;
+  font-size: clamp(.68rem, 3.1cqw, .8rem);
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  line-height: 1.35;
+}
+.challenge-clock-day { margin: 0; line-height: 1; }
+.challenge-clock-day-word {
+  display: block;
+  font-size: clamp(.75rem, 3.5cqw, .875rem);
+  letter-spacing: .16em;
+  font-weight: 700;
+  margin-top: clamp(.2rem, 1.5cqw, .4rem);
+}
+.challenge-clock-number {
+  display: block;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(3.6rem, 22cqw, 5.1rem);
+  font-weight: 800;
+  letter-spacing: -.055em;
+  line-height: 1.08;
+  font-variant-numeric: tabular-nums;
+  padding-right: .055em;
+}
+.challenge-clock-number-long { font-size: clamp(2.75rem, 17cqw, 4rem); }
+.challenge-clock-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.challenge-clock-track { stroke: #fff9; }
+.challenge-clock-progress {
+  stroke: var(--challenge-ring);
+  transition: stroke-dashoffset .5s linear, stroke .8s ease;
+}
+.challenge-clock-countdown { width: 100%; }
+.challenge-clock-time {
+  display: block;
+  font-size: clamp(1rem, 5.1cqw, 1.2rem);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: .045em;
+  font-variant-numeric: tabular-nums;
+}
+.challenge-clock-caption {
+  display: block;
+  max-width: 13rem;
+  margin-inline: auto;
+  font-size: clamp(.65rem, 2.9cqw, .76rem);
+  line-height: 1.4;
+  color: #625141;
+}
+.challenge-clock-habit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  width: 100%;
+  margin-top: clamp(.25rem, 1.6cqw, .5rem);
+}
+.challenge-clock-habit-icon { width: 1.4rem; height: 1.4rem; flex-shrink: 0; color: var(--challenge-ring); }
+.challenge-clock-habit-emoji { font-size: 1.5rem; line-height: 1.2; }
+.challenge-clock-habit-name {
+  min-width: 0;
+  margin: 0;
+  font-size: clamp(.75rem, 3.6cqw, .94rem);
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.challenge-clock-streak { margin: 0; font-size: clamp(.67rem, 3cqw, .78rem); line-height: 1.4; color: #625141; }
+.challenge-clock-seed { width: 3rem; height: 3rem; margin: .65rem 0; color: var(--challenge-ring); }
+.challenge-clock-invitation {
+  max-width: 14rem;
+  margin: 0;
+  font-size: clamp(.9rem, 4.9cqw, 1.13rem);
+  line-height: 1.55;
+  font-weight: 600;
+  text-wrap: balance;
+}
+.challenge-clock-trophy {
+  position: absolute;
+  right: 16%;
+  top: 14%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: #fffc;
+  border: 1px solid var(--challenge-edge);
+  color: #765517;
+  box-shadow: 0 3px 8px #71503915;
+}
+.challenge-clock-actions { width: min(100%, 23rem); margin: 1rem auto 0; }
+.challenge-clock-goal { margin: 0 auto .8rem; max-width: 21rem; font-size: .875rem; line-height: 1.55; overflow-wrap: anywhere; color: #6f5d51; }
+.challenge-clock-primary { width: min(100%, 18rem); min-height: 48px; border-radius: 999px; }
+.challenge-clock-note { margin: .6rem auto 0; max-width: 22rem; font-size: .75rem; line-height: 1.55; color: #625141; }
+.challenge-clock-secondary { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 .2rem; margin-top: .4rem; }
+.challenge-clock-secondary button {
+  min-height: 44px;
+  padding: .5rem .65rem;
+  border-radius: .75rem;
+  font-size: .75rem;
+  line-height: 1.3;
+  font-weight: 600;
+  color: #695647;
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+.challenge-clock-secondary button:focus-visible { outline: 2px solid #754734; outline-offset: 2px; }
+@keyframes challenge-clock-arrive { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .challenge-clock, .challenge-clock-progress { animation: none; transition: none; }
+}
+
+.challenge-mountain { position:absolute; inset:0; width:100%; height:100%; border-radius:50%; pointer-events:none; z-index:0; }
+.challenge-clock-content { text-shadow:0 1px 8px #fffdf5b0; }
+
+.challenge-clock-time { color:#43352b; }
+
+.wellbeing-plan-progress { appearance:none; border:0; border-radius:999px; overflow:hidden; background:#e1e7d9; }
+.wellbeing-plan-progress::-webkit-progress-bar { background:#e1e7d9; border-radius:999px; }
+.wellbeing-plan-progress::-webkit-progress-value { background:#71885e; border-radius:999px; }
+.wellbeing-plan-progress::-moz-progress-bar { background:#71885e; border-radius:999px; }

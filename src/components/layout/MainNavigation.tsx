@@ -1,4 +1,4 @@
-import { House, Wind, Target, Zap, Users } from "lucide-react";
+import { House, Wind, Target, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 type Props = {
@@ -17,7 +17,6 @@ export function MainNavigation({
     { label: t("home"), icon: House, index: 0, element: "balance" },
     { label: t("hug"), icon: Wind, index: 1, element: "air" },
     { label: t("objectives"), icon: Target, index: 2, element: "earth" },
-    { label: t("impulse"), icon: Zap, index: 3, element: "fire" },
     { label: t("community"), icon: Users, index: 4, element: "water" },
   ];
   return (

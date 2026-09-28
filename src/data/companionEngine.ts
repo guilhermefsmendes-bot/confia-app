@@ -70,10 +70,11 @@ function average(values: number[]): number | null {
 }
 
 function calculateTrend(values: number[]): MoodTrend {
-  if (values.length < 2) return "insufficient";
+  if (values.length < 4) return "insufficient";
 
-  const first = values[0];
-  const last = values[values.length - 1];
+  const middle=Math.floor(values.length/2);
+  const first=average(values.slice(0,middle))!;
+  const last=average(values.slice(middle))!;
 
   const difference = last - first;
 
@@ -108,11 +109,12 @@ export function analyzeCompanionData(
    * HUMOR
    */
 
-  const mood7 = data.mood.filter(item =>
+  const orderedMood=data.mood.filter(item=>/^\d{4}-\d{2}-\d{2}$/.test(item.date)).sort((a,b)=>a.date.localeCompare(b.date));
+  const mood7 = orderedMood.filter(item =>
     dates7.includes(item.date)
   );
 
-  const mood14 = data.mood.filter(item =>
+  const mood14 = orderedMood.filter(item =>
     dates14.includes(item.date)
   );
 
@@ -152,7 +154,7 @@ export function analyzeCompanionData(
 
   const afternoonAverage7Days = average(afternoon7);
 
-  const moodTrend = calculateTrend(allMood14);
+  const moodTrend = calculateTrend(mood14.map(item=>average([item.morning,item.afternoon].filter((v):v is number=>typeof v==="number"&&Number.isFinite(v)))!).filter(v=>v!==null));
 
   const morningTrend = calculateTrend(morning7);
 
@@ -243,13 +245,13 @@ export function analyzeCompanionData(
     strongestSignal = "afternoon";
 
   } else if (
-    objectiveCompletionRate >= 0.75
+    totalObjectives >= 4 && recentObjectives.length >= 3 && objectiveCompletionRate >= 0.75
   ) {
     strongestSignal = "objectives";
 
   } else if (
     interventionEffectiveness !== null &&
-    interventionEffectiveness >= 2
+    completedInterventions.length >= 3 && interventionEffectiveness >= 2
   ) {
     strongestSignal = "impulse";
 
@@ -263,70 +265,11 @@ export function analyzeCompanionData(
    * MENSAGEM PERSONALIZADA
    */
 
-  let message =
-    "O teu Companheiro está a conhecer melhor os teus ritmos. Continua a registar como te sentes.";
-
-  let suggestion =
-    "Continua a usar a Confia como um pequeno espaço para parar, observar e cuidar de ti.";
-
-  let gratitude =
-    "Hoje pode existir algo pequeno pelo qual vale a pena agradecer.";
-
-  if (strongestSignal === "morning") {
-
-    message =
-      "Esta semana as tuas manhãs têm estado menos positivas do que o resto do dia. Parece existir um padrão interessante no teu ritmo diário.";
-
-    suggestion =
-      "Experimenta criar uma pequena pausa a meio da manhã. Afasta-te por alguns minutos, respira e saboreia o momento sem pressa.";
-
-    gratitude =
-      "Antes de começares o dia, lembra-te de reconhecer uma coisa simples que tens hoje e que merece ser valorizada.";
-
-  } else if (strongestSignal === "afternoon") {
-
-    message =
-      "Tenho reparado que as tuas tardes têm sido um pouco mais difíceis. Talvez seja nessa parte do dia que valha a pena reservar alguns minutos para ti.";
-
-    suggestion =
-      "Quando sentires a tarde a ficar mais pesada, experimenta fazer uma pausa curta antes de continuares.";
-
-    gratitude =
-      "Mesmo num dia difícil, procura uma pequena coisa boa que tenha acontecido até agora.";
-
-  } else if (strongestSignal === "objectives") {
-
-    message =
-      "Tens conseguido cumprir uma boa parte dos teus objetivos. Isso mostra consistência e, sobretudo, vontade de cuidar de ti.";
-
-    suggestion =
-      "Não precisas de fazer tudo. Continua a valorizar cada pequena ação que consegues concretizar.";
-
-    gratitude =
-      "Reconhece hoje uma pequena vitória tua. O progresso também acontece nas coisas simples.";
-
-  } else if (strongestSignal === "impulse") {
-
-    message =
-      "Os teus registos mostram que tens conseguido reduzir a intensidade em alguns momentos difíceis através do Impulso.";
-
-    suggestion =
-      "Quando surgir novamente um momento de maior intensidade, lembra-te de que já tens ferramentas que podem ajudar-te a atravessá-lo.";
-
-    gratitude =
-      "Agradece a ti próprio por teres parado para cuidar de ti quando precisaste.";
-
-  } else if (strongestSignal === "positive") {
-
-    message =
-      "Os teus registos recentes mostram sinais positivos. Há uma evolução que vale a pena reconhecer.";
-
-    suggestion =
-      "Continua a observar o que estás a fazer nos dias em que te sentes melhor. Esses padrões podem ensinar-te muito.";
-
-    gratitude =
-      "Hoje vale a pena agradecer por alguma coisa que esteja a correr um pouco melhor.";
-  }
+  // Legacy API returns i18n keys; the live Companion uses the unified Brain.
+  const suffix=strongestSignal.charAt(0).toUpperCase()+strongestSignal.slice(1);
+  const message="companionMessage"+suffix;
+  const suggestion="companionSuggestion"+suffix;
+  const gratitude="companionGratitude"+suffix;
 
   return {
     moodTrend,

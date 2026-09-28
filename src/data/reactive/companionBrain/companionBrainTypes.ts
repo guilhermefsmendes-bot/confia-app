@@ -84,7 +84,8 @@ export interface CompanionBrainCandidate {
       | "impulse"
       | "patterns"
       | "objectives"
-      | "community";
+      | "community"
+      | "habits" | "habitHistory" | "nutrition" | "exercise" | "plans" | "breathe" | "progress";
   };
 
   metadata?: Record<string, unknown>;
@@ -96,6 +97,7 @@ export interface CompanionBrainDecision {
 }
 
 export interface CompanionBrainShownMessage {
+  translationKey?: string;
   id: string;
   category: CompanionBrainCategory;
   reason: string;

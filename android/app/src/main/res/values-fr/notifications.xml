@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+ <string name="notice_community">Réponses de la Communauté</string>
+ <string name="notice_reminder">Rappel quotidien</string>
+ <string name="notice_reply">Quelqu’un a répondu à ton partage dans la Communauté.</string>
+ <string name="notice_daily_1">Comment s’est passée ta journée ? Une minute suffit pour la noter.</string>
+ <string name="notice_daily_2">Une petite pause pour toi : veux-tu noter comment tu te sens aujourd’hui ?</string>
+ <string name="notice_daily_3">Ta journée mérite un moment d’attention. Note-la à ton rythme.</string>
+ <string name="widget_title">Mon défi</string>
+ <string name="widget_day">JOUR %1$d</string>
+ <string name="widget_streak">%1$d jours construits</string>
+ <string name="widget_remaining">Encore %1$dh %2$dm avant la fin du jour</string>
+ <string name="widget_updated">Actualisé à %1$s</string>
+ <string name="widget_empty">Choisis une habitude pour commencer</string>
+ <string name="widget_register">Noter</string>
+ <string name="widget_choose">Choisir une habitude</string>
+ <string name="widget_description">Ton défi et ta progression sur l’écran d’accueil.</string>
+</resources>

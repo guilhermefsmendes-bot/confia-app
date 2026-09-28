@@ -8,7 +8,10 @@ export type PersonalEventType =
   | "intervention"
   | "context"
   | "insight_feedback"
-  | "experiment";
+  | "experiment"
+  | "nutrition"
+  | "exercise"
+  | "habit_challenge";
 
 export type PersonalEventSource =
   | "daily_checkin"
@@ -19,7 +22,8 @@ export type PersonalEventSource =
   | "app_context"
   | "insight"
   | "microexperiment"
-  | "migration";
+  | "migration"
+  | "habits";
 
 export interface PersonalEventBase {
   id: string;
@@ -80,6 +84,10 @@ export interface ExperimentEvent extends PersonalEventBase {
   metadata?: { experimentId?: string; phase?: "start" | "measure" | "complete"; hypothesis?: string; start?: string; end?: string; baseline?: number | string; targetMetric?: string; completion?: string; outcome?: string; status?: "active" | "complete"; } & Record<string, unknown>;
 }
 
+export interface LifestyleEvent extends PersonalEventBase {
+  type: "nutrition" | "exercise" | "habit_challenge";
+}
+
 export type PersonalEvent =
   | MoodEvent
   | CheckInEvent
@@ -88,7 +96,8 @@ export type PersonalEvent =
   | InterventionEvent
   | ContextEvent
   | InsightFeedbackEvent
-  | ExperimentEvent;
+  | ExperimentEvent
+  | LifestyleEvent;
 
 export function localDateFromTimestamp(timestamp: string): string {
   const date = new Date(timestamp);

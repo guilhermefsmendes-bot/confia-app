@@ -12,7 +12,13 @@
     "test": "node --import tsx --test src/data/personal/__tests__/*.test.ts src/data/reactive/__tests__/*.test.ts src/utils/__tests__/*.test.ts",
     "security:audit": "npm audit --omit=dev --audit-level=high",
     "test:rules": "firebase emulators:exec --only firestore 'node --import tsx --test src/data/community/__tests__/firestore.rules.test.ts'",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:habits": "node --import tsx --test src/data/habits/__tests__/habits.test.ts src/data/habits/__tests__/storage.test.ts src/data/habits/__tests__/wellbeing.test.ts",
+    "test:habits:rules": "firebase emulators:exec --only firestore --project demo-confia-habits 'node --import tsx --test src/data/habits/__tests__/habits.rules.test.ts'",
+    "test:habits:e2e": "playwright test tests/e2e/habits.spec.ts --workers=1",
+    "test:zen": "node --import tsx --test src/data/zen/zen.test.ts src/notifications/permission.test.ts",
+    "test:zen:e2e": "playwright test --config playwright.zen.config.ts",
+    "test:companion": "node --import tsx --test src/data/reactive/__tests__/companionDaily.test.ts src/data/reactive/companionBrain/__tests__/*.test.ts"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",

@@ -1,3 +1,5 @@
+import HabitInsights from "./Habits/HabitInsights";
+import { useLocalDay } from "./Habits/shared";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Brain, Compass, Info, MessageSquareHeart, Plus, Sparkles, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
@@ -17,6 +19,7 @@ type Props = { onBack: () => void };
 
 export default function PersonalMap({ onBack }: Props) {
   const { t } = useTranslation();
+  const habitToday = useLocalDay();
   const [personalEventRevision, setPersonalEventRevision] = useState(0);
   const [memoryRevision, setMemoryRevision] = useState(0);
   const [manualKind, setManualKind] = useState<ManualNoteKind>("helps");
@@ -40,7 +43,7 @@ export default function PersonalMap({ onBack }: Props) {
     const target = [...events].reverse().find(e => (e.type === "mood" || e.type === "checkin") && typeof e.value === "number");
     return target ? findAnalogousMoments(events, target, 3) : [];
   }, [events]);
-  const insights = useMemo(() => applyInsightLifecycle(buildPersonalInsights(events)), [events]);
+  const insights = useMemo(() => applyInsightLifecycle(buildPersonalInsights(events).filter(i => !i.fingerprint.startsWith("lifestyle:"))), [events]);
   const replay = useMemo(() => buildReplayMoments(events), [events]);
   const twin = useMemo(() => buildPersonalTwinSummary(events), [events]);
   const forecasts = useMemo(() => buildForecastSignals(events), [events]);
@@ -82,6 +85,8 @@ export default function PersonalMap({ onBack }: Props) {
           <Metric label={t("personalMap.completeness")} value={`${Math.round(model.completeness * 100)}%`} />
         </div>
       </section>
+
+      <div className="mt-4"><HabitInsights events={events} today={habitToday} showEmpty={false} /></div>
 
       <section className="mt-4 rounded-[30px] border border-[#E5D7C7] bg-[#FFFCF7] p-5 shadow-sm sm:p-6">
         <div className="flex items-start gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#3F2C27] text-white"><Sparkles size={19}/></div><div><p className="text-[10px] font-black uppercase tracking-[.2em] text-[#B86B52]">CONFIA · {t("personalMap.liveMemory.eyebrow")}</p><h2 className="mt-1 text-xl font-black text-[#3F2C27]">{t("personalMap.liveMemory.title")}</h2><p className="mt-2 text-xs leading-5 text-[#806D65]">{t("personalMap.liveMemory.subtitle")}</p></div></div>

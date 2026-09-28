@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+ <string name="notice_community">Respuestas de la Comunidad</string>
+ <string name="notice_reminder">Recordatorio diario</string>
+ <string name="notice_reply">Alguien respondió a tu publicación en la Comunidad.</string>
+ <string name="notice_daily_1">¿Cómo fue tu día? Un minuto basta para dejar tu registro.</string>
+ <string name="notice_daily_2">Una pequeña pausa para ti: ¿quieres registrar cómo te sientes hoy?</string>
+ <string name="notice_daily_3">Tu día merece un momento de atención. Regístralo a tu ritmo.</string>
+ <string name="widget_title">Mi reto</string>
+ <string name="widget_day">DÍA %1$d</string>
+ <string name="widget_streak">%1$d días construidos</string>
+ <string name="widget_remaining">Quedan %1$dh %2$dm para terminar hoy</string>
+ <string name="widget_updated">Actualizado a las %1$s</string>
+ <string name="widget_empty">Elige un hábito para empezar</string>
+ <string name="widget_register">Registrar</string>
+ <string name="widget_choose">Elegir un hábito</string>
+ <string name="widget_description">Tu reto y el progreso del día en la pantalla de inicio.</string>
+</resources>

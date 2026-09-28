@@ -37,6 +37,8 @@ import {
   collectCompanionData,
   CompanionCollectedData,
 } from "../companionData";
+import { readPersonalEvents } from "../personal/personalEventStorage";
+import { buildPersonalSignalSnapshot } from "../personal/personalSignalEngine";
 
 import {
   REACTIVE_RESPONSES,
@@ -473,7 +475,7 @@ function detectSituation(
       situation: "impulse_effective",
       confidence: 0.91,
       reasoning:
-        "Os episódios do Impulso mostram uma redução média relevante da intensidade.",
+        "Os episódios do apoio imediato mostram uma redução média relevante da intensidade.",
     };
   }
 
@@ -488,7 +490,7 @@ function detectSituation(
       situation: "impulse_partially_effective",
       confidence: 0.82,
       reasoning:
-        "Os episódios do Impulso mostram alguma redução de intensidade, mas ainda limitada.",
+        "Os episódios do apoio imediato mostram alguma redução de intensidade, mas ainda limitada.",
     };
   }
 
@@ -719,6 +721,13 @@ export function buildReactiveContext(
   const memory =
     buildReactiveRecentMemory(data);
 
+  // Lifestyle/habit intelligence is local, bounded and cached. Explicit action
+  // flows keep priority; the shared snapshot mainly enriches general/pattern analysis.
+  const personalSignals =
+    !input.source || input.source === "general" || input.source === "pattern"
+      ? buildPersonalSignalSnapshot(readPersonalEvents())
+      : undefined;
+
   const moodRecords = getMoodRecords(data);
 
   const recentMoods = moodRecords
@@ -757,21 +766,21 @@ export function buildReactiveContext(
         situation: "impulse_effective" as const,
         confidence: 0.96,
         reasoning:
-          "O Impulso acabado de concluir reduziu a intensidade em pelo menos dois pontos.",
+          "O apoio imediato acabado de concluir reduziu a intensidade em pelo menos dois pontos.",
       };
     } else if (reduction > 0) {
       detection = {
         situation: "impulse_partially_effective" as const,
         confidence: 0.90,
         reasoning:
-          "O Impulso acabado de concluir produziu uma pequena redução de intensidade.",
+          "O apoio imediato acabado de concluir produziu uma pequena redução de intensidade.",
       };
     } else {
       detection = {
         situation: "impulse_not_effective" as const,
         confidence: 0.92,
         reasoning:
-          "O Impulso acabado de concluir não reduziu a intensidade.",
+          "O apoio imediato acabado de concluir não reduziu a intensidade.",
       };
     }
 
@@ -935,6 +944,24 @@ export function buildReactiveContext(
 
   } else {
     detection = detectSituation(metrics, data);
+
+    // A strong personal lifestyle/habit pattern may replace only generic/stable
+    // classifications. It never overrides low mood, SOS, explicit actions or
+    // other higher-priority emotional states.
+    const topPersonal = personalSignals?.topSignal;
+    if (
+      topPersonal &&
+      topPersonal.kind === "association" &&
+      topPersonal.confidence >= 0.6 &&
+      (topPersonal.status === "possible" || topPersonal.status === "consistent") &&
+      ["multiple_signals", "mood_stable", "consistent_use"].includes(detection.situation)
+    ) {
+      detection = {
+        situation: "pattern_detected" as const,
+        confidence: topPersonal.confidence,
+        reasoning: `Padrão pessoal ${topPersonal.metric} (${topPersonal.timing}) com ${topPersonal.evidenceCount} observações; associação, não causalidade.`,
+      };
+    }
   }
 
   const lastDate =
@@ -955,6 +982,7 @@ export function buildReactiveContext(
     recentDates,
     hasPreviousData: metrics.daysTracked > 1,
     daysSinceLastRecord,
+    personalSignals,
   };
 }
 
@@ -1594,7 +1622,11 @@ export function analyzeReactiveState(
         getConfidence(context) * 100
       )}%.`,
 
-    confidence: getConfidence(context),
+    confidence: context.personalSignals?.topSignal && context.situation === "pattern_detected"
+      ? context.personalSignals.topSignal.confidence
+      : getConfidence(context),
+
+    personalSignals: context.personalSignals,
   };
 }
 

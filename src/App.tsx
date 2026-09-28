@@ -1,5 +1,10 @@
+import {habitDestination,screenName} from "./navigation";
+import {recordPersonalScreenView} from "./data/personal/personalAnalytics";
+import type { CompanionAction } from "./components/Companheiro/CompanionVoice";
+import { startNativeNotices,connectNoticeNavigation } from "./notifications/service";
+import type { NoticeTarget } from "./notifications/model";
 import { emitCompanionBrainEvent } from "./data/reactive/companionBrain/companionBrainEvents";
-import React, { lazy, Suspense, useState, useEffect, useRef, useMemo } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { AppHeader } from "./components/layout/AppHeader";
 import { MainNavigation } from "./components/layout/MainNavigation";
 import {
@@ -35,6 +40,7 @@ import { auth, initAnonymousAuth } from "./firebaseAuth";
 import { db } from "./firebaseFirestore";
 import {
   collection,
+  getDoc,
   onSnapshot,
   query,
   where,
@@ -67,20 +73,19 @@ const HomeShop = lazy(() => import("./components/HomeShop"));
 import { PartilhaFeed } from "./components/PartilhaFeed";
 import { ObjectivosList } from "./components/ObjectivosList";
 import { WeeklyGoalSection } from "./components/WeeklyGoalSection";
-import { ImpulsoSOS } from "./components/ImpulsoSOS";
+const NotificationSettings = lazy(() => import("./components/NotificationSettings"));
+const HabitDashboard = lazy(() => import("./components/Habits/HabitDashboard"));
 const ProgressoDashboard = lazy(() => import("./components/ProgressoDashboard").then(m => ({ default: m.ProgressoDashboard })));
 const StopMode = lazy(() => import("./components/StopMode").then(m => ({ default: m.StopMode })));
 const CommunityChat = lazy(() => import("./components/CommunityChat").then(m => ({ default: m.CommunityChat })));
 const TriageModal = lazy(() => import("./components/TriageModal").then(m => ({ default: m.TriageModal })));
 import { AbracoTimer } from "./components/AbracoTimer";
-const BlindVent = lazy(() => import("./components/BlindVent"));
 
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
 
 import type { ReactiveResult } from "./data/reactive/reactiveTypes";
 import type { PersonalInsight } from "./data/personal/personalInsights";
-type HomeCompanionBrainDecision = ReturnType<typeof import("./data/reactive/companionBrain/homeDecision").getHomeCompanionBrainDecision>;
 import {
   recordReactiveResponse,
 } from "./data/reactive/reactiveHistoryStorage";
@@ -252,6 +257,7 @@ return parsed.items
 
   useEffect(() => {
     let cancelled = false;
+    let unsubscribe = () => {};
     void import("./data/personal").then(({ PERSONAL_EVENTS_UPDATED_EVENT, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle }) => {
       if (cancelled) return;
       const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
@@ -265,9 +271,9 @@ return parsed.items
           const actionability = { high: 3, medium: 2, low: 1 };
           return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
         })[0]);
-      return () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+      unsubscribe = () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
     }).catch(() => { if (!cancelled) setPersonalDiscovery(undefined); });
-    return () => { cancelled = true; };
+    return () => { cancelled = true; unsubscribe(); };
   }, [ratings, personalEventRevision]);
 
   const [posts, setPosts] = useState<SharePost[]>(() =>
@@ -275,6 +281,7 @@ return parsed.items
   );
 
   const [currentTab, setCurrentTab] = useState<number>(0);
+  useEffect(()=>recordPersonalScreenView(screenName(currentTab,homeScreen)),[currentTab,homeScreen]);
 const stopAbracoRef = useRef<(() => void) | null>(null);
 const changeTab = (tab:number) => {
   // Sempre que mudamos de separador, fechamos qualquer sub-ecrã
@@ -289,8 +296,15 @@ const [avatarMemoryMessage, setAvatarMemoryMessage] = useState("");
   const [prevLevel, setPrevLevel] = useState(avatar.level);
   const [showSplash, setShowSplash] = useState(true);
 const [showStopMode, setShowStopMode] = useState(false);
-const [showBlindVent, setShowBlindVent] = useState(false);
+const [openHabitSupport, setOpenHabitSupport] = useState(false);
+const [homeOverviewExpanded,setHomeOverviewExpanded]=useState(false);
+useEffect(() => { void import("./data/habits/sync").then(m => m.startHabitSync()); }, []);
 const [showCommunityTerms, setShowCommunityTerms] = useState(false);
+const [noticeDestination,setNoticeDestination]=useState<NoticeTarget|null>(null);
+const [habitEntry,setHabitEntry]=useState({page:"home",key:0});
+const [noticeMessage,setNoticeMessage]=useState("");
+const [noticeMessageId,setNoticeMessageId]=useState<string|undefined>();
+useEffect(()=>{const stop=connectNoticeNavigation(setNoticeDestination);void startNativeNotices();return stop;},[]);
 
 // Chat privado da comunidade
 const [chatPost, setChatPost] = useState<SharePost | null>(null);
@@ -310,8 +324,33 @@ const [pendingCommunityChat, setPendingCommunityChat] = useState<{
 const [openPendingChatOnCommunityEntry, setOpenPendingChatOnCommunityEntry] =
   useState(false);
 const [showDailyCheckIn, setShowDailyCheckIn] = useState(
-  () => !hasCompletedToday()
+  () => false
 );
+  useEffect(()=>{
+    if(!noticeDestination)return;
+    let cancelled=false;
+    const target=noticeDestination;setNoticeMessage("");
+    if(target.kind==="sky"){setShowDailyCheckIn(false);setCurrentTab(1);setHomeScreen("innerCanvas");return;}
+    if(target.kind==="checkin"){setCurrentTab(0);setHomeScreen("home");setShowDailyCheckIn(true);return;}
+    if(target.kind==="habit"){const destination=habitDestination(target.action);setShowDailyCheckIn(false);setOpenHabitSupport(false);setHabitEntry(old=>({page:destination.page,key:old.key+1}));setCurrentTab(destination.tab);
+      setHomeScreen("home");
+      requestAnimationFrame(() => document.getElementById("home-habits")?.scrollIntoView({block:"start"}));return;}
+    setCurrentTab(4);setOpenPendingChatOnCommunityEntry(false);
+    let handled=false;
+    const stop=auth.onAuthStateChanged(user=>{if(!user||cancelled||handled)return;handled=true;void (async()=>{
+      try {
+        const chat=await getDoc(doc(db,"chats",target.chatId));
+        if(!chat.exists()||!chat.data().participants?.includes(user.uid)||chat.data().postId!==target.postId)throw Error("unavailable");
+        const post=await getDoc(doc(db,"posts",target.postId));
+        if(!post.exists())throw Error("unavailable");
+        if(cancelled)return;
+        const data=post.data();
+        setChatIdOverride(target.chatId);setNoticeMessageId(target.messageId);
+        setChatPost({...data,id:post.id,timestamp:t("justNow"),yellowLikes:data.yellowLikes??0,greenLikes:data.greenLikes??0,redLikes:data.redLikes??0} as SharePost);
+      }catch{if(!cancelled)setNoticeMessage(t("notifications.unavailable"));}
+    })();});
+    return()=>{cancelled=true;stop();};
+  },[noticeDestination]);
   // Open STOP mode from Android widget/deep link
   useEffect(() => {
     const handleStopLink = () => {
@@ -581,6 +620,60 @@ const homeNowMemory = useMemo(() => {
  * - balão;
  * - expressão visual.
  */
+const handleCompanionAction = useCallback((target: CompanionAction) => {
+    if (["habits","habitHistory","nutrition","exercise","plans"].includes(target)) {
+      setOpenHabitSupport(false);setHabitEntry(old=>({page:target==="habitHistory"?"history":target==="habits"?"home":target,key:old.key+1}));setCurrentTab(0);setHomeScreen("home");
+      requestAnimationFrame(()=>document.getElementById("home-habits")?.scrollIntoView({block:"start"}));return;
+    }
+    if(target==="breathe"){setCurrentTab(1);setHomeScreen("home");return;}
+    if(target==="objectives"){setCurrentTab(2);setHomeScreen("home");return;}
+    if(target==="community"){setCurrentTab(4);setHomeScreen("home");return;}
+    if(target==="mood"||target==="record"){setCurrentTab(0);setHomeScreen("home");setShowDailyCheckIn(true);return;}
+
+    if (target === "impulse") {
+      setOpenHabitSupport(true);
+      setHomeScreen("home");
+      setCurrentTab(0);
+      setHomeScreen("home");
+      requestAnimationFrame(() => document.getElementById("home-habits")?.scrollIntoView({block:"start"}));
+      return;
+    }
+
+    if (target === "patterns") {
+      setHomeScreen("map");
+      setCurrentTab(0);
+      return;
+    }
+
+    if (target === "progress") {
+      // CONFIA_COMPANION_OPEN_PROGRESS
+      emitCompanionBrainEvent(
+        "context_changed",
+        {
+          from: "home",
+          to: "progress",
+          source: "companion_action",
+        }
+      );
+
+      setHomeScreen("progress");
+      setCurrentTab(0);
+      return;
+    }
+
+
+    if (target === "inventory") {
+      setHomeScreen("inventory");
+      setCurrentTab(0);
+      return;
+    }
+
+    if (target === "shop") {
+      setHomeScreen("shop");
+      setCurrentTab(0);
+    }
+}, []);
+
 const [homeReactiveResult, setHomeReactiveResult] =
   useState<ReactiveResult | null>(null);
 
@@ -1070,6 +1163,7 @@ const handleHomeNowAction = () => {
 
   switch (homeNowAction.kind) {
     case "impulse":
+      setOpenHabitSupport(true);
       changeTab(3);
       return;
 
@@ -1163,6 +1257,19 @@ const handleHomeNowAction = () => {
 const [selectedDate, setSelectedDate] = useState(
   getLocalCalendarDate()
 );
+
+const companionVoiceInput = useMemo(() => ({
+  currentTab: 0,
+  homeScreen: "home",
+  selectedDate,
+  todayLogged,
+  morningRating,
+  afternoonRating,
+  ratings,
+  personalDiscovery,
+  reactiveResult: homeReactiveResult,
+}), [selectedDate, todayLogged, morningRating, afternoonRating, ratings, personalDiscovery, homeReactiveResult]);
+
   // Save states to localStorage on changes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.AVATAR, JSON.stringify(avatar));
@@ -1432,28 +1539,6 @@ useEffect(() => {
    * Nesta fase só usamos informação que podemos afirmar
    * com segurança.
    */
-  const [homeCompanionBrainDecision, setHomeCompanionBrainDecision] = useState<HomeCompanionBrainDecision>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (currentTab !== 0 || homeScreen !== "home") {
-      setHomeCompanionBrainDecision(null);
-      return () => { cancelled = true; };
-    }
-    void import("./data/reactive/companionBrain/homeDecision")
-      .then(({ getHomeCompanionBrainDecision }) => {
-        if (cancelled) return;
-        setHomeCompanionBrainDecision(getHomeCompanionBrainDecision({
-          currentTab, homeScreen, selectedDate, todayLogged, morningRating, afternoonRating, ratings,
-          personalDiscovery: personalDiscovery?.messageKey
-            ? { ...personalDiscovery, messageKey: personalDiscovery.messageKey }
-            : undefined,
-        }));
-      })
-      .catch(() => { if (!cancelled) setHomeCompanionBrainDecision(null); });
-    return () => { cancelled = true; };
-  }, [currentTab, homeScreen, selectedDate, todayLogged, morningRating, afternoonRating, ratings, personalDiscovery]);
-
 // Handle XP increments and level ups
   const addXp = (amount: number) => {
     setAvatar(prev => {
@@ -2009,7 +2094,7 @@ const getRatingLabel = (val: number) => {
 
 return (
     <div className="confia-app min-h-screen flex flex-col antialiased">
-{showDailyCheckIn && (
+{showDailyCheckIn && currentTab === 0 && (
   <LazySection>
     <DailyCheckIn
       onComplete={() => {
@@ -2070,6 +2155,7 @@ className="flex items-center justify-center w-24 h-24 relative"
               key="main-menu"
               className="space-y-5"
             >
+              <button type="button" onClick={()=>setShowDailyCheckIn(true)} className="flex min-h-12 w-full items-center justify-between rounded-2xl border border-[#E8DDD7] bg-white px-4 py-3 text-left text-sm font-semibold"><span>{t("dailyCheckIn.moodQuestion")}{todayLogged&&<span className="mt-1 block text-xs font-normal">{getRatingLabel(afternoonRating).text}</span>}</span><span aria-hidden="true">→</span></button>
               {/* Interactive Amigo Panel */}
               <div className="space-y-4">
 
@@ -2353,9 +2439,7 @@ className="flex items-center justify-center w-24 h-24 relative"
   afternoonRating={afternoonRating}
   handlePetAvatar={handlePetAvatar}
   worldMood={worldMood}
-  reactiveResult={homeReactiveResult}
-  companionBrainDecision={homeCompanionBrainDecision}
-  relationalMemory={homeCompanionRelationalMemory}
+  voiceInput={companionVoiceInput}
   relationshipStage={
     isFirstContact
       ? "first_contact"
@@ -2367,52 +2451,7 @@ className="flex items-center justify-center w-24 h-24 relative"
   }
   relationshipObservationCount={ratings.length}
 
-  onCompanionAction={(target) => {
-    if (target === "impulse") {
-      setHomeScreen("home");
-      setCurrentTab(3);
-      return;
-    }
-
-    if (target === "patterns") {
-      setHomeScreen("patterns");
-      setCurrentTab(0);
-      return;
-    }
-
-    if (target === "progress") {
-      // CONFIA_COMPANION_OPEN_PROGRESS
-      emitCompanionBrainEvent(
-        "context_changed",
-        {
-          from: "home",
-          to: "progress",
-          source: "companion_action",
-        }
-      );
-
-      setHomeScreen("progress");
-      setCurrentTab(0);
-      return;
-    }
-
-    if (target === "record") {
-      setHomeScreen("home");
-      setCurrentTab(0);
-      return;
-    }
-
-    if (target === "inventory") {
-      setHomeScreen("inventory");
-      setCurrentTab(0);
-      return;
-    }
-
-    if (target === "shop") {
-      setHomeScreen("shop");
-      setCurrentTab(0);
-    }
-  }}
+  onCompanionAction={handleCompanionAction}
 />
 </LazySection>
 
@@ -2520,11 +2559,10 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 {/* Hoje — resumo + registo diário */}
               <div className="mt-1">
-                <LazySection>
-<HomeProgressSummary
-  onOpenProgress={() => setHomeScreen("progress")}
-/>
-</LazySection>
+                <details open={homeOverviewExpanded} onToggle={e=>setHomeOverviewExpanded(e.currentTarget.open)} className="mb-3 rounded-2xl border border-[#E8DDD7] bg-white p-4">
+                  <summary className="min-h-11 cursor-pointer text-sm font-semibold">{t("homeProgress.evolutionTitle")}</summary>
+                  {homeOverviewExpanded&&<LazySection><HomeProgressSummary onOpenProgress={()=>setHomeScreen("progress")}/></LazySection>}
+                </details>
 
                 {/* Registo diário premium — integrado na área Hoje */}
                 <section
@@ -2700,113 +2738,18 @@ className="flex items-center justify-center w-24 h-24 relative"
                 </section>
               </div>
 
-{/* CONFIA — O TEU CÉU / AÇÃO PRINCIPAL ACIMA DO SOS */}
-    <div className="mb-3">
-      <button
-        type="button"
-        onClick={() => setHomeScreen("innerCanvas")}
-        aria-label={t("innerCanvas.homeTitle")}
-        className="group relative w-full overflow-hidden rounded-[24px] border border-[#6976B5]/30 bg-[#090D20] px-4 py-4 text-left shadow-[0_12px_30px_rgba(10,14,35,0.20)] transition-all duration-300 active:scale-[0.99]"
-      >
-        {/* Fundo profundo */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(118,135,220,0.23),transparent_34%),radial-gradient(circle_at_84%_82%,rgba(117,79,171,0.20),transparent_38%)]"
-        />
-
-        {/* Pequeno brilho azul */}
-        <div
-          aria-hidden="true"
-          className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#7B83D5]/15 blur-2xl transition-transform duration-500 group-hover:scale-110"
-        />
-
-        {/* Campo de estrelas */}
-        <div
-          aria-hidden="true"
-          className="absolute left-[7%] top-[21%] h-1 w-1 rounded-full bg-white/75 shadow-[37px_22px_0_rgba(255,255,255,0.40),76px_-7px_0_rgba(255,255,255,0.72),116px_27px_0_rgba(255,255,255,0.34),159px_-3px_0_rgba(255,255,255,0.56),204px_23px_0_rgba(255,255,255,0.38),248px_-5px_0_rgba(255,255,255,0.62),282px_28px_0_rgba(255,255,255,0.32)]"
-        />
-
-        <span
-          aria-hidden="true"
-          className="absolute bottom-[17%] left-[43%] h-1 w-1 rounded-full bg-[#DCE4FF]/70"
-        />
-
-        <span
-          aria-hidden="true"
-          className="absolute right-[18%] top-[20%] h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_7px_rgba(255,255,255,0.75)]"
-        />
-
-        {/* Constelação decorativa subtil */}
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 150 70"
-          className="pointer-events-none absolute right-10 top-1/2 h-[65px] w-[130px] -translate-y-1/2 opacity-[0.18]"
-        >
-          <path
-            d="M8 46 L35 24 L62 39 L91 15 L121 34 L142 20"
-            fill="none"
-            stroke="white"
-            strokeWidth="1"
-          />
-
-          {[
-            [8, 46],
-            [35, 24],
-            [62, 39],
-            [91, 15],
-            [121, 34],
-            [142, 20],
-          ].map(([cx, cy], index) => (
-            <circle
-              key={`home-sky-star-${index}`}
-              cx={cx}
-              cy={cy}
-              r={index === 3 ? 2.6 : 1.8}
-              fill="white"
-            />
-          ))}
-        </svg>
-
-        <div className="relative z-10 flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3.5">
-            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-white/15 bg-white/[0.08] shadow-[inset_0_0_18px_rgba(170,185,255,0.08)]">
-              <Sparkles
-                size={21}
-                strokeWidth={1.7}
-                className="text-[#F5F2E9]"
-              />
-
-              <span
-                aria-hidden="true"
-                className="absolute right-1.5 top-1.5 h-1 w-1 rounded-full bg-white shadow-[0_0_7px_rgba(255,255,255,0.9)]"
-              />
-            </div>
-
-            <div className="min-w-0">
-              <p className="text-[9px] font-black uppercase tracking-[0.21em] text-[#AAB5E6]">
-                ✦ CONFIA
-              </p>
-
-              <p className="mt-0.5 text-[16px] font-black tracking-[0.02em] text-white">
-                {t("innerCanvas.homeTitle")}
-              </p>
-
-              <p className="mt-0.5 max-w-[190px] text-[10px] font-semibold leading-snug text-[#B7BEDD]">
-                {t("innerCanvas.homeSubtitle")}
-              </p>
-            </div>
-          </div>
-
-          <span
-            aria-hidden="true"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.08] text-base font-light text-white transition-transform duration-300 group-hover:translate-x-0.5"
-          >
-            →
-          </span>
-        </div>
-      </button>
-    </div>
-
+{/* Hábitos — relógio, Alimenta-me e Exercício entre Classificar o teu dia e SOS */}
+<section id="home-habits" className="scroll-mt-24" aria-label={t("habitHub.title")}>
+  <Suspense fallback={<p role="status">{t("loading")}</p>}>
+    <HabitDashboard
+      embedded
+      onAddXp={addXp}
+      openSupport={openHabitSupport}
+      initialPage={habitEntry.page}
+      navigationKey={habitEntry.key}
+    />
+  </Suspense>
+</section>
 
 {/* Apoio — acesso SOS discreto e sempre disponível */}
 <button
@@ -2915,7 +2858,7 @@ className="flex items-center justify-center w-24 h-24 relative"
   <Suspense fallback={<ScreenLoading label={t("loading")} />}><PersonalExperiments onBack={() => setHomeScreen("home")} /></Suspense>
 )}
 
-{currentTab === 0 && homeScreen === "innerCanvas" && (
+{currentTab === 1 && homeScreen === "innerCanvas" && (
   <div
     key="inner-canvas-screen"
     className="flex-1"
@@ -3005,8 +2948,8 @@ className="flex items-center justify-center w-24 h-24 relative"
 
       <LazySection>
 <Companion
-        avatarLevel={avatar.level}
-        avatarXp={avatar.xp}
+ input={{currentTab:0,homeScreen:"home",selectedDate,todayLogged,morningRating,afternoonRating,ratings,personalDiscovery}}
+ onAction={handleCompanionAction}
       />
 </LazySection>
 
@@ -3072,6 +3015,7 @@ className="flex items-center justify-center w-24 h-24 relative"
       </h2>
     </div>
 
+<Suspense fallback={<ScreenLoading label={t("loading")} />}><NotificationSettings/></Suspense>
 {/* Idioma */}
   <div className="bg-white border border-[#B85F48]/20 rounded-3xl p-5 shadow-sm mb-4">
     <h3 className="text-sm font-black text-[#2F2926] mb-1">
@@ -3204,7 +3148,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 )}
 
 
-{currentTab === 1 && (
+{currentTab === 1 && homeScreen !== "innerCanvas" && (
             /* TAB 2: ABRAÇO (TIMER DE RESPIRAÇÃO) */
             <motion.div
               key="embrace-tab"
@@ -3213,6 +3157,115 @@ className="flex items-center justify-center w-24 h-24 relative"
               exit={{ opacity: 0, y: -10 }}
             >
               <div className="confia-surface-panel">
+{/* CONFIA — O TEU CÉU / AÇÃO PRINCIPAL ACIMA DO SOS */}
+    <div className="mb-3">
+      <button
+        type="button"
+        onClick={() => setHomeScreen("innerCanvas")}
+        aria-label={t("innerCanvas.homeTitle")}
+        className="group relative w-full overflow-hidden rounded-[24px] border border-[#6976B5]/30 bg-[#090D20] px-4 py-4 text-left shadow-[0_12px_30px_rgba(10,14,35,0.20)] transition-all duration-300 active:scale-[0.99]"
+      >
+        {/* Fundo profundo */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(118,135,220,0.23),transparent_34%),radial-gradient(circle_at_84%_82%,rgba(117,79,171,0.20),transparent_38%)]"
+        />
+
+        {/* Pequeno brilho azul */}
+        <div
+          aria-hidden="true"
+          className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#7B83D5]/15 blur-2xl transition-transform duration-500 group-hover:scale-110"
+        />
+
+        {/* Campo de estrelas */}
+        <div
+          aria-hidden="true"
+          className="absolute left-[7%] top-[21%] h-1 w-1 rounded-full bg-white/75 shadow-[37px_22px_0_rgba(255,255,255,0.40),76px_-7px_0_rgba(255,255,255,0.72),116px_27px_0_rgba(255,255,255,0.34),159px_-3px_0_rgba(255,255,255,0.56),204px_23px_0_rgba(255,255,255,0.38),248px_-5px_0_rgba(255,255,255,0.62),282px_28px_0_rgba(255,255,255,0.32)]"
+        />
+
+        <span
+          aria-hidden="true"
+          className="absolute bottom-[17%] left-[43%] h-1 w-1 rounded-full bg-[#DCE4FF]/70"
+        />
+
+        <span
+          aria-hidden="true"
+          className="absolute right-[18%] top-[20%] h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_7px_rgba(255,255,255,0.75)]"
+        />
+
+        {/* Constelação decorativa subtil */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 150 70"
+          className="pointer-events-none absolute right-10 top-1/2 h-[65px] w-[130px] -translate-y-1/2 opacity-[0.18]"
+        >
+          <path
+            d="M8 46 L35 24 L62 39 L91 15 L121 34 L142 20"
+            fill="none"
+            stroke="white"
+            strokeWidth="1"
+          />
+
+          {[
+            [8, 46],
+            [35, 24],
+            [62, 39],
+            [91, 15],
+            [121, 34],
+            [142, 20],
+          ].map(([cx, cy], index) => (
+            <circle
+              key={`home-sky-star-${index}`}
+              cx={cx}
+              cy={cy}
+              r={index === 3 ? 2.6 : 1.8}
+              fill="white"
+            />
+          ))}
+        </svg>
+
+        <div className="relative z-10 flex items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3.5">
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-white/15 bg-white/[0.08] shadow-[inset_0_0_18px_rgba(170,185,255,0.08)]">
+              <Sparkles
+                size={21}
+                strokeWidth={1.7}
+                className="text-[#F5F2E9]"
+              />
+
+              <span
+                aria-hidden="true"
+                className="absolute right-1.5 top-1.5 h-1 w-1 rounded-full bg-white shadow-[0_0_7px_rgba(255,255,255,0.9)]"
+              />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-[0.21em] text-[#AAB5E6]">
+                ✦ CONFIA
+              </p>
+
+              <p className="mt-0.5 text-[16px] font-black tracking-[0.02em] text-white">
+                {t("innerCanvas.homeTitle")}
+              </p>
+
+              <p className="mt-0.5 max-w-[190px] text-[10px] font-semibold leading-snug text-[#B7BEDD]">
+                {t("innerCanvas.homeSubtitle")}
+              </p>
+            </div>
+          </div>
+
+          <span
+            aria-hidden="true"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.08] text-base font-light text-white transition-transform duration-300 group-hover:translate-x-0.5"
+          >
+            →
+          </span>
+        </div>
+      </button>
+    </div>
+
+
+
 <AbracoTimer
   onAddXp={addXp}
   onRegisterStop={(fn) => {
@@ -3261,34 +3314,6 @@ className="flex items-center justify-center w-24 h-24 relative"
               </div>
             </motion.div>
           )}
-
-{currentTab === 3 && (
-  /* TAB 4: IMPULSO — intervenção imediata / SOS */
-  <motion.div
-    key="impulso-tab"
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -10 }}
-  >
-    <div className="mb-4 rounded-[28px] border border-[#B85F48]/20 bg-white/80 p-4 shadow-sm sm:p-5">
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F8E8DF] text-[#A85F45]">
-          <EyeOff size={18} aria-hidden="true" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#B9785D]">{t("blindVent.eyebrow")}</p>
-          <p className="mt-1 text-sm font-black text-[#2F2926]">{t("blindVent.shortTitle")}</p>
-          <p className="mt-1 text-xs font-semibold leading-5 text-[var(--cf-text-soft)]">{t("blindVent.shortText")}</p>
-        </div>
-      </div>
-      <button type="button" onClick={() => setShowBlindVent(true)} className="mt-3 min-h-11 w-full rounded-2xl border border-[#D9B5A4] bg-[#FFF9F5] px-4 py-3 text-xs font-black text-[#A85F45] transition hover:bg-[#FBEFE9]">
-        {t("blindVent.open")}
-      </button>
-    </div>
-    <div className="h-3" />
-    <ImpulsoSOS onAddXp={addXp} />
-  </motion.div>
-)}
 
           {currentTab === 4 && (
             /* TAB 5: COMUNIDADE */
@@ -3366,17 +3391,15 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 
       </AnimatePresence>
-      {showBlindVent && (
-      <LazySection>
-        <BlindVent onClose={() => setShowBlindVent(false)} />
-      </LazySection>
-    )}
       {showStopMode && (
       <LazySection>
         <StopMode
           onStartImpulse={() => {
             setShowStopMode(false);
-            setCurrentTab(3);
+            setOpenHabitSupport(true);
+            setCurrentTab(0);
+      setHomeScreen("home");
+      requestAnimationFrame(() => document.getElementById("home-habits")?.scrollIntoView({block:"start"}));
           }}
         />
       </LazySection>
@@ -3386,18 +3409,22 @@ className="flex items-center justify-center w-24 h-24 relative"
 <CommunityChat
           post={chatPost}
           initialChatId={chatIdOverride}
+          initialMessageId={noticeMessageId}
           onClose={() => {
             setChatPost(null);
             setChatIdOverride(null);
+            setNoticeMessageId(undefined);
           }}
         />
 </LazySection>
       )}
 
+      {noticeMessage && <div role="status" className="fixed bottom-28 left-4 right-4 z-[100] rounded-2xl bg-[#FFF7E9] p-4 text-sm"><p>{noticeMessage}</p><button type="button" className="min-h-11 underline" onClick={()=>setNoticeMessage("")}>{t("notifications.close")}</button></div>}
       <MainNavigation
         currentTab={currentTab}
         hasUnreadCommunityMessage={Boolean(pendingCommunityChat)}
         onNavigate={(index) => {
+          setOpenHabitSupport(false);
           setHomeScreen("home");
 
           // A abertura automática do chat só é armada quando
@@ -3412,7 +3439,7 @@ className="flex items-center justify-center w-24 h-24 relative"
             setOpenPendingChatOnCommunityEntry(false);
           }
 
-          setCurrentTab(index);
+          setCurrentTab(index === 3 ? 0 : index);
         }}
       />
     </div>

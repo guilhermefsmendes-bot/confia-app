@@ -39,6 +39,107 @@ service cloud.firestore {
 
   match /databases/{database}/documents {
 
+    match /users/{uid}/devices/{deviceId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['fcmToken','platform','updatedAt','notificationsEnabled','language'])
+        && request.resource.data.fcmToken is string && request.resource.data.fcmToken.size() >= 20 && request.resource.data.fcmToken.size() <= 4096
+        && request.resource.data.platform == 'android'
+        && request.resource.data.notificationsEnabled is bool
+        && request.resource.data.language in ['pt','en','es','fr']
+        && request.resource.data.updatedAt == request.time;
+    }
+    match /users/{uid}/preferences/notifications {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['community','milestones','updatedAt'])
+        && request.resource.data.community is bool && request.resource.data.milestones is bool
+        && request.resource.data.updatedAt == request.time;
+    }
+    match /notificationDeliveries/{id} { allow read, write: if false; }
+
+    // Private habit journal. No community access or sensitive analytics payloads.
+    match /users/{userId}/habitRecords/{recordId} {
+      function owns() { return request.auth != null && request.auth.uid == userId; }
+      function quantity(d, key) { return !(key in d) || (d[key] is number && d[key] >= 0 && d[key] <= 1000); }
+      function period(d) { return !('period' in d) || d.period in ['morning','lunch','afternoon','evening']; }
+      function sample(d) { return d is map && d.keys().hasOnly(['mean','days','moodMean','moodDays']) && d.mean is number && d.mean >= 0 && d.mean <= 250000 && d.days is int && d.days >= 0 && d.days <= 10000 && d.moodMean is number && d.moodMean >= -100 && d.moodMean <= 100 && d.moodDays is int && d.moodDays >= 0 && d.moodDays <= 10000; }
+      function foodItem(d) {
+        return d.keys().hasOnly(['category','subtype','quantity','unit','servingMl','period','time','size','intensity','caffeine','sugar','deleted'])
+          && d.category in ['coffee','fruit','vegetables','soda','water','energy','alcohol','tobacco','fastFood','sweets']
+          && (d.subtype == 'unspecified' || (d.category == 'coffee' && d.subtype in ['espresso','short','long','americano','filter','capsule','instant','decaf','other'])
+            || (d.category == 'fruit' && d.subtype in ['apple','banana','orange','pear','kiwi','strawberry','berries','grapes','mango','pineapple','peach','melon','watermelon','other'])
+            || (d.category == 'vegetables' && d.subtype in ['salad','soup','boiled','grilled','other'])
+            || (d.category == 'soda' && d.subtype in ['cocaCola','cocaColaZero','pepsi','pepsiMax','sprite','sevenUp','fanta','guarana','orangeJuice','appleJuice','nectar','iceTea','freshJuice','other'])
+            || (d.category == 'water' && d.subtype in ['still','sparkling'])
+            || (d.category == 'energy' && d.subtype in ['energy','sugarFree','other'])
+            || (d.category in ['alcohol','tobacco'] && d.subtype == 'other')
+            || (d.category == 'fastFood' && d.subtype in ['meal','other'])
+            || (d.category == 'sweets' && d.subtype in ['occasion','other']))
+          && d.quantity is number && d.quantity >= 0
+          && d.unit in ['item','portion','cup','can','bottle','ml','occasion','meal']
+          && (d.unit == 'ml' ? d.quantity <= 10000 : (d.quantity is int && d.quantity <= 100))
+          && d.deleted is bool && period(d)
+          && (!('servingMl' in d) || (d.servingMl is int && d.servingMl >= 1 && d.servingMl <= 2000))
+          && (!('time' in d) || (d.time is string && d.time.matches('([01][0-9]|2[0-3]):[0-5][0-9]')))
+          && (!('size' in d) || d.size in ['small','medium','large'])
+          && (!('intensity' in d) || d.intensity in ['mild','medium','strong'])
+          && (!('caffeine' in d) || d.caffeine in ['yes','no','unknown'])
+          && (!('sugar' in d) || d.sugar in ['yes','no','unknown']);
+      }
+      function plan(d) {
+        return d.keys().hasOnly(['templateId','status','startDate','endDate','pausedAt','pausedDays','gentle','baseline','result'])
+          && d.templateId in ['caffeine','hydration','plants','energy','movement','walk','regularity','timing','routine']
+          && d.status in ['active','paused','completed','abandoned']
+          && d.startDate is string && d.startDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+          && d.endDate is string && d.endDate.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}') && d.endDate >= d.startDate
+          && d.pausedAt is string && (d.pausedAt == '' || d.pausedAt.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}'))
+          && d.pausedDays is int && d.pausedDays >= 0 && d.pausedDays <= 10000
+          && d.gentle is bool && sample(d.baseline) && (!('result' in d) || sample(d.result));
+      }
+      function validPayload(r) {
+        let d = r.data;
+        return d is map && (
+          (r.kind == 'habit' && d.keys().hasOnly(['type','name','icon','goal','active','createdAt'])
+            && d.type in ['tobacco','coffee','alcohol','social','gaming','sugar','shopping','checking','sleep','custom']
+            && d.name is string && d.name.size() <= 60 && (d.type != 'custom' || d.name.size() > 0)
+            && d.icon is string && d.icon.size() > 0 && d.icon.size() <= 16
+            && d.goal is string && d.goal.size() > 0 && d.goal.size() <= 180
+            && d.active is bool && d.createdAt is string)
+          || (r.kind == 'settings' && recordId == 'settings' && d.keys().hasOnly(['primaryId']) && d.primaryId is string && d.primaryId.size() <= 100)
+          || (r.kind == 'habitLog' && d.keys().hasOnly(['habitId','completed']) && d.habitId is string && d.habitId.size() <= 100 && d.completed is bool)
+          || (r.kind == 'restart' && d.keys().hasOnly(['habitId','reason','bestBefore']) && d.habitId is string && d.habitId.size() <= 100 && d.reason in ['once','several','fresh'] && (!('bestBefore' in d) || (d.bestBefore is int && d.bestBefore >= 0)))
+          || (r.kind == 'summary' && d.keys().hasOnly(['habitId','best','total','runStart','runEnd','cycleAt','cycleDate']) && d.habitId is string && d.habitId.size() <= 100 && d.best is int && d.best >= 0 && d.total is int && d.total >= 0 && d.runStart is string && d.runStart.size() <= 10 && d.runEnd is string && d.runEnd.size() <= 10 && d.cycleAt is string && d.cycleAt.size() <= 24 && d.cycleDate is string && d.cycleDate.size() <= 10)
+          || (r.kind == 'nutrition' && d.keys().size() > 0
+            && d.keys().hasOnly(['coffee','energy','soda','water','alcohol','tobacco','fastFood','fruit','vegetables','sweets'])
+            && quantity(d,'coffee') && quantity(d,'energy') && quantity(d,'soda') && quantity(d,'water')
+            && quantity(d,'alcohol') && quantity(d,'tobacco') && quantity(d,'fastFood') && quantity(d,'fruit') && quantity(d,'vegetables') && quantity(d,'sweets'))
+          || (r.kind == 'foodItem' && foodItem(d))
+          || (r.kind == 'wellbeingPlan' && plan(d))
+          || (r.kind == 'planCheck' && d.keys().hasOnly(['planId','day','outcome']) && d.planId is string && d.planId.size() <= 100 && d.day is int && d.day >= 1 && d.day <= 15 && d.outcome in ['done','notToday'])
+          || (r.kind == 'planPreference' && recordId == 'plan_preference' && d.keys().hasOnly(['dismissedUntil']) && d.dismissedUntil is string && d.dismissedUntil.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}'))
+          || (r.kind == 'exercise' && d.keys().hasOnly(['activity','minutes','intensity','period']) && period(d)
+            && d.activity in ['walk','run','gym','bike','swim','sport','yoga','other']
+            && d.minutes is int && d.minutes >= 0 && d.minutes <= 1440
+            && (!('intensity' in d) || d.intensity in ['light','moderate','intense']))
+        );
+      }
+      function valid() {
+        let r = request.resource.data;
+        return r.keys().hasOnly(['id','kind','date','updatedAt','timezone','userId','data'])
+          && r.id == recordId && r.userId == userId
+          && r.date is string && r.date.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+          && r.updatedAt is string && r.updatedAt.size() == 24
+          && r.timezone is string && r.timezone.size() <= 100
+          && validPayload(r);
+      }
+      allow read, delete: if owns();
+      allow create: if owns() && valid();
+      allow update: if owns() && valid() && request.resource.data.kind == resource.data.kind
+        && request.resource.data.updatedAt >= resource.data.updatedAt;
+    }
+
+
     function validAcceptedExperienceMatch(chatData) {
       return chatData.keys().hasAny(['matchRequestId'])
         && chatData.matchRequestId is string

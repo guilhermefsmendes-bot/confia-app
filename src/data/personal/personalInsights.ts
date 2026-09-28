@@ -1,3 +1,4 @@
+import { buildLifestyleInsights } from "./lifestylePatterns";
 import type { PersonalEvent } from "./personalEvent";
 import { buildPersonalPatterns, describePersonalPattern } from "./personalPatterns";
 
@@ -213,7 +214,7 @@ function buildPersonalChangeInsight(valid: PersonalEvent[], now: Date): Personal
 
 export function buildPersonalInsights(events: PersonalEvent[], now = new Date()): PersonalInsight[] {
   const valid = events.filter(validTimestamp).filter(event => mood(event) !== undefined).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-  const insights: PersonalInsight[] = [];
+  const insights: PersonalInsight[] = buildLifestyleInsights(events, now);
   const trend = buildTrendInsight(valid, now);
   if (trend) insights.push(trend);
   const weekday = buildWeekdayInsight(valid, now);

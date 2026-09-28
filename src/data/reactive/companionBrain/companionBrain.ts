@@ -56,6 +56,7 @@ export function markCompanionDecisionShown(
 ): void {
   recordCompanionShownMessage({
     id: decision.candidate.id,
+    translationKey: decision.candidate.translationKey,
     category:
       decision.candidate.category,
     reason:

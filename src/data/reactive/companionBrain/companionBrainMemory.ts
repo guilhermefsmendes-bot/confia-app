@@ -1,3 +1,4 @@
+import {getHabitOwner} from "../../habits/store";
 import type {
   CompanionBrainCategory,
   CompanionConversationThread,
@@ -8,7 +9,7 @@ import type {
   CompanionBrainShownMessage,
 } from "./companionBrainTypes";
 
-const STORAGE_KEY = "confia_companion_brain_memory_v1";
+const storageKey = () => "confia_companion_brain_memory_v2:"+getHabitOwner();
 
 const MAX_SHOWN_MESSAGES = 120;
 const MAX_RECENT_EVENTS = 100;
@@ -51,7 +52,7 @@ export function loadCompanionBrainMemory(): CompanionBrainMemory {
   }
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(storageKey());
 
     if (!raw) {
       return createEmptyMemory();
@@ -69,7 +70,7 @@ export function loadCompanionBrainMemory(): CompanionBrainMemory {
       return createEmptyMemory();
     }
 
-    return parsed as CompanionBrainMemory;
+    return {...parsed,shownMessages:parsed.shownMessages.slice(-MAX_SHOWN_MESSAGES),recentEvents:parsed.recentEvents.slice(-MAX_RECENT_EVENTS),conversationAnchorUses:(parsed.conversationAnchorUses??[]).slice(-100),conversationThreads:(parsed.conversationThreads??[]).slice(-50)} as CompanionBrainMemory;
   } catch {
     return createEmptyMemory();
   }
@@ -82,7 +83,7 @@ export function saveCompanionBrainMemory(
 
   try {
     window.localStorage.setItem(
-      STORAGE_KEY,
+      storageKey(),
       JSON.stringify({
         ...memory,
         shownMessages:

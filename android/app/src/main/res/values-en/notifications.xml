@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+ <string name="notice_community">Community replies</string>
+ <string name="notice_reminder">Daily reminder</string>
+ <string name="notice_reply">Someone replied to your share in the Community.</string>
+ <string name="notice_daily_1">How was your day? One minute is enough to leave your entry.</string>
+ <string name="notice_daily_2">A little pause for you: would you like to record how you feel today?</string>
+ <string name="notice_daily_3">Your day deserves a moment of attention. Record it at your pace.</string>
+ <string name="widget_title">My challenge</string>
+ <string name="widget_day">DAY %1$d</string>
+ <string name="widget_streak">%1$d days built</string>
+ <string name="widget_remaining">%1$dh %2$dm until today ends</string>
+ <string name="widget_updated">Updated at %1$s</string>
+ <string name="widget_empty">Choose a habit to begin</string>
+ <string name="widget_register">Record</string>
+ <string name="widget_choose">Choose a habit</string>
+ <string name="widget_description">Your challenge and daily progress on the home screen.</string>
+</resources>

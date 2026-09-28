@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/habit_widget" android:layout_width="match_parent" android:layout_height="match_parent" android:padding="2dp">
+ <ImageView android:id="@+id/habit_landscape" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+ <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center" android:padding="8dp">
+  <TextView android:id="@+id/habit_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="11sp" android:textStyle="bold" android:textColor="#43352B" android:maxLines="1"/>
+  <TextView android:id="@+id/habit_day" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="32sp" android:textStyle="bold" android:textColor="#332824" android:maxLines="2"/>
+  <TextView android:id="@+id/habit_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="14sp" android:textStyle="bold" android:textColor="#43352B" android:maxLines="1" android:ellipsize="end"/>
+  <TextView android:id="@+id/habit_streak" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="12sp" android:textColor="#43352B" android:maxLines="1"/>
+  <TextView android:id="@+id/habit_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="12sp" android:textColor="#43352B" android:maxLines="2"/>
+  <TextView android:id="@+id/habit_updated" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:textSize="10sp" android:textColor="#625141" android:maxLines="1"/>
+  <TextView android:id="@+id/habit_register" android:layout_width="match_parent" android:layout_height="48dp" android:gravity="center" android:textSize="13sp" android:textStyle="bold" android:textColor="#FFFFFF" android:background="@drawable/widget_action" android:layout_marginTop="6dp" android:maxLines="1"/>
+ </LinearLayout>
+</FrameLayout>

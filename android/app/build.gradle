@@ -10,7 +10,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        versionCode 51
+        versionCode 52
         versionName "1.0.45"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -55,6 +55,8 @@ repositories {
 }
 
 dependencies {
+    implementation platform("com.google.firebase:firebase-bom:34.19.0")
+    implementation "com.google.firebase:firebase-messaging"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"

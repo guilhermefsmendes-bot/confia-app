@@ -65,6 +65,7 @@ export function saveDailyCheckIn(
     JSON.stringify(last30Days)
   );
 
+  window.dispatchEvent(new Event("confia:daily-checkin-saved"));
   return data;
 }
 

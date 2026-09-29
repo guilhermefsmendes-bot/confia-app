@@ -26,7 +26,7 @@ public final class NoticeScheduler {
  }
  public static void scheduleMidnight(Context c){
   AlarmManager m=c.getSystemService(AlarmManager.class);m.cancel(alarm(c,MIDNIGHT));
-  if(!HabitWidgetProvider.hasWidgets(c))return;
+  if(!HabitWidgetProvider.hasWidgets(c)&&!CompanionWidgetProvider.hasWidgets(c))return;
   Calendar next=Calendar.getInstance();next.add(Calendar.DAY_OF_YEAR,1);next.set(Calendar.HOUR_OF_DAY,0);next.set(Calendar.MINUTE,0);next.set(Calendar.SECOND,5);next.set(Calendar.MILLISECOND,0);
   m.setWindow(AlarmManager.RTC,next.getTimeInMillis(),600000,alarm(c,MIDNIGHT));
  }

@@ -59,27 +59,21 @@ import { useDailyOpenState } from "./hooks/useDailyOpenState";
 import { getLocalCalendarDate } from "./utils/date";
 
 const PersonalMap = lazy(() => import("./components/PersonalMap"));
-const PersonalExperiments = lazy(() => import("./components/PersonalExperiments"));
 const ConfiaCompanionHome = lazy(() => import("./components/Companheiro/ConfiaCompanionHome"));
 const DailyCheckIn = lazy(() => import("./components/DailyCheckIn/DailyCheckIn"));
-const Companion = lazy(() => import("./components/Companheiro/Companion"));
 const InnerCanvas = lazy(() => import("./components/InnerCanvas/InnerCanvas"));
-const PatternsNew = lazy(() => import("./components/PatternsNew/PatternsNew"));
-const HabitAssessment = lazy(() => import("./components/PatternsNew/HabitAssessment"));
-const HabitDailyCheck = lazy(() => import("./components/PatternsNew/HabitDailyCheck"));
-const HabitEvolution = lazy(() => import("./components/PatternsNew/HabitEvolution"));
 const HomeInventory = lazy(() => import("./components/HomeInventory"));
 const HomeShop = lazy(() => import("./components/HomeShop"));
-import { PartilhaFeed } from "./components/PartilhaFeed";
-import { ObjectivosList } from "./components/ObjectivosList";
-import { WeeklyGoalSection } from "./components/WeeklyGoalSection";
+const PartilhaFeed = lazy(() => import("./components/PartilhaFeed").then(m => ({ default: m.PartilhaFeed })));
+const ObjectivosList = lazy(() => import("./components/ObjectivosList").then(m => ({ default: m.ObjectivosList })));
+const WeeklyGoalSection = lazy(() => import("./components/WeeklyGoalSection").then(m => ({ default: m.WeeklyGoalSection })));
 const NotificationSettings = lazy(() => import("./components/NotificationSettings"));
 const HabitDashboard = lazy(() => import("./components/Habits/HabitDashboard"));
 const ProgressoDashboard = lazy(() => import("./components/ProgressoDashboard").then(m => ({ default: m.ProgressoDashboard })));
 const StopMode = lazy(() => import("./components/StopMode").then(m => ({ default: m.StopMode })));
 const CommunityChat = lazy(() => import("./components/CommunityChat").then(m => ({ default: m.CommunityChat })));
 const TriageModal = lazy(() => import("./components/TriageModal").then(m => ({ default: m.TriageModal })));
-import { AbracoTimer } from "./components/AbracoTimer";
+const AbracoTimer = lazy(() => import("./components/AbracoTimer").then(m => ({ default: m.AbracoTimer })));
 
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 import { INITIAL_OBJECTIVES, INITIAL_POSTS } from './data/initialData';
@@ -172,13 +166,20 @@ useEffect(() => {
   });
 }, []);
   // Global App States
-const [patternsPage, setPatternsPage] = useState("menu");
 const [homeScreen, setHomeScreen] = useState<
-  "home" | "companion" | "patterns" | "shop" | "inventory" | "settings" | "progress" | "innerCanvas" | "map" | "experiments"
+  "home" | "shop" | "inventory" | "settings" | "progress" | "innerCanvas" | "map"
 >("home");
   const [avatar, setAvatar] = useState<AvatarState>(() => {
     const saved = readStoredJson<AvatarState | null>(STORAGE_KEYS.AVATAR, null);
-    if (saved) return saved;
+    if (saved) {
+      return {
+        ...saved,
+        level: Number.isFinite(saved.level) ? Math.max(1, saved.level) : 1,
+        xp: Number.isFinite(saved.xp) ? Math.max(0, saved.xp) : 0,
+        maxXp: Number.isFinite(saved.maxXp) && saved.maxXp > 0 ? saved.maxXp : 100,
+        points: Number.isFinite(saved.points) ? Math.max(0, saved.points) : 0,
+      };
+    }
 
     return {
       level: 1,
@@ -698,6 +699,41 @@ useEffect(() => {
   return () => { cancelled = true; };
 }, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp]);
 
+// Uma única observação contextual para o cartão de chegada. A prioridade é
+// diversidade real de dados (exercício/alimentação/hábitos), depois continuidade
+// de registos. Não inventa relações causais nem duplica vários cartões.
+const homeReactiveObservation = useMemo(() => {
+  const result = homeReactiveResult;
+  if (!result) return null;
+
+  const positiveFacts = (result.personalSignals?.facts ?? []).filter(
+    (fact) => typeof fact.observedValue === "number" && fact.observedValue > 0
+  );
+  const domains = new Set(positiveFacts.map((fact) => fact.domain));
+  const activeDays = result.personalSignals?.activeDays ?? result.metrics.activeDays;
+  const variant = activeDays % 2 === 0 ? "a" : "b";
+
+  if (domains.size >= 2) {
+    return { key: `dailyMoment.observation.mixed.${variant}` };
+  }
+  if (domains.has("exercise")) {
+    return { key: `dailyMoment.observation.exercise.${variant}` };
+  }
+  if (domains.has("nutrition")) {
+    return { key: `dailyMoment.observation.nutrition.${variant}` };
+  }
+  if (domains.has("habit")) {
+    return { key: `dailyMoment.observation.habit.${variant}` };
+  }
+  if (activeDays >= 4) {
+    return {
+      key: `dailyMoment.observation.records.${variant}`,
+      values: { count: activeDays },
+    };
+  }
+  return null;
+}, [homeReactiveResult]);
+
 
 const homeNowAction = (() => {
   if (currentTab !== 0 || homeScreen !== "home") {
@@ -1163,13 +1199,25 @@ const handleHomeNowAction = () => {
 
   switch (homeNowAction.kind) {
     case "impulse":
+      // Apoio imediato vive no painel de Hábitos da Home. O antigo
+      // changeTab(3) apontava para um separador inexistente e deixava o
+      // utilizador num ecrã vazio no Android.
       setOpenHabitSupport(true);
-      changeTab(3);
+      setCurrentTab(0);
+      setHomeScreen("home");
+      requestAnimationFrame(() =>
+        document.getElementById("home-habits")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
+      );
       return;
 
     case "patterns":
-      setPatternsPage("menu");
-      setHomeScreen("patterns");
+      // Padrões passam a ter um único destino: Meu Mapa. O antigo menu
+      // PatternsNew duplicava avaliação, registo diário e evolução já
+      // presentes noutras áreas da app.
+      setHomeScreen("map");
       return;
 
     case "objectives":
@@ -1273,6 +1321,7 @@ const companionVoiceInput = useMemo(() => ({
   // Save states to localStorage on changes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.AVATAR, JSON.stringify(avatar));
+    window.dispatchEvent(new CustomEvent("confia:avatar-updated"));
   }, [avatar]);
 
   useEffect(() => {
@@ -1588,10 +1637,10 @@ const handleMicroHabitCompleted = () => {
   addXp(1);
 };
 
-const spendXp = (amount: number) => {
+const spendPoints = (amount: number) => {
   setAvatar(prev => ({
     ...prev,
-    xp: prev.xp - amount
+    points: Math.max(0, prev.points - amount)
   }));
 };
 
@@ -2215,22 +2264,24 @@ className="flex items-center justify-center w-24 h-24 relative"
         <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#8A6A5D]">
           {dailyContext.state === "return_after_absence"
             ? t("dailyMoment.return.text")
-            : dailyContext.state === "first_today"
-              ? (
-                  <>
-                    {/* CONFIA 3E.2 — LINGUAGEM DE APRENDIZAGEM */}
-                    {dailyContext.dailyLearningLevel === "learned_impulse"
-                      ? t("dailyMoment.learning.learnedImpulse")
-                      : dailyContext.dailyLearningLevel === "effective_impulse"
-                        ? t("dailyMoment.learning.effectiveImpulse")
-                        : dailyContext.dailyLearningLevel === "repeated_signals"
-                          ? t("dailyMoment.learning.repeatedSignals")
-                          : dailyContext.dailyLearningLevel === "early_learning"
-                            ? t("dailyMoment.learning.early")
-                            : t("dailyMoment.learning.neutral")}
-                  </>
-                )
-              : t("dailyMoment.continueToday.text")}
+            : homeReactiveObservation
+              ? t(homeReactiveObservation.key, homeReactiveObservation.values)
+              : dailyContext.state === "first_today"
+                ? (
+                    <>
+                      {/* CONFIA 3E.2 — LINGUAGEM DE APRENDIZAGEM */}
+                      {dailyContext.dailyLearningLevel === "learned_impulse"
+                        ? t("dailyMoment.learning.learnedImpulse")
+                        : dailyContext.dailyLearningLevel === "effective_impulse"
+                          ? t("dailyMoment.learning.effectiveImpulse")
+                          : dailyContext.dailyLearningLevel === "repeated_signals"
+                            ? t("dailyMoment.learning.repeatedSignals")
+                            : dailyContext.dailyLearningLevel === "early_learning"
+                              ? t("dailyMoment.learning.early")
+                              : t("dailyMoment.learning.neutral")}
+                    </>
+                  )
+                : t("dailyMoment.continueToday.text")}
         </p>
 
         {dailyContext.state === "return_after_absence" &&
@@ -2252,7 +2303,7 @@ className="flex items-center justify-center w-24 h-24 relative"
             Não representa percentagem, ranking ou progressão
             independente.
         ====================================================== */}
-        {dailyContext.dailyLearningLevel !== "none" && (
+        {!homeReactiveObservation && dailyContext.dailyLearningLevel !== "none" && (
           <div className="mt-3 flex items-center gap-2.5 rounded-2xl border border-[#E8DDD7]/45 bg-white/45 px-3.5 py-2.5">
             <div
               aria-hidden="true"
@@ -2462,9 +2513,6 @@ className="flex items-center justify-center w-24 h-24 relative"
 {homeScreen === "home" && (
   <section className="relative overflow-hidden rounded-[30px] border border-[#E8DDD7]/70 bg-gradient-to-br from-white via-[#FFFDFC] to-[#FFF6F1] p-4 shadow-[0_12px_32px_rgba(92,64,52,0.055)]" aria-label={t("homeSpace.title")}>
     <div className="px-1 pb-3"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38]">{t("homeSpace.title")}</p><p className="mt-1 text-[11px] font-semibold text-[var(--cf-muted)]">{t("homeSpace.subtitle")}</p></div>
-    <button type="button" onClick={() => { emitCompanionInteraction("companion_contact","companion",{from:"home",to:"companion"}); setHomeScreen("companion"); }} className="w-full rounded-[24px] border border-[#B85F48]/20 bg-white px-4 py-4 text-left shadow-sm">
-      <div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF3EC]"><Sparkles size={18} className="text-[#934A38]"/></div><div className="min-w-0 flex-1"><span className="block text-[9px] font-black uppercase tracking-[.16em] text-[#934A38]">CONFIA</span><span className="text-sm font-black text-[#2F2926]">{t("companion")}</span></div><span className="text-[#934A38]">→</span></div>
-    </button>
     <button type="button" onClick={() => { emitCompanionInteraction("reflection_opened","map",{from:"home",to:"map"}); setHomeScreen("map"); }} className="mt-2 w-full rounded-[22px] border border-[#E8DDD7] bg-[#FFF9F5] px-4 py-3 text-left">
       <div className="flex items-center gap-3"><Compass size={17} className="text-[#934A38]"/><div className="flex-1"><span className="block text-xs font-black text-[#4A352F]">{t("personalMap.title")}</span><span className="mt-0.5 block text-[10px] text-[#806D65]">{t("personalMap.homeLearning")}</span></div><span className="text-[#934A38]">→</span></div>
     </button>
@@ -2854,10 +2902,6 @@ className="flex items-center justify-center w-24 h-24 relative"
   <Suspense fallback={<ScreenLoading label={t("loading")} />}><PersonalMap onBack={() => setHomeScreen("home")} /></Suspense>
 )}
 
-{currentTab === 0 && homeScreen === "experiments" && (
-  <Suspense fallback={<ScreenLoading label={t("loading")} />}><PersonalExperiments onBack={() => setHomeScreen("home")} /></Suspense>
-)}
-
 {currentTab === 1 && homeScreen === "innerCanvas" && (
   <div
     key="inner-canvas-screen"
@@ -2868,92 +2912,6 @@ className="flex items-center justify-center w-24 h-24 relative"
         onBack={() => setHomeScreen("home")}
       />
     </LazySection>
-  </div>
-)}
-
-{/* Padrões — ecrã próprio dentro do Principal */}
-{currentTab === 0 && homeScreen === "patterns" && (
-  <>
-    {patternsPage === "menu" && (
-      <LazySection>
-<PatternsNew
-        onBack={() => {
-          // CONFIA_COMPANION_HOME_RETURNED_PATTERNS
-          emitCompanionBrainEvent(
-            "home_returned",
-            {
-              from: "patterns",
-            }
-          );
-
-          setPatternsPage("menu");
-          setHomeScreen("home");
-        }}
-        onOpenAssessment={() => setPatternsPage("assessment")}
-        onOpenDaily={() => setPatternsPage("daily")}
-        onOpenEvolution={() => setPatternsPage("evolution")}
-      />
-</LazySection>
-    )}
-
-    {patternsPage === "assessment" && (
-      <LazySection>
-<HabitAssessment
-        onBack={() => setPatternsPage("menu")}
-      />
-</LazySection>
-    )}
-
-    {patternsPage === "daily" && (
-      <LazySection>
-<HabitDailyCheck
-        onBack={() => setPatternsPage("menu")}
-      />
-</LazySection>
-    )}
-
-    {patternsPage === "evolution" && (
-      <LazySection>
-<HabitEvolution
-        onBack={() => setPatternsPage("menu")}
-      />
-</LazySection>
-    )}
-  </>
-)}
-
-{currentTab === 0 && homeScreen === "companion" && (
-  <div
-    key="companion-screen"
-    className="flex-1 px-4 pt-4"
-  >
-    <div className="max-w-md mx-auto">
-
-      <button type="button"
-        onClick={() => {
-          // CONFIA_COMPANION_HOME_RETURNED_COMPANION
-          emitCompanionBrainEvent(
-            "home_returned",
-            {
-              from: "companion",
-            }
-          );
-
-          setHomeScreen("home");
-        }}
-        className="mb-4 text-xs font-bold text-[#934A38]"
-      >
-        ← {t("back")}
-      </button>
-
-      <LazySection>
-<Companion
- input={{currentTab:0,homeScreen:"home",selectedDate,todayLogged,morningRating,afternoonRating,ratings,personalDiscovery}}
- onAction={handleCompanionAction}
-      />
-</LazySection>
-
-    </div>
   </div>
 )}
 
@@ -2971,9 +2929,9 @@ className="flex items-center justify-center w-24 h-24 relative"
 
     setHomeScreen("home");
   }}
-  xp={avatar.xp}
+  points={avatar.points}
   companionLevel={avatar.level}
-  spendXp={spendXp}
+  spendPoints={spendPoints}
 />
 </LazySection>
 )}
@@ -3266,12 +3224,14 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 
 
+<LazySection>
 <AbracoTimer
   onAddXp={addXp}
   onRegisterStop={(fn) => {
     stopAbracoRef.current = fn;
   }}
 />
+</LazySection>
               </div>
             </motion.div>
           )}
@@ -3298,19 +3258,21 @@ className="flex items-center justify-center w-24 h-24 relative"
                     <div aria-hidden="true" className="h-[3px] w-full bg-gradient-to-r from-[#B85F48]/10 via-[#934A38]/45 to-[#B85F48]/10" />
                   </section>
                 )}
-                <ObjectivosList
-                  objectives={objectives}
-                  onToggleComplete={handleToggleObjective}
-                  onAddCustomObjective={handleAddCustomObjective}
-                  onDeleteObjective={handleDeleteObjective}
-                />
+                <LazySection>
+                  <ObjectivosList
+                    objectives={objectives}
+                    onToggleComplete={handleToggleObjective}
+                    onAddCustomObjective={handleAddCustomObjective}
+                    onDeleteObjective={handleDeleteObjective}
+                  />
 
-                <WeeklyGoalSection
-                  weeklyGoal={weeklyGoal}
-                  onCreateGoal={handleCreateWeeklyGoal}
-                  onCompleteDay={handleCompleteWeeklyDay}
-                  onShareTrophy={handleShareWeeklyTrophy}
-                />
+                  <WeeklyGoalSection
+                    weeklyGoal={weeklyGoal}
+                    onCreateGoal={handleCreateWeeklyGoal}
+                    onCompleteDay={handleCompleteWeeklyDay}
+                    onShareTrophy={handleShareWeeklyTrophy}
+                  />
+                </LazySection>
               </div>
             </motion.div>
           )}
@@ -3322,18 +3284,21 @@ className="flex items-center justify-center w-24 h-24 relative"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
+              className="w-full min-w-0 overflow-x-clip"
             >
-              <PartilhaFeed
-                posts={posts}
-                onAddPost={handleAddPost}
-                onLikePost={handleLikePost}
-                onOpenChat={handleOpenChat}
-                onConnectMatch={handleConnectCommunityMatch}
-                onOpenMatchedChat={handleOpenMatchedChat}
-                onDeletePost={handleDeletePost}
-                onReportPost={handleReportPost}
-                onBlockUser={handleBlockUser}
-              />
+              <LazySection>
+                <PartilhaFeed
+                  posts={posts}
+                  onAddPost={handleAddPost}
+                  onLikePost={handleLikePost}
+                  onOpenChat={handleOpenChat}
+                  onConnectMatch={handleConnectCommunityMatch}
+                  onOpenMatchedChat={handleOpenMatchedChat}
+                  onDeletePost={handleDeletePost}
+                  onReportPost={handleReportPost}
+                  onBlockUser={handleBlockUser}
+                />
+              </LazySection>
             </motion.div>
           )}
 

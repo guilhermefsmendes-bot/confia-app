@@ -127,10 +127,17 @@
     }
   },
   "shop": "Shop",
+  "companionEvolutionPanel": {
+    "eyebrow": "CONFIA evolution",
+    "progressAria": "Progress toward the next evolution",
+    "nextForm": "The next visual change happens at level {{level}}. Evolution XP is no longer spent in the shop.",
+    "finalForm": "You have reached the adult form. XP still marks your journey."
+  },
   "companionShop": {
     "title": "CONFIA Shop",
     "subtitle": "Choose small details to make your CONFIA feel even more like yours.",
     "xpAvailable": "Available XP",
+    "pointsAvailable": "Available points",
     "accessoriesTitle": "For your CONFIA",
     "accessoriesSubtitle": "Accessories you can use on your companion.",
     "collectionTitle": "Other items",
@@ -138,6 +145,7 @@
     "buy": "Buy",
     "owned": "Owned",
     "notEnoughXp": "Not enough XP",
+    "notEnoughPoints": "Not enough points",
     "availableAtLevel": "Available at level {{level}}",
     "levelRequired": "Level {{level}}"
   },
@@ -1685,6 +1693,28 @@
       "title": "We continue from here",
       "text": "You have already been with CONFIA today. There is no need to start again — we continue from here."
     },
+    "observation": {
+      "mixed": {
+        "a": "Today you logged more than one part of your day. Together, those records give CONFIA more context without drawing conclusions too soon.",
+        "b": "You left more than one kind of clue about your day today. That helps CONFIA follow your rhythm with more context."
+      },
+      "exercise": {
+        "a": "There is movement logged today. Alongside your other records, it adds context without assuming one thing caused another.",
+        "b": "I noticed you logged physical activity today. I will keep it in context with the rest of your day without turning one record into a conclusion."
+      },
+      "nutrition": {
+        "a": "You also logged food today. That detail helps build a fuller picture of your rhythm over time.",
+        "b": "Food is part of today's records too. It is only an observation for now, but it adds context to what you log next."
+      },
+      "habit": {
+        "a": "There is also a record from your challenge today. CONFIA follows continuity without treating one day as a conclusion.",
+        "b": "Your habit was logged today too. I will keep it with the rest of the context and watch what truly holds over time."
+      },
+      "records": {
+        "a": "You have kept records across {{count}} days. That continuity is starting to give CONFIA a more faithful picture of your rhythm.",
+        "b": "There are now {{count}} days with your records. I do not need to draw conclusions yet — but I have more context to stay with you."
+      }
+    },
     "actionHint": "One small action to continue from here.",
     "learning": {
       "learnedImpulse": "We have seen more than once that some of your experiences with CONFIA ended lighter than they began. We can use that learning without assuming every day is the same.",
@@ -1973,6 +2003,7 @@
       "title": "What I have learned about you",
       "evidence": "{{observations}} observations · {{insights}} evidence-based patterns.",
       "learning": "I am still learning. I will not invent conclusions before there is enough data.",
+      "summaryOnly": "There are already {{count}} evidence-based patterns. Detailed discoveries appear below in one place to avoid repetition.",
       "interventions": "Of the recorded interventions, {{rate}}% ended with lower intensity than at the start."
     },
     "replay": {

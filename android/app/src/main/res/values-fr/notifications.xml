@@ -15,4 +15,11 @@
  <string name="widget_register">Noter</string>
  <string name="widget_choose">Choisir une habitude</string>
  <string name="widget_description">Ton défi et ta progression sur l’écran d’accueil.</string>
+ <string name="companion_widget_name">CONFIA · Avatar</string>
+ <string name="companion_widget_description">Ta CONFIA et de petites actions sur l’écran d’accueil.</string>
+ <string name="companion_widget_days">%1$d jours</string>
+ <string name="companion_widget_no_habit">Choisis une habitude</string>
+ <string name="companion_widget_done">Fait</string>
+ <string name="companion_widget_done_today">Fait aujourd’hui ✓</string>
+ <string name="companion_widget_collapse">Fermer</string>
 </resources>

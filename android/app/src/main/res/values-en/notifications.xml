@@ -15,4 +15,11 @@
  <string name="widget_register">Record</string>
  <string name="widget_choose">Choose a habit</string>
  <string name="widget_description">Your challenge and daily progress on the home screen.</string>
+ <string name="companion_widget_name">CONFIA · Avatar</string>
+ <string name="companion_widget_description">Your CONFIA and small steps on the home screen.</string>
+ <string name="companion_widget_days">%1$d days</string>
+ <string name="companion_widget_no_habit">Choose a habit</string>
+ <string name="companion_widget_done">Done</string>
+ <string name="companion_widget_done_today">Done today ✓</string>
+ <string name="companion_widget_collapse">Close</string>
 </resources>

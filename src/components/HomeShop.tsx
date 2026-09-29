@@ -15,9 +15,9 @@ import {
 
 interface HomeShopProps {
   onBack: () => void;
-  xp: number;
+  points: number;
   companionLevel: number;
-  spendXp: (amount: number) => void;
+  spendPoints: (amount: number) => void;
 
   /**
    * Callback legacy.
@@ -31,9 +31,9 @@ interface HomeShopProps {
 
 const HomeShop: React.FC<HomeShopProps> = ({
   onBack,
-  xp,
+  points,
   companionLevel,
-  spendXp,
+  spendPoints,
   onBuy,
 }) => {
 
@@ -52,9 +52,9 @@ const HomeShop: React.FC<HomeShopProps> = ({
    *
    * Mantém o fluxo de compra original:
    *
-   * XP
+   * Pontos
    * ↓
-   * spendXp
+   * spendPoints
    * ↓
    * buyItem
    * ↓
@@ -77,12 +77,12 @@ const HomeShop: React.FC<HomeShopProps> = ({
     if (
       owned ||
       levelLocked ||
-      xp < item.cost
+      points < item.cost
     ) {
       return;
     }
 
-    spendXp(item.cost);
+    spendPoints(item.cost);
 
     buyItem(item.id);
 
@@ -122,7 +122,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
     const canBuy =
       !owned &&
       !levelLocked &&
-      xp >= item.cost;
+      points >= item.cost;
 
     const slotKey =
       item.companionSlot === "head" ||
@@ -194,7 +194,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
             </span>
 
             <span>
-              {item.cost} XP
+              {item.cost} {t("points")}
             </span>
           </div>
 
@@ -221,7 +221,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
                 )}`
               : canBuy
                 ? t("companionShop.buy")
-                : t("companionShop.notEnoughXp")
+                : t("companionShop.notEnoughPoints")
           }
         </button>
 
@@ -239,7 +239,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
 
     const canBuy =
       !owned &&
-      xp >= item.cost;
+      points >= item.cost;
 
     return (
       <div
@@ -256,7 +256,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
         </div>
 
         <div className="mt-2 text-xs font-extrabold text-[#6B5148]">
-          {item.cost} XP
+          {item.cost} {t("points")}
         </div>
 
         <button
@@ -275,7 +275,7 @@ const HomeShop: React.FC<HomeShopProps> = ({
             ? `✓ ${t("companionShop.owned")}`
             : canBuy
               ? t("companionShop.buy")
-              : t("companionShop.notEnoughXp")
+              : t("companionShop.notEnoughPoints")
           }
         </button>
 
@@ -335,11 +335,11 @@ const HomeShop: React.FC<HomeShopProps> = ({
             </span>
 
             <span className="text-xs font-bold text-[#8A756D]">
-              {t("companionShop.xpAvailable")}
+              {t("companionShop.pointsAvailable")}
             </span>
 
             <span className="text-sm font-extrabold text-[#2F2926]">
-              {xp} XP
+              {points} {t("points")}
             </span>
 
           </div>

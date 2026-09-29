@@ -1037,6 +1037,36 @@ function selectResponse(
   const getUseCount = (responseId: string): number =>
     responseUsage.get(responseId)?.count ?? 0;
 
+  // Evita não só repetir a mesma frase, mas também apresentar em sequência
+  // respostas semanticamente equivalentes (ex.: validação/validação ou
+  // reflexão/reflexão com palavras diferentes). Tags muito genéricas são
+  // ignoradas para não bloquear toda uma situação emocional.
+  const genericTags = new Set([
+    "mood", "support", "positive", "progress", "welcome", "impulse",
+    "low-mood", "high-mood", "pattern", "objective",
+  ]);
+  const recentSemanticResponses = history
+    .slice(-6)
+    .map((entry) => REACTIVE_RESPONSES.find((item) => item.id === entry.responseId))
+    .filter((item): item is (typeof REACTIVE_RESPONSES)[number] => Boolean(item));
+
+  const getSemanticRepetitionScore = (
+    response: (typeof candidates)[number]
+  ): number => {
+    const tags = (response.tags ?? []).filter((tag) => !genericTags.has(tag));
+    if (tags.length === 0) return 0;
+
+    return recentSemanticResponses.reduce((score, previous, index) => {
+      const previousTags = new Set(
+        (previous.tags ?? []).filter((tag) => !genericTags.has(tag))
+      );
+      const overlap = tags.filter((tag) => previousTags.has(tag)).length;
+      if (overlap === 0) return score;
+      const recencyWeight = index >= recentSemanticResponses.length - 2 ? 3 : 1;
+      return score + overlap * recencyWeight;
+    }, 0);
+  };
+
   const isInCooldown = (
     response: (typeof candidates)[number]
   ): boolean => {
@@ -1364,46 +1394,46 @@ function selectResponse(
   ) =>
     [...items].sort((a, b) => {
       /**
-       * 1. Variedade:
-       * respostas menos usadas continuam primeiro.
+       * 1. Contexto real primeiro.
+       * Uma frase que usa memória verdadeira do utilizador é preferível a uma
+       * frase genérica apenas porque esta foi usada menos vezes.
        */
-      const aCount = getUseCount(a.id);
-      const bCount = getUseCount(b.id);
-
-      if (aCount !== bCount) {
-        return aCount - bCount;
-      }
-
-      /**
-       * 2. Memória:
-       * entre respostas com o mesmo número de usos,
-       * preferir a mais relevante para o histórico recente.
-       */
-      const aMemoryScore =
-        getMemoryScore(a);
-
-      const bMemoryScore =
-        getMemoryScore(b);
-
+      const aMemoryScore = getMemoryScore(a);
+      const bMemoryScore = getMemoryScore(b);
       if (aMemoryScore !== bMemoryScore) {
         return bMemoryScore - aMemoryScore;
       }
 
       /**
-       * 3. Evitar repetição temporal.
+       * 2. Novidade semântica.
+       * Penaliza ideias recentemente repetidas mesmo quando o texto é diferente.
        */
-      const aLast =
-        getLastUseTime(a.id) ?? 0;
+      const aSemanticRepeat = getSemanticRepetitionScore(a);
+      const bSemanticRepeat = getSemanticRepetitionScore(b);
+      if (aSemanticRepeat !== bSemanticRepeat) {
+        return aSemanticRepeat - bSemanticRepeat;
+      }
 
-      const bLast =
-        getLastUseTime(b.id) ?? 0;
+      /**
+       * 3. Variedade histórica da frase concreta.
+       */
+      const aCount = getUseCount(a.id);
+      const bCount = getUseCount(b.id);
+      if (aCount !== bCount) {
+        return aCount - bCount;
+      }
 
+      /**
+       * 4. Evitar repetição temporal da mesma resposta.
+       */
+      const aLast = getLastUseTime(a.id) ?? 0;
+      const bLast = getLastUseTime(b.id) ?? 0;
       if (aLast !== bLast) {
         return aLast - bLast;
       }
 
       /**
-       * 4. Prioridade editorial da resposta.
+       * 5. Prioridade editorial da resposta.
        */
       return b.priority - a.priority;
     });

@@ -112,11 +112,11 @@ export default function PersonalMap({ onBack }: Props) {
           </div>
         </div>
         <div className="mt-4 space-y-2">
-          {twin.strongest.length ? twin.strongest.map(item => (
-            <div key={item.id} className="rounded-2xl bg-white/10 p-3 text-xs leading-5">
-              {item.messageKey ? t(item.messageKey, item.messageValues) : item.message}
-            </div>
-          )) : <p className="rounded-2xl bg-white/10 p-3 text-xs text-white/70">{t("personalMap.twin.learning")}</p>}
+          <p className="rounded-2xl bg-white/10 p-3 text-xs leading-5 text-white/80">
+            {twin.insightCount > 0
+              ? t("personalMap.twin.summaryOnly", { count: twin.insightCount })
+              : t("personalMap.twin.learning")}
+          </p>
           {twin.helpfulInterventionRate !== undefined && (
             <p className="text-[11px] font-bold text-[#E6B9A3]">{t("personalMap.twin.interventions", { rate: twin.helpfulInterventionRate })}</p>
           )}
@@ -198,7 +198,7 @@ export default function PersonalMap({ onBack }: Props) {
         {events.length > 0 && <div className="mt-5 flex gap-2 rounded-2xl bg-[#F8F3F0] p-3 text-xs leading-5 text-[#806D65]"><Info size={14} className="mt-0.5 shrink-0" aria-hidden="true" /> {t("personalMap.explainable")}</div>}
       </section>
 
-      {model.repeatedNeeds.length > 0 && <section className="mt-4 rounded-[30px] border border-[#EADBD3] bg-[#FFF9F5] p-5 shadow-sm"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#B86B52]">{t("personalMap.needEyebrow")}</p><h2 className="mt-1 text-xl font-black text-[#3F2C27]">{t("personalMap.needTitle")}</h2><p className="mt-2 text-sm leading-6 text-[#6D5A53]">{t("personalMap.needObserved", { need: model.repeatedNeeds[0].need, count: model.repeatedNeeds[0].count })}</p></section>}
+      {model.repeatedNeeds.length > 0 && !insights.some(insight => insight.type === "repeated_need") && <section className="mt-4 rounded-[30px] border border-[#EADBD3] bg-[#FFF9F5] p-5 shadow-sm"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#B86B52]">{t("personalMap.needEyebrow")}</p><h2 className="mt-1 text-xl font-black text-[#3F2C27]">{t("personalMap.needTitle")}</h2><p className="mt-2 text-sm leading-6 text-[#6D5A53]">{t("personalMap.needObserved", { need: (() => { const key = `dailyCheckIn.needs.${model.repeatedNeeds[0].need}`; const translated = t(key); return translated === key ? model.repeatedNeeds[0].need : translated; })(), count: model.repeatedNeeds[0].count })}</p></section>}
 
       {analogous.length > 0 && <section className="mt-4 rounded-[30px] border border-white bg-white/90 p-5 shadow-sm"><h2 className="text-xl font-black text-[#3F2C27]">{t("personalMap.analogousTitle")}</h2><p className="mt-1 text-xs leading-5 text-[#806D65]">{t("personalMap.analogousSubtitle")}</p><div className="mt-3 grid gap-2 sm:grid-cols-3">{analogous.map(event => <div key={event.id} className="rounded-2xl bg-[#FFF8F4] px-4 py-3"><span className="block text-xs font-semibold text-[#806D65]">{event.localDate}</span><span className="mt-1 block text-xl font-black text-[#B86B52]">{event.value}/10</span></div>)}</div></section>}
     </main>
@@ -238,6 +238,16 @@ function InsightsSummary({
       ...current,
       [insight.id]: kind,
     }));
+  };
+
+  const localizedInsightValues = (insight: PersonalInsight) => {
+    if (!insight.messageValues) return insight.messageValues;
+    const values = { ...insight.messageValues };
+    if (insight.type === "repeated_need" && typeof values.label === "string") {
+      const translated = t(`dailyCheckIn.needs.${values.label}`);
+      values.label = translated === `dailyCheckIn.needs.${values.label}` ? values.label : translated;
+    }
+    return values;
   };
 
   const signalLabel = (insight: PersonalInsight): string => {
@@ -303,7 +313,7 @@ function InsightsSummary({
 
                   <p className="mt-1 text-sm font-bold leading-6 text-[#3F2C27]">
                     {insight.messageKey
-                      ? t(insight.messageKey, insight.messageValues)
+                      ? t(insight.messageKey, localizedInsightValues(insight))
                       : insight.message}
                   </p>
 

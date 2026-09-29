@@ -63,15 +63,21 @@ export async function clearNativeNotices() {
  await ConfiaDevice.widget({snapshot:{}});
  if(owner!=='guest'&&deviceId&&auth.currentUser?.uid===owner){try{await Promise.race([deleteDoc(deviceRef(owner)),new Promise<void>(resolve=>setTimeout(resolve,1500))]);}catch{/* Native owner check also rejects stale delivery after logout. */}}
 }
+function currentAvatarLevel(){
+ try{
+  const raw=JSON.parse(localStorage.getItem('confia_avatar_v2')??'{}');
+  return Number.isFinite(raw.level)?Math.max(1,Math.min(10,Number(raw.level))):1;
+ }catch{return 1;}
+}
 async function updateWidget() {
  if(!isNativeAndroid())return;
  if(getHabitOwner()!==owner&&!(owner==='guest'&&getHabitOwner()==='guest'))return;
  const records=getHabitSnapshot().records,settings=records.find(r=>r.kind==='settings');
  const habits=records.filter(r=>r.kind==='habit'&&r.data.active);
  const habit=habits.find(r=>r.id===(settings?.kind==='settings'?settings.data.primaryId:''))??habits[0];
- if(habit?.kind!=='habit'){await ConfiaDevice.widget({snapshot:{language:language()}});return;}
+ if(habit?.kind!=='habit'){await ConfiaDevice.widget({snapshot:{language:language(),level:currentAvatarLevel()}});return;}
  const stats=habitStats(records,habit.id);
- await ConfiaDevice.widget({snapshot:{name:habit.data.type==='custom'?habit.data.name:i18n.t('habitHub.habits.'+habit.data.type),icon:HABIT_ICONS[habit.data.type],days:stats.current,runEnd:stats.runEnd,best:stats.best,updatedDay:localDay(),language:language()}});
+ await ConfiaDevice.widget({snapshot:{name:habit.data.type==='custom'?habit.data.name:i18n.t('habitHub.habits.'+habit.data.type),icon:HABIT_ICONS[habit.data.type],days:stats.current,runEnd:stats.runEnd,best:stats.best,updatedDay:localDay(),language:language(),level:currentAvatarLevel()}});
 }
 let pending:NoticeTarget|null=null;let navigation:((target:NoticeTarget)=>void)|null=null;
 export function connectNoticeNavigation(fn:(target:NoticeTarget)=>void){navigation=fn;if(pending){fn(pending);pending=null;}return()=>{if(navigation===fn)navigation=null;};}
@@ -90,6 +96,7 @@ export async function startNativeNotices() {
   })().catch(()=>{syncError=true;notify();});});
   subscribeHabits(()=>void updateWidget());
   const daily=()=>void configure();window.addEventListener('confia:daily-checkin-saved',daily);
+  const avatarUpdated=()=>void updateWidget();window.addEventListener('confia:avatar-updated',avatarUpdated);
   const resume=()=>{if(document.visibilityState==='visible'){void configure();void updateWidget();void syncNoticePreferences();}};
   document.addEventListener('visibilitychange',resume);window.addEventListener('online',resume);
   i18n.on('languageChanged',()=>{void configure();void updateWidget();void syncNoticePreferences();});

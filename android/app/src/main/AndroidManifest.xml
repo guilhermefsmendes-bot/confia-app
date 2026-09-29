@@ -39,6 +39,7 @@
         <service android:name=".ConfiaMessagingService" android:exported="false"><intent-filter><action android:name="com.google.firebase.MESSAGING_EVENT"/></intent-filter></service>
         <receiver android:name=".DeviceReceiver" android:exported="false"><intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.TIME_SET"/><action android:name="android.intent.action.TIMEZONE_CHANGED"/><action android:name="android.intent.action.DATE_CHANGED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/></intent-filter></receiver>
         <receiver android:name=".HabitWidgetProvider" android:exported="false" android:label="@string/widget_title"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/habit_widget_info"/></receiver>
+        <receiver android:name=".CompanionWidgetProvider" android:exported="false" android:label="@string/companion_widget_name"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/companion_widget_info"/></receiver>
         <receiver
             android:name=".StopWidgetProvider"
             android:exported="false">

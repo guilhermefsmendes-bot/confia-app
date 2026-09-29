@@ -15,4 +15,11 @@
  <string name="widget_register">Registrar</string>
  <string name="widget_choose">Elegir un hábito</string>
  <string name="widget_description">Tu reto y el progreso del día en la pantalla de inicio.</string>
+ <string name="companion_widget_name">CONFIA · Avatar</string>
+ <string name="companion_widget_description">Tu CONFIA y pequeños pasos en la pantalla de inicio.</string>
+ <string name="companion_widget_days">%1$d días</string>
+ <string name="companion_widget_no_habit">Elige un hábito</string>
+ <string name="companion_widget_done">Realizado</string>
+ <string name="companion_widget_done_today">Hecho hoy ✓</string>
+ <string name="companion_widget_collapse">Cerrar</string>
 </resources>

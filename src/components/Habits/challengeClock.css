@@ -157,6 +157,13 @@
 
 .challenge-clock-time { color:#43352b; }
 
+/* Mobile: keep the challenge clock compact so it does not dominate the screen. */
+@media (max-width: 600px) {
+  .challenge-clock {
+    width: min(50vw, 11.5rem);
+  }
+}
+
 .wellbeing-plan-progress { appearance:none; border:0; border-radius:999px; overflow:hidden; background:#e1e7d9; }
 .wellbeing-plan-progress::-webkit-progress-bar { background:#e1e7d9; border-radius:999px; }
 .wellbeing-plan-progress::-webkit-progress-value { background:#71885e; border-radius:999px; }

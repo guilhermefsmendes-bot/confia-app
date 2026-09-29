@@ -89,7 +89,7 @@ export default function ExperienceMatchingPanel({ posts, profile, requests, bloc
   const findPost = (id: string) => posts.find(p => p.id === id);
 
   return (
-    <div className="space-y-4">
+    <div className="w-full min-w-0 overflow-x-clip space-y-4">
       <div className="rounded-2xl border border-[#E5D4CC] bg-white p-4">
         <div className="flex items-start gap-3">
           <div className="rounded-xl bg-[#F7E8E1] p-2 text-[#A85F45]"><UserRoundSearch size={19}/></div>

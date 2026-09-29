@@ -145,7 +145,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   };
 
   return (
-    <div className="max-w-md mx-auto space-y-5 py-4">
+    <div className="mx-auto w-full min-w-0 max-w-md overflow-x-clip space-y-5 py-4">
 
       {/* Header Banner */}
       <div className="text-center px-4">
@@ -161,7 +161,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 px-1">
+      <div className="grid min-w-0 grid-cols-2 gap-2 px-1">
         <button type="button" onClick={() => setCommunityView("feed")} className={(communityView === "feed" ? "bg-[#2F2926] text-white" : "bg-white text-[#6F554B] border border-[#E8DDD7]") + " flex min-h-12 items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black"}>
           <MessagesSquare size={16}/>{t("experienceMatching.community")}
         </button>
@@ -324,7 +324,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
       <CommunityCircles posts={posts} onOpenChat={onOpenChat} />
 
       {/* Topic filters */}
-      <div className="overflow-x-auto -mx-1 px-1">
+      <div className="w-full min-w-0 overflow-x-auto px-1">
         <div className="flex gap-2 pb-1 min-w-max">
           <button
             type="button"
@@ -386,15 +386,15 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
               >
 
                 {/* Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex min-w-0 items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
 
                     <div className="w-8 h-8 rounded-full bg-[#B85F48]/10 border border-[#B85F48]/15 flex items-center justify-center text-[10px] font-black text-[#B85F48]">
                       {post.userName.substring(0, 2).toUpperCase()}
                     </div>
 
-                    <div>
-                      <h4 className="text-xs font-black text-[#2F2926]">
+                    <div className="min-w-0">
+                      <h4 className="truncate text-xs font-black text-[#2F2926]">
                         {post.userName}
                       </h4>
 

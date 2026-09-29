@@ -35,9 +35,15 @@
   --cf-space-12: 3rem;
 }
 
-html { background: var(--cf-bg); }
+html {
+  background: var(--cf-bg);
+  max-width: 100%;
+  overflow-x: hidden;
+}
 body {
   margin: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   background: var(--cf-bg);
   color: var(--cf-text);
   font-family: var(--font-sans);
@@ -45,10 +51,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.confia-app { background:
-  radial-gradient(circle at 12% -8%, rgb(184 95 72 / .07), transparent 28rem),
-  radial-gradient(circle at 88% 10%, rgb(95 127 109 / .055), transparent 24rem),
-  var(--cf-bg); }
+.confia-app {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  background:
+    radial-gradient(circle at 12% -8%, rgb(184 95 72 / .07), transparent 28rem),
+    radial-gradient(circle at 88% 10%, rgb(95 127 109 / .055), transparent 24rem),
+    var(--cf-bg);
+}
 
 .confia-header {
   background: rgb(255 255 255 / .88);
@@ -64,8 +75,19 @@ body {
   border: 1px solid #ead5cc;
 }
 
-.confia-main { max-width: 1180px; margin-inline: auto; }
-.confia-main > * { min-width: 0; max-width: 920px; margin-inline: auto; }
+.confia-main {
+  width: 100%;
+  max-width: 1180px;
+  min-width: 0;
+  margin-inline: auto;
+  overflow-x: clip;
+}
+.confia-main > * {
+  width: 100%;
+  min-width: 0;
+  max-width: 920px;
+  margin-inline: auto;
+}
 
 .confia-nav { background: transparent; pointer-events: none; }
 .confia-nav-inner {

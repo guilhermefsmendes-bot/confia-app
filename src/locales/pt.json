@@ -124,10 +124,17 @@
     }
   },
   "shop": "Loja",
+  "companionEvolutionPanel": {
+    "eyebrow": "Evolução da CONFIA",
+    "progressAria": "Progresso para a próxima evolução",
+    "nextForm": "A próxima mudança visual acontece no nível {{level}}. O XP de evolução já não é gasto na loja.",
+    "finalForm": "Chegaste à forma adulta. O XP continua a marcar o teu percurso."
+  },
   "companionShop": {
     "title": "Loja da CONFIA",
     "subtitle": "Escolhe pequenos detalhes para tornar a tua CONFIA ainda mais tua.",
     "xpAvailable": "XP disponível",
+    "pointsAvailable": "Pontos disponíveis",
     "accessoriesTitle": "Para a tua CONFIA",
     "accessoriesSubtitle": "Acessórios que podes usar na tua companheira.",
     "collectionTitle": "Outros objetos",
@@ -135,6 +142,7 @@
     "buy": "Comprar",
     "owned": "Já tens",
     "notEnoughXp": "XP insuficiente",
+    "notEnoughPoints": "Pontos insuficientes",
     "availableAtLevel": "Disponível no nível {{level}}",
     "levelRequired": "Nível {{level}}"
   },
@@ -1673,6 +1681,28 @@
       "title": "Continuamos por aqui",
       "text": "Já passaste pela CONFIA hoje. Não precisas de recomeçar — continuamos a partir daqui."
     },
+    "observation": {
+      "mixed": {
+        "a": "Hoje juntaste registos de áreas diferentes. Vistos em conjunto, dão à CONFIA mais contexto sobre o teu dia sem tirar conclusões antes do tempo.",
+        "b": "Hoje deixaste mais do que um tipo de pista sobre o teu dia. Isso ajuda a CONFIA a acompanhar o teu ritmo com mais contexto."
+      },
+      "exercise": {
+        "a": "Hoje já há movimento registado. Junto aos teus outros registos, isso acrescenta contexto ao teu dia sem assumir que uma coisa causou a outra.",
+        "b": "Reparei que registaste atividade física hoje. Vou mantê-la em contexto com o resto do teu dia, sem transformar um registo isolado numa conclusão."
+      },
+      "nutrition": {
+        "a": "Hoje também registaste alimentação. Esse detalhe ajuda a construir uma visão mais completa do teu ritmo ao longo dos dias.",
+        "b": "A alimentação entrou nos teus registos de hoje. Ainda é apenas uma observação, mas acrescenta contexto ao que fores registando depois."
+      },
+      "habit": {
+        "a": "Hoje também há um registo do teu desafio. A CONFIA acompanha a continuidade sem tratar um único dia como uma conclusão.",
+        "b": "O teu hábito também ficou registado hoje. Vou juntá-lo ao restante contexto e observar o que realmente se mantém com o tempo."
+      },
+      "records": {
+        "a": "Tens mantido registos em {{count}} dias. Essa continuidade começa a dar à CONFIA uma imagem mais fiel do teu ritmo.",
+        "b": "Já existem {{count}} dias com registos teus. Não preciso de tirar conclusões já — mas tenho mais contexto para te acompanhar."
+      }
+    },
     "actionHint": "Uma pequena ação para continuares a partir daqui.",
     "learning": {
       "learnedImpulse": "Já vimos mais do que uma vez que algumas das tuas experiências na CONFIA terminaram mais leves do que começaram. Podemos usar essa aprendizagem sem assumir que todos os dias são iguais.",
@@ -1961,6 +1991,7 @@
       "title": "O que já aprendi sobre ti",
       "evidence": "{{observations}} observações · {{insights}} padrões com evidência.",
       "learning": "Ainda estou a aprender. Não vou inventar conclusões antes de ter dados suficientes.",
+      "summaryOnly": "Já existem {{count}} padrões com evidência. As descobertas detalhadas aparecem mais abaixo, num único lugar para evitar repetições.",
       "interventions": "Nas intervenções registadas, {{rate}}% terminaram com intensidade inferior à inicial."
     },
     "replay": {

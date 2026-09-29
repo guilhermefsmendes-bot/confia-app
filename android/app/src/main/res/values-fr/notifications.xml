@@ -22,4 +22,8 @@
  <string name="companion_widget_done">Fait</string>
  <string name="companion_widget_done_today">Fait aujourd’hui ✓</string>
  <string name="companion_widget_collapse">Fermer</string>
+ <string name="companion_widget_challenge_title">DÉFI</string>
+ <string name="companion_widget_today_title">OBJECTIF DU JOUR</string>
+ <string name="companion_widget_progress">Objectif %1$d/%2$d</string>
+ <string name="companion_widget_all_done">Terminé pour aujourd’hui ✓</string>
 </resources>

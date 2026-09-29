@@ -69,15 +69,39 @@ function currentAvatarLevel(){
   return Number.isFinite(raw.level)?Math.max(1,Math.min(10,Number(raw.level))):1;
  }catch{return 1;}
 }
+function objectiveIcon(id:string,category:string){
+ const key=id.toLowerCase();
+ if(/water|drink/.test(key))return '💧';
+ if(/meal|food|snack|hunger|nutrition/.test(key))return '🍎';
+ if(/walk|stand|stairs|stretch|body|move|dance|outdoor|shoulder|face|hands/.test(key))return '🚶';
+ if(/breath|breathe/.test(key))return '🌬️';
+ if(/phone|screen|notification/.test(key))return '📵';
+ if(/message|family|social|someone|compliment|listen/.test(key))return '🤝';
+ if(/gratitude|good|victory|progress|kind/.test(key))return '🌱';
+ if(/organize|declutter|tidy|prepare/.test(key))return '🧹';
+ return category==='nutricao'?'🍎':category==='corporeo'?'🚶':category==='social'?'🤝':category==='mental'?'🧠':'✨';
+}
+function currentObjectives(){
+ try{
+  const raw=JSON.parse(localStorage.getItem('confia_objectives_v2')??'{}');
+  if(raw?.date!==localDay()||!Array.isArray(raw.items))return [];
+  return raw.items.slice(0,5).map((item:any)=>({
+   id:String(item.id??''),
+   icon:objectiveIcon(String(item.id??''),String(item.category??'')),
+   completed:item.completed===true
+  }));
+ }catch{return [];}
+}
 async function updateWidget() {
  if(!isNativeAndroid())return;
  if(getHabitOwner()!==owner&&!(owner==='guest'&&getHabitOwner()==='guest'))return;
  const records=getHabitSnapshot().records,settings=records.find(r=>r.kind==='settings');
  const habits=records.filter(r=>r.kind==='habit'&&r.data.active);
  const habit=habits.find(r=>r.id===(settings?.kind==='settings'?settings.data.primaryId:''))??habits[0];
- if(habit?.kind!=='habit'){await ConfiaDevice.widget({snapshot:{language:language(),level:currentAvatarLevel()}});return;}
+ const objectives=currentObjectives();
+ if(habit?.kind!=='habit'){await ConfiaDevice.widget({snapshot:{language:language(),level:currentAvatarLevel(),objectives}});return;}
  const stats=habitStats(records,habit.id);
- await ConfiaDevice.widget({snapshot:{name:habit.data.type==='custom'?habit.data.name:i18n.t('habitHub.habits.'+habit.data.type),icon:HABIT_ICONS[habit.data.type],days:stats.current,runEnd:stats.runEnd,best:stats.best,updatedDay:localDay(),language:language(),level:currentAvatarLevel()}});
+ await ConfiaDevice.widget({snapshot:{name:habit.data.type==='custom'?habit.data.name:i18n.t('habitHub.habits.'+habit.data.type),icon:HABIT_ICONS[habit.data.type],days:stats.current,runEnd:stats.runEnd,best:stats.best,updatedDay:localDay(),language:language(),level:currentAvatarLevel(),objectives}});
 }
 let pending:NoticeTarget|null=null;let navigation:((target:NoticeTarget)=>void)|null=null;
 export function connectNoticeNavigation(fn:(target:NoticeTarget)=>void){navigation=fn;if(pending){fn(pending);pending=null;}return()=>{if(navigation===fn)navigation=null;};}
@@ -97,6 +121,7 @@ export async function startNativeNotices() {
   subscribeHabits(()=>void updateWidget());
   const daily=()=>void configure();window.addEventListener('confia:daily-checkin-saved',daily);
   const avatarUpdated=()=>void updateWidget();window.addEventListener('confia:avatar-updated',avatarUpdated);
+  const objectivesUpdated=()=>void updateWidget();window.addEventListener('confia:objectives-updated',objectivesUpdated);
   const resume=()=>{if(document.visibilityState==='visible'){void configure();void updateWidget();void syncNoticePreferences();}};
   document.addEventListener('visibilitychange',resume);window.addEventListener('online',resume);
   i18n.on('languageChanged',()=>{void configure();void updateWidget();void syncNoticePreferences();});

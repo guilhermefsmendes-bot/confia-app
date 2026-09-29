@@ -22,4 +22,8 @@
  <string name="companion_widget_done">Done</string>
  <string name="companion_widget_done_today">Done today ✓</string>
  <string name="companion_widget_collapse">Close</string>
+ <string name="companion_widget_challenge_title">CHALLENGE</string>
+ <string name="companion_widget_today_title">TODAY GOAL</string>
+ <string name="companion_widget_progress">Goal %1$d/%2$d</string>
+ <string name="companion_widget_all_done">Done for today ✓</string>
 </resources>

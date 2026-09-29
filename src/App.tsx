@@ -1332,6 +1332,7 @@ const companionVoiceInput = useMemo(() => ({
     items: objectives
   })
 );
+   window.dispatchEvent(new CustomEvent("confia:objectives-updated"));
   }, [objectives]);
 useEffect(() => {
 localStorage.setItem(

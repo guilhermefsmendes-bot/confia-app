@@ -16,6 +16,7 @@ import android.graphics.Shader;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class CompanionWidgetProvider extends AppWidgetProvider {
@@ -53,9 +54,25 @@ public class CompanionWidgetProvider extends AppWidgetProvider {
             update(context, AppWidgetManager.getInstance(context), id);
         } else if (ACTION_DONE.equals(action)) {
             String day = NoticeScheduler.today();
+            String progressDayKey = "companion_widget_objectives_day_" + id;
+            String progressCountKey = "companion_widget_objectives_count_" + id;
+            int count = day.equals(DeviceState.prefs(context).getString(progressDayKey, ""))
+                    ? DeviceState.prefs(context).getInt(progressCountKey, 0)
+                    : 0;
+            int appCompleted = 0;
+            try {
+                JSONObject widget = new JSONObject(DeviceState.prefs(context).getString("widget", "{}"));
+                JSONArray objectives = widget.optJSONArray("objectives");
+                if (objectives != null) {
+                    for (int i = 0; i < Math.min(5, objectives.length()); i++) {
+                        JSONObject objective = objectives.optJSONObject(i);
+                        if (objective != null && objective.optBoolean("completed", false)) appCompleted++;
+                    }
+                }
+            } catch (Exception ignored) {}
             DeviceState.prefs(context).edit()
-                    .putString("companion_widget_done_day_" + id, day)
-                    .putBoolean("companion_widget_expanded_" + id, false)
+                    .putString(progressDayKey, day)
+                    .putInt(progressCountKey, Math.min(5, Math.max(count, appCompleted) + 1))
                     .apply();
             update(context, AppWidgetManager.getInstance(context), id);
         }
@@ -66,7 +83,8 @@ public class CompanionWidgetProvider extends AppWidgetProvider {
         for (int id : appWidgetIds) {
             DeviceState.prefs(context).edit()
                     .remove("companion_widget_expanded_" + id)
-                    .remove("companion_widget_done_day_" + id)
+                    .remove("companion_widget_objectives_day_" + id)
+                    .remove("companion_widget_objectives_count_" + id)
                     .apply();
         }
     }
@@ -102,28 +120,55 @@ public class CompanionWidgetProvider extends AppWidgetProvider {
 
         boolean expanded = DeviceState.prefs(context)
                 .getBoolean("companion_widget_expanded_" + id, false);
-        boolean doneToday = NoticeScheduler.today().equals(
-                DeviceState.prefs(context).getString("companion_widget_done_day_" + id, "")
-        );
+
+        String today = NoticeScheduler.today();
+        String progressDayKey = "companion_widget_objectives_day_" + id;
+        String progressCountKey = "companion_widget_objectives_count_" + id;
+        int widgetProgress = today.equals(DeviceState.prefs(context).getString(progressDayKey, ""))
+                ? DeviceState.prefs(context).getInt(progressCountKey, 0)
+                : 0;
+
+        JSONArray objectives = data.optJSONArray("objectives");
+        int appCompleted = 0;
+        if (objectives != null) {
+            for (int i = 0; i < Math.min(5, objectives.length()); i++) {
+                JSONObject objective = objectives.optJSONObject(i);
+                if (objective != null && objective.optBoolean("completed", false)) appCompleted++;
+            }
+        }
+        int completed = Math.min(5, Math.max(widgetProgress, appCompleted));
+        boolean allDone = completed >= 5;
+        String objectiveIcon = "✨";
+        if (!allDone && objectives != null && objectives.length() > 0) {
+            JSONObject current = objectives.optJSONObject(Math.min(completed, objectives.length() - 1));
+            if (current != null) objectiveIcon = current.optString("icon", "✨");
+        }
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_companion);
         views.setViewVisibility(R.id.companion_collapsed, expanded ? View.GONE : View.VISIBLE);
         views.setViewVisibility(R.id.companion_expanded, expanded ? View.VISIBLE : View.GONE);
 
-        views.setImageViewBitmap(R.id.companion_avatar, avatarBitmap(level, doneToday));
-        views.setImageViewBitmap(R.id.companion_avatar_badge, avatarBitmap(level, doneToday));
+        views.setImageViewBitmap(R.id.companion_avatar, avatarBitmap(level, allDone));
+        views.setImageViewBitmap(R.id.companion_avatar_badge, avatarBitmap(level, allDone));
 
+        views.setTextViewText(R.id.companion_days_badge, active ? String.valueOf(days) : "—");
+        views.setTextViewText(R.id.companion_objective_badge, allDone ? "✓" : objectiveIcon);
         views.setTextViewText(
                 R.id.companion_days,
                 active ? DeviceState.text(context, R.string.companion_widget_days, days)
                         : DeviceState.text(context, R.string.companion_widget_no_habit)
         );
+        views.setTextViewText(R.id.companion_action_icon, allDone ? "✓" : objectiveIcon);
+        views.setTextViewText(
+                R.id.companion_progress,
+                DeviceState.text(context, R.string.companion_widget_progress, Math.min(5, completed + (allDone ? 0 : 1)), 5)
+        );
         views.setTextViewText(
                 R.id.companion_done,
-                doneToday ? DeviceState.text(context, R.string.companion_widget_done_today)
+                allDone ? DeviceState.text(context, R.string.companion_widget_all_done)
                         : DeviceState.text(context, R.string.companion_widget_done)
         );
-        views.setTextViewText(R.id.companion_action_icon, doneToday ? "✓" : "🍎");
+        views.setViewVisibility(R.id.companion_done, allDone ? View.GONE : View.VISIBLE);
 
         views.setOnClickPendingIntent(
                 R.id.companion_collapsed,

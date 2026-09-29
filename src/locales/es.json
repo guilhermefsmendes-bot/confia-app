@@ -136,6 +136,10 @@
     "nextForm": "El próximo cambio visual ocurre en el nivel {{level}}. El XP de evolución ya no se gasta en la tienda.",
     "finalForm": "Has llegado a la forma adulta. El XP sigue marcando tu recorrido."
   },
+  "companionWidgetPrompt": {
+    "message": "¿Quieres llevarme contigo a la pantalla de inicio? Puedo mostrarte tu reto y tus pequeños objetivos sin que tengas que abrir la app.",
+    "action": "Añadir widget"
+  },
   "companionShop": {
     "title": "Tienda de CONFIA",
     "subtitle": "Elige pequeños detalles para hacer que tu CONFIA sea aún más tuya.",

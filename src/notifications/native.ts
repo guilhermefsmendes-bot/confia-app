@@ -10,6 +10,7 @@ interface ConfiaDevice {
  consumeLink():Promise<{url?:string}>;
  openNoticeSettings():Promise<void>;
  pinWidget():Promise<{supported:boolean}>;
+ widgetInfo():Promise<{installed:boolean}>;
  addListener(event:'tokenChanged'|'openLink',handler:(event:{token?:string;url?:string})=>void):Promise<PluginListenerHandle>;
 }
 export const ConfiaDevice=registerPlugin<ConfiaDevice>('ConfiaDevice');

@@ -220,7 +220,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const lastRight=placed[placed.length-1]?.tile.right||"Stress";
  const tileStep=routeDirection==="up"||routeDirection==="down"?34:78;
  const lastPlaced=placed[placed.length-1];
- const candidateCount=Math.min(5,2+(bonuses.extraChoices||0));
+ const candidateCount=Math.min(4,2+Math.min(2,bonuses.extraChoices||0));
  const [rouletteSeed,setRouletteSeed]=useState(0);
  const options=useMemo(()=>{
   let pool=DOMINOES.filter(d=>d.left===lastRight&&!placed.slice(-6).some(p=>p.tile.id===d.id));
@@ -241,14 +241,14 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
 
  const rewardQuest=()=>{
   if(questDone)return;
-  setBonuses((b:any)=>quest.reward==="extra-choice"?{...b,extraChoices:b.extraChoices+1}:quest.reward==="reroll"?{...b,rerolls:b.rerolls+1}:{...b,hints:b.hints+1});
+  setBonuses((b:any)=>quest.reward==="extra-choice"?{...b,extraChoices:Math.min(2,b.extraChoices+1)}:quest.reward==="reroll"?{...b,rerolls:b.rerolls+1}:{...b,hints:b.hints+1});
   const next=sample(QUESTS.filter(q=>q.id!==quest.id),1)[0]||quest;
   setQuest(next);
   setQuestDone(false);
   setToast(c.bonus);setTimeout(()=>setToast(""),2200);
  };
- const reset=()=>{setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([]);setImpulse(null);setPendingDrop(null);setTreasureOpen(false);setTreasureAnswer("")};
- const enterSection=(next:Section)=>{if(next==="sea"){setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setUnlockedIslands([]);setSelectedPlaced(null);setTreasureOpen(false);setTreasureAnswer("")}setSection(next)};
+ const reset=()=>{setBonuses({extraChoices:0,rerolls:0,hints:0});setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([]);setImpulse(null);setPendingDrop(null);setTreasureOpen(false);setTreasureAnswer("")};
+ const enterSection=(next:Section)=>{if(next==="sea"){setBonuses({extraChoices:0,rerolls:0,hints:0});setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setUnlockedIslands([]);setSelectedPlaced(null);setTreasureOpen(false);setTreasureAnswer("")}setSection(next)};
  const reroll=()=>{if(bonuses.rerolls<=0)return;setBonuses((b:any)=>({...b,rerolls:b.rerolls-1}));setQuestDone(v=>!v)};
  const islands=[{x:.14,y:.12},{x:.36,y:.20},{x:.62,y:.11},{x:.86,y:.24},{x:.28,y:.40},{x:.58,y:.34},{x:.82,y:.50},{x:.18,y:.63},{x:.48,y:.67},{x:.76,y:.78},{x:.92,y:.88,treasure:true}];
  const seaObstacles=[

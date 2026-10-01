@@ -96,7 +96,67 @@ const DOMINOES:Domino[]=[
 {id:"double-pause",left:"Pausa",right:"Pausa",tone:"light",turn:true},
 {id:"double-calm",left:"Calma",right:"Calma",tone:"light",turn:true},
 {id:"double-clarity",left:"Clareza",right:"Clareza",tone:"light",turn:true},
-{id:"double-confidence",left:"Confiança",right:"Confiança",tone:"light",turn:true}
+{id:"double-confidence",left:"Confiança",right:"Confiança",tone:"light",turn:true},
+{id:"stress-fatigue",left:"Stress",right:"Cansaço",tone:"heavy"},
+{id:"stress-pressure",left:"Stress",right:"Pressão",tone:"heavy"},
+{id:"stress-rest",left:"Stress",right:"Descanso",tone:"neutral"},
+{id:"agitation-worry",left:"Agitação",right:"Preocupação",tone:"heavy"},
+{id:"agitation-pause",left:"Agitação",right:"Pausa",tone:"light"},
+{id:"tension-breath",left:"Tensão",right:"Respiração",tone:"light"},
+{id:"tension-space",left:"Tensão",right:"Espaço",tone:"light"},
+{id:"worry-doubt",left:"Preocupação",right:"Dúvida",tone:"heavy"},
+{id:"worry-clarity",left:"Preocupação",right:"Clareza",tone:"light"},
+{id:"fear-accept",left:"Medo",right:"Aceitar",tone:"light"},
+{id:"fear-breath",left:"Medo",right:"Respiração",tone:"light"},
+{id:"fear-courage",left:"Medo",right:"Coragem",tone:"light"},
+{id:"alert-pause",left:"Alerta",right:"Pausa",tone:"light"},
+{id:"alert-observe",left:"Alerta",right:"Observar",tone:"light"},
+{id:"rush-pause",left:"Pressa",right:"Pausa",tone:"light"},
+{id:"rush-rest",left:"Pressa",right:"Descanso",tone:"light"},
+{id:"overload-balance",left:"Sobrecarga",right:"Equilíbrio",tone:"light"},
+{id:"overload-rest",left:"Sobrecarga",right:"Descanso",tone:"light"},
+{id:"check-pause",left:"Verificar",right:"Pausa",tone:"light"},
+{id:"check-clarity",left:"Verificar",right:"Clareza",tone:"light"},
+{id:"check-perspective",left:"Verificar",right:"Perspetiva",tone:"light"},
+{id:"relief-confidence",left:"Alívio breve",right:"Confiança",tone:"light"},
+{id:"relief-calm",left:"Alívio breve",right:"Calma",tone:"light"},
+{id:"doubt-pause",left:"Dúvida",right:"Pausa",tone:"light"},
+{id:"doubt-accept",left:"Dúvida",right:"Aceitar",tone:"light"},
+{id:"avoid-observe",left:"Evitar",right:"Observar",tone:"light"},
+{id:"avoid-accept",left:"Evitar",right:"Aceitar",tone:"light"},
+{id:"pause-clarity",left:"Pausa",right:"Clareza",tone:"light"},
+{id:"pause-presence",left:"Pausa",right:"Presença",tone:"light"},
+{id:"pause-balance",left:"Pausa",right:"Equilíbrio",tone:"light"},
+{id:"breath-presence",left:"Respiração",right:"Presença",tone:"light"},
+{id:"breath-balance",left:"Respiração",right:"Equilíbrio",tone:"light"},
+{id:"observe-calm",left:"Observar",right:"Calma",tone:"light"},
+{id:"observe-confidence",left:"Observar",right:"Confiança",tone:"light"},
+{id:"observe-action",left:"Observar",right:"Ação",tone:"light"},
+{id:"space-calm",left:"Espaço",right:"Calma",tone:"light"},
+{id:"space-accept",left:"Espaço",right:"Aceitar",tone:"light"},
+{id:"perspective-accept",left:"Perspetiva",right:"Aceitar",tone:"light"},
+{id:"perspective-action",left:"Perspetiva",right:"Ação",tone:"light"},
+{id:"clarity-confidence",left:"Clareza",right:"Confiança",tone:"light"},
+{id:"clarity-courage",left:"Clareza",right:"Coragem",tone:"light"},
+{id:"action-calm",left:"Ação",right:"Calma",tone:"light"},
+{id:"action-balance",left:"Ação",right:"Equilíbrio",tone:"light"},
+{id:"confidence-calm",left:"Confiança",right:"Calma",tone:"light"},
+{id:"confidence-presence",left:"Confiança",right:"Presença",tone:"light"},
+{id:"courage-action",left:"Coragem",right:"Ação",tone:"light"},
+{id:"courage-presence",left:"Coragem",right:"Presença",tone:"light"},
+{id:"calm-balance",left:"Calma",right:"Equilíbrio",tone:"light"},
+{id:"calm-wellbeing",left:"Calma",right:"Bem-estar",tone:"light"},
+{id:"presence-clarity",left:"Presença",right:"Clareza",tone:"light"},
+{id:"presence-action",left:"Presença",right:"Ação",tone:"light"},
+{id:"balance-energy",left:"Equilíbrio",right:"Energia",tone:"light"},
+{id:"wellbeing-energy",left:"Bem-estar",right:"Energia",tone:"light"},
+{id:"rest-calm",left:"Descanso",right:"Calma",tone:"light"},
+{id:"rest-balance",left:"Descanso",right:"Equilíbrio",tone:"light"},
+{id:"energy-confidence",left:"Energia",right:"Confiança",tone:"light"},
+{id:"accept-clarity",left:"Aceitar",right:"Clareza",tone:"light"},
+{id:"accept-presence",left:"Aceitar",right:"Presença",tone:"light"},
+{id:"wait-pause",left:"Esperar",right:"Pausa",tone:"light"},
+{id:"wait-accept",left:"Esperar",right:"Aceitar",tone:"light"}
 ];
 
 const IMPULSE_QUESTIONS:ImpulseQuestion[]=[
@@ -257,7 +317,12 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   const wanted=neededWord.trim().toLocaleLowerCase();
   if(!wanted)return [];
   return DOMINOES.filter(d=>d.left.trim().toLocaleLowerCase()===wanted);
- },[neededWord,placed]);
+ },[neededWord]);
+ const neededWordSuggestions=useMemo(()=>{
+  const recentIds=new Set(placed.slice(-8).map(p=>p.tile.id));
+  const unique=DOMINOES.filter(d=>!recentIds.has(d.id)).reduce<Domino[]>((acc,d)=>acc.some(x=>x.left.toLocaleLowerCase()===d.left.toLocaleLowerCase())?acc:[...acc,d],[]);
+  return sample(unique,8);
+ },[placed]);
 
  const bury=()=>{if(!draft.trim())return;const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:draft.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:(capsule?.cycle||0)+1};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);if(!monthTracker){setMonthTracker({startedAt:buriedAt.toISOString(),dueAt:new Date(buriedAt.getTime()+30*86400000).toISOString()})}setNow(Date.now());setDraft("");setGuess("");setRevealed(false)};
  const rebury=()=>{if(!capsule||!feedback.trim())return;const reflection={at:new Date().toISOString(),message:capsule.message,guess:guess.trim(),feedback:feedback.trim()};setWeeklyLog(prev=>[...prev,reflection]);const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:feedback.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:capsule.cycle+1,feedback:feedback.trim()};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);setNow(Date.now());setFeedback("");setGuess("");setRevealed(false)};
@@ -317,7 +382,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   };
  };
  const requestWord=()=>{setNeededWord("");setWordTile(null);setWordMoment("");setWordPromptOpen(true)};
- const findNeededWord=()=>{if(!neededWord.trim())return;if(availableWordTiles.length===0){setToast(c.needWordNoMatch);setTimeout(()=>setToast(""),2200);return}setWordTile(availableWordTiles[0])};
+ const findNeededWord=()=>{if(!neededWord.trim())return;if(availableWordTiles.length===0){setToast(c.needWordNoMatch);setTimeout(()=>setToast(""),2200);return}setWordTile(availableWordTiles[placed.length%availableWordTiles.length])};
  const saveWordMoment=()=>{
   if(!wordTile||!wordMoment.trim()||!boardRef.current)return;
   const rect=boardRef.current.getBoundingClientRect();if(placed.length>=33)return;
@@ -500,7 +565,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
    <motion.div initial={{opacity:0,y:22,scale:.96}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[30px] border border-white/80 bg-[#fffdf7] p-6 shadow-[0_30px_80px_rgba(12,54,63,.34)]">
     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] bg-[#e6f5f1] text-2xl">✦</div>
     <h3 className="mt-4 text-center text-[21px] font-black text-[#294f57]">{wordTile?c.needWordMoment:c.needWordTitle}</h3>
-    {!wordTile&&<><p className="mt-3 text-center text-[12px] font-semibold leading-relaxed text-[#587177]">{c.needWordPrompt}</p><input autoFocus value={neededWord} onChange={e=>setNeededWord(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")findNeededWord()}} placeholder={c.needWordPlaceholder} className="mt-5 w-full rounded-[17px] border border-[#d8e5e3] bg-white p-3.5 text-[13px] font-bold text-[#405a60] outline-none"/><button onClick={findNeededWord} className="mt-3 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white">{c.needWordFind}</button></>}
+    {!wordTile&&<><p className="mt-3 text-center text-[12px] font-semibold leading-relaxed text-[#587177]">{c.needWordPrompt}</p><input autoFocus value={neededWord} onChange={e=>setNeededWord(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")findNeededWord()}} placeholder={c.needWordPlaceholder} className="mt-5 w-full rounded-[17px] border border-[#d8e5e3] bg-white p-3.5 text-[13px] font-bold text-[#405a60] outline-none"/><div className="mt-3 flex flex-wrap justify-center gap-1.5">{neededWordSuggestions.map(tile=><button key={tile.left} type="button" onClick={()=>setNeededWord(tile.left)} className="rounded-full border border-[#b9d9d5] bg-[#f4fbf9] px-2.5 py-1.5 text-[9px] font-black text-[#286773]">{tile.left}</button>)}</div><button onClick={findNeededWord} className="mt-3 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white">{c.needWordFind}</button></>}
     {wordTile&&<><div className="mt-4 flex justify-center"><button onClick={()=>setWordTile(null)} className="cursor-pointer"><DominoPiece tile={wordTile}/></button></div><p className="mt-5 text-[13px] font-black leading-relaxed text-[#304f56]">{c.needWordMoment}</p><textarea autoFocus value={wordMoment} onChange={e=>setWordMoment(e.target.value)} maxLength={700} placeholder={c.needWordMomentPlaceholder} className="mt-3 min-h-[135px] w-full resize-none rounded-[17px] border border-[#d8e5e3] bg-white p-3 text-[12px] font-medium text-[#405a60] outline-none"/><button disabled={!wordMoment.trim()} onClick={saveWordMoment} className="mt-3 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white disabled:opacity-40">{c.needWordSave}</button></>}
     <button onClick={()=>{setWordPromptOpen(false);setWordTile(null);setWordMoment("")}} className="mt-2 w-full py-2 text-[10px] font-bold text-[#718185]">×</button>
    </motion.div>

@@ -232,7 +232,14 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const compareMonth=()=>{if(!monthTracker||!monthSummary.trim())return;setMonthCompared(true);setMonthTracker({...monthTracker,summary:monthSummary.trim(),comparedAt:new Date().toISOString()})};
  const closeMonth=()=>{const start=new Date();const next={startedAt:start.toISOString(),dueAt:new Date(start.getTime()+30*86400000).toISOString()};setMonthTracker(next);setMonthSummary("");setMonthCompared(false)};
 
- const rewardQuest=()=>{if(questDone)return;setQuestDone(true);setBonuses((b:any)=>quest.reward==="extra-choice"?{...b,extraChoices:b.extraChoices+1}:quest.reward==="reroll"?{...b,rerolls:b.rerolls+1}:{...b,hints:b.hints+1});setToast(c.bonus);setTimeout(()=>setToast(""),2200)};
+ const rewardQuest=()=>{
+  if(questDone)return;
+  setBonuses((b:any)=>quest.reward==="extra-choice"?{...b,extraChoices:b.extraChoices+1}:quest.reward==="reroll"?{...b,rerolls:b.rerolls+1}:{...b,hints:b.hints+1});
+  const next=sample(QUESTS.filter(q=>q.id!==quest.id),1)[0]||quest;
+  setQuest(next);
+  setQuestDone(false);
+  setToast(c.bonus);setTimeout(()=>setToast(""),2200);
+ };
  const reset=()=>{setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([]);setImpulse(null);setPendingDrop(null);setTreasureOpen(false);setTreasureAnswer("")};
  const enterSection=(next:Section)=>{if(next==="sea"){setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setUnlockedIslands([]);setSelectedPlaced(null);setTreasureOpen(false);setTreasureAnswer("")}setSection(next)};
  const reroll=()=>{if(bonuses.rerolls<=0)return;setBonuses((b:any)=>({...b,rerolls:b.rerolls-1}));setQuestDone(v=>!v)};

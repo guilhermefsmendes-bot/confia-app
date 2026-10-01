@@ -372,7 +372,8 @@ let horizonHandStore:Domino[]|null=null;
 function getHorizonHand(){
  if(horizonHandStore?.length)return horizonHandStore;
  const saved=readJson<Domino[]>(HORIZON_HAND_KEY,[]);
- horizonHandStore=saved.length?saved:pickHandTiles(4);
+ horizonHandStore=saved.length? (saved.length>3?saved.slice(0,3):saved) : pickHandTiles(3);
+ if(saved.length>3){localStorage.setItem(HORIZON_HAND_KEY,JSON.stringify(horizonHandStore));}
  return horizonHandStore;
 }
 function setHorizonHand(next:Domino[]){
@@ -517,7 +518,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   setQuestDone(false);
   setToast(c.bonus);setTimeout(()=>setToast(""),2200);
  };
- const reset=()=>{const freshHand=pickHandTiles(4);setBonuses({extraChoices:0,rerolls:0,hints:0});setHorizonHand(freshHand);setHand(freshHand);setPlaced([]);localStorage.removeItem(DOMINO_KEY);localStorage.removeItem(HORIZON_PROGRESS_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([0]);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setJunction(null);setJunctionExplanation("");setJunctions([]);localStorage.removeItem(HORIZON_JUNCTIONS_KEY);setTreasureOpen(false);setTreasureAnswer("");setWordPromptOpen(false);setNeededWord("");setWordTile(null);setWordMoment("")};
+ const reset=()=>{const freshHand=pickHandTiles(3);setBonuses({extraChoices:0,rerolls:0,hints:0});setHorizonHand(freshHand);setHand(freshHand);setPlaced([]);localStorage.removeItem(DOMINO_KEY);localStorage.removeItem(HORIZON_PROGRESS_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([0]);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setJunction(null);setJunctionExplanation("");setJunctions([]);localStorage.removeItem(HORIZON_JUNCTIONS_KEY);setTreasureOpen(false);setTreasureAnswer("");setWordPromptOpen(false);setNeededWord("");setWordTile(null);setWordMoment("")};
  const enterSection=(next:Section)=>{setSection(next);if(next==="sea"){setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setHorizonResumeOpen(true)}};
  const startNewJourney=()=>{reset();setHorizonResumeOpen(false);setHorizonIntroOpen(true)};
  const continueJourney=()=>{setHorizonResumeOpen(false)};
@@ -606,7 +607,19 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   if(nextSlot%3===2){
    const reachedIsland=Math.floor(nextSlot/3)+1;
    if(reachedIsland<islands.length)setUnlockedIslands(prev=>prev.includes(reachedIsland)?prev:[...prev,reachedIsland]);
-   if(reachedIsland===11)setTimeout(()=>setTreasureOpen(true),520);
+   if(reachedIsland===11){
+    setTimeout(()=>setTreasureOpen(true),520);
+    return;
+   }
+   // Ao chegar a uma nova ilha, abre sempre um questionário de reflexão.
+   // O questionário não bloqueia nem apaga o caminho: é uma pausa entre ilhas.
+   const next=nextImpulseQuestion();
+   setTimeout(()=>{
+    setImpulse(next);
+    setImpulseAnswer(null);
+    setPendingDrop(null);
+    setUsedImpulseQuestions(prev=>[...prev,next.id]);
+   },520);
   }
  };
  const nextImpulseQuestion=(excludeId?:string)=>{

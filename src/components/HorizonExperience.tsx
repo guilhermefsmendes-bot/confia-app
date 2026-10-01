@@ -317,7 +317,9 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   if(x>rect.width-w-4){setToast("Não há espaço suficiente à direita da peça anterior");setTimeout(()=>setToast(""),1800);return}
   x=Math.max(4,Math.min(rect.width-w-4,x)); y=Math.max(6,Math.min(rect.height-h-6,y));
   const pending={tile,x,y,rotate,direction:routeDirection};
-  if(touchingObstacle(x,y,rect.width,rect.height)){setToast("Há um perigo no mar. Muda o rumo e encontra outra passagem.");setTimeout(()=>setToast(""),2200);return;}
+  // A primeira peça inicia a viagem num corredor seguro; os perigos só
+  // interferem depois de o caminho já ter começado.
+  if(placed.length>0&&touchingObstacle(x,y,rect.width,rect.height)){setToast("Há um perigo no mar. Muda o rumo e encontra outra passagem.");setTimeout(()=>setToast(""),2200);return;}
   const islandIndex=touchingIsland(x,y,rect.width,rect.height);
   if(islandIndex>=0){
    if(islands[islandIndex].treasure){setTreasureOpen(true);return;}

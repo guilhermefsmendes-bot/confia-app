@@ -306,6 +306,17 @@ const QUESTS:Quest[]=[
 
 function readJson<T>(key:string,fallback:T):T{try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}}
 function sample<T>(xs:T[],n:number){return [...xs].sort(()=>Math.random()-.5).slice(0,n)}
+let horizonHandStore:Domino[]|null=null;
+function getHorizonHand(){
+ if(horizonHandStore?.length)return horizonHandStore;
+ const saved=readJson<Domino[]>(HORIZON_HAND_KEY,[]);
+ horizonHandStore=saved.length?saved:pickHandTiles(4);
+ return horizonHandStore;
+}
+function setHorizonHand(next:Domino[]){
+ horizonHandStore=next;
+ localStorage.setItem(HORIZON_HAND_KEY,JSON.stringify(next));
+}
 function pickHandTiles(count:number,excludeIds:string[]=[]){
  const excluded=new Set(excludeIds);
  const pool=DOMINOES.filter(d=>!excluded.has(d.id));
@@ -383,13 +394,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [monthSummary,setMonthSummary]=useState("");
  const [monthCompared,setMonthCompared]=useState(false);
  const [placed,setPlaced]=useState<PlacedDomino[]>(()=>readHorizonProgress()?.placed||readJson(DOMINO_KEY,[]));
- const [hand,setHand]=useState<Domino[]>(()=>{
-  const savedHand=readJson(HORIZON_HAND_KEY,[]);
-  if(Array.isArray(savedHand)&&savedHand.length)return savedHand;
-  const savedProgress=readHorizonProgress()?.hand;
-  if(savedProgress?.length)return savedProgress;
-  return pickHandTiles(4);
- });
+ const [hand,setHand]=useState<Domino[]>(()=>getHorizonHand());
  const [bonuses,setBonuses]=useState(()=>readHorizonProgress()?.bonuses||readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));
  const [quest,setQuest]=useState<Quest>(()=>readHorizonProgress()?.quest||sample(QUESTS,1)[0]);
  const [questDone,setQuestDone]=useState(()=>readHorizonProgress()?.questDone||false);
@@ -422,7 +427,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  useEffect(()=>{localStorage.setItem(DOMINO_KEY,JSON.stringify(placed))},[placed]);
  useEffect(()=>{localStorage.setItem(BONUS_KEY,JSON.stringify(bonuses))},[bonuses]);
  useEffect(()=>{localStorage.setItem(HORIZON_JUNCTIONS_KEY,JSON.stringify(junctions))},[junctions]);
- useEffect(()=>{localStorage.setItem(HORIZON_HAND_KEY,JSON.stringify(hand));localStorage.setItem(HORIZON_PROGRESS_KEY,JSON.stringify({placed,hand,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone}))},[hand,placed,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone]);
+ useEffect(()=>{setHorizonHand(hand);localStorage.setItem(HORIZON_PROGRESS_KEY,JSON.stringify({placed,hand,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone}))},[hand,placed,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone]);
  useEffect(()=>{const onCommunity=()=>{setBonuses(readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));setToast(c.bonus);setTimeout(()=>setToast(""),2200)};window.addEventListener(COMMUNITY_EVENT,onCommunity);return()=>window.removeEventListener(COMMUNITY_EVENT,onCommunity)},[c.bonus]);
 
  const hasSavedJourney=placed.length>0||junctions.length>0||unlockedIslands.length>1||Boolean(treasureAnswer.trim());
@@ -485,7 +490,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   setQuestDone(false);
   setToast(c.bonus);setTimeout(()=>setToast(""),2200);
  };
- const reset=()=>{const freshHand=pickHandTiles(4);setBonuses({extraChoices:0,rerolls:0,hints:0});setHand(freshHand);localStorage.setItem(HORIZON_HAND_KEY,JSON.stringify(freshHand));setPlaced([]);localStorage.removeItem(DOMINO_KEY);localStorage.removeItem(HORIZON_PROGRESS_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([0]);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setJunction(null);setJunctionExplanation("");setJunctions([]);localStorage.removeItem(HORIZON_JUNCTIONS_KEY);setTreasureOpen(false);setTreasureAnswer("");setWordPromptOpen(false);setNeededWord("");setWordTile(null);setWordMoment("")};
+ const reset=()=>{const freshHand=pickHandTiles(4);setBonuses({extraChoices:0,rerolls:0,hints:0});setHorizonHand(freshHand);setHand(freshHand);setPlaced([]);localStorage.removeItem(DOMINO_KEY);localStorage.removeItem(HORIZON_PROGRESS_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([0]);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setJunction(null);setJunctionExplanation("");setJunctions([]);localStorage.removeItem(HORIZON_JUNCTIONS_KEY);setTreasureOpen(false);setTreasureAnswer("");setWordPromptOpen(false);setNeededWord("");setWordTile(null);setWordMoment("")};
  const enterSection=(next:Section)=>{setSection(next);if(next==="sea"){setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setHorizonResumeOpen(true)}};
  const startNewJourney=()=>{reset();setHorizonResumeOpen(false);setHorizonIntroOpen(true)};
  const continueJourney=()=>{setHorizonResumeOpen(false)};
@@ -585,8 +590,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  };
  const replenishHand=(usedTile:Domino)=>{
   setHand(current=>{
-   // A carteira só pode mudar quando uma peça foi efetivamente usada no caminho.
-   // Pesquisar uma palavra, escrever ou abrir o modal nunca passa por este ponto.
+   // ÚNICO ponto onde a carteira é substituída: depois de usar uma peça no mapa.
    if(!current.some(tile=>tile.id===usedTile.id))return current;
    const excludedIds=[...current.map(tile=>tile.id),...placed.slice(-24).map(p=>p.tile.id),usedTile.id];
    const candidates=DOMINOES.filter(tile=>{
@@ -597,7 +601,9 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
     return true;
    });
    const replacement=sample(candidates.length?candidates:DOMINOES.filter(tile=>!excludedIds.includes(tile.id)),1)[0];
-   return replacement?[...current.filter(tile=>tile.id!==usedTile.id),replacement]:current;
+   const next=replacement?[...current.filter(tile=>tile.id!==usedTile.id),replacement]:current;
+   if(next!==current)setHorizonHand(next);
+   return next;
   });
  };
  const placeTile=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction;obstacle:boolean})=>{

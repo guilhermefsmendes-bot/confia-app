@@ -323,11 +323,11 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   // ponto de passagem estiver sobre um perigo, ela pode ser colocada na mesma
   // posição, mas só se estiver virada para cima ou para baixo: é o primeiro
   // desvio que obriga a mudar a rota.
-  const obstacle=placed.length>0&&touchingObstacle(x,y,rect.width,rect.height);
-  const secondPiece=placed.length===1;
+  const obstacle=touchingObstacle(x,y,rect.width,rect.height);
   const verticalRoute=routeDirection==="up"||routeDirection==="down";
-  if(obstacle&&secondPiece&&!verticalRoute){setToast("Aqui tens de mudar a rota: vira a segunda peça para cima ou para baixo.");setTimeout(()=>setToast(""),2400);return;}
-  if(obstacle&&!secondPiece){setToast("Há um perigo no mar. Muda o rumo e encontra outra passagem.");setTimeout(()=>setToast(""),2200);return;}
+  // As áreas de perigo não bloqueiam a colocação. Funcionam como zonas
+  // especiais: qualquer peça pode entrar nelas, mas só na vertical.
+  if(obstacle&&!verticalRoute){setToast("Nesta zona do mar, a peça só pode ficar na vertical.");setTimeout(()=>setToast(""),2400);return;}
   const islandIndex=touchingIsland(x,y,rect.width,rect.height);
   if(islandIndex>=0){
    if(islands[islandIndex].treasure){setTreasureOpen(true);return;}

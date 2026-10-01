@@ -367,6 +367,7 @@ const QUESTS:Quest[]=[
 
 function readJson<T>(key:string,fallback:T):T{try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}}
 function sample<T>(xs:T[],n:number){return [...xs].sort(()=>Math.random()-.5).slice(0,n)}
+const wordKey=(word:string)=>word.trim().toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 let horizonHandStore:Domino[]|null=null;
 function getHorizonHand(){
  if(horizonHandStore?.length)return horizonHandStore;
@@ -384,9 +385,18 @@ function pickHandTiles(count:number,excludeIds:string[]=[]){
  const result:Domino[]=[];
  const candidates=[...pool];
  while(result.length<count&&candidates.length){
-  const compatible=candidates.filter(d=>!result.some(r=>d.left.toLocaleLowerCase()===r.right.toLocaleLowerCase()||d.right.toLocaleLowerCase()===r.left.toLocaleLowerCase()));
-  const source=compatible.length?compatible:candidates;
-  const picked=sample(source,1)[0];
+  const usedWords=new Set(result.flatMap(r=>[wordKey(r.left),wordKey(r.right)]));
+  const compatible=candidates.filter(d=>{
+   const left=wordKey(d.left),right=wordKey(d.right);
+   if(usedWords.has(left)||usedWords.has(right))return false;
+   return !result.some(r=>left===wordKey(r.right)||right===wordKey(r.left));
+  });
+  const source=compatible.length?compatible:candidates.filter(d=>{
+   const used=new Set(result.flatMap(r=>[wordKey(r.left),wordKey(r.right)]));
+   return !used.has(wordKey(d.left))&&!used.has(wordKey(d.right));
+  });
+  const fallback=source.length?source:candidates;
+  const picked=sample(fallback,1)[0];
   if(!picked)break;
   result.push(picked);
   const index=candidates.findIndex(d=>d.id===picked.id);
@@ -530,26 +540,14 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   );
  },[neededWord,reverseWordDirection,usedTileIds]);
  const neededWordSuggestions=useMemo(()=>{
-  const side=reverseWordDirection?"left":"right";
   const unused=DOMINOES.filter(d=>!usedTileIds.has(d.id));
-  // As sugestões privilegiam o lado que conduz o percurso, mas uma palavra
-  // nunca fica excluída por estar no lado oposto da peça.
-  const unique=unused.reduce<Domino[]>((acc,d)=>{
-   const preferred=d[side].toLocaleLowerCase();
-   const alternate=d[side==="left"?"right":"left"].toLocaleLowerCase();
-   const value=preferred||alternate;
-   return acc.some(x=>x[side].toLocaleLowerCase()===value)?acc:[...acc,d];
-  },[]);
-  // As sugestões pertencem ao estado atual do percurso. Não as sorteamos
-  // em cada render, porque escrever uma palavra provoca um render e não
-  // deve mudar a carteira nem as sugestões que a pessoa já está a ver.
+  // Mostramos palavras únicas, não peças únicas. Assim duas peças diferentes
+  // com o mesmo nome nunca aparecem como duas sugestões repetidas.
+  const words=[...new Map(unused.flatMap(d=>[d.left,d.right]).map(word=>[wordKey(word),word])).values()];
   const seed=placed.length*31+(reverseWordDirection?17:0);
-  return [...unique].sort((a,b)=>{
-   const ha=(a.id*17+seed)%997;
-   const hb=(b.id*17+seed)%997;
-   return ha-hb;
-  }).slice(0,8);
- },[placed,reverseWordDirection]);
+  const hash=(word:string)=>{let h=seed;for(const char of wordKey(word))h=(h*31+char.charCodeAt(0))%997;return h};
+  return [...words].sort((a,b)=>hash(a)-hash(b)).slice(0,8);
+ },[placed,reverseWordDirection,usedTileIds]);
 
  const bury=()=>{if(!draft.trim())return;const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:draft.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:(capsule?.cycle||0)+1};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);if(!monthTracker){setMonthTracker({startedAt:buriedAt.toISOString(),dueAt:new Date(buriedAt.getTime()+30*86400000).toISOString()})}setNow(Date.now());setDraft("");setGuess("");setRevealed(false)};
  const rebury=()=>{if(!capsule||!feedback.trim())return;const reflection={at:new Date().toISOString(),message:capsule.message,guess:guess.trim(),feedback:feedback.trim()};setWeeklyLog(prev=>[...prev,reflection]);const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:feedback.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:capsule.cycle+1,feedback:feedback.trim()};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);setNow(Date.now());setFeedback("");setGuess("");setRevealed(false)};
@@ -664,14 +662,16 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
    // ÚNICO ponto onde a carteira é substituída: depois de usar uma peça no mapa.
    if(!current.some(tile=>tile.id===usedTile.id))return current;
    const excludedIds=[...current.map(tile=>tile.id),...placed.slice(-24).map(p=>p.tile.id),usedTile.id];
+   const currentWords=new Set(current.flatMap(tile=>[wordKey(tile.left),wordKey(tile.right)]));
    const candidates=DOMINOES.filter(tile=>{
     if(excludedIds.includes(tile.id))return false;
-    if(tile.left.toLocaleLowerCase()===usedTile.right.toLocaleLowerCase())return false;
-    if(tile.right.toLocaleLowerCase()===usedTile.left.toLocaleLowerCase())return false;
-    if(current.some(existing=>tile.left.toLocaleLowerCase()===existing.right.toLocaleLowerCase()||tile.right.toLocaleLowerCase()===existing.left.toLocaleLowerCase()))return false;
+    const left=wordKey(tile.left),right=wordKey(tile.right);
+    if(currentWords.has(left)||currentWords.has(right))return false;
+    if(left===wordKey(usedTile.right)||right===wordKey(usedTile.left))return false;
     return true;
    });
-   const replacement=sample(candidates.length?candidates:DOMINOES.filter(tile=>!excludedIds.includes(tile.id)),1)[0];
+   const fallback=DOMINOES.filter(tile=>!excludedIds.includes(tile.id)&&!currentWords.has(wordKey(tile.left))&&!currentWords.has(wordKey(tile.right)));
+   const replacement=sample(candidates.length?candidates:fallback,1)[0];
    const next=replacement?[...current.filter(tile=>tile.id!==usedTile.id),replacement]:current;
    if(next!==current)setHorizonHand(next);
    return next;
@@ -817,7 +817,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
    <motion.div initial={{opacity:0,y:22,scale:.96}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[30px] border border-white/80 bg-[#fffdf7] p-6 shadow-[0_30px_80px_rgba(12,54,63,.34)]">
     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] bg-[#e6f5f1] text-2xl">✦</div>
     <h3 className="mt-4 text-center text-[21px] font-black text-[#294f57]">{wordTile?c.needWordMoment:c.needWordTitle}</h3>
-    {!wordTile&&<><p className="mt-3 text-center text-[12px] font-semibold leading-relaxed text-[#587177]">{c.needWordPrompt}</p><input autoFocus value={neededWord} onChange={e=>setNeededWord(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")findNeededWord()}} placeholder={c.needWordPlaceholder} className="mt-5 w-full rounded-[17px] border border-[#d8e5e3] bg-white p-3.5 text-[13px] font-bold text-[#405a60] outline-none"/><div className="mt-3 flex flex-wrap justify-center gap-1.5">{neededWordSuggestions.map(tile=><button key={tile.left} type="button" onClick={()=>setNeededWord(tile.left)} className="rounded-full border border-[#b9d9d5] bg-[#f4fbf9] px-2.5 py-1.5 text-[9px] font-black text-[#286773]">{tile.left}</button>)}</div><button onClick={findNeededWord} className="mt-3 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white">{c.needWordFind}</button></>}
+    {!wordTile&&<><p className="mt-3 text-center text-[12px] font-semibold leading-relaxed text-[#587177]">{c.needWordPrompt}</p><input autoFocus value={neededWord} onChange={e=>setNeededWord(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")findNeededWord()}} placeholder={c.needWordPlaceholder} className="mt-5 w-full rounded-[17px] border border-[#d8e5e3] bg-white p-3.5 text-[13px] font-bold text-[#405a60] outline-none"/><div className="mt-3 flex flex-wrap justify-center gap-1.5">{neededWordSuggestions.map(word=><button key={wordKey(word)} type="button" onClick={()=>setNeededWord(word)} className="rounded-full border border-[#b9d9d5] bg-[#f4fbf9] px-2.5 py-1.5 text-[9px] font-black text-[#286773]">{word}</button>)}</div><button onClick={findNeededWord} className="mt-3 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white">{c.needWordFind}</button></>}
     {wordTile&&<><div className="mt-4 flex justify-center"><button onClick={()=>setWordTile(null)} className="cursor-pointer"><DominoPiece tile={wordTile}/></button></div><p className="mt-5 text-[13px] font-black leading-relaxed text-[#304f56]">{c.needWordMoment}</p><textarea autoFocus value={wordMoment} onChange={e=>setWordMoment(e.target.value)} maxLength={700} placeholder={c.needWordMomentPlaceholder} className="mt-3 min-h-[135px] w-full resize-none rounded-[17px] border border-[#d8e5e3] bg-white p-3 text-[12px] font-medium text-[#405a60] outline-none"/><button disabled={!wordMoment.trim()} onClick={saveWordMoment} className="mt-3 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white disabled:opacity-40">{c.needWordSave}</button></>}
     <button onClick={()=>{setWordPromptOpen(false);setWordTile(null);setWordMoment("")}} className="mt-2 w-full py-2 text-[10px] font-bold text-[#718185]">×</button>
    </motion.div>

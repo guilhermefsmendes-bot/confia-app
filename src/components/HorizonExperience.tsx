@@ -235,8 +235,27 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const reroll=()=>{if(bonuses.rerolls<=0)return;setBonuses((b:any)=>({...b,rerolls:b.rerolls-1}));setQuestDone(v=>!v)};
  const islands=[{x:.22,y:.16},{x:.38,y:.12},{x:.68,y:.14},{x:.88,y:.28},{x:.22,y:.38},{x:.55,y:.38},{x:.80,y:.50},{x:.12,y:.68},{x:.42,y:.72},{x:.72,y:.80}];
  const touchingIsland=(x:number,y:number,boardWidth:number,boardHeight:number)=>{
+  // A ilha desbloqueia quando a lateral direita da peça chega à sua área.
+  // Usamos colisão/proximidade real em vez de uma janela estreita baseada
+  // apenas no valor de x, para funcionar de forma consistente em todas as ilhas.
   const w=74,h=29;
-  return islands.findIndex((island,index)=>!unlockedIslands.includes(index)&&x+w>=boardWidth*island.x-32&&x+w<=boardWidth*island.x+38&&y+h>=boardHeight*island.y-24&&y<=boardHeight*island.y+24);
+  const tolerance=12;
+  const pieceLeft=x;
+  const pieceRight=x+w;
+  const pieceTop=y;
+  const pieceBottom=y+h;
+  return islands.findIndex((island,index)=>{
+   if(unlockedIslands.includes(index)) return false;
+   const islandCenterX=boardWidth*island.x;
+   const islandCenterY=boardHeight*island.y;
+   const islandLeft=islandCenterX-32;
+   const islandRight=islandCenterX+32;
+   const islandTop=islandCenterY-24;
+   const islandBottom=islandCenterY+24;
+   const horizontalReach=pieceRight>=islandLeft-tolerance && pieceLeft<=islandRight+tolerance;
+   const verticalOverlap=pieceBottom>=islandTop-tolerance && pieceTop<=islandBottom+tolerance;
+   return horizontalReach && verticalOverlap;
+  });
  };
  const unlockIsland=(index:number,drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction})=>{
   setPendingDrop(drop);setImpulse(sample(IMPULSE_QUESTIONS,1)[0]);setImpulseAnswer(null);setUnlockedIslands(prev=>prev.includes(index)?prev:[...prev,index]);

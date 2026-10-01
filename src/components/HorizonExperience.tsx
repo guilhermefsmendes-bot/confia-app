@@ -167,7 +167,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [monthTracker,setMonthTracker]=useState<MonthTracker|null>(()=>readJson(MONTH_TRACKER_KEY,null));
  const [monthSummary,setMonthSummary]=useState("");
  const [monthCompared,setMonthCompared]=useState(false);
- const [placed,setPlaced]=useState<PlacedDomino[]>(()=>readJson(DOMINO_KEY,[{tile:DOMINOES[0],x:22,y:42,rotate:-2}]));
+ const [placed,setPlaced]=useState<PlacedDomino[]>([]);
  const [bonuses,setBonuses]=useState(()=>readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));
  const [quest,setQuest]=useState<Quest>(()=>sample(QUESTS,1)[0]);
  const [questDone,setQuestDone]=useState(false);
@@ -205,7 +205,8 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const closeMonth=()=>{const start=new Date();const next={startedAt:start.toISOString(),dueAt:new Date(start.getTime()+30*86400000).toISOString()};setMonthTracker(next);setMonthSummary("");setMonthCompared(false)};
 
  const rewardQuest=()=>{if(questDone)return;setQuestDone(true);setBonuses((b:any)=>quest.reward==="extra-choice"?{...b,extraChoices:b.extraChoices+1}:quest.reward==="reroll"?{...b,rerolls:b.rerolls+1}:{...b,hints:b.hints+1});setToast(c.bonus);setTimeout(()=>setToast(""),2200)};
- const reset=()=>{setPlaced([{tile:sample(DOMINOES.filter(d=>d.left==="Stress"),1)[0],x:22,y:42,rotate:-2}]);setQuest(sample(QUESTS,1)[0]);setQuestDone(false)};
+ const reset=()=>{setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false)};
+ const enterSection=(next:Section)=>{if(next==="sea"){setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null)}setSection(next)};
  const reroll=()=>{if(bonuses.rerolls<=0)return;setBonuses((b:any)=>({...b,rerolls:b.rerolls-1}));setQuestDone(v=>!v)};
  const placeTile=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:"right"|"up"|"down"})=>{
   setPlaced(prev=>[...prev,{tile:drop.tile,x:drop.x,y:drop.y,rotate:drop.rotate,direction:drop.direction}]);
@@ -254,7 +255,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
    </div>
 
    <div className="relative z-30 -mt-7 mx-3 grid grid-cols-3 overflow-hidden rounded-[22px] border border-white/70 bg-white/80 p-1.5 shadow-[0_10px_26px_rgba(83,58,45,.10)] backdrop-blur-xl">
-    {([["sky",c.sky,"✦"],["sand",c.sand,"⌁"],["sea",c.sea,"≈"]] as const).map(([id,label,icon])=><button key={id} onClick={()=>setSection(id)} className={`rounded-[17px] px-2 py-2.5 text-[10px] font-black transition ${section===id?"bg-white text-[#8f503e] shadow-sm":"text-[#776863]"}`}><span className="mr-1.5">{icon}</span>{label}</button>)}
+    {([["sky",c.sky,"✦"],["sand",c.sand,"⌁"],["sea",c.sea,"≈"]] as const).map(([id,label,icon])=><button key={id} onClick={()=>enterSection(id)} className={`rounded-[17px] px-2 py-2.5 text-[10px] font-black transition ${section===id?"bg-white text-[#8f503e] shadow-sm":"text-[#776863]"}`}><span className="mr-1.5">{icon}</span>{label}</button>)}
    </div>
 
    <AnimatePresence mode="wait">

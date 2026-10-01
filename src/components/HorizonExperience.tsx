@@ -250,7 +250,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const availableWordTiles=useMemo(()=>{
   const wanted=neededWord.trim().toLocaleLowerCase();
   if(!wanted)return [];
-  return DOMINOES.filter(d=>d.left.trim().toLocaleLowerCase()===wanted&&!placed.some(p=>p.tile.id===d.id));
+  return DOMINOES.filter(d=>d.left.trim().toLocaleLowerCase()===wanted);
  },[neededWord,placed]);
 
  const bury=()=>{if(!draft.trim())return;const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:draft.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:(capsule?.cycle||0)+1};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);if(!monthTracker){setMonthTracker({startedAt:buriedAt.toISOString(),dueAt:new Date(buriedAt.getTime()+30*86400000).toISOString()})}setNow(Date.now());setDraft("");setGuess("");setRevealed(false)};

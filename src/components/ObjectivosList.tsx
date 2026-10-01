@@ -344,7 +344,24 @@ const { t, i18n } = useTranslation();
             </div>
           </div>
 
-          <div className="mt-5 rounded-[22px] border border-white/80 bg-white/75 p-4 shadow-sm backdrop-blur-sm">
+          <div className="mt-5 overflow-hidden rounded-[26px] border border-[#E8D8CA] bg-gradient-to-b from-[#F8F3ED] via-[#F5EEE6] to-[#E9DED3] shadow-sm">
+            <div className="relative h-[270px] overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(255,255,255,.95),transparent_42%)]" />
+              <div className="absolute left-[7%] top-5 text-3xl opacity-70">☁️</div>
+              <div className="absolute right-[9%] top-12 text-2xl opacity-55">☁️</div>
+              <div className="absolute left-0 right-0 bottom-0 h-[210px] bg-[#CBB9AA] [clip-path:polygon(0_100%,0_72%,19%_50%,31%_68%,51%_16%,70%_58%,82%_38%,100%_72%,100%_100%)]" />
+              <div className="absolute left-0 right-0 bottom-0 h-[145px] bg-[#A88E7E] [clip-path:polygon(0_100%,18%_62%,31%_82%,51%_35%,68%_78%,82%_54%,100%_84%,100%_100%)]" />
+              {[
+                {level:1,x:22,y:79},{level:2,x:35,y:65},{level:3,x:49,y:49},{level:4,x:64,y:34},{level:5,x:78,y:20}
+              ].map(point=><div key={point.level} className="absolute z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full border-2 border-white bg-[#8F503E] shadow" style={{left:`${point.x}%`,top:`${point.y}%`}} />)}
+              <motion.div animate={{left:`${Math.min(78,22 + (completionPercentage/100)*56)}%`,top:`${Math.max(20,79 - (completionPercentage/100)*59)}%`}} transition={{duration:.65,ease:'easeOut'}} className="absolute z-20 -translate-x-1/2 -translate-y-full text-[34px] drop-shadow-md">🧗</motion.div>
+              <div className="absolute left-4 top-4 z-20 rounded-full border border-white/80 bg-white/75 px-3 py-1.5 backdrop-blur-sm">
+                <p className="text-[9px] font-black uppercase tracking-[.16em] text-[#8F503E]">{t("objectivesPremium.mountainLevel",{level:Math.min(5,Math.max(1,Math.ceil(completedCount/Math.max(1,objectives.length)*5)))})}</p>
+              </div>
+              <div className="absolute right-4 top-4 z-20 text-right"><p className="text-[9px] font-black uppercase tracking-[.15em] text-[#765D52]">{t("objectivesPremium.mountainSummit")}</p><p className="mt-0.5 text-[9px] font-bold text-[#9B857B]">{completedCount}/{objectives.length}</p></div>
+              <div className="absolute bottom-4 left-4 right-4 z-20 flex items-end justify-between"><div><p className="text-[9px] font-black uppercase tracking-[.16em] text-[#8F503E]">{completedCount===objectives.length&&objectives.length>0?t("objectivesPremium.mountainSummitTitle"):t("objectivesPremium.mountainBase")}</p><p className="mt-1 max-w-[230px] text-[10px] font-semibold leading-relaxed text-[#66574F]">{completedCount===objectives.length&&objectives.length>0?t("objectivesPremium.mountainSummitHint"):t("objectivesPremium.mountainHint")}</p></div><span className="text-2xl">🏔️</span></div>
+            </div>
+            <div className="border-t border-white/70 bg-white/65 p-4 backdrop-blur-sm">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#A88A7D]">
@@ -414,6 +431,7 @@ const { t, i18n } = useTranslation();
                 {completedCount}/{objectives.length}
               </span>
             </div>
+          </div>
           </div>
         </div>
       </section>

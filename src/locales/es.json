@@ -1602,9 +1602,9 @@
     "text": "Ya estoy empezando a recibir algunas señales tuyas. Todavía estoy reuniendo contexto para comprender mejor qué se repite y qué cambia."
   },
   "objectivesPremium": {
-    "eyebrow": "Tu progreso",
-    "title": "Tu camino",
-    "subtitle": "Cada pequeña acción cuenta. Hoy estás construyendo tu camino, paso a paso.",
+    "eyebrow": "Monte Everstress",
+    "title": "Sube a tu ritmo",
+    "subtitle": "Cada objetivo es un paso. El alpinista sube contigo, sin que tengas que hacerlo todo perfecto.",
     "today": "Hoy",
     "todayProgress": "Progreso de hoy",
     "progressHint": "Las pequeñas acciones también son progreso.",
@@ -1624,7 +1624,13 @@
     "markPending": "Marcar objetivo como pendiente",
     "markCompleted": "Marcar objetivo como completado",
     "yourGoalEyebrow": "A tu manera",
-    "createOwnTitle": "Crea una pequeña acción propia"
+    "createOwnTitle": "Crea una pequeña acción propia",
+    "mountainBase": "Campamento Base",
+    "mountainLevel": "Nivel {{level}} de 5",
+    "mountainSummit": "Cima",
+    "mountainHint": "Completa un objetivo para subir un poco más.",
+    "mountainSummitTitle": "Has llegado a la cima",
+    "mountainSummitHint": "No se trataba de hacerlo todo. Se trataba de seguir subiendo."
   },
   "weeklyGoalPremium": {
     "pathEyebrow": "Tu semana",

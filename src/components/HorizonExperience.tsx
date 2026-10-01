@@ -64,6 +64,7 @@ const DOMINOES:Domino[]=[
 {id:"pause-breath",left:"Pausa",right:"Respiração",tone:"light"},
 {id:"pause-space",left:"Pausa",right:"Espaço",tone:"light"},
 {id:"pause-observe",left:"Pausa",right:"Observar",tone:"light"},
+{id:"pause-joy",left:"Pausa",right:"Alegria",tone:"light"},
 {id:"breath-calm",left:"Respiração",right:"Calma",tone:"light"},
 {id:"breath-clarity",left:"Respiração",right:"Clareza",tone:"light"},
 {id:"observe-perspective",left:"Observar",right:"Perspetiva",tone:"light"},

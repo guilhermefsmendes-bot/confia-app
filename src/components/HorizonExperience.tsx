@@ -44,7 +44,7 @@ const MONTH_COPY={
 
 const FEELINGS=["ansioso","pensativo","amedrontado","esperançoso","cansado","confuso","determinado","inseguro","aliviado","frustrado","curioso","sensível","sobrecarregado","otimista","sozinho","grato","irritado","bloqueado","vulnerável","corajoso","nostálgico","tranquilo","impaciente","desanimado","focado","perdido","orgulhoso","tenso","sereno","incerto","motivado","exausto","preocupado","resiliente","agitado","confiante"];
 
-const DOMINOES:Domino[]=[
+const BASE_DOMINOES:Domino[]=[
 {id:"stress-agitation",left:"Stress",right:"Agitação",tone:"heavy"},
 {id:"stress-worry",left:"Stress",right:"Preocupação",tone:"heavy"},
 {id:"stress-tension",left:"Stress",right:"Tensão",tone:"heavy"},
@@ -304,6 +304,59 @@ const IMPULSE_QUESTIONS:ImpulseQuestion[]=[
  {id:"q23",question:"O que pode acontecer quando damos atenção a uma preocupação sem agir logo?",answers:["Podemos notar que o impulso muda","A preocupação torna-se automaticamente verdade","Deixamos de pensar para sempre","Garantimos que nada acontece"],correct:0,explanation:"O impulso pode mudar com o tempo; observar não garante um resultado específico."},
  {id:"q24",question:"Qual destas opções é mais adequada para uma pergunta de saúde mental?",answers:["Procurar informação fiável","Assumir o pior cenário","Pesquisar indefinidamente","Tratar uma possibilidade como certeza"],correct:0,explanation:"Informação fiável pode ajudar, enquanto transformar possibilidades em certezas pode aumentar a confusão."}
 ];
+
+// A carteira pode ter muitas combinações, mas a pesquisa de uma palavra
+// não pode ficar presa a uma única peça. Expandimos o grafo de conceitos
+// até cada conceito ter várias saídas e várias entradas, mantendo pares
+// semanticamente próximos por família.
+const CONCEPT_FAMILIES={
+ anxiety:["Stress","Agitação","Tensão","Preocupação","Medo","Alerta","Inquietação","Incerteza","Antecipação","Ruminação","Dúvida","Receio","Nervosismo","Frustração","Irritação","Pressa","Pressão","Sobrecarga","Bloqueio","Evitar","Verificar"],
+ regulation:["Respiração","Pausa","Calma","Clareza","Presença","Perspetiva","Paciência","Aceitar","Observar","Espaço","Equilíbrio"],
+ action:["Escolha","Ação","Movimento","Limite","Prioridade","Foco","Planeamento","Flexibilidade","Cuidado","Descanso","Recuperação","Delegar"],
+ positive:["Alívio","Alívio breve","Alegria","Gratidão","Serenidade","Esperança","Confiança","Confiar","Coragem","Liberdade","Leveza","Paz","Entrega","Energia","Bem-estar"],
+ cognitive:["Pensamento","Curiosidade","Descoberta","Aprendizagem","Esperar","Controlo"]
+} as const;
+const FAMILY_TARGETS={
+ anxiety:["Pausa","Respiração","Clareza","Perspetiva","Paciência","Observar","Aceitar","Espaço","Coragem","Escolha"],
+ regulation:["Presença","Clareza","Equilíbrio","Perspetiva","Aceitar","Paciência","Respiração","Ação","Leveza","Serenidade"],
+ action:["Escolha","Ação","Flexibilidade","Prioridade","Foco","Cuidado","Recuperação","Descanso","Presença","Clareza"],
+ positive:["Presença","Gratidão","Alegria","Serenidade","Calma","Energia","Confiança","Coragem","Paz","Leveza"],
+ cognitive:["Curiosidade","Clareza","Perspetiva","Aprendizagem","Descoberta","Paciência","Aceitar","Ação","Pausa","Presença"]
+} as const;
+const conceptFamily=(word:string)=>{
+ const normalized=word.toLocaleLowerCase();
+ return (Object.entries(CONCEPT_FAMILIES).find(([,words])=>words.some(w=>w.toLocaleLowerCase()===normalized))?.[0]||"regulation") as keyof typeof FAMILY_TARGETS;
+};
+const expandedPairs=(()=>{
+ const pairs=[...BASE_DOMINOES];
+ const seen=new Set(pairs.map(d=>`${d.left.toLocaleLowerCase()}|${d.right.toLocaleLowerCase()}`));
+ let id=10000;
+ const words=[...new Set(pairs.flatMap(d=>[d.left,d.right]))];
+ const add=(left:string,right:string)=>{
+  const key=`${left.toLocaleLowerCase()}|${right.toLocaleLowerCase()}`;
+  if(left.toLocaleLowerCase()===right.toLocaleLowerCase()||seen.has(key))return false;
+  seen.add(key);pairs.push({id:id++,left,right,tone:"neutral"});return true;
+ };
+ // Primeiro garante pelo menos 6 saídas por palavra. A escolha é feita
+ // dentro da família sem repetir uma combinação já existente.
+ for(const word of words){
+  const family=conceptFamily(word);
+  const targets=FAMILY_TARGETS[family];
+  let count=pairs.filter(d=>d.left.toLocaleLowerCase()===word.toLocaleLowerCase()).length;
+  for(let i=0;i<targets.length&&count<6;i++)if(add(word,targets[i]))count++;
+ }
+ // Depois garante pelo menos 6 entradas por palavra, usando conceitos da
+ // mesma família como origem. Assim a pesquisa funciona também no sentido
+ // inverso (segmentos 5→8 e 9→12).
+ for(const word of words){
+  const family=conceptFamily(word);
+  const sources=CONCEPT_FAMILIES[family];
+  let count=pairs.filter(d=>d.right.toLocaleLowerCase()===word.toLocaleLowerCase()).length;
+  for(let i=0;i<sources.length&&count<6;i++)if(add(sources[i],word))count++;
+ }
+ return pairs;
+})();
+const DOMINOES:Domino[]=expandedPairs;
 
 const QUESTS:Quest[]=[
 {id:"water",label:"water",reward:"extra-choice",icon:"💧"},{id:"pause",label:"pause",reward:"extra-choice",icon:"⏸️"},

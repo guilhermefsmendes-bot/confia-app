@@ -454,7 +454,15 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   const recentIds=new Set(placed.slice(-12).map(p=>p.tile.id));
   const side=reverseWordDirection?"left":"right";
   const unique=DOMINOES.filter(d=>!recentIds.has(d.id)).reduce<Domino[]>((acc,d)=>acc.some(x=>x[side].toLocaleLowerCase()===d[side].toLocaleLowerCase())?acc:[...acc,d],[]);
-  return sample(unique,8);
+  // As sugestões pertencem ao estado atual do percurso. Não as sorteamos
+  // em cada render, porque escrever uma palavra provoca um render e não
+  // deve mudar a carteira nem as sugestões que a pessoa já está a ver.
+  const seed=placed.length*31+(reverseWordDirection?17:0);
+  return [...unique].sort((a,b)=>{
+   const ha=(a.id*17+seed)%997;
+   const hb=(b.id*17+seed)%997;
+   return ha-hb;
+  }).slice(0,8);
  },[placed,reverseWordDirection]);
 
  const bury=()=>{if(!draft.trim())return;const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:draft.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:(capsule?.cycle||0)+1};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);if(!monthTracker){setMonthTracker({startedAt:buriedAt.toISOString(),dueAt:new Date(buriedAt.getTime()+30*86400000).toISOString()})}setNow(Date.now());setDraft("");setGuess("");setRevealed(false)};

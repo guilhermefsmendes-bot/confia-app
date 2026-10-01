@@ -323,7 +323,6 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   // ponto de passagem estiver sobre um perigo, ela pode ser colocada na mesma
   // posição, mas só se estiver virada para cima ou para baixo: é o primeiro
   // desvio que obriga a mudar a rota.
-  const islandIndex=touchingIsland(x,y,rect.width,rect.height);
   const nearAnyIsland=islands.some(island=>{ const cx=rect.width*island.x,cy=rect.height*island.y; return x+w>=cx-50&&x<=cx+50&&y+h>=cy-42&&y<=cy+42; });
   const obstacle=touchingObstacle(x,y,rect.width,rect.height);
   const verticalRoute=routeDirection==="up"||routeDirection==="down";

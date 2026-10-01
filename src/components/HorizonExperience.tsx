@@ -453,6 +453,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   const segment=Math.floor(nextSlot/3);
   return segment%2===1;
  },[placed.length]);
+ const usedTileIds=useMemo(()=>new Set(placed.map(p=>p.tile.id)),[placed]);
  const availableWordTiles=useMemo(()=>{
   const wanted=neededWord.trim().toLocaleLowerCase();
   if(!wanted)return [];
@@ -460,12 +461,12 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   // a palavra pedida é a que está no lado esquerdo da peça.
   // Nos restantes, procuramos a palavra no lado direito.
   const side=reverseWordDirection?"left":"right";
-  return DOMINOES.filter(d=>d[side].trim().toLocaleLowerCase()===wanted);
- },[neededWord,reverseWordDirection]);
+  return DOMINOES.filter(d=>d[side].trim().toLocaleLowerCase()===wanted&&!usedTileIds.has(d.id));
+ },[neededWord,reverseWordDirection,usedTileIds]);
  const neededWordSuggestions=useMemo(()=>{
-  const recentIds=new Set(placed.slice(-12).map(p=>p.tile.id));
   const side=reverseWordDirection?"left":"right";
-  const unique=DOMINOES.filter(d=>!recentIds.has(d.id)).reduce<Domino[]>((acc,d)=>acc.some(x=>x[side].toLocaleLowerCase()===d[side].toLocaleLowerCase())?acc:[...acc,d],[]);
+  const unused=DOMINOES.filter(d=>!usedTileIds.has(d.id));
+  const unique=unused.reduce<Domino[]>((acc,d)=>acc.some(x=>x[side].toLocaleLowerCase()===d[side].toLocaleLowerCase())?acc:[...acc,d],[]);
   // As sugestões pertencem ao estado atual do percurso. Não as sorteamos
   // em cada render, porque escrever uma palavra provoca um render e não
   // deve mudar a carteira nem as sugestões que a pessoa já está a ver.
@@ -540,10 +541,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   if(availableWordTiles.length===0){setToast(c.needWordNoMatch);setTimeout(()=>setToast(""),2200);return}
   // Nunca escolher sempre o mesmo domino: baralhamos os candidatos e
   // evitamos, quando possível, peças usadas recentemente.
-  const recentIds=new Set(placed.slice(-12).map(p=>p.tile.id));
-  const fresh=availableWordTiles.filter(tile=>!recentIds.has(tile.id));
-  const pool=fresh.length?fresh:availableWordTiles;
-  setWordTile(sample(pool,1)[0]);
+  setWordTile(sample(availableWordTiles,1)[0]);
  };
  const saveWordMoment=()=>{
   if(!wordTile||!wordMoment.trim()||!boardRef.current)return;

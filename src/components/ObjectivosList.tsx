@@ -375,7 +375,9 @@ const { t, i18n } = useTranslation();
               {[
                 {level:1,x:22,y:79},{level:2,x:35,y:65},{level:3,x:49,y:49},{level:4,x:64,y:34},{level:5,x:78,y:20}
               ].map(point=><div key={point.level} className="absolute z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full border-2 border-white bg-[#8F503E] shadow" style={{left:`${point.x}%`,top:`${point.y}%`}} />)}
-              <motion.div animate={{left:`${climberPosition.x}%`,top:`${climberPosition.y}%`}} transition={{duration:.9,ease:'easeInOut'}} className="absolute z-30 -translate-x-1/2 -translate-y-full text-[42px] drop-shadow-[0_8px_8px_rgba(40,30,25,.28)]">🧗</motion.div>
+              <motion.div animate={{left:`${climberPosition.x}%`,top:`${climberPosition.y}%`}} transition={{duration:.9,ease:'easeInOut'}} className="absolute z-30 -translate-x-1/2 -translate-y-full text-[42px] drop-shadow-[0_8px_8px_rgba(40,30,25,.28)]">
+                {completedCount === objectives.length && objectives.length > 0 ? "😊" : "🧗"}
+              </motion.div>
               <div className="absolute left-4 top-4 z-20 rounded-full border border-white/80 bg-white/75 px-3 py-1.5 backdrop-blur-sm">
                 <p className="text-[10px] font-black uppercase tracking-[.18em] text-white drop-shadow">{t("objectivesPremium.mountainLevel",{level:Math.min(5,Math.max(1,Math.ceil(completedCount/Math.max(1,objectives.length)*5)))})}</p>
               </div>

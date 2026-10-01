@@ -521,13 +521,25 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   // Nos segmentos que avançam da direita para a esquerda (5→8 e 9→12),
   // a palavra pedida é a que está no lado esquerdo da peça.
   // Nos restantes, procuramos a palavra no lado direito.
-  const side=reverseWordDirection?"left":"right";
-  return DOMINOES.filter(d=>d[side].trim().toLocaleLowerCase()===wanted&&!usedTileIds.has(d.id));
+  // A palavra que a pessoa vê numa peça deve ser pesquisável dos dois lados.
+  // A direção do percurso continua a controlar a orientação no mapa, mas não
+  // deve fazer uma palavra desaparecer só porque está no outro lado do domino.
+  return DOMINOES.filter(d=>
+   !usedTileIds.has(d.id) &&
+   (d.left.trim().toLocaleLowerCase()===wanted || d.right.trim().toLocaleLowerCase()===wanted)
+  );
  },[neededWord,reverseWordDirection,usedTileIds]);
  const neededWordSuggestions=useMemo(()=>{
   const side=reverseWordDirection?"left":"right";
   const unused=DOMINOES.filter(d=>!usedTileIds.has(d.id));
-  const unique=unused.reduce<Domino[]>((acc,d)=>acc.some(x=>x[side].toLocaleLowerCase()===d[side].toLocaleLowerCase())?acc:[...acc,d],[]);
+  // As sugestões privilegiam o lado que conduz o percurso, mas uma palavra
+  // nunca fica excluída por estar no lado oposto da peça.
+  const unique=unused.reduce<Domino[]>((acc,d)=>{
+   const preferred=d[side].toLocaleLowerCase();
+   const alternate=d[side==="left"?"right":"left"].toLocaleLowerCase();
+   const value=preferred||alternate;
+   return acc.some(x=>x[side].toLocaleLowerCase()===value)?acc:[...acc,d];
+  },[]);
   // As sugestões pertencem ao estado atual do percurso. Não as sorteamos
   // em cada render, porque escrever uma palavra provoca um render e não
   // deve mudar a carteira nem as sugestões que a pessoa já está a ver.

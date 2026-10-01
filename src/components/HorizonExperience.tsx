@@ -221,11 +221,18 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const tileStep=routeDirection==="up"||routeDirection==="down"?34:78;
  const lastPlaced=placed[placed.length-1];
  const candidateCount=Math.min(5,2+(bonuses.extraChoices||0));
+ const [rouletteSeed,setRouletteSeed]=useState(0);
  const options=useMemo(()=>{
   let pool=DOMINOES.filter(d=>d.left===lastRight&&!placed.slice(-6).some(p=>p.tile.id===d.id));
   if(pool.length<candidateCount) pool=[...pool,...DOMINOES.filter(d=>d.left!==lastRight&&!placed.slice(-4).some(p=>p.tile.id===d.id))];
-  return sample(pool,candidateCount);
- },[lastRight,placed,candidateCount,questDone]);
+  // A roleta baralha TODAS as peças disponíveis, permitindo voltar a encontrar
+  // uma palavra específica (por exemplo "Stress") quando ela deixa de surgir.
+  if(rouletteSeed>0){
+   pool=DOMINOES.filter(d=>!placed.slice(-10).some(p=>p.tile.id===d.id));
+  }
+  return sample(pool.length?pool:DOMINOES,candidateCount);
+ },[lastRight,placed,candidateCount,questDone,rouletteSeed]);
+ const spinRoulette=()=>setRouletteSeed(v=>v+1);
 
  const bury=()=>{if(!draft.trim())return;const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:draft.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:(capsule?.cycle||0)+1};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);if(!monthTracker){setMonthTracker({startedAt:buriedAt.toISOString(),dueAt:new Date(buriedAt.getTime()+30*86400000).toISOString()})}setNow(Date.now());setDraft("");setGuess("");setRevealed(false)};
  const rebury=()=>{if(!capsule||!feedback.trim())return;const reflection={at:new Date().toISOString(),message:capsule.message,guess:guess.trim(),feedback:feedback.trim()};setWeeklyLog(prev=>[...prev,reflection]);const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:feedback.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:capsule.cycle+1,feedback:feedback.trim()};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);setNow(Date.now());setFeedback("");setGuess("");setRevealed(false)};
@@ -405,6 +412,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
        <div className="mt-4 rounded-[24px] border border-white/60 bg-white/58 p-4 backdrop-blur-md">
         <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#337582]">{c.choose}</p><p className="mt-1 text-[10px] font-semibold text-[#4b7b82]">{c.dragTip}</p></div><div className="flex gap-2"><button onClick={reroll} disabled={bonuses.rerolls<=0} className="rounded-full bg-white/80 p-2 text-[#37727d] disabled:opacity-30"><RotateCcw size={15}/></button><button onClick={reset} className="rounded-full bg-white/80 p-2 text-[#37727d]" title={c.restart}><Star size={15}/></button></div></div>
         <div className="mt-3 grid grid-cols-2 gap-3 pb-3 pt-1">{options.map(tile=><div key={tile.id} className="flex justify-center"><DominoPiece tile={tile} draggable onDrop={dropDomino}/></div>)}</div>
+        <button onClick={spinRoulette} className="mx-auto flex items-center justify-center gap-2 rounded-full border border-[#e2bf70]/70 bg-[#fff8df]/90 px-4 py-2 text-[10px] font-black text-[#795d25] shadow-sm active:scale-[.98]">🎰 <span>ROULETA — mudar peças</span></button>
         <div className="mt-2 flex items-center justify-center gap-1.5 rounded-[16px] border border-white/70 bg-white/55 p-2">
          <span className="mr-1 text-[8px] font-black uppercase tracking-[.12em] text-[#39727b]">Posição</span>
          <button onClick={()=>setRouteDirection("up")} className={`h-8 w-8 rounded-lg font-black ${routeDirection==="up"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>↑</button>

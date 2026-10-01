@@ -320,13 +320,13 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  };
  const junctionForIsland=(islandIndex:number):JunctionPair|null=>{
   const pairs:JunctionPair[]=[
-   {slot:2,left:lang==="pt"?"MEDO":lang==="es"?"MIEDO":lang==="fr"?"PEUR":"FEAR",right:lang==="pt"?"PESQUISAS":lang==="es"?"INVESTIGACIONES":lang==="fr"?"RECHERCHES":"RESEARCH"},
-   {slot:6,left:lang==="pt"?"ANSIEDADE":lang==="es"?"ANSIEDAD":lang==="fr"?"ANXIÉTÉ":"ANXIETY",right:"TIQUES"},
-   {slot:9,left:lang==="pt"?"CONTROLO":lang==="es"?"CONTROL":lang==="fr"?"CONTRÔLE":"CONTROL",right:lang==="pt"?"ALÍVIO":lang==="es"?"ALIVIO":lang==="fr"?"SOULAGEMENT":"RELIEF"}
+   {slot:1,left:lang==="pt"?"MEDO":lang==="es"?"MIEDO":lang==="fr"?"PEUR":"FEAR",right:lang==="pt"?"PESQUISAS":lang==="es"?"INVESTIGACIONES":lang==="fr"?"RECHERCHES":"RESEARCH"},
+   {slot:5,left:lang==="pt"?"ANSIEDADE":lang==="es"?"ANSIEDAD":lang==="fr"?"ANXIÉTÉ":"ANXIETY",right:"TIQUES"},
+   {slot:8,left:lang==="pt"?"CONTROLO":lang==="es"?"CONTROL":lang==="fr"?"CONTRÔLE":"CONTROL",right:lang==="pt"?"ALÍVIO":lang==="es"?"ALIVIO":lang==="fr"?"SOULAGEMENT":"RELIEF"}
   ];
   return pairs.find(p=>p.slot===islandIndex)||null;
  };
- const openJunction=()=>{const pair=junctionForIsland(Math.floor(placed.length/3));if(pair){setJunction(pair);setJunctionExplanation("");}};
+ const openJunction=(islandIndex:number)=>{const pair=junctionForIsland(islandIndex);if(pair){setJunction(pair);setJunctionExplanation("");}};
  const saveJunction=()=>{if(!junction||!junctionExplanation.trim())return;setJunctions(prev=>[...prev.filter(x=>x.slot!==junction.slot),{slot:junction.slot,left:junction.left,right:junction.right,explanation:junctionExplanation.trim()}]);setJunction(null);setJunctionExplanation("");setToast(c.junctionSaved);setTimeout(()=>setToast(""),1800)};
  const buildTreasureReflection=()=>{
   if(junctions.length<3)return c.treasureEmpty;
@@ -340,7 +340,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   if(nextSlot%3===2){
    const reachedIsland=Math.floor(nextSlot/3)+1;
    if(reachedIsland<islands.length)setUnlockedIslands(prev=>prev.includes(reachedIsland)?prev:[...prev,reachedIsland]);
-   if([2,6,9].includes(reachedIsland))setTimeout(openJunction,260);
+   if([1,5,8].includes(reachedIsland))setTimeout(()=>openJunction(reachedIsland),260);
    if(reachedIsland===11)setTimeout(()=>setTreasureOpen(true),520);
   }
  };

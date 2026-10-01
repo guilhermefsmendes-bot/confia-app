@@ -194,6 +194,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [toast,setToast]=useState("");
  const [impulse,setImpulse]=useState<ImpulseQuestion|null>(null);
  const [impulseAnswer,setImpulseAnswer]=useState<number|null>(null);
+ const [usedImpulseQuestions,setUsedImpulseQuestions]=useState<string[]>([]);
  const [pendingDrop,setPendingDrop]=useState<{tile:Domino;x:number;y:number;rotate:number;direction:Direction}|null>(null);
  const [routeDirection,setRouteDirection]=useState<Direction>("right");
  const [selectedPlaced,setSelectedPlaced]=useState<number|null>(null);
@@ -257,8 +258,14 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
    return horizontalReach && verticalOverlap;
   });
  };
+ const nextImpulseQuestion=(excludeId?:string)=>{
+  const available=IMPULSE_QUESTIONS.filter(q=>q.id!==excludeId&&!usedImpulseQuestions.includes(q.id));
+  const pool=available.length?available:IMPULSE_QUESTIONS.filter(q=>q.id!==excludeId);
+  return sample(pool.length?pool:IMPULSE_QUESTIONS,1)[0];
+ };
  const unlockIsland=(index:number,drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction})=>{
-  setPendingDrop(drop);setImpulse(sample(IMPULSE_QUESTIONS,1)[0]);setImpulseAnswer(null);setUnlockedIslands(prev=>prev.includes(index)?prev:[...prev,index]);
+  const first=nextImpulseQuestion();
+  setPendingDrop(drop);setImpulse(first);setImpulseAnswer(null);setUsedImpulseQuestions(prev=>[...prev,first.id]);setUnlockedIslands(prev=>prev.includes(index)?prev:[...prev,index]);
  };
  const placeTile=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction})=>{
   setPlaced(prev=>[...prev,{tile:drop.tile,x:drop.x,y:drop.y,rotate:drop.rotate,direction:drop.direction}]);
@@ -270,7 +277,13 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   setImpulseAnswer(index);
   if(index===impulse.correct){
    if(pendingDrop)placeTile(pendingDrop);
-   setTimeout(()=>{setImpulse(null);setImpulseAnswer(null);setPendingDrop(null)},850);
+   setTimeout(()=>{setImpulse(null);setImpulseAnswer(null);setPendingDrop(null);setUsedImpulseQuestions([])},850);
+  } else {
+   // Cada erro gera imediatamente uma nova pergunta. A viagem só avança quando acertar.
+   setTimeout(()=>{
+    const next=nextImpulseQuestion(impulse.id);
+    setImpulse(next);setImpulseAnswer(null);setUsedImpulseQuestions(prev=>[...prev,next.id]);
+   },650);
   }
  };
  const dropDomino=(tile:Domino,clientX:number,clientY:number)=>{

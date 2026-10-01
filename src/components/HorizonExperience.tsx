@@ -436,16 +436,26 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const lastRight=connectionValue(placed[placed.length-1]);
  const lastPlaced=placed[placed.length-1];
 
+ const reverseWordDirection=useMemo(()=>{
+  const nextSlot=placed.length;
+  const segment=Math.floor(nextSlot/3);
+  return segment%2===1;
+ },[placed.length]);
  const availableWordTiles=useMemo(()=>{
   const wanted=neededWord.trim().toLocaleLowerCase();
   if(!wanted)return [];
-  return DOMINOES.filter(d=>d.left.trim().toLocaleLowerCase()===wanted);
- },[neededWord]);
+  // Nos segmentos que avançam da direita para a esquerda (5→8 e 9→12),
+  // a palavra pedida é a que está no lado esquerdo da peça.
+  // Nos restantes, procuramos a palavra no lado direito.
+  const side=reverseWordDirection?"left":"right";
+  return DOMINOES.filter(d=>d[side].trim().toLocaleLowerCase()===wanted);
+ },[neededWord,reverseWordDirection]);
  const neededWordSuggestions=useMemo(()=>{
-  const recentIds=new Set(placed.slice(-8).map(p=>p.tile.id));
-  const unique=DOMINOES.filter(d=>!recentIds.has(d.id)).reduce<Domino[]>((acc,d)=>acc.some(x=>x.left.toLocaleLowerCase()===d.left.toLocaleLowerCase())?acc:[...acc,d],[]);
+  const recentIds=new Set(placed.slice(-12).map(p=>p.tile.id));
+  const side=reverseWordDirection?"left":"right";
+  const unique=DOMINOES.filter(d=>!recentIds.has(d.id)).reduce<Domino[]>((acc,d)=>acc.some(x=>x[side].toLocaleLowerCase()===d[side].toLocaleLowerCase())?acc:[...acc,d],[]);
   return sample(unique,8);
- },[placed]);
+ },[placed,reverseWordDirection]);
 
  const bury=()=>{if(!draft.trim())return;const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:draft.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:(capsule?.cycle||0)+1};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);if(!monthTracker){setMonthTracker({startedAt:buriedAt.toISOString(),dueAt:new Date(buriedAt.getTime()+30*86400000).toISOString()})}setNow(Date.now());setDraft("");setGuess("");setRevealed(false)};
  const rebury=()=>{if(!capsule||!feedback.trim())return;const reflection={at:new Date().toISOString(),message:capsule.message,guess:guess.trim(),feedback:feedback.trim()};setWeeklyLog(prev=>[...prev,reflection]);const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:feedback.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:capsule.cycle+1,feedback:feedback.trim()};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);setNow(Date.now());setFeedback("");setGuess("");setRevealed(false)};
@@ -505,7 +515,16 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   };
  };
  const requestWord=()=>{setNeededWord("");setWordTile(null);setWordMoment("");setWordPromptOpen(true)};
- const findNeededWord=()=>{if(!neededWord.trim())return;if(availableWordTiles.length===0){setToast(c.needWordNoMatch);setTimeout(()=>setToast(""),2200);return}setWordTile(availableWordTiles[placed.length%availableWordTiles.length])};
+ const findNeededWord=()=>{
+  if(!neededWord.trim())return;
+  if(availableWordTiles.length===0){setToast(c.needWordNoMatch);setTimeout(()=>setToast(""),2200);return}
+  // Nunca escolher sempre o mesmo domino: baralhamos os candidatos e
+  // evitamos, quando possível, peças usadas recentemente.
+  const recentIds=new Set(placed.slice(-12).map(p=>p.tile.id));
+  const fresh=availableWordTiles.filter(tile=>!recentIds.has(tile.id));
+  const pool=fresh.length?fresh:availableWordTiles;
+  setWordTile(sample(pool,1)[0]);
+ };
  const saveWordMoment=()=>{
   if(!wordTile||!wordMoment.trim()||!boardRef.current)return;
   const rect=boardRef.current.getBoundingClientRect();if(placed.length>=33)return;

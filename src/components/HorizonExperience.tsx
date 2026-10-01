@@ -238,7 +238,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const reroll=()=>{if(bonuses.rerolls<=0)return;setBonuses((b:any)=>({...b,rerolls:b.rerolls-1}));setQuestDone(v=>!v)};
  const islands=[{x:.14,y:.12},{x:.36,y:.20},{x:.62,y:.11},{x:.86,y:.24},{x:.28,y:.40},{x:.58,y:.34},{x:.82,y:.50},{x:.18,y:.63},{x:.48,y:.67},{x:.76,y:.78},{x:.92,y:.88,treasure:true}];
  const seaObstacles=[
-  {x:.25,y:.28,type:"🌀",label:"Remoinho"},
+
   {x:.50,y:.24,type:"🏴‍☠️",label:"Piratas"},
   {x:.72,y:.40,type:"🐙",label:"Kraken"},
   {x:.38,y:.52,type:"🌀",label:"Remoinho"},

@@ -197,9 +197,9 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [impulseAnswer,setImpulseAnswer]=useState<number|null>(null);
  const [usedImpulseQuestions,setUsedImpulseQuestions]=useState<string[]>([]);
  const [pendingDrop,setPendingDrop]=useState<{tile:Domino;x:number;y:number;rotate:number;direction:Direction}|null>(null);
- const [routeDirection,setRouteDirection]=useState<Direction>("right");
  const [selectedPlaced,setSelectedPlaced]=useState<number|null>(null);
- const [unlockedIslands,setUnlockedIslands]=useState<number[]>([]);
+
+ const [unlockedIslands,setUnlockedIslands]=useState<number[]>([0]);
  const [treasureOpen,setTreasureOpen]=useState(false);
  const [treasureAnswer,setTreasureAnswer]=useState("");
 
@@ -228,7 +228,6 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   return p.tile.right;
 };
  const lastRight=connectionValue(placed[placed.length-1]);
- const tileStep=routeDirection==="up"||routeDirection==="down"?34:78;
  const lastPlaced=placed[placed.length-1];
  const candidateCount=Math.min(4,2+Math.min(2,bonuses.extraChoices||0));
  const [rouletteSeed,setRouletteSeed]=useState(0);
@@ -257,57 +256,56 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   setQuestDone(false);
   setToast(c.bonus);setTimeout(()=>setToast(""),2200);
  };
- const reset=()=>{setBonuses({extraChoices:0,rerolls:0,hints:0});setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([]);setImpulse(null);setPendingDrop(null);setTreasureOpen(false);setTreasureAnswer("")};
- const enterSection=(next:Section)=>{if(next==="sea"){setBonuses({extraChoices:0,rerolls:0,hints:0});setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setUnlockedIslands([]);setSelectedPlaced(null);setTreasureOpen(false);setTreasureAnswer("")}setSection(next)};
+ const reset=()=>{setBonuses({extraChoices:0,rerolls:0,hints:0});setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([0]);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null)};
+ const enterSection=(next:Section)=>{if(next==="sea"){setBonuses({extraChoices:0,rerolls:0,hints:0});setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setUnlockedIslands([0]);setSelectedPlaced(null)}setSection(next)};
  const reroll=()=>{if(bonuses.rerolls<=0)return;setBonuses((b:any)=>({...b,rerolls:b.rerolls-1}));setQuestDone(v=>!v)};
- const islands=[{x:.14,y:.12},{x:.36,y:.20},{x:.62,y:.11},{x:.86,y:.24},{x:.28,y:.40},{x:.58,y:.34},{x:.82,y:.50},{x:.18,y:.63},{x:.48,y:.67},{x:.76,y:.78},{x:.92,y:.88,treasure:true}];
+ const islands=Array.from({length:12},(_,index)=>{
+  const row=Math.floor(index/4);
+  const column=index%4;
+  const snakeColumn=row%2===0?column:3-column;
+  return {x:[.10,.36,.64,.90][snakeColumn],y:[.16,.50,.84][row]};
+ });
  const seaObstacles=[
-
-  {x:.50,y:.24,type:"🏴‍☠️",label:"Piratas"},
-  {x:.72,y:.40,type:"🐙",label:"Kraken"},
-  {x:.38,y:.52,type:"🌀",label:"Remoinho"},
-  {x:.66,y:.66,type:"🏴‍☠️",label:"Piratas"}
+  {x:.50,y:.16,type:"🌀",label:"Remoinho"},
+  {x:.50,y:.50,type:"🐙",label:"Kraken"},
+  {x:.25,y:.84,type:"🌀",label:"Remoinho"}
  ];
- const touchingObstacle=(x:number,y:number,boardWidth:number,boardHeight:number)=>{
-  const w=74,h=29;
+ const touchingObstacle=(x:number,y:number,boardWidth:number,boardHeight:number,rotate=0)=>{
+  const w=rotate===90||rotate===270?29:74;
+  const h=rotate===90||rotate===270?74:29;
   return seaObstacles.some(o=>{
    const cx=boardWidth*o.x,cy=boardHeight*o.y;
-   return x+w>=cx-25&&x<=cx+25&&y+h>=cy-25&&y<=cy+25;
+   return x+w>=cx-28&&x<=cx+28&&y+h>=cy-28&&y<=cy+28;
   });
  };
- const touchingIsland=(x:number,y:number,boardWidth:number,boardHeight:number)=>{
-  // A ilha desbloqueia quando a lateral direita da peça chega à sua área.
-  // Usamos colisão/proximidade real em vez de uma janela estreita baseada
-  // apenas no valor de x, para funcionar de forma consistente em todas as ilhas.
-  const w=74,h=29;
-  const tolerance=12;
-  const pieceLeft=x;
-  const pieceRight=x+w;
-  const pieceTop=y;
-  const pieceBottom=y+h;
-  const nextIslandIndex=unlockedIslands.length;
-  return islands.findIndex((island,index)=>{
-   if(index!==nextIslandIndex) return false;
-   if(unlockedIslands.includes(index)) return false;
-   const islandCenterX=boardWidth*island.x;
-   const islandCenterY=boardHeight*island.y;
-   const islandLeft=islandCenterX-32;
-   const islandRight=islandCenterX+32;
-   const islandTop=islandCenterY-24;
-   const islandBottom=islandCenterY+24;
-   const horizontalReach=pieceRight>=islandLeft-tolerance && pieceLeft<=islandRight+tolerance;
-   const verticalOverlap=pieceBottom>=islandTop-tolerance && pieceTop<=islandBottom+tolerance;
-   return horizontalReach && verticalOverlap;
-  });
+ const routeSlot=(slot:number,boardWidth:number,boardHeight:number)=>{
+  const segment=Math.floor(slot/3);
+  const within=slot%3;
+  const from=islands[segment];
+  const to=islands[segment+1];
+  const t=(within+1)/4;
+  const fromX=boardWidth*from.x;
+  const fromY=boardHeight*from.y;
+  const toX=boardWidth*to.x;
+  const toY=boardHeight*to.y;
+  const vertical=from.y!==to.y;
+  const w=vertical?29:74;
+  const h=vertical?74:29;
+  return {
+   x:Math.max(4,Math.min(boardWidth-w-4,fromX+(toX-fromX)*t-w/2)),
+   y:Math.max(6,Math.min(boardHeight-h-6,fromY+(toY-fromY)*t-h/2)),
+   rotate:vertical?90:0,
+   direction:vertical?"down":"right" as Direction
+  };
  };
  const nextImpulseQuestion=(excludeId?:string)=>{
   const available=IMPULSE_QUESTIONS.filter(q=>q.id!==excludeId&&!usedImpulseQuestions.includes(q.id));
   const pool=available.length?available:IMPULSE_QUESTIONS.filter(q=>q.id!==excludeId);
   return sample(pool.length?pool:IMPULSE_QUESTIONS,1)[0];
  };
- const unlockIsland=(index:number,drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction})=>{
+ const askQuestionForDrop=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction})=>{
   const first=nextImpulseQuestion();
-  setPendingDrop(drop);setImpulse(first);setImpulseAnswer(null);setUsedImpulseQuestions(prev=>[...prev,first.id]);setUnlockedIslands(prev=>prev.includes(index)?prev:[...prev,index]);
+  setPendingDrop(drop);setImpulse(first);setImpulseAnswer(null);setUsedImpulseQuestions(prev=>[...prev,first.id]);
  };
  const placeTile=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction})=>{
   setPlaced(prev=>[...prev,{tile:drop.tile,x:drop.x,y:drop.y,rotate:drop.rotate,direction:drop.direction}]);
@@ -318,7 +316,14 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   if(!impulse)return;
   setImpulseAnswer(index);
   if(index===impulse.correct){
-   if(pendingDrop)placeTile(pendingDrop);
+   if(pendingDrop){
+    const nextSlot=placed.length;
+    placeTile(pendingDrop);
+    if(nextSlot%3===2){
+     const reachedIsland=Math.floor(nextSlot/3)+1;
+     if(reachedIsland<islands.length)setUnlockedIslands(prev=>prev.includes(reachedIsland)?prev:[...prev,reachedIsland]);
+    }
+   }
    setTimeout(()=>{setImpulse(null);setImpulseAnswer(null);setPendingDrop(null);setUsedImpulseQuestions([])},850);
   } else {
    // Cada erro gera imediatamente uma nova pergunta. A viagem só avança quando acertar.
@@ -329,34 +334,26 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   }
  };
  const dropDomino=(tile:Domino,clientX:number,clientY:number)=>{
-  const board=boardRef.current;if(!board)return;const rect=board.getBoundingClientRect();
+  const board=boardRef.current;if(!board)return;
+  const rect=board.getBoundingClientRect();
   const inside=clientX>=rect.left&&clientX<=rect.right&&clientY>=rect.top&&clientY<=rect.bottom;
   if(!inside){setToast(c.choose);setTimeout(()=>setToast(""),1400);return}
   if(placed.length>0&&tile.left!==lastRight){setToast(c.invalid);setTimeout(()=>setToast(""),1800);return}
-  const w=74,h=29;
-  const anchor=lastPlaced?{x:lastPlaced.x,y:lastPlaced.y}:{x:12,y:Math.round(rect.height*.16)};
-  let x=anchor.x+w+4,y=anchor.y,rotate=0;
-  // Uma peça nova entra sempre imediatamente à direita da anterior.
-  // A direção escolhida controla apenas a orientação; a posição pode depois ser ajustada por arrasto.
-  if(routeDirection==="down")rotate=90;
-  if(routeDirection==="up")rotate=270;
-  if(x>rect.width-w-4){setToast("Não há espaço suficiente à direita da peça anterior");setTimeout(()=>setToast(""),1800);return}
-  x=Math.max(4,Math.min(rect.width-w-4,x)); y=Math.max(6,Math.min(rect.height-h-6,y));
-  const pending={tile,x,y,rotate,direction:routeDirection};
-  // A primeira peça começa num corredor seguro. Na segunda peça, se o
-  // ponto de passagem estiver sobre um perigo, ela pode ser colocada na mesma
-  // posição, mas só se estiver virada para cima ou para baixo: é o primeiro
-  // desvio que obriga a mudar a rota.
-  const nearAnyIsland=islands.some(island=>{ const cx=rect.width*island.x,cy=rect.height*island.y; return x+w>=cx-50&&x<=cx+50&&y+h>=cy-42&&y<=cy+42; });
-  const obstacle=touchingObstacle(x,y,rect.width,rect.height);
-  const verticalRoute=routeDirection==="up"||routeDirection==="down";
-  // As áreas de perigo não bloqueiam a colocação. Funcionam como zonas
-  // especiais: qualquer peça pode entrar nelas, mas só na vertical.
-  if(obstacle&&!nearAnyIsland&&!verticalRoute){setToast("Nesta zona do mar, a peça só pode ficar na vertical.");setTimeout(()=>setToast(""),2400);return;}
-  const islandIndex=touchingIsland(x,y,rect.width,rect.height);
-  if(islandIndex>=0){
-   if(islands[islandIndex].treasure){setTreasureOpen(true);return;}
-   unlockIsland(islandIndex,pending);return;
+  if(placed.length>=33){setToast("O teu horizonte está completo.");setTimeout(()=>setToast(""),1800);return}
+  const slot=routeSlot(placed.length,rect.width,rect.height);
+  const pending={tile,x:slot.x,y:slot.y,rotate:slot.rotate,direction:slot.direction};
+  // O mapa decide automaticamente a posição e a direção da peça.
+  // A rota faz o Z: desce entre as ilhas 4→5 e 8→9.
+  if(touchingObstacle(slot.x,slot.y,rect.width,rect.height,slot.rotate)){
+   askQuestionForDrop(pending);
+   return;
+  }
+  if(placed.length%3===2){
+   const reachedIsland=Math.floor(placed.length/3)+1;
+   if(reachedIsland<islands.length){
+    askQuestionForDrop(pending);
+    return;
+   }
   }
   placeTile(pending);
  };
@@ -416,20 +413,13 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
         {seaObstacles.map((o,i)=><motion.div key={o.type+i} animate={{y:[0,-3,0],rotate:o.type==="🌀"?[0,8,-8,0]:[0,-2,0]}} transition={{duration:o.type==="🌀"?2.8:4.2,repeat:Infinity}} className="absolute z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-white/40 bg-[#0e6572]/25 text-center shadow-sm backdrop-blur-[1px]" style={{left:`${o.x*100}%`,top:`${o.y*100}%`}}><span className="text-[20px] leading-none">{o.type}</span><span className="mt-0.5 text-[5px] font-black uppercase tracking-[.08em] text-white/80">{o.label}</span></motion.div>)}
         {islands.map((island,index)=>{const unlocked=unlockedIslands.includes(index);const treasure=Boolean((island as any).treasure);return <div key={index} className={`absolute flex h-12 ${treasure?"w-20":"w-16"} -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border text-center shadow-[0_7px_14px_rgba(38,103,116,.20)] ${treasure?"border-[#f2cf70] bg-[radial-gradient(ellipse_at_45%_35%,#fff1b4,#c99942)]":unlocked?"border-emerald-300 bg-[radial-gradient(ellipse_at_45%_35%,#d9f4df,#75c69a)]":"border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)]"}`} style={{left:`${island.x*100}%`,top:`${island.y*100}%`}}><span className={`text-[6px] font-black uppercase tracking-[.10em] ${treasure?"text-[#765018]":unlocked?"text-emerald-800":"text-[#6d5b3d]"}`}>{treasure?"🏆 Ilha Tesouro":unlocked?"✓ ":""}{!treasure&&`Impulso ${index+1}`}</span></div>})}
         <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[9px] font-black text-[#286b76] backdrop-blur">{c.start}: {placed[0]?.tile.left}</div>
-        {placed.map((p,i)=><motion.div key={p.tile.id+"-"+i} drag dragElastic={0.12} whileDrag={{scale:1.05,zIndex:90}} onClick={()=>setSelectedPlaced(i)} onDragEnd={(_,info)=>{const w=74;const board=boardRef.current;if(!board)return;const rect=board.getBoundingClientRect();const prev=placed[i-1];const next=placed[i+1];let nx=Math.max(4,Math.min(rect.width-w-4,p.x+info.offset.x));const ny=Math.max(6,Math.min(rect.height-35,p.y+info.offset.y));if(prev){const requiredX=prev.x+w+4;if(Math.abs(nx-requiredX)>12){setToast("A peça tem de ficar ligada à lateral direita da anterior");setTimeout(()=>setToast(""),1800);return}nx=requiredX}if(next&&next.x<=nx+w+4){setToast("Não podes ultrapassar a peça seguinte");setTimeout(()=>setToast(""),1600);return}setPlaced(prevPlaced=>prevPlaced.map((q,j)=>j===i?{...q,x:nx,y:ny}:q));}} initial={{opacity:0,scale:.88}} animate={{opacity:1,scale:1,y:[0,i%2?2:-2,0]}} transition={{opacity:{duration:.2},scale:{duration:.2},y:{duration:4+i*.15,repeat:Infinity}}} className={`cursor-grab touch-none ${selectedPlaced===i?"ring-2 ring-[#f0b35b] ring-offset-1 rounded-xl":""}`} style={{position:"absolute",left:p.x,top:p.y,rotate:p.rotate}}><DominoPiece tile={p.tile} compact/></motion.div>)}
+        {placed.map((p,i)=><motion.div key={p.tile.id+"-"+i} drag={false} onClick={()=>setSelectedPlaced(i)} onDragEnd={(_,info)=>{const w=74;const board=boardRef.current;if(!board)return;const rect=board.getBoundingClientRect();const prev=placed[i-1];const next=placed[i+1];let nx=Math.max(4,Math.min(rect.width-w-4,p.x+info.offset.x));const ny=Math.max(6,Math.min(rect.height-35,p.y+info.offset.y));if(prev){const requiredX=prev.x+w+4;if(Math.abs(nx-requiredX)>12){setToast("A peça tem de ficar ligada à lateral direita da anterior");setTimeout(()=>setToast(""),1800);return}nx=requiredX}if(next&&next.x<=nx+w+4){setToast("Não podes ultrapassar a peça seguinte");setTimeout(()=>setToast(""),1600);return}setPlaced(prevPlaced=>prevPlaced.map((q,j)=>j===i?{...q,x:nx,y:ny}:q));}} initial={{opacity:0,scale:.88}} animate={{opacity:1,scale:1,y:[0,i%2?2:-2,0]}} transition={{opacity:{duration:.2},scale:{duration:.2},y:{duration:4+i*.15,repeat:Infinity}}} className={`cursor-grab touch-none ${selectedPlaced===i?"ring-2 ring-[#f0b35b] ring-offset-1 rounded-xl":""}`} style={{position:"absolute",left:p.x,top:p.y,rotate:p.rotate}}><DominoPiece tile={p.tile} compact/></motion.div>)}
        </div>
 
        <div className="mt-4 rounded-[24px] border border-white/60 bg-white/58 p-4 backdrop-blur-md">
         <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#337582]">{c.choose}</p><p className="mt-1 text-[10px] font-semibold text-[#4b7b82]">{c.dragTip}</p></div><div className="flex gap-2"><button onClick={reroll} disabled={bonuses.rerolls<=0} className="rounded-full bg-white/80 p-2 text-[#37727d] disabled:opacity-30"><RotateCcw size={15}/></button><button onClick={reset} className="rounded-full bg-white/80 p-2 text-[#37727d]" title={c.restart}><Star size={15}/></button></div></div>
         <div className="mt-3 grid grid-cols-2 gap-3 pb-3 pt-1">{options.map(tile=><div key={tile.id} className="flex justify-center"><DominoPiece tile={tile} draggable onDrop={dropDomino}/></div>)}</div>
         <button onClick={spinRoulette} className="mx-auto flex items-center justify-center gap-2 rounded-full border border-[#e2bf70]/70 bg-[#fff8df]/90 px-4 py-2 text-[10px] font-black text-[#795d25] shadow-sm active:scale-[.98]">🎰 <span>ROULETA — mudar peças</span></button>
-        <div className="mt-2 flex items-center justify-center gap-1.5 rounded-[16px] border border-white/70 bg-white/55 p-2">
-         <span className="mr-1 text-[8px] font-black uppercase tracking-[.12em] text-[#39727b]">Posição</span>
-         <button onClick={()=>setRouteDirection("up")} className={`h-8 w-8 rounded-lg font-black ${routeDirection==="up"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>↑</button>
-         <button onClick={()=>setRouteDirection("left")} className={`h-8 w-8 rounded-lg font-black ${routeDirection==="left"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>←</button>
-         <button onClick={()=>setRouteDirection("down")} className={`h-8 w-8 rounded-lg font-black ${routeDirection==="down"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>↓</button>
-         <button onClick={()=>setRouteDirection("right")} className={`h-8 w-8 rounded-lg font-black ${routeDirection==="right"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>→</button>
-        </div>
         <p className="text-center text-[9px] font-bold text-[#477b84]">{bonuses.extraChoices>0?`+${bonuses.extraChoices} escolha(s) extra desbloqueada(s)`:""}</p>
        </div>
 

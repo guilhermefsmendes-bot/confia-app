@@ -261,11 +261,12 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   if(placed.length>0&&tile.left!==lastRight){setToast(c.invalid);setTimeout(()=>setToast(""),1800);return}
   const w=74,h=29;
   const anchor=lastPlaced?{x:lastPlaced.x,y:lastPlaced.y}:{x:12,y:Math.round(rect.height*.16)};
-  let x=anchor.x,y=anchor.y,rotate=0;
-  if(routeDirection==="right"){x=anchor.x+w+4; y=anchor.y; rotate=0}
-  if(routeDirection==="left"){x=anchor.x-w-4; y=anchor.y; rotate=0}
-  if(routeDirection==="down"){x=anchor.x; y=anchor.y+h+4; rotate=90}
-  if(routeDirection==="up"){x=anchor.x; y=anchor.y-h-4; rotate=270}
+  let x=anchor.x+w+4,y=anchor.y,rotate=0;
+  // Uma peça nova entra sempre imediatamente à direita da anterior.
+  // A direção escolhida controla apenas a orientação; a posição pode depois ser ajustada por arrasto.
+  if(routeDirection==="down")rotate=90;
+  if(routeDirection==="up")rotate=270;
+  if(x>rect.width-w-4){setToast("Não há espaço suficiente à direita da peça anterior");setTimeout(()=>setToast(""),1800);return}
   x=Math.max(4,Math.min(rect.width-w-4,x)); y=Math.max(6,Math.min(rect.height-h-6,y));
   const pending={tile,x,y,rotate,direction:routeDirection};
   const islandIndex=touchingIsland(x,y,rect.width,rect.height);

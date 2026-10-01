@@ -231,14 +231,14 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   if(!inside){setToast(c.choose);setTimeout(()=>setToast(""),1400);return}
   if(placed.length>0&&tile.left!==lastRight){setToast(c.invalid);setTimeout(()=>setToast(""),1800);return}
   const w=74,h=29;
-  const anchor=lastPlaced?{x:lastPlaced.x,y:lastPlaced.y}:{x:18,y:Math.round(rect.height/2-h/2)};
+  const anchor=lastPlaced?{x:lastPlaced.x,y:lastPlaced.y}:{x:12,y:Math.round(rect.height*.16)};
   let x=anchor.x,y=anchor.y,rotate=0;
   if(routeDirection==="right"){x=anchor.x+w+4; y=anchor.y; rotate=0}
   if(routeDirection==="left"){x=anchor.x-w-4; y=anchor.y; rotate=0}
   if(routeDirection==="down"){x=anchor.x; y=anchor.y+h+4; rotate=90}
   if(routeDirection==="up"){x=anchor.x; y=anchor.y-h-4; rotate=90}
   x=Math.max(4,Math.min(rect.width-w-4,x)); y=Math.max(6,Math.min(rect.height-h-6,y));
-  const islands=[{x:.12,y:.16},{x:.38,y:.12},{x:.68,y:.14},{x:.88,y:.28},{x:.22,y:.38},{x:.55,y:.38},{x:.80,y:.50},{x:.12,y:.68},{x:.42,y:.72},{x:.72,y:.80}];
+  const islands=[{x:.22,y:.16},{x:.38,y:.12},{x:.68,y:.14},{x:.88,y:.28},{x:.22,y:.38},{x:.55,y:.38},{x:.80,y:.50},{x:.12,y:.68},{x:.42,y:.72},{x:.72,y:.80}];
   const nearIsland=islands.some(i=>Math.hypot((clientX-rect.left)/rect.width-i.x,(clientY-rect.top)/rect.height-i.y)<.09);
   const pending={tile,x,y,rotate,direction:routeDirection};
   if(nearIsland){
@@ -302,7 +302,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
        <div ref={boardRef} className="relative mt-4 h-[430px] overflow-hidden rounded-[28px] border border-white/60 bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,.48),transparent_24%),linear-gradient(180deg,rgba(255,255,255,.16),rgba(27,128,145,.18))] shadow-[inset_0_0_45px_rgba(255,255,255,.22)]">
         <motion.div animate={{x:[-16,16,-16]}} transition={{duration:8,repeat:Infinity,ease:"easeInOut"}} className="absolute -left-10 top-7 h-10 w-[120%] rounded-[50%] border-t border-white/40 opacity-70"/>
         <motion.div animate={{x:[14,-14,14]}} transition={{duration:10,repeat:Infinity,ease:"easeInOut"}} className="absolute -left-10 top-32 h-12 w-[120%] rounded-[50%] border-t border-white/30 opacity-70"/>
-        {[{x:12,y:16},{x:38,y:12},{x:68,y:14},{x:88,y:28},{x:22,y:38},{x:55,y:38},{x:80,y:50},{x:12,y:68},{x:42,y:72},{x:72,y:80}].map((island,index)=><div key={index} className="absolute flex h-12 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)] text-center shadow-[0_7px_14px_rgba(38,103,116,.20)]" style={{left:`${island.x}%`,top:`${island.y}%`}}><span className="text-[6px] font-black uppercase tracking-[.10em] text-[#6d5b3d]">Impulso {index+1}</span></div>)}
+        {[{x:22,y:16},{x:38,y:12},{x:68,y:14},{x:88,y:28},{x:22,y:38},{x:55,y:38},{x:80,y:50},{x:12,y:68},{x:42,y:72},{x:72,y:80}].map((island,index)=><div key={index} className="absolute flex h-12 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)] text-center shadow-[0_7px_14px_rgba(38,103,116,.20)]" style={{left:`${island.x}%`,top:`${island.y}%`}}><span className="text-[6px] font-black uppercase tracking-[.10em] text-[#6d5b3d]">Impulso {index+1}</span></div>)}
         <div className="absolute right-3 top-3 z-20 rounded-[18px] border border-white/70 bg-white/65 p-1.5 shadow-sm backdrop-blur"><p className="px-1 pb-1 text-center text-[7px] font-black uppercase tracking-[.12em] text-[#39727b]">Rota</p><div className="grid grid-cols-3 gap-1"><span/><button onClick={()=>setRouteDirection("up")} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="up"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>↑</button><span/><button onClick={()=>setRouteDirection("left")} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="left"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>←</button><button onClick={()=>setRouteDirection("down")} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="down"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>↓</button><button onClick={()=>setRouteDirection("right")} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="right"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>→</button></div></div>
         <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[9px] font-black text-[#286b76] backdrop-blur">{c.start}: {placed[0]?.tile.left}</div>
         {placed.map((p,i)=><motion.div key={p.tile.id+"-"+i} initial={{opacity:0,scale:.88}} animate={{opacity:1,scale:1,y:[0,i%2?2:-2,0]}} transition={{opacity:{duration:.2},scale:{duration:.2},y:{duration:4+i*.15,repeat:Infinity}}} style={{position:"absolute",left:p.x,top:p.y,rotate:p.rotate}}><DominoPiece tile={p.tile} compact/></motion.div>)}

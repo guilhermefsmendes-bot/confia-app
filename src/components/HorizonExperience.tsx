@@ -218,7 +218,16 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const monthRemaining=monthTracker?new Date(monthTracker.dueAt).getTime()-now:0;
  const monthDue=Boolean(monthTracker&&monthRemaining<=0);
  const monthReflections=useMemo(()=>monthTracker?weeklyLog.filter(item=>new Date(item.at).getTime()>=new Date(monthTracker.startedAt).getTime()&&new Date(item.at).getTime()<=new Date(monthTracker.dueAt).getTime()+86400000):[],[weeklyLog,monthTracker]);
- const lastRight=placed[placed.length-1]?.tile.right||"Stress";
+ const connectionValue=(p:PlacedDomino|undefined)=>{
+  if(!p)return "Stress";
+  // Quando a peça está virada para cima, o valor que fica no topo é o
+  // lado esquerdo original; virada para baixo, o valor no fundo é o
+  // lado direito original. A ligação seguinte deve usar esse extremo visível.
+  if(p.rotate===270)return p.tile.left;
+  if(p.rotate===90)return p.tile.right;
+  return p.tile.right;
+};
+ const lastRight=connectionValue(placed[placed.length-1]);
  const tileStep=routeDirection==="up"||routeDirection==="down"?34:78;
  const lastPlaced=placed[placed.length-1];
  const candidateCount=Math.min(4,2+Math.min(2,bonuses.extraChoices||0));

@@ -199,6 +199,8 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [routeDirection,setRouteDirection]=useState<Direction>("right");
  const [selectedPlaced,setSelectedPlaced]=useState<number|null>(null);
  const [unlockedIslands,setUnlockedIslands]=useState<number[]>([]);
+ const [treasureOpen,setTreasureOpen]=useState(false);
+ const [treasureAnswer,setTreasureAnswer]=useState("");
 
  useEffect(()=>{setNow(Date.now());const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id)},[]);
  useEffect(()=>{localStorage.setItem(WEEKLY_LOG_KEY,JSON.stringify(weeklyLog))},[weeklyLog]);
@@ -231,10 +233,24 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const closeMonth=()=>{const start=new Date();const next={startedAt:start.toISOString(),dueAt:new Date(start.getTime()+30*86400000).toISOString()};setMonthTracker(next);setMonthSummary("");setMonthCompared(false)};
 
  const rewardQuest=()=>{if(questDone)return;setQuestDone(true);setBonuses((b:any)=>quest.reward==="extra-choice"?{...b,extraChoices:b.extraChoices+1}:quest.reward==="reroll"?{...b,rerolls:b.rerolls+1}:{...b,hints:b.hints+1});setToast(c.bonus);setTimeout(()=>setToast(""),2200)};
- const reset=()=>{setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([]);setImpulse(null);setPendingDrop(null)};
- const enterSection=(next:Section)=>{if(next==="sea"){setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setUnlockedIslands([]);setSelectedPlaced(null)}setSection(next)};
+ const reset=()=>{setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([]);setImpulse(null);setPendingDrop(null);setTreasureOpen(false);setTreasureAnswer("")};
+ const enterSection=(next:Section)=>{if(next==="sea"){setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setUnlockedIslands([]);setSelectedPlaced(null);setTreasureOpen(false);setTreasureAnswer("")}setSection(next)};
  const reroll=()=>{if(bonuses.rerolls<=0)return;setBonuses((b:any)=>({...b,rerolls:b.rerolls-1}));setQuestDone(v=>!v)};
- const islands=[{x:.22,y:.16},{x:.38,y:.12},{x:.68,y:.14},{x:.88,y:.28},{x:.22,y:.38},{x:.55,y:.38},{x:.80,y:.50},{x:.12,y:.68},{x:.42,y:.72},{x:.72,y:.80}];
+ const islands=[{x:.14,y:.12},{x:.36,y:.20},{x:.62,y:.11},{x:.86,y:.24},{x:.28,y:.40},{x:.58,y:.34},{x:.82,y:.50},{x:.18,y:.63},{x:.48,y:.67},{x:.76,y:.78},{x:.92,y:.88,treasure:true}];
+ const seaObstacles=[
+  {x:.25,y:.28,type:"🌀",label:"Remoinho"},
+  {x:.50,y:.24,type:"🏴‍☠️",label:"Piratas"},
+  {x:.72,y:.40,type:"🐙",label:"Kraken"},
+  {x:.38,y:.52,type:"🌀",label:"Remoinho"},
+  {x:.66,y:.66,type:"🏴‍☠️",label:"Piratas"}
+ ];
+ const touchingObstacle=(x:number,y:number,boardWidth:number,boardHeight:number)=>{
+  const w=74,h=29;
+  return seaObstacles.some(o=>{
+   const cx=boardWidth*o.x,cy=boardHeight*o.y;
+   return x+w>=cx-25&&x<=cx+25&&y+h>=cy-25&&y<=cy+25;
+  });
+ };
  const touchingIsland=(x:number,y:number,boardWidth:number,boardHeight:number)=>{
   // A ilha desbloqueia quando a lateral direita da peça chega à sua área.
   // Usamos colisão/proximidade real em vez de uma janela estreita baseada
@@ -301,8 +317,12 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   if(x>rect.width-w-4){setToast("Não há espaço suficiente à direita da peça anterior");setTimeout(()=>setToast(""),1800);return}
   x=Math.max(4,Math.min(rect.width-w-4,x)); y=Math.max(6,Math.min(rect.height-h-6,y));
   const pending={tile,x,y,rotate,direction:routeDirection};
+  if(touchingObstacle(x,y,rect.width,rect.height)){setToast("Há um perigo no mar. Muda o rumo e encontra outra passagem.");setTimeout(()=>setToast(""),2200);return;}
   const islandIndex=touchingIsland(x,y,rect.width,rect.height);
-  if(islandIndex>=0){unlockIsland(islandIndex,pending);return;}
+  if(islandIndex>=0){
+   if(islands[islandIndex].treasure){setTreasureOpen(true);return;}
+   unlockIsland(islandIndex,pending);return;
+  }
   placeTile(pending);
  };
 
@@ -358,7 +378,8 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
        <div ref={boardRef} className="relative mt-4 h-[430px] overflow-hidden rounded-[28px] border border-white/60 bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,.48),transparent_24%),linear-gradient(180deg,rgba(255,255,255,.16),rgba(27,128,145,.18))] shadow-[inset_0_0_45px_rgba(255,255,255,.22)]">
         <motion.div animate={{x:[-16,16,-16]}} transition={{duration:8,repeat:Infinity,ease:"easeInOut"}} className="absolute -left-10 top-7 h-10 w-[120%] rounded-[50%] border-t border-white/40 opacity-70"/>
         <motion.div animate={{x:[14,-14,14]}} transition={{duration:10,repeat:Infinity,ease:"easeInOut"}} className="absolute -left-10 top-32 h-12 w-[120%] rounded-[50%] border-t border-white/30 opacity-70"/>
-        {islands.map((island,index)=>{const unlocked=unlockedIslands.includes(index);return <div key={index} className={`absolute flex h-12 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border text-center shadow-[0_7px_14px_rgba(38,103,116,.20)] ${unlocked?"border-emerald-300 bg-[radial-gradient(ellipse_at_45%_35%,#d9f4df,#75c69a)]":"border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)]"}`} style={{left:`${island.x*100}%`,top:`${island.y*100}%`}}><span className={`text-[6px] font-black uppercase tracking-[.10em] ${unlocked?"text-emerald-800":"text-[#6d5b3d]"}`}>{unlocked?"✓ ":""}Impulso {index+1}</span></div>})}
+        {seaObstacles.map((o,i)=><motion.div key={o.type+i} animate={{y:[0,-3,0],rotate:o.type==="🌀"?[0,8,-8,0]:[0,-2,0]}} transition={{duration:o.type==="🌀"?2.8:4.2,repeat:Infinity}} className="absolute z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-white/40 bg-[#0e6572]/25 text-center shadow-sm backdrop-blur-[1px]" style={{left:`${o.x*100}%`,top:`${o.y*100}%`}}><span className="text-[20px] leading-none">{o.type}</span><span className="mt-0.5 text-[5px] font-black uppercase tracking-[.08em] text-white/80">{o.label}</span></motion.div>)}
+        {islands.map((island,index)=>{const unlocked=unlockedIslands.includes(index);const treasure=Boolean((island as any).treasure);return <div key={index} className={`absolute flex h-12 ${treasure?"w-20":"w-16"} -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border text-center shadow-[0_7px_14px_rgba(38,103,116,.20)] ${treasure?"border-[#f2cf70] bg-[radial-gradient(ellipse_at_45%_35%,#fff1b4,#c99942)]":unlocked?"border-emerald-300 bg-[radial-gradient(ellipse_at_45%_35%,#d9f4df,#75c69a)]":"border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)]"}`} style={{left:`${island.x*100}%`,top:`${island.y*100}%`}}><span className={`text-[6px] font-black uppercase tracking-[.10em] ${treasure?"text-[#765018]":unlocked?"text-emerald-800":"text-[#6d5b3d]"}`}>{treasure?"🏆 Ilha Tesouro":unlocked?"✓ ":""}{!treasure&&`Impulso ${index+1}`}</span></div>})}
         <div className="absolute right-3 top-3 z-20 rounded-[18px] border border-white/70 bg-white/65 p-1.5 shadow-sm backdrop-blur"><p className="px-1 pb-1 text-center text-[7px] font-black uppercase tracking-[.12em] text-[#39727b]">Rota</p><div className="grid grid-cols-3 gap-1"><span/><button onClick={()=>{setRouteDirection("up"); if(selectedPlaced!==null) setPlaced(prev=>prev.map((p,i)=>i===selectedPlaced?{...p,rotate:270,direction:"up"}:p))}} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="up"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>↑</button><span/><button onClick={()=>{setRouteDirection("left"); if(selectedPlaced!==null) setPlaced(prev=>prev.map((p,i)=>i===selectedPlaced?{...p,rotate:0,direction:"left"}:p))}} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="left"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>←</button><button onClick={()=>{setRouteDirection("down"); if(selectedPlaced!==null) setPlaced(prev=>prev.map((p,i)=>i===selectedPlaced?{...p,rotate:90,direction:"down"}:p))}} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="down"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>↓</button><button onClick={()=>{setRouteDirection("right"); if(selectedPlaced!==null) setPlaced(prev=>prev.map((p,i)=>i===selectedPlaced?{...p,rotate:0,direction:"right"}:p))}} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="right"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>→</button></div></div>
         <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[9px] font-black text-[#286b76] backdrop-blur">{c.start}: {placed[0]?.tile.left}</div>
         {placed.map((p,i)=><motion.div key={p.tile.id+"-"+i} drag dragElastic={0.12} whileDrag={{scale:1.05,zIndex:90}} onClick={()=>setSelectedPlaced(i)} onDragEnd={(_,info)=>{const w=74;const board=boardRef.current;if(!board)return;const rect=board.getBoundingClientRect();const nx=Math.max(4,Math.min(rect.width-w-4,p.x+info.offset.x));const ny=Math.max(6,Math.min(rect.height-35,p.y+info.offset.y));const prev=placed[i-1];if(prev&&nx<=prev.x+w+4){setToast("A peça tem de ficar à direita da anterior");setTimeout(()=>setToast(""),1600);return}const next=placed[i+1];if(next&&next.x<=nx+w+4){setToast("Não podes ultrapassar a peça seguinte");setTimeout(()=>setToast(""),1600);return}setPlaced(prevPlaced=>prevPlaced.map((q,j)=>j===i?{...q,x:nx,y:ny}:q));const islandIndex=touchingIsland(nx,ny,rect.width,rect.height);if(islandIndex>=0){setUnlockedIslands(prevUnlocked=>prevUnlocked.includes(islandIndex)?prevUnlocked:[...prevUnlocked,islandIndex]);setPendingDrop(null);setImpulse(sample(IMPULSE_QUESTIONS,1)[0]);setImpulseAnswer(null);}}} initial={{opacity:0,scale:.88}} animate={{opacity:1,scale:1,y:[0,i%2?2:-2,0]}} transition={{opacity:{duration:.2},scale:{duration:.2},y:{duration:4+i*.15,repeat:Infinity}}} className={`cursor-grab touch-none ${selectedPlaced===i?"ring-2 ring-[#f0b35b] ring-offset-1 rounded-xl":""}`} style={{position:"absolute",left:p.x,top:p.y,rotate:p.rotate}}><DominoPiece tile={p.tile} compact/></motion.div>)}
@@ -375,6 +396,20 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
     </motion.section>}
    </AnimatePresence>
   </div>
+  <AnimatePresence>{treasureOpen&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[210] flex items-center justify-center bg-[#123f48]/65 p-5 backdrop-blur-sm">
+   <motion.div initial={{opacity:0,y:20,scale:.96}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[30px] border border-[#f4d78a] bg-[#fffaf0] p-6 text-center shadow-[0_30px_80px_rgba(12,54,63,.34)]">
+    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[24px] border border-[#e8c66b] bg-[#f8dda0] text-4xl shadow-inner">🎁</div>
+    <p className="mt-4 text-[9px] font-black uppercase tracking-[.2em] text-[#9a7040]">Ilha Tesouro</p>
+    <h3 className="mt-1 text-[21px] font-black text-[#4c3829]">Encontraste o baú.</h3>
+    <p className="mt-2 text-[11px] font-semibold leading-relaxed text-[#735f51]">Dentro dele está a primeira interação da tua viagem na CONFIA.</p>
+    <div className="mt-5 rounded-[20px] border border-[#ead7b5] bg-white p-4 text-left">
+      <p className="text-[10px] font-black uppercase tracking-[.14em] text-[#a06f3d]">A primeira pergunta</p>
+      <p className="mt-2 text-[15px] font-black leading-relaxed text-[#354f56]">O que te trouxe até aqui?</p>
+      <textarea value={treasureAnswer} onChange={e=>setTreasureAnswer(e.target.value)} maxLength={500} placeholder="Escreve livremente…" className="mt-3 min-h-[100px] w-full resize-none rounded-[16px] border border-[#e4d7c4] bg-[#fffdf9] p-3 text-[12px] font-medium text-[#4f4037] outline-none"/>
+      <button disabled={!treasureAnswer.trim()} onClick={()=>{setTreasureOpen(false);setToast("A tua primeira interação ficou guardada no teu caminho.");setTimeout(()=>setToast(""),2400)}} className="mt-3 w-full rounded-[16px] bg-[#8f503e] py-3 text-[11px] font-black text-white disabled:opacity-40">Guardar e continuar</button>
+    </div>
+   </motion.div>
+  </motion.div>}</AnimatePresence>
   <AnimatePresence>{impulse&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[200] flex items-center justify-center bg-[#123f48]/55 p-5 backdrop-blur-sm">
    <motion.div initial={{opacity:0,y:18,scale:.97}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[28px] border border-white/80 bg-[#fffdf7] p-5 shadow-[0_25px_70px_rgba(12,54,63,.28)]">
     <div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e9d7a8] text-lg">🏝️</div><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#9b7950]">Ilha do Impulso</p><p className="text-[11px] font-bold text-[#6f5d52]">Responde para continuares a viagem</p></div></div>

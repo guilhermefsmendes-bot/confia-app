@@ -196,7 +196,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [impulse,setImpulse]=useState<ImpulseQuestion|null>(null);
  const [impulseAnswer,setImpulseAnswer]=useState<number|null>(null);
  const [usedImpulseQuestions,setUsedImpulseQuestions]=useState<string[]>([]);
- const [pendingDrop,setPendingDrop]=useState<{tile:Domino;x:number;y:number;rotate:number;direction:Direction}|null>(null);
+ const [pendingDrop,setPendingDrop]=useState<{tile:Domino;x:number;y:number;rotate:number;direction:Direction;obstacle:boolean}|null>(null);
  const [selectedPlaced,setSelectedPlaced]=useState<number|null>(null);
 
  const [unlockedIslands,setUnlockedIslands]=useState<number[]>([0]);
@@ -263,7 +263,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   const row=Math.floor(index/4);
   const column=index%4;
   const snakeColumn=row%2===0?column:3-column;
-  return {x:[.10,.36,.64,.90][snakeColumn],y:[.16,.50,.84][row]};
+  return {x:[.10,.36,.64,.90][snakeColumn],y:[.16,.50,.84][row],...(index===11?{treasure:true}: {})};
  });
  const seaObstacles=[
   {x:.50,y:.16,type:"🌀",label:"Remoinho"},
@@ -303,11 +303,11 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   const pool=available.length?available:IMPULSE_QUESTIONS.filter(q=>q.id!==excludeId);
   return sample(pool.length?pool:IMPULSE_QUESTIONS,1)[0];
  };
- const askQuestionForDrop=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction})=>{
+ const askQuestionForDrop=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction;obstacle:boolean})=>{
   const first=nextImpulseQuestion();
   setPendingDrop(drop);setImpulse(first);setImpulseAnswer(null);setUsedImpulseQuestions(prev=>[...prev,first.id]);
  };
- const placeTile=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction})=>{
+ const placeTile=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction;obstacle:boolean})=>{
   setPlaced(prev=>[...prev,{tile:drop.tile,x:drop.x,y:drop.y,rotate:drop.rotate,direction:drop.direction}]);
   if(bonuses.extraChoices>0)setBonuses((b:any)=>({...b,extraChoices:Math.max(0,b.extraChoices-1)}));
   setQuest(sample(QUESTS,1)[0]);setQuestDone(false);
@@ -326,7 +326,18 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
    }
    setTimeout(()=>{setImpulse(null);setImpulseAnswer(null);setPendingDrop(null);setUsedImpulseQuestions([])},850);
   } else {
-   // Cada erro gera imediatamente uma nova pergunta. A viagem só avança quando acertar.
+   if(pendingDrop?.obstacle){
+    setPlaced([]);
+    setUnlockedIslands([0]);
+    setPendingDrop(null);
+    setImpulse(null);
+    setImpulseAnswer(null);
+    setUsedImpulseQuestions([]);
+    setToast("O mar levou-te de volta à Ilha 1.");
+    setTimeout(()=>setToast(""),2400);
+    return;
+   }
+   // Nas perguntas normais, o erro pede outra reflexão sem perder o percurso.
    setTimeout(()=>{
     const next=nextImpulseQuestion(impulse.id);
     setImpulse(next);setImpulseAnswer(null);setUsedImpulseQuestions(prev=>[...prev,next.id]);
@@ -341,10 +352,11 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   if(placed.length>0&&tile.left!==lastRight){setToast(c.invalid);setTimeout(()=>setToast(""),1800);return}
   if(placed.length>=33){setToast("O teu horizonte está completo.");setTimeout(()=>setToast(""),1800);return}
   const slot=routeSlot(placed.length,rect.width,rect.height);
-  const pending={tile,x:slot.x,y:slot.y,rotate:slot.rotate,direction:slot.direction};
+  const obstacle=touchingObstacle(slot.x,slot.y,rect.width,rect.height,slot.rotate);
+  const pending={tile,x:slot.x,y:slot.y,rotate:slot.rotate,direction:slot.direction,obstacle};
   // O mapa decide automaticamente a posição e a direção da peça.
-  // A rota faz o Z: desce entre as ilhas 4→5 e 8→9.
-  if(touchingObstacle(slot.x,slot.y,rect.width,rect.height,slot.rotate)){
+  // Remoinhos e Kraken são provas do percurso: se o utilizador errar, regressa à Ilha 1.
+  if(obstacle){
    askQuestionForDrop(pending);
    return;
   }

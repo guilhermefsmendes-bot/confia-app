@@ -15,7 +15,7 @@ type Quest = { id:string; label:keyof typeof COPY.pt; reward:"extra-choice"|"rer
 type ImpulseQuestion = {id:string;question:string;answers:string[];correct:number;explanation:string};
 type Junction = {slot:number;left:string;right:string;explanation:string};
 type JunctionPair = {slot:number;left:string;right:string};
-type HorizonProgress = {placed:PlacedDomino[];bonuses:{extraChoices:number;rerolls:number;hints:number};unlockedIslands:number[];junctions:Junction[];treasureAnswer:string;quest:Quest;questDone:boolean};
+type HorizonProgress = {placed:PlacedDomino[];hand?:Domino[];bonuses:{extraChoices:number;rerolls:number;hints:number};unlockedIslands:number[];junctions:Junction[];treasureAnswer:string;quest:Quest;questDone:boolean};
 
 const CAPSULE_KEY="confia_horizon_capsule_v1";
 const WEEKLY_LOG_KEY="confia_horizon_weekly_reflections_v1";
@@ -195,6 +195,22 @@ const QUESTS:Quest[]=[
 
 function readJson<T>(key:string,fallback:T):T{try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}}
 function sample<T>(xs:T[],n:number){return [...xs].sort(()=>Math.random()-.5).slice(0,n)}
+function pickHandTiles(count:number,excludeIds:string[]=[]){
+ const excluded=new Set(excludeIds);
+ const pool=DOMINOES.filter(d=>!excluded.has(d.id));
+ const result:Domino[]=[];
+ const candidates=[...pool];
+ while(result.length<count&&candidates.length){
+  const compatible=candidates.filter(d=>!result.some(r=>d.left.toLocaleLowerCase()===r.right.toLocaleLowerCase()||d.right.toLocaleLowerCase()===r.left.toLocaleLowerCase()));
+  const source=compatible.length?compatible:candidates;
+  const picked=sample(source,1)[0];
+  if(!picked)break;
+  result.push(picked);
+  const index=candidates.findIndex(d=>d.id===picked.id);
+  if(index>=0)candidates.splice(index,1);
+ }
+ return result;
+}
 function readHorizonProgress():HorizonProgress|null{return readJson<HorizonProgress|null>(HORIZON_PROGRESS_KEY,null)}
 function formatRemaining(ms:number){if(ms<=0)return "0 d 00 h 00 m 00 s";const d=Math.floor(ms/86400000);const h=Math.floor(ms%86400000/3600000);const m=Math.floor(ms%3600000/60000);const s=Math.floor(ms%60000/1000);return `${d} d ${String(h).padStart(2,"0")} h ${String(m).padStart(2,"0")} m ${String(s).padStart(2,"0")} s`}
 
@@ -256,6 +272,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [monthSummary,setMonthSummary]=useState("");
  const [monthCompared,setMonthCompared]=useState(false);
  const [placed,setPlaced]=useState<PlacedDomino[]>(()=>readHorizonProgress()?.placed||readJson(DOMINO_KEY,[]));
+ const [hand,setHand]=useState<Domino[]>(()=>{const saved=readHorizonProgress()?.hand;return saved?.length?saved:pickHandTiles(4)});
  const [bonuses,setBonuses]=useState(()=>readHorizonProgress()?.bonuses||readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));
  const [quest,setQuest]=useState<Quest>(()=>readHorizonProgress()?.quest||sample(QUESTS,1)[0]);
  const [questDone,setQuestDone]=useState(()=>readHorizonProgress()?.questDone||false);
@@ -288,7 +305,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  useEffect(()=>{localStorage.setItem(DOMINO_KEY,JSON.stringify(placed))},[placed]);
  useEffect(()=>{localStorage.setItem(BONUS_KEY,JSON.stringify(bonuses))},[bonuses]);
  useEffect(()=>{localStorage.setItem(HORIZON_JUNCTIONS_KEY,JSON.stringify(junctions))},[junctions]);
- useEffect(()=>{localStorage.setItem(HORIZON_PROGRESS_KEY,JSON.stringify({placed,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone}))},[placed,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone]);
+ useEffect(()=>{localStorage.setItem(HORIZON_PROGRESS_KEY,JSON.stringify({placed,hand,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone}))},[placed,hand,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone]);
  useEffect(()=>{const onCommunity=()=>{setBonuses(readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));setToast(c.bonus);setTimeout(()=>setToast(""),2200)};window.addEventListener(COMMUNITY_EVENT,onCommunity);return()=>window.removeEventListener(COMMUNITY_EVENT,onCommunity)},[c.bonus]);
 
  const hasSavedJourney=placed.length>0||junctions.length>0||unlockedIslands.length>1||Boolean(treasureAnswer.trim());
@@ -308,11 +325,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
 };
  const lastRight=connectionValue(placed[placed.length-1]);
  const lastPlaced=placed[placed.length-1];
- const candidateCount=Math.min(4,2+Math.min(2,bonuses.extraChoices||0));
- const options=useMemo(()=>{
-  const pool=DOMINOES.filter(d=>!placed.slice(-10).some(p=>p.tile.id===d.id));
-  return sample(pool.length?pool:DOMINOES,candidateCount);
- },[placed,candidateCount,questDone]);
+
  const availableWordTiles=useMemo(()=>{
   const wanted=neededWord.trim().toLocaleLowerCase();
   if(!wanted)return [];
@@ -337,7 +350,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   setQuestDone(false);
   setToast(c.bonus);setTimeout(()=>setToast(""),2200);
  };
- const reset=()=>{setBonuses({extraChoices:0,rerolls:0,hints:0});setPlaced([]);localStorage.removeItem(DOMINO_KEY);localStorage.removeItem(HORIZON_PROGRESS_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([0]);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setJunction(null);setJunctionExplanation("");setJunctions([]);localStorage.removeItem(HORIZON_JUNCTIONS_KEY);setTreasureOpen(false);setTreasureAnswer("");setWordPromptOpen(false);setNeededWord("");setWordTile(null);setWordMoment("")};
+ const reset=()=>{setBonuses({extraChoices:0,rerolls:0,hints:0});setHand(pickHandTiles(4));setPlaced([]);localStorage.removeItem(DOMINO_KEY);localStorage.removeItem(HORIZON_PROGRESS_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([0]);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setJunction(null);setJunctionExplanation("");setJunctions([]);localStorage.removeItem(HORIZON_JUNCTIONS_KEY);setTreasureOpen(false);setTreasureAnswer("");setWordPromptOpen(false);setNeededWord("");setWordTile(null);setWordMoment("")};
  const enterSection=(next:Section)=>{setSection(next);if(next==="sea"){setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setHorizonResumeOpen(true)}};
  const startNewJourney=()=>{reset();setHorizonResumeOpen(false);setHorizonIntroOpen(true)};
  const continueJourney=()=>{setHorizonResumeOpen(false)};
@@ -426,8 +439,24 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   const first=nextImpulseQuestion();
   setPendingDrop(drop);setImpulse(first);setImpulseAnswer(null);setUsedImpulseQuestions(prev=>[...prev,first.id]);
  };
+ const replenishHand=(usedTile:Domino)=>{
+  setHand(current=>{
+   if(!current.some(tile=>tile.id===usedTile.id))return current;
+   const excludedIds=[...current.map(tile=>tile.id),...placed.slice(-24).map(p=>p.tile.id),usedTile.id];
+   const candidates=DOMINOES.filter(tile=>{
+    if(excludedIds.includes(tile.id))return false;
+    if(tile.left.toLocaleLowerCase()===usedTile.right.toLocaleLowerCase())return false;
+    if(tile.right.toLocaleLowerCase()===usedTile.left.toLocaleLowerCase())return false;
+    if(current.some(existing=>tile.left.toLocaleLowerCase()===existing.right.toLocaleLowerCase()||tile.right.toLocaleLowerCase()===existing.left.toLocaleLowerCase()))return false;
+    return true;
+   });
+   const replacement=sample(candidates.length?candidates:DOMINOES.filter(tile=>!excludedIds.includes(tile.id)),1)[0];
+   return replacement?[...current.filter(tile=>tile.id!==usedTile.id),replacement]:current;
+  });
+ };
  const placeTile=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction;obstacle:boolean})=>{
   setPlaced(prev=>[...prev,{tile:drop.tile,x:drop.x,y:drop.y,rotate:drop.rotate,direction:drop.direction}]);
+  replenishHand(drop.tile);
   if(bonuses.extraChoices>0)setBonuses((b:any)=>({...b,extraChoices:Math.max(0,b.extraChoices-1)}));
   setQuest(sample(QUESTS,1)[0]);setQuestDone(false);
  };
@@ -539,7 +568,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
 
        <div className="mt-4 rounded-[24px] border border-white/60 bg-white/58 p-4 backdrop-blur-md">
         <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#337582]">{c.choose}</p><p className="mt-1 text-[10px] font-semibold text-[#4b7b82]">{c.dragTip}</p></div><button onClick={reset} className="rounded-full bg-white/80 p-2 text-[#37727d]" title={c.restart}><Star size={15}/></button></div>
-        <div className="mt-3 grid grid-cols-2 gap-3 pb-3 pt-1">{options.map(tile=><div key={tile.id} className="flex justify-center"><DominoPiece tile={tile} draggable onDrop={dropDomino}/></div>)}</div>
+        <div className="mt-3 grid grid-cols-2 gap-3 pb-3 pt-1">{hand.map(tile=><div key={tile.id} className="flex justify-center"><DominoPiece tile={tile} draggable onDrop={dropDomino}/></div>)}</div>
         <button onClick={requestWord} className="mx-auto flex items-center justify-center gap-2 rounded-full border border-[#2f7882]/30 bg-[#effaf7]/95 px-5 py-2.5 text-[10px] font-black text-[#286773] shadow-sm active:scale-[.98]">✦ <span>{c.needWord}</span></button>
         <p className="text-center text-[9px] font-bold text-[#477b84]">{bonuses.extraChoices>0?`+${bonuses.extraChoices} escolha(s) extra desbloqueada(s)`:""}</p>
        </div>

@@ -25,6 +25,7 @@ const BONUS_KEY="confia_horizon_bonuses_v1";
 const HORIZON_INTRO_KEY="confia_horizon_intro_v2";
 const HORIZON_JUNCTIONS_KEY="confia_horizon_junctions_v1";
 const HORIZON_PROGRESS_KEY="confia_horizon_progress_v1";
+const HORIZON_HAND_KEY="confia_horizon_hand_v1";
 const COMMUNITY_EVENT="confia:community-post-created";
 
 const COPY={
@@ -382,7 +383,13 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [monthSummary,setMonthSummary]=useState("");
  const [monthCompared,setMonthCompared]=useState(false);
  const [placed,setPlaced]=useState<PlacedDomino[]>(()=>readHorizonProgress()?.placed||readJson(DOMINO_KEY,[]));
- const [hand,setHand]=useState<Domino[]>(()=>{const saved=readHorizonProgress()?.hand;return saved?.length?saved:pickHandTiles(4)});
+ const [hand,setHand]=useState<Domino[]>(()=>{
+  const savedHand=readJson(HORIZON_HAND_KEY,[]);
+  if(Array.isArray(savedHand)&&savedHand.length)return savedHand;
+  const savedProgress=readHorizonProgress()?.hand;
+  if(savedProgress?.length)return savedProgress;
+  return pickHandTiles(4);
+ });
  const [bonuses,setBonuses]=useState(()=>readHorizonProgress()?.bonuses||readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));
  const [quest,setQuest]=useState<Quest>(()=>readHorizonProgress()?.quest||sample(QUESTS,1)[0]);
  const [questDone,setQuestDone]=useState(()=>readHorizonProgress()?.questDone||false);
@@ -415,7 +422,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  useEffect(()=>{localStorage.setItem(DOMINO_KEY,JSON.stringify(placed))},[placed]);
  useEffect(()=>{localStorage.setItem(BONUS_KEY,JSON.stringify(bonuses))},[bonuses]);
  useEffect(()=>{localStorage.setItem(HORIZON_JUNCTIONS_KEY,JSON.stringify(junctions))},[junctions]);
- useEffect(()=>{localStorage.setItem(HORIZON_PROGRESS_KEY,JSON.stringify({placed,hand,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone}))},[placed,hand,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone]);
+ useEffect(()=>{localStorage.setItem(HORIZON_HAND_KEY,JSON.stringify(hand));localStorage.setItem(HORIZON_PROGRESS_KEY,JSON.stringify({placed,hand,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone}))},[hand,placed,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone]);
  useEffect(()=>{const onCommunity=()=>{setBonuses(readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));setToast(c.bonus);setTimeout(()=>setToast(""),2200)};window.addEventListener(COMMUNITY_EVENT,onCommunity);return()=>window.removeEventListener(COMMUNITY_EVENT,onCommunity)},[c.bonus]);
 
  const hasSavedJourney=placed.length>0||junctions.length>0||unlockedIslands.length>1||Boolean(treasureAnswer.trim());
@@ -478,7 +485,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   setQuestDone(false);
   setToast(c.bonus);setTimeout(()=>setToast(""),2200);
  };
- const reset=()=>{setBonuses({extraChoices:0,rerolls:0,hints:0});setHand(pickHandTiles(4));setPlaced([]);localStorage.removeItem(DOMINO_KEY);localStorage.removeItem(HORIZON_PROGRESS_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([0]);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setJunction(null);setJunctionExplanation("");setJunctions([]);localStorage.removeItem(HORIZON_JUNCTIONS_KEY);setTreasureOpen(false);setTreasureAnswer("");setWordPromptOpen(false);setNeededWord("");setWordTile(null);setWordMoment("")};
+ const reset=()=>{const freshHand=pickHandTiles(4);setBonuses({extraChoices:0,rerolls:0,hints:0});setHand(freshHand);localStorage.setItem(HORIZON_HAND_KEY,JSON.stringify(freshHand));setPlaced([]);localStorage.removeItem(DOMINO_KEY);localStorage.removeItem(HORIZON_PROGRESS_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([0]);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setJunction(null);setJunctionExplanation("");setJunctions([]);localStorage.removeItem(HORIZON_JUNCTIONS_KEY);setTreasureOpen(false);setTreasureAnswer("");setWordPromptOpen(false);setNeededWord("");setWordTile(null);setWordMoment("")};
  const enterSection=(next:Section)=>{setSection(next);if(next==="sea"){setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setSelectedPlaced(null);setHorizonResumeOpen(true)}};
  const startNewJourney=()=>{reset();setHorizonResumeOpen(false);setHorizonIntroOpen(true)};
  const continueJourney=()=>{setHorizonResumeOpen(false)};
@@ -578,6 +585,8 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  };
  const replenishHand=(usedTile:Domino)=>{
   setHand(current=>{
+   // A carteira só pode mudar quando uma peça foi efetivamente usada no caminho.
+   // Pesquisar uma palavra, escrever ou abrir o modal nunca passa por este ponto.
    if(!current.some(tile=>tile.id===usedTile.id))return current;
    const excludedIds=[...current.map(tile=>tile.id),...placed.slice(-24).map(p=>p.tile.id),usedTile.id];
    const candidates=DOMINOES.filter(tile=>{

@@ -9,7 +9,8 @@ type WeeklyReflection = { at:string; message:string; guess:string; feedback:stri
 type MonthTracker = { startedAt:string; dueAt:string; summary?:string; comparedAt?:string };
 type Tone = "heavy" | "neutral" | "light";
 type Domino = { id:string; left:string; right:string; tone:Tone; turn?:boolean };
-type PlacedDomino = { tile:Domino; x:number; y:number; rotate:number; direction?:"right"|"up"|"down" };
+type Direction="right"|"left"|"up"|"down";
+type PlacedDomino = { tile:Domino; x:number; y:number; rotate:number; direction?:Direction };
 type Quest = { id:string; label:keyof typeof COPY.pt; reward:"extra-choice"|"reroll"|"hint"; icon:string };
 type ImpulseQuestion = {id:string;question:string;answers:string[];correct:number;explanation:string};
 
@@ -174,7 +175,8 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [toast,setToast]=useState("");
  const [impulse,setImpulse]=useState<ImpulseQuestion|null>(null);
  const [impulseAnswer,setImpulseAnswer]=useState<number|null>(null);
- const [pendingDrop,setPendingDrop]=useState<{tile:Domino;x:number;y:number;rotate:number;direction:"right"|"up"|"down"}|null>(null);
+ const [pendingDrop,setPendingDrop]=useState<{tile:Domino;x:number;y:number;rotate:number;direction:Direction}|null>(null);
+ const [routeDirection,setRouteDirection]=useState<Direction>("right");
 
  useEffect(()=>{setNow(Date.now());const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id)},[]);
  useEffect(()=>{localStorage.setItem(WEEKLY_LOG_KEY,JSON.stringify(weeklyLog))},[weeklyLog]);
@@ -191,7 +193,9 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const monthRemaining=monthTracker?new Date(monthTracker.dueAt).getTime()-now:0;
  const monthDue=Boolean(monthTracker&&monthRemaining<=0);
  const monthReflections=useMemo(()=>monthTracker?weeklyLog.filter(item=>new Date(item.at).getTime()>=new Date(monthTracker.startedAt).getTime()&&new Date(item.at).getTime()<=new Date(monthTracker.dueAt).getTime()+86400000):[],[weeklyLog,monthTracker]);
- const lastRight=placed[placed.length-1]?.tile.right||"Agitação";
+ const lastRight=placed[placed.length-1]?.tile.right||"Stress";
+ const tileStep=routeDirection==="up"||routeDirection==="down"?34:78;
+ const lastPlaced=placed[placed.length-1];
  const candidateCount=Math.min(5,2+(bonuses.extraChoices||0));
  const options=useMemo(()=>{
   let pool=DOMINOES.filter(d=>d.left===lastRight&&!placed.slice(-6).some(p=>p.tile.id===d.id));
@@ -208,7 +212,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const reset=()=>{setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false)};
  const enterSection=(next:Section)=>{if(next==="sea"){setPlaced([]);localStorage.removeItem(DOMINO_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null)}setSection(next)};
  const reroll=()=>{if(bonuses.rerolls<=0)return;setBonuses((b:any)=>({...b,rerolls:b.rerolls-1}));setQuestDone(v=>!v)};
- const placeTile=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:"right"|"up"|"down"})=>{
+ const placeTile=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction})=>{
   setPlaced(prev=>[...prev,{tile:drop.tile,x:drop.x,y:drop.y,rotate:drop.rotate,direction:drop.direction}]);
   if(bonuses.extraChoices>0)setBonuses((b:any)=>({...b,extraChoices:Math.max(0,b.extraChoices-1)}));
   setQuest(sample(QUESTS,1)[0]);setQuestDone(false);
@@ -225,14 +229,18 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   const board=boardRef.current;if(!board)return;const rect=board.getBoundingClientRect();
   const inside=clientX>=rect.left&&clientX<=rect.right&&clientY>=rect.top&&clientY<=rect.bottom;
   if(!inside){setToast(c.choose);setTimeout(()=>setToast(""),1400);return}
-  if(tile.left!==lastRight){setToast(c.invalid);setTimeout(()=>setToast(""),1800);return}
-  const x=Math.max(4,Math.min(rect.width-80,clientX-rect.left-38));
-  const y=Math.max(6,Math.min(rect.height-38,clientY-rect.top-19));
-  const rotate=tile.turn?90:[-4,-2,0,2,4][placed.length%5];
-  const direction: "right"|"up"|"down" = tile.turn ? (clientY-rect.top < rect.height*.48 ? "up" : "down") : "right";
-  const islands=[{x:.72,y:.20},{x:.28,y:.51},{x:.70,y:.80}];
-  const nearIsland=islands.some(i=>Math.hypot((clientX-rect.left)/rect.width-i.x,(clientY-rect.top)/rect.height-i.y)<.13);
-  const pending={tile,x,y,rotate,direction};
+  if(placed.length>0&&tile.left!==lastRight){setToast(c.invalid);setTimeout(()=>setToast(""),1800);return}
+  const w=74,h=29;
+  const anchor=lastPlaced?{x:lastPlaced.x,y:lastPlaced.y}:{x:18,y:Math.round(rect.height/2-h/2)};
+  let x=anchor.x,y=anchor.y,rotate=0;
+  if(routeDirection==="right"){x=anchor.x+w+4; y=anchor.y; rotate=0}
+  if(routeDirection==="left"){x=anchor.x-w-4; y=anchor.y; rotate=0}
+  if(routeDirection==="down"){x=anchor.x; y=anchor.y+h+4; rotate=90}
+  if(routeDirection==="up"){x=anchor.x; y=anchor.y-h-4; rotate=90}
+  x=Math.max(4,Math.min(rect.width-w-4,x)); y=Math.max(6,Math.min(rect.height-h-6,y));
+  const islands=[{x:.12,y:.16},{x:.38,y:.12},{x:.68,y:.14},{x:.88,y:.28},{x:.22,y:.38},{x:.55,y:.38},{x:.80,y:.50},{x:.12,y:.68},{x:.42,y:.72},{x:.72,y:.80}];
+  const nearIsland=islands.some(i=>Math.hypot((clientX-rect.left)/rect.width-i.x,(clientY-rect.top)/rect.height-i.y)<.09);
+  const pending={tile,x,y,rotate,direction:routeDirection};
   if(nearIsland){
    setPendingDrop(pending);
    setImpulse(sample(IMPULSE_QUESTIONS,1)[0]);
@@ -294,9 +302,8 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
        <div ref={boardRef} className="relative mt-4 h-[430px] overflow-hidden rounded-[28px] border border-white/60 bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,.48),transparent_24%),linear-gradient(180deg,rgba(255,255,255,.16),rgba(27,128,145,.18))] shadow-[inset_0_0_45px_rgba(255,255,255,.22)]">
         <motion.div animate={{x:[-16,16,-16]}} transition={{duration:8,repeat:Infinity,ease:"easeInOut"}} className="absolute -left-10 top-7 h-10 w-[120%] rounded-[50%] border-t border-white/40 opacity-70"/>
         <motion.div animate={{x:[14,-14,14]}} transition={{duration:10,repeat:Infinity,ease:"easeInOut"}} className="absolute -left-10 top-32 h-12 w-[120%] rounded-[50%] border-t border-white/30 opacity-70"/>
-        <div className="absolute left-[72%] top-[20%] flex h-14 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)] text-center shadow-[0_7px_14px_rgba(38,103,116,.20)]"><span className="text-[7px] font-black uppercase tracking-[.12em] text-[#6d5b3d]">Impulso</span></div>
-        <div className="absolute left-[28%] top-[51%] flex h-14 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)] text-center shadow-[0_7px_14px_rgba(38,103,116,.20)]"><span className="text-[7px] font-black uppercase tracking-[.12em] text-[#6d5b3d]">Impulso</span></div>
-        <div className="absolute left-[70%] top-[80%] flex h-14 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)] text-center shadow-[0_7px_14px_rgba(38,103,116,.20)]"><span className="text-[7px] font-black uppercase tracking-[.12em] text-[#6d5b3d]">Impulso</span></div>
+        {[{x:12,y:16},{x:38,y:12},{x:68,y:14},{x:88,y:28},{x:22,y:38},{x:55,y:38},{x:80,y:50},{x:12,y:68},{x:42,y:72},{x:72,y:80}].map((island,index)=><div key={index} className="absolute flex h-12 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)] text-center shadow-[0_7px_14px_rgba(38,103,116,.20)]" style={{left:`${island.x}%`,top:`${island.y}%`}}><span className="text-[6px] font-black uppercase tracking-[.10em] text-[#6d5b3d]">Impulso {index+1}</span></div>)}
+        <div className="absolute right-3 top-3 z-20 rounded-[18px] border border-white/70 bg-white/65 p-1.5 shadow-sm backdrop-blur"><p className="px-1 pb-1 text-center text-[7px] font-black uppercase tracking-[.12em] text-[#39727b]">Rota</p><div className="grid grid-cols-3 gap-1"><span/><button onClick={()=>setRouteDirection("up")} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="up"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>↑</button><span/><button onClick={()=>setRouteDirection("left")} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="left"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>←</button><button onClick={()=>setRouteDirection("down")} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="down"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>↓</button><button onClick={()=>setRouteDirection("right")} className={`h-7 w-7 rounded-lg font-black ${routeDirection==="right"?"bg-[#286f7b] text-white":"bg-white/80 text-[#286f7b]"}`}>→</button></div></div>
         <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[9px] font-black text-[#286b76] backdrop-blur">{c.start}: {placed[0]?.tile.left}</div>
         {placed.map((p,i)=><motion.div key={p.tile.id+"-"+i} initial={{opacity:0,scale:.88}} animate={{opacity:1,scale:1,y:[0,i%2?2:-2,0]}} transition={{opacity:{duration:.2},scale:{duration:.2},y:{duration:4+i*.15,repeat:Infinity}}} style={{position:"absolute",left:p.x,top:p.y,rotate:p.rotate}}><DominoPiece tile={p.tile} compact/></motion.div>)}
        </div>

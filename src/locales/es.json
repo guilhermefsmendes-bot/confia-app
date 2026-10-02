@@ -1630,7 +1630,19 @@
     "mountainSummit": "Cima",
     "mountainHint": "Completa un objetivo para subir un poco más.",
     "mountainSummitTitle": "Has llegado a la cima",
-    "mountainSummitHint": "No se trataba de hacerlo todo. Se trataba de seguir subiendo."
+    "mountainSummitHint": "No se trataba de hacerlo todo. Se trataba de seguir subiendo.",
+    "graduationTitle": "Tu graduación",
+    "graduationHint": "5 objetivos completados = 1 día conquistado",
+    "graduationDays": "días",
+    "climberChoiceTitle": "¿Quién subirá contigo?",
+    "climberChoiceHint": "Elige tu alpinista. Puedes cambiarlo más adelante.",
+    "climberMale": "Alpinista",
+    "climberFemale": "Alpinista",
+    "climberContinue": "Continuar",
+    "climberMaleAlt": "Masculino",
+    "climberFemaleAlt": "Femenino",
+    "climberDay": "día",
+    "climberDays": "días"
   },
   "weeklyGoalPremium": {
     "pathEyebrow": "Tu semana",

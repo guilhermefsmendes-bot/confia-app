@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { House, Wind, Target, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -7,7 +8,7 @@ type Props = {
   hasUnreadCommunityMessage?: boolean;
 };
 
-export function MainNavigation({
+export const MainNavigation = memo(function MainNavigation({
   currentTab,
   onNavigate,
   hasUnreadCommunityMessage = false
@@ -53,4 +54,4 @@ export function MainNavigation({
       </div>
     </footer>
   );
-}
+});

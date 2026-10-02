@@ -93,7 +93,7 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
 
   if (completed) {
     return (
-      <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-5">
+      <div className="flex min-h-full items-center justify-center px-0">
         <div className="w-full max-w-md rounded-3xl bg-white/90 p-8 text-center shadow-xl backdrop-blur">
           <div className="mb-4 text-5xl">🌱</div>
 
@@ -134,7 +134,7 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-5 py-8">
+    <div className="flex min-h-full items-center justify-center px-0 py-2">
       <div className="w-full max-w-md rounded-3xl bg-white/90 p-6 shadow-xl backdrop-blur">
 
         <div className="text-center">

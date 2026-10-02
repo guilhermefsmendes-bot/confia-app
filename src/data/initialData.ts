@@ -392,7 +392,12 @@ const OBJECTIVES_LIBRARY: Objective[] = [
 ];
 
 
-const daySeed = Math.floor(Date.now() / 86400000);
+function getLocalCalendarDate(date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return year + "-" + month + "-" + day;
+}
 
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000;
@@ -400,23 +405,27 @@ function seededRandom(seed: number) {
 }
 
 
-const dailyObjectives = [...OBJECTIVES_LIBRARY];
-
-dailyObjectives.sort((a, b) => {
-  const ra = seededRandom(
-    daySeed + a.id.split("").reduce((s, c) => s + c.charCodeAt(0), 0)
+export function getDailyObjectives(date = new Date()): Objective[] {
+  const dateKey = getLocalCalendarDate(date);
+  const daySeed = Array.from(dateKey).reduce(
+    (sum, char, index) => sum + char.charCodeAt(0) * (index + 1),
+    0
   );
+  const dailyObjectives = [...OBJECTIVES_LIBRARY];
 
-  const rb = seededRandom(
-    daySeed + b.id.split("").reduce((s, c) => s + c.charCodeAt(0), 0)
-  );
+  dailyObjectives.sort((a, b) => {
+    const hashA = a.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    const hashB = b.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return seededRandom(daySeed + hashA) - seededRandom(daySeed + hashB);
+  });
 
-  return ra - rb;
-});
+  return dailyObjectives.slice(0, 5).map(objective => ({
+    ...objective,
+    completed: false,
+  }));
+}
 
-
-export const INITIAL_OBJECTIVES: Objective[] =
-  dailyObjectives.slice(0, 5);
+export const INITIAL_OBJECTIVES: Objective[] = getDailyObjectives(new Date());
 
 
 

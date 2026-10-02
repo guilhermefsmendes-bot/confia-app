@@ -865,106 +865,6 @@ const formatTime = (seconds: number) => {
         </p>
       </div>
 
-      {/* CONFIA — 5 MINUTOS PARA MIM */}
-      <section className="w-full overflow-hidden rounded-[28px] border border-[#B85F48]/20 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FFFDFC] shadow-[0_10px_28px_rgba(92,64,52,0.045)]">
-        <div className="p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#F3E3DC] text-lg">
-              ✨
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">
-                {t("fiveMinutes.eyebrow")}
-              </p>
-
-              <h3 className="mt-1 text-base font-black text-[#2F2926]">
-                {t("fiveMinutes.title")}
-              </h3>
-
-              <p className="mt-1 text-xs font-medium leading-relaxed text-slate-500">
-                {t("fiveMinutes.description")}
-              </p>
-            </div>
-          </div>
-
-          <p className="mt-5 text-xs font-black text-[#2F2926]">
-            {t("fiveMinutes.howAreYou")}
-          </p>
-
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            {([
-              ["anxious", "😰"],
-              ["busyMind", "🤯"],
-              ["low", "😔"],
-              ["irritated", "😤"],
-              ["tired", "😴"],
-              ["disconnected", "🫥"],
-              ["pause", "🙂"],
-            ] as const).map(([mood, emoji]) => (
-              <button
-                key={mood}
-                type="button"
-                disabled={isActive}
-                onClick={() => selectFiveMinuteMood(mood)}
-                aria-pressed={fiveMinuteMood === mood}
-                className={`min-h-[54px] rounded-[18px] border px-3 py-2.5 text-left transition-all ${
-                  fiveMinuteMood === mood
-                    ? "border-[#B85F48]/45 bg-[#F8E8DF] shadow-sm"
-                    : "border-[#E8DDD7]/75 bg-white"
-                } ${
-                  isActive
-                    ? "cursor-default opacity-70"
-                    : "active:scale-[0.98]"
-                }`}
-              >
-                <span className="mr-1.5">
-                  {emoji}
-                </span>
-
-                <span className="text-[11px] font-bold text-[#5F504A]">
-                  {t(`fiveMinutes.moods.${mood}`)}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {fiveMinuteMood && (
-            <>
-              <p className="mt-5 text-xs font-black text-[#2F2926]">{t("fiveMinutes.needQuestion")}</p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                {(["calm","strength","company","clarity","pause"] as HugNeed[]).map(need => (
-                  <button key={need} type="button" disabled={isActive} onClick={() => setHugNeed(need)} aria-pressed={hugNeed===need} className={`min-h-[48px] rounded-[16px] border px-3 py-2 text-[11px] font-bold transition ${hugNeed===need ? "border-[#B85F48]/45 bg-[#F8E8DF] text-[#5F504A]" : "border-[#E8DDD7]/75 bg-white text-[#6F625D]"}`}>{t(`fiveMinutes.needs.${need}`)}</button>
-                ))}
-              </div>
-              <p className="mt-5 text-xs font-black text-[#2F2926]">{t("fiveMinutes.toneQuestion")}</p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                {(["warm","encouraging","reflective","quiet"] as HugTone[]).map(tone => (
-                  <button key={tone} type="button" disabled={isActive} onClick={() => setHugTone(tone)} aria-pressed={hugTone===tone} className={`min-h-[48px] rounded-[16px] border px-3 py-2 text-[11px] font-bold transition ${hugTone===tone ? "border-[#B85F48]/45 bg-[#F8E8DF] text-[#5F504A]" : "border-[#E8DDD7]/75 bg-white text-[#6F625D]"}`}>{t(`fiveMinutes.tones.${tone}`)}</button>
-                ))}
-              </div>
-            </>
-          )}
-
-          {hugQuestionnaireReady && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-4 rounded-[20px] border border-[#B85F48]/20 bg-[#FFF8F4] px-4 py-3.5"
-            >
-              <p className="text-[9px] font-black uppercase tracking-[0.15em] text-[#934A38]">
-                {isActive
-                  ? t("fiveMinutes.now")
-                  : t("fiveMinutes.prepared")}
-              </p>
-
-              <p className="mt-1.5 text-sm font-bold leading-relaxed text-[#2F2926]">
-                {adaptiveHugMessage}
-              </p>
-            </motion.div>
-          )}
-        </div>
-      </section>
 
       {/* Main Visual breathing circle and Timer */}
       <div className="relative flex items-center justify-center w-64 h-64 my-4 bg-[#F3E3DC]/40 rounded-full border border-[#B85F48]/15 shadow-inner">
@@ -1057,68 +957,39 @@ key={phraseIdx}
           </motion.div>
         </AnimatePresence>
       </div>
-{/* Sons — continuam sempre opcionais */}
-<div className="w-full bg-[#F8F1EA] rounded-[24px] p-4 border border-[#B85F48]/20 mb-4">
-
-  <div className="flex items-center justify-between gap-3">
-    <div>
-      <p className="text-xs font-black text-[#2F2926]">
-        🎧 {t("fiveMinutes.soundTitle")}
-      </p>
-
-      <p className="mt-1 text-[10px] font-medium text-slate-500">
-        {t("fiveMinutes.soundDescription")}
-      </p>
-    </div>
-
-    <button
-      type="button"
-      disabled={isActive}
-      onClick={() =>
-        setSoundEnabled(current => !current)
-      }
-      aria-pressed={soundEnabled}
-      className={`shrink-0 rounded-full border px-3 py-2 text-[10px] font-black transition ${
-        soundEnabled
-          ? "border-[#B85F48]/35 bg-[#934A38] text-white"
-          : "border-[#DCCBC3] bg-white text-[#8B6B60]"
-      }`}
-    >
-      {soundEnabled
-        ? t("fiveMinutes.soundOn")
-        : t("fiveMinutes.soundOff")}
-    </button>
-  </div>
-
-  {soundEnabled && (
-    <div className="mt-3">
-      <select
-        value={selectedSound}
-        disabled={isActive}
-        onChange={(e) =>
-          setSelectedSound(e.target.value)
-        }
-        className="w-full rounded-xl border border-[#B85F48]/30 bg-white px-3 py-2.5 text-sm"
-      >
-        <option value="rain">
-          {t("soundRain")}
-        </option>
-
-        <option value="forest">
-          {t("soundForest")}
-        </option>
-
-        <option value="ocean">
-          {t("soundOcean")}
-        </option>
-
-        <option value="white-noise">
-          {t("soundWhiteNoise")}
-        </option>
-      </select>
-    </div>
-  )}
-</div>
+      {/* Sons — continuam sempre opcionais */}
+      <div className="w-full rounded-[24px] border border-[#B85F48]/20 bg-[#F8F1EA] p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-black text-[#2F2926]">🎧 {t("fiveMinutes.soundTitle")}</p>
+            <p className="mt-1 text-[10px] font-medium text-slate-500">{t("fiveMinutes.soundDescription")}</p>
+          </div>
+          <button
+            type="button"
+            disabled={isActive}
+            onClick={() => setSoundEnabled(current => !current)}
+            aria-pressed={soundEnabled}
+            className={`shrink-0 rounded-full border px-3 py-2 text-[10px] font-black transition ${soundEnabled ? "border-[#B85F48]/35 bg-[#934A38] text-white" : "border-[#DCCBC3] bg-white text-[#8B6B60]"}`}
+          >
+            {soundEnabled ? t("fiveMinutes.soundOn") : t("fiveMinutes.soundOff")}
+          </button>
+        </div>
+        {soundEnabled && (
+          <div className="mt-3">
+            <select
+              value={selectedSound}
+              disabled={isActive}
+              onChange={e => setSelectedSound(e.target.value)}
+              className="w-full rounded-xl border border-[#B85F48]/30 bg-white px-3 py-2.5 text-sm"
+            >
+              <option value="rain">{t("soundRain")}</option>
+              <option value="forest">{t("soundForest")}</option>
+              <option value="ocean">{t("soundOcean")}</option>
+              <option value="white-noise">{t("soundWhiteNoise")}</option>
+            </select>
+          </div>
+        )}
+      </div>
 
       {/* Abraço Premium — Rabisco */}
       <section className="w-full overflow-hidden rounded-[28px] border border-[#B85F48]/20 bg-gradient-to-br from-[#FFF9F5] via-white to-[#FFFDFC]">
@@ -1421,7 +1292,7 @@ key={phraseIdx}
 
         <button type="button"
           onClick={handleToggle}
-          disabled={!hugQuestionnaireReady && !isActive}
+          disabled={false}
           className={`px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider font-display shadow-lg transition-all flex items-center gap-2 cursor-pointer ${
             isActive
               ? 'bg-[#B85F48] hover:bg-[#D59375] text-white shadow-[#B85F48]/25'

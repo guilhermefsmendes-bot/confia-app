@@ -1,0 +1,1121 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { ChevronRight, LockKeyhole, RotateCcw, Sparkles, Star, Waves } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
+type Section = "sky" | "sand" | "sea";
+type Capsule = { message:string; buriedAt:string; opensAt:string; cycle:number; feedback?:string };
+type WeeklyReflection = { at:string; message:string; guess:string; feedback:string };
+type MonthTracker = { startedAt:string; dueAt:string; summary?:string; comparedAt?:string; treasure?:string };
+type MonthlyTreasure = { date:string; text:string };
+type Tone = "heavy" | "neutral" | "light";
+type Domino = { id:string; left:string; right:string; tone:Tone; turn?:boolean };
+type Direction="right"|"left"|"up"|"down";
+type PlacedDomino = { tile:Domino; x:number; y:number; rotate:number; direction?:Direction; connectionExplanation?:string };
+type Quest = { id:string; label:keyof typeof COPY.pt; reward:"extra-choice"|"reroll"|"hint"; icon:string };
+type ImpulseQuestion = {id:string;question:string;answers:string[];correct:number;explanation:string;locale?:string;variant?:string};
+type Junction = {slot:number;left:string;right:string;explanation:string};
+type JunctionPair = {slot:number;left:string;right:string};
+type HorizonProgress = {placed:PlacedDomino[];hand?:Domino[];bonuses:{extraChoices:number;rerolls:number;hints:number};unlockedIslands:number[];junctions:Junction[];treasureAnswer:string;quest:Quest;questDone:boolean};
+type TreasureHistoryEntry = {date:string; reflection:string; answer:string; words:string[]};
+type IslandReflection = {island:number; words:string[]; text:string; at:string};
+
+const CAPSULE_KEY="confia_horizon_capsule_v1";
+const WEEKLY_LOG_KEY="confia_horizon_weekly_reflections_v1";
+const MONTH_TRACKER_KEY="confia_horizon_month_tracker_v1";
+const MONTH_TREASURES_KEY="confia_horizon_month_treasures_v1";
+const DOMINO_KEY="confia_horizon_domino_v2";
+const BONUS_KEY="confia_horizon_bonuses_v1";
+const HORIZON_INTRO_KEY="confia_horizon_intro_v2";
+const HORIZON_JUNCTIONS_KEY="confia_horizon_junctions_v1";
+const HORIZON_PROGRESS_KEY="confia_horizon_progress_v1";
+const HORIZON_HAND_KEY="confia_horizon_word_hand_v1";
+const HORIZON_TREASURE_HISTORY_KEY="confia_horizon_treasure_history_v1";
+const HORIZON_ISLAND_REFLECTIONS_KEY="confia_horizon_island_reflections_v1";
+const HORIZON_QUESTION_HISTORY_KEY="confia_horizon_question_history_v1";
+const COMMUNITY_EVENT="confia:community-post-created";
+
+const COPY={
+  pt:{horizon:"O teu horizonte",horizonSub:"Céu, areia e mar — três espaços para observar, guardar e transformar o que sentes.",sky:"Céu",sand:"Areia",sea:"Mar da serenidade",skySub:"O que sentes também pode ganhar forma.",sandSub:"Guarda uma carta no teu baú e reencontra-a mais tarde com novos olhos.",seaSub:"Liga emoções, pensamentos e ações. Pequenas escolhas podem mudar o rumo.",capsule:"A tua cápsula do tempo",bury:"Enterrar carta por 7 dias",placeholder:"Escreve algo que gostarias de reencontrar daqui a uma semana…",buried:"O teu baú abre em",open:"Abrir o baú",guess:"Antes de abrir, queres tentar adivinhar o que escreveste há 7 dias?",guessPlaceholder:"Escreve aqui o que pensas que deixaste na cápsula…",reveal:"Agora compara o que imaginavas com aquilo que realmente escreveste.",remembered:"O que imaginavas",actual:"O que escreveste",feedback:"O que dirias hoje ao teu eu daquela semana?",rebury:"Responder e voltar a enterrar por 7 dias",monthTitle:"O teu mês",monthPrompt:"Antes de veres os teus registos: como resumirias este último mês?",monthPlaceholder:"Escreve uma frase ou pequeno resumo do mês…",monthCompare:"Comparar com as minhas semanas",monthYourSummary:"O teu resumo do mês",monthWeekly:"O que foste dizendo semana a semana",monthCombined:"Somatório dos teus feedbacks",monthClose:"Fechar mês e começar novo ciclo",monthTreasure:"O que fica deste mês?",monthTreasurePlaceholder:"Escreve uma frase que queres levar contigo deste mês…",monthTreasureSave:"Guardar e começar novo ciclo",monthWaiting:"Perspetiva mensal",monthIn:"Revisão mensal em",quest:"Iniciativa opcional",choose:"Arrasta uma palavra para a água",needWord:"Outra palavra",needWordTitle:"Escolhe outra palavra",needWordPrompt:"Escreve uma palavra que, para ti, faça sentido vir agora depois da palavra anterior.",needWordPlaceholder:"Escreve uma palavra…",needWordFind:"Usar esta palavra",needWordNoMatch:"Podes usar livremente esta palavra.",needWordMoment:"Porque é que esta palavra faz sentido agora?",needWordMomentPlaceholder:"Explica com as tuas palavras porque escolheste esta palavra…",needWordSave:"Guardar ligação e colocar no caminho",needWordSaved:"A tua ligação ficou guardada no caminho.",bonus:"Vantagem desbloqueada",restart:"Novo caminho",resumeTitle:"Continuar o teu percurso?",resumeText:"Encontrámos um percurso que ficou guardado. Podes continuar exatamente onde paraste ou começar um percurso novo.",continueJourney:"Continuar",startJourney:"Começar percurso",savedProgress:"Percurso guardado",hint:"Dica",community:"Partilhar algo na Comunidade",water:"Beber um copo de água",pause:"Fazer 30 segundos de pausa",walk:"Caminhar 2 minutos",breathe:"Fazer 5 respirações lentas",stretch:"Alongar ombros e pescoço",window:"Olhar pela janela durante 30 segundos",invalid:"Agora podes escolher livremente.",dragTip:"Junta palavras que, naquele momento, sintas que fazem sentido estar juntas. Não há respostas certas ou erradas.",start:"Começa por aqui",introTitle:"Uma nova forma de atravessar o mar",introText:"Cada peça tem uma palavra. A tua tarefa é ir juntando palavras que, naquele momento, sintas que fazem sentido estar juntas. Não existem combinações certas ou erradas: a ligação é tua.",introExample:"Por exemplo: MEDO → PESQUISAR. Talvez sintas que, quando aparece o medo, surge também a vontade de pesquisar. Outra pessoa poderia escolher MEDO → PAUSA. As duas ligações são válidas.",introExplain:"Podes escolher uma palavra que já esteja na tua carteira. Se quiseres uma palavra que não está lá, escreve-a na opção “Outra palavra” e explica porque é que faz sentido agora. No fim, a CONFIA olha para o caminho que construíste e devolve-te uma ponderação.",introButton:"Percebi. Começar a viagem",junctionTitle:"Encontra a tua ligação",junctionStep:"Junção {step} de 3",junctionPrompt:"O que pode ligar estes dois conceitos para ti?",junctionExplain:"Escolhe a ligação que fizer sentido para ti. Não há resposta certa.",junctionPlaceholder:"Explica com as tuas palavras porque os ligaste…",junctionSave:"Guardar ligação",junctionSaved:"Ligação guardada.",treasureLabel:"Ilha Tesouro",treasureTitle:"Encontraste o baú",treasureSubtitle:"A tua viagem deixou três ligações para trás.",treasureIntro:"A CONFIA reuniu as três junções que construíste. Em vez de te dar uma conclusão, deixa-te uma ponderação para veres se reconheces algum fio no teu próprio caminho.",treasureThread:"Um possível fio no teu caminho",treasureQuestion:"Isto faz sentido para ti?",treasureClose:"Guardar esta ponderação",treasureHistory:"Histórico dos tesouros",treasureHistoryPrompt:"Rever os teus baús e acompanhar a evolução do teu pensamento.",treasureHistoryEmpty:"Ainda não tens tesouros guardados.",treasureHistoryClose:"Fechar histórico",treasureEmpty:"Completa as três junções para abrir a ponderação final.",islandReflectionTitle:"Antes de continuares",islandReflectionPrompt:"Escolheste estas três palavras. O que te fez associá-las?",islandReflectionPlaceholder:"Escreve aqui o que liga estas três palavras para ti…",islandReflectionContinue:"Guardar e continuar",islandReflectionWords:"As tuas três palavras",questionTitle:"Uma pausa para refletir",questionSubtitle:"Agora responde à pergunta para continuares a viagem.",questionRetry:"Pensa de novo nesta pergunta.",questionCorrect:"✓ Resposta certa. A tua peça pode continuar o caminho.",treasureReactive:"O que o teu caminho parece estar a dizer",treasureReactiveIntro:"A CONFIA reuniu as palavras que escolheste e aquilo que foste escrevendo entre ilhas.",treasureReactiveEmpty:"Ainda não há texto suficiente para encontrar um fio no teu percurso.",treasureReactivePatterns:"Ao longo das tuas reflexões, aparecem com frequência ideias ligadas a: {words}.",treasureReactivePath:"O teu percurso passou por {count} ilhas. As tuas palavras mostram não só o que escolheste, mas também o significado que foste dando a essas escolhas."},
+  en:{horizon:"Your horizon",horizonSub:"Sky, sand and sea — three spaces to observe, keep and transform what you feel.",sky:"Sky",sand:"Sand",sea:"Sea of serenity",skySub:"What you feel can also take shape.",sandSub:"Keep a letter in your chest and meet it again later with fresh eyes.",seaSub:"Connect emotions, thoughts and actions. Small choices can change the path.",capsule:"Your time capsule",bury:"Bury letter for 7 days",placeholder:"Write something you would like to meet again in a week…",buried:"Your chest opens in",open:"Open chest",guess:"Before opening, want to guess what you wrote 7 days ago?",guessPlaceholder:"Write what you think you left in the capsule…",reveal:"Now compare what you imagined with what you actually wrote.",remembered:"What you imagined",actual:"What you wrote",feedback:"What would you tell your past self from that week today?",rebury:"Reply and bury again for 7 days",monthTitle:"Your month",monthPrompt:"Before seeing your records: how would you sum up this past month?",monthPlaceholder:"Write a sentence or short summary of the month…",monthCompare:"Compare with my weeks",monthYourSummary:"Your monthly summary",monthWeekly:"What you said week by week",monthCombined:"Combined weekly feedback",monthClose:"Close month and start a new cycle",monthTreasure:"What stays from this month?",monthTreasurePlaceholder:"Write one sentence you want to carry with you from this month…",monthTreasureSave:"Save and start a new cycle",monthWaiting:"Monthly perspective",monthIn:"Monthly review in",quest:"Optional initiative",choose:"Drag a word onto the water",needWord:"Another word",needWordTitle:"Choose another word",needWordPrompt:"Write a word that, for you, makes sense to come next after the previous word.",needWordPlaceholder:"Write a word…",needWordFind:"Use this word",needWordNoMatch:"You can freely use this word.",needWordMoment:"Why does this word make sense now?",needWordMomentPlaceholder:"Explain in your own words why you chose this word…",needWordSave:"Save connection and place on the path",needWordSaved:"Your connection has been saved to the path.",bonus:"Advantage unlocked",restart:"New path",resumeTitle:"Continue your journey?",resumeText:"We found a saved journey. You can continue exactly where you stopped or start a new journey.",continueJourney:"Continue",startJourney:"Start journey",savedProgress:"Saved journey",hint:"Hint",community:"Share something in Community",water:"Drink a glass of water",pause:"Take a 30-second pause",walk:"Walk for 2 minutes",breathe:"Take 5 slow breaths",stretch:"Stretch shoulders and neck",window:"Look out a window for 30 seconds",invalid:"You can choose freely now.",dragTip:"The tiles no longer need matching words. Look for a connection that makes sense to you.",start:"Start here",introTitle:"A new way to cross the sea",introText:"Each piece has one word. Your task is to join words that, in that moment, feel meaningful to place together. There are no right or wrong combinations: the connection is yours.",introExample:"For example: FEAR → RESEARCH. You might feel that when fear appears, the urge to research appears too. Someone else might choose FEAR → PAUSE. Both connections are valid.",introExplain:"You can choose a word already in your hand. If you want a word that is not there, use “Another word”, write it, and explain why it makes sense now. At the end, CONFIA looks at the path you built and offers a reflection.",introButton:"I understand. Start the journey",junctionTitle:"Find your connection",junctionStep:"Connection {step} of 3",junctionPrompt:"What could connect these two concepts for you?",junctionExplain:"Choose the connection that makes sense to you. There is no right answer.",junctionPlaceholder:"Explain in your own words why you connected them…",junctionSave:"Save connection",junctionSaved:"Connection saved.",treasureLabel:"Treasure Island",treasureTitle:"You found the chest",treasureSubtitle:"Your journey left three connections behind.",treasureIntro:"CONFIA gathered the three connections you built. Instead of giving you a conclusion, it leaves you with a reflection to see whether you recognise a thread in your own path.",treasureThread:"A possible thread in your path",treasureQuestion:"Does this make sense to you?",treasureClose:"Save this reflection",treasureHistory:"Treasure history",treasureHistoryPrompt:"Revisit your chests and follow how your thinking evolves.",treasureHistoryEmpty:"You do not have any saved treasures yet.",treasureHistoryClose:"Close history",treasureEmpty:"Complete the three connections to open the final reflection.",islandReflectionTitle:"Before you continue",islandReflectionPrompt:"You chose these three words. What made you connect them?",islandReflectionPlaceholder:"Write what connects these three words for you…",islandReflectionContinue:"Save and continue",islandReflectionWords:"Your three words",questionTitle:"A moment to reflect",questionSubtitle:"Now answer the question to continue your journey.",questionRetry:"Think about this question again.",questionCorrect:"✓ Correct answer. Your piece can continue the path.",treasureReactive:"What your path seems to be saying",treasureReactiveIntro:"CONFIA brought together the words you chose and what you wrote between islands.",treasureReactiveEmpty:"There is not enough text yet to find a thread in your journey.",treasureReactivePatterns:"Across your reflections, ideas often connected to: {words}.",treasureReactivePath:"Your journey crossed {count} islands. Your words show not only what you chose, but also the meaning you gave to those choices."},
+  es:{horizon:"Tu horizonte",horizonSub:"Cielo, arena y mar — tres espacios para observar, guardar y transformar lo que sientes.",sky:"Cielo",sand:"Arena",sea:"Mar de serenidad",skySub:"Lo que sientes también puede tomar forma.",sandSub:"Guarda una carta en tu cofre y vuelve a encontrarla más tarde con otra mirada.",seaSub:"Conecta emociones, pensamientos y acciones. Pequeñas elecciones pueden cambiar el rumbo.",capsule:"Tu cápsula del tiempo",bury:"Enterrar carta 7 días",placeholder:"Escribe algo que quieras reencontrar dentro de una semana…",buried:"Tu cofre se abre en",open:"Abrir el cofre",guess:"Antes de abrir, ¿quieres adivinar qué escribiste hace 7 días?",guessPlaceholder:"Escribe lo que crees que dejaste en la cápsula…",reveal:"Ahora compara lo que imaginabas con lo que realmente escribiste.",remembered:"Lo que imaginabas",actual:"Lo que escribiste",feedback:"¿Qué le dirías hoy a tu yo de aquella semana?",rebury:"Responder y volver a enterrar 7 días",quest:"Iniciativa opcional",choose:"Arrastra una palabra al agua",needWord:"Otra palabra",needWordTitle:"Elige otra palabra",needWordPrompt:"Escribe una palabra que, para ti, tenga sentido poner ahora después de la palabra anterior.",needWordPlaceholder:"Escribe una palabra…",needWordFind:"Usar esta palabra",needWordNoMatch:"Puedes usar esta palabra libremente.",needWordMoment:"¿Por qué tiene sentido esta palabra ahora?",needWordMomentPlaceholder:"Explica con tus palabras por qué has elegido esta palabra…",needWordSave:"Guardar conexión y colocar en el camino",needWordSaved:"Tu conexión ha quedado guardada en el camino.",bonus:"Ventaja desbloqueada",restart:"Nuevo camino",resumeTitle:"¿Continuar tu recorrido?",resumeText:"Encontramos un recorrido guardado. Puedes continuar exactamente donde lo dejaste o empezar uno nuevo.",continueJourney:"Continuar",startJourney:"Empezar recorrido",savedProgress:"Recorrido guardado",hint:"Pista",community:"Compartir algo en Comunidad",water:"Beber un vaso de agua",pause:"Hacer una pausa de 30 segundos",walk:"Caminar 2 minutos",breathe:"Hacer 5 respiraciones lentas",stretch:"Estirar hombros y cuello",window:"Mirar por la ventana 30 segundos",invalid:"Ahora puedes elegir libremente.",dragTip:"Las fichas ya no tienen que compartir palabras. Busca una conexión que tenga sentido para ti.",start:"Empieza aquí",introTitle:"Una nueva forma de atravesar el mar",introText:"Cada pieza tiene una palabra. Tu tarea es ir uniendo palabras que, en ese momento, sientas que tiene sentido poner juntas. No existen combinaciones correctas o incorrectas: la conexión es tuya.",introExample:"Por ejemplo: MIEDO → INVESTIGAR. Puede que sientas que, cuando aparece el miedo, también aparece la necesidad de investigar. Otra persona podría elegir MIEDO → PAUSA. Las dos conexiones son válidas.",introExplain:"Puedes elegir una palabra que ya esté en tu mano. Si quieres una palabra que no está allí, usa “Otra palabra”, escríbela y explica por qué tiene sentido ahora. Al final, CONFIA mira el camino que construiste y te devuelve una reflexión.",introButton:"Lo entiendo. Empezar el viaje",junctionTitle:"Encuentra tu conexión",junctionStep:"Conexión {step} de 3",junctionPrompt:"¿Qué puede conectar estos dos conceptos para ti?",junctionExplain:"Elige la conexión que tenga sentido para ti. No hay una respuesta correcta.",junctionPlaceholder:"Explica con tus palabras por qué los has conectado…",junctionSave:"Guardar conexión",junctionSaved:"Conexión guardada.",treasureLabel:"Isla del Tesoro",treasureTitle:"Has encontrado el cofre",treasureSubtitle:"Tu viaje dejó tres conexiones atrás.",treasureIntro:"CONFIA reunió las tres conexiones que construiste. En lugar de darte una conclusión, te deja una reflexión para que veas si reconoces algún hilo en tu propio camino.",treasureThread:"Un posible hilo en tu camino",treasureQuestion:"¿Tiene sentido para ti?",treasureClose:"Guardar esta reflexión",treasureHistory:"Historial de tesoros",treasureHistoryPrompt:"Revisa tus cofres y observa cómo evoluciona tu forma de pensar.",treasureHistoryEmpty:"Todavía no tienes tesoros guardados.",treasureHistoryClose:"Cerrar historial",treasureEmpty:"Completa las tres conexiones para abrir la reflexión final.",islandReflectionTitle:"Antes de continuar",islandReflectionPrompt:"Has elegido estas tres palabras. ¿Qué te hizo relacionarlas?",islandReflectionPlaceholder:"Escribe qué conecta estas tres palabras para ti…",islandReflectionContinue:"Guardar y continuar",islandReflectionWords:"Tus tres palabras",questionTitle:"Una pausa para reflexionar",questionSubtitle:"Ahora responde a la pregunta para continuar el viaje.",questionRetry:"Piensa de nuevo en esta pregunta.",questionCorrect:"✓ Respuesta correcta. Tu pieza puede continuar el camino.",treasureReactive:"Lo que tu camino parece estar diciendo",treasureReactiveIntro:"CONFIA reunió las palabras que elegiste y lo que escribiste entre islas.",treasureReactiveEmpty:"Todavía no hay suficiente texto para encontrar un hilo en tu recorrido.",treasureReactivePatterns:"En tus reflexiones aparecen con frecuencia ideas relacionadas con: {words}.",treasureReactivePath:"Tu recorrido pasó por {count} islas. Tus palabras muestran no solo lo que elegiste, sino también el significado que diste a esas elecciones."},
+  fr:{horizon:"Ton horizon",horizonSub:"Ciel, sable et mer — trois espaces pour observer, garder et transformer ce que tu ressens.",sky:"Ciel",sand:"Sable",sea:"Mer de sérénité",skySub:"Ce que tu ressens peut aussi prendre forme.",sandSub:"Garde une lettre dans ton coffre et retrouve-la plus tard avec un autre regard.",seaSub:"Relie émotions, pensées et actions. De petits choix peuvent changer le chemin.",capsule:"Ta capsule temporelle",bury:"Enterrer la lettre 7 jours",placeholder:"Écris quelque chose que tu aimerais retrouver dans une semaine…",buried:"Ton coffre s'ouvre dans",open:"Ouvrir le coffre",guess:"Avant d'ouvrir, veux-tu deviner ce que tu avais écrit il y a 7 jours ?",guessPlaceholder:"Écris ce que tu penses avoir laissé dans la capsule…",reveal:"Compare maintenant ce que tu imaginais avec ce que tu avais réellement écrit.",remembered:"Ce que tu imaginais",actual:"Ce que tu avais écrit",feedback:"Que dirais-tu aujourd'hui à ton toi de cette semaine-là ?",rebury:"Répondre et enterrer à nouveau 7 jours",quest:"Initiative facultative",choose:"Fais glisser un mot sur l'eau",needWord:"Autre mot",needWordTitle:"Choisis un autre mot",needWordPrompt:"Écris un mot qui, pour toi, a du sens après le mot précédent.",needWordPlaceholder:"Écris un mot…",needWordFind:"Utiliser ce mot",needWordNoMatch:"Tu peux utiliser librement ce mot.",needWordMoment:"Pourquoi ce mot a-t-il du sens maintenant ?",needWordMomentPlaceholder:"Explique avec tes mots pourquoi tu as choisi ce mot…",needWordSave:"Enregistrer le lien et placer sur le chemin",needWordSaved:"Ton lien a été enregistré sur le chemin.",bonus:"Avantage débloqué",restart:"Nouveau chemin",resumeTitle:"Continuer ton parcours ?",resumeText:"Nous avons trouvé un parcours enregistré. Tu peux continuer exactement où tu t’es arrêté ou commencer un nouveau parcours.",continueJourney:"Continuer",startJourney:"Commencer le parcours",savedProgress:"Parcours enregistré",hint:"Indice",community:"Partager dans la Communauté",water:"Boire un verre d'eau",pause:"Faire une pause de 30 secondes",walk:"Marcher 2 minutes",breathe:"Faire 5 respirations lentes",stretch:"Étirer les épaules et le cou",window:"Regarder dehors 30 secondes",invalid:"Tu peux maintenant choisir librement.",dragTip:"Les pièces n’ont plus besoin de partager un mot. Cherche une connexion qui a du sens pour toi.",start:"Commence ici",introTitle:"Une nouvelle façon de traverser la mer",introText:"Chaque pièce contient un seul mot. Ton rôle est de relier des mots qui, à ce moment-là, te semblent avoir du sens ensemble. Il n’y a pas de combinaison correcte ou incorrecte : le lien t’appartient.",introExample:"Par exemple : PEUR → RECHERCHER. Tu peux sentir que lorsque la peur apparaît, l’envie de chercher des réponses apparaît aussi. Quelqu’un d’autre pourrait choisir PEUR → PAUSE. Les deux liens sont valables.",introExplain:"Tu peux choisir un mot déjà présent dans ta main. Si tu veux un mot qui n’y est pas, utilise « Autre mot », écris-le et explique pourquoi il a du sens maintenant. À la fin, CONFIA regarde le chemin que tu as construit et te propose une réflexion.",introButton:"J’ai compris. Commencer le voyage",junctionTitle:"Trouve ta connexion",junctionStep:"Connexion {step} sur 3",junctionPrompt:"Qu’est-ce qui peut relier ces deux concepts pour toi ?",junctionExplain:"Choisis la connexion qui a du sens pour toi. Il n’y a pas de bonne réponse.",junctionPlaceholder:"Explique avec tes mots pourquoi tu les as reliés…",junctionSave:"Enregistrer la connexion",junctionSaved:"Connexion enregistrée.",treasureLabel:"Île au trésor",treasureTitle:"Tu as trouvé le coffre",treasureSubtitle:"Ton voyage a laissé trois connexions derrière lui.",treasureIntro:"CONFIA a réuni les trois connexions que tu as construites. Au lieu de te donner une conclusion, elle te laisse une réflexion pour voir si tu reconnais un fil dans ton propre chemin.",treasureThread:"Un fil possible dans ton chemin",treasureQuestion:"Est-ce que cela a du sens pour toi ?",treasureClose:"Enregistrer cette réflexion",treasureHistory:"Historique des trésors",treasureHistoryPrompt:"Revisite tes coffres et observe l’évolution de ta façon de penser.",treasureHistoryEmpty:"Tu n’as encore aucun trésor enregistré.",treasureHistoryClose:"Fermer l’historique",treasureEmpty:"Complète les trois connexions pour ouvrir la réflexion finale.",islandReflectionTitle:"Avant de continuer",islandReflectionPrompt:"Tu as choisi ces trois mots. Qu’est-ce qui t’a amené à les relier ?",islandReflectionPlaceholder:"Écris ce qui relie ces trois mots pour toi…",islandReflectionContinue:"Enregistrer et continuer",islandReflectionWords:"Tes trois mots",questionTitle:"Un moment pour réfléchir",questionSubtitle:"Réponds maintenant à la question pour continuer ton voyage.",questionRetry:"Réfléchis encore à cette question.",questionCorrect:"✓ Bonne réponse. Ta pièce peut continuer le chemin.",treasureReactive:"Ce que ton chemin semble dire",treasureReactiveIntro:"CONFIA a réuni les mots que tu as choisis et ce que tu as écrit entre les îles.",treasureReactiveEmpty:"Il n’y a pas encore assez de texte pour trouver un fil dans ton parcours.",treasureReactivePatterns:"Dans tes réflexions, certaines idées reviennent autour de : {words}.",treasureReactivePath:"Ton parcours a traversé {count} îles. Tes mots montrent non seulement tes choix, mais aussi le sens que tu leur as donné."}
+} as const;
+
+const MONTH_COPY={
+  pt:{monthTitle:"O teu mês",monthPrompt:"Antes de veres os teus registos: como resumirias este último mês?",monthPlaceholder:"Escreve uma frase ou pequeno resumo do mês…",monthCompare:"Comparar com as minhas semanas",monthYourSummary:"O teu resumo do mês",monthWeekly:"O que foste dizendo semana a semana",monthCombined:"Somatório dos teus feedbacks",monthClose:"Fechar mês e começar novo ciclo",monthTreasure:"O que fica deste mês?",monthTreasurePlaceholder:"Escreve uma frase que queres levar contigo deste mês…",monthTreasureSave:"Guardar e começar novo ciclo",monthWaiting:"Perspetiva mensal",monthIn:"Revisão mensal em",compareQuestion:"O que mudou entre estes dois momentos?",timelineToday:"Hoje",timelineWrite:"Escrever",timelineDays:"7 dias",timelineReencounter:"Reencontrar",timelineMonth:"30 dias",timelineReview:"Rever",weekLabel:"Semana",monthLabel:"Mês",noWeekly:"Ainda não há feedbacks semanais registados neste ciclo.",evolutionText:"Ao longo deste mês, algumas ideias voltaram a aparecer nas tuas semanas. Repara nelas quando leres este percurso novamente.",cycleLabel:"Ciclo",monthlyTreasures:"Os teus tesouros mensais"},
+  en:{monthTitle:"Your month",monthPrompt:"Before seeing your records: how would you sum up this past month?",monthPlaceholder:"Write a sentence or short summary of the month…",monthCompare:"Compare with my weeks",monthYourSummary:"Your monthly summary",monthWeekly:"What you said week by week",monthCombined:"Combined weekly feedback",monthClose:"Close month and start a new cycle",monthTreasure:"What stays from this month?",monthTreasurePlaceholder:"Write one sentence you want to carry with you from this month…",monthTreasureSave:"Save and start a new cycle",monthWaiting:"Monthly perspective",monthIn:"Monthly review in",compareQuestion:"What changed between these two moments?",timelineToday:"Today",timelineWrite:"Write",timelineDays:"7 days",timelineReencounter:"Reencounter",timelineMonth:"30 days",timelineReview:"Review",weekLabel:"Week",monthLabel:"Month",noWeekly:"There are no weekly reflections recorded in this cycle yet.",evolutionText:"Throughout this month, some ideas appeared again in your weeks. Notice them when you read this journey again.",cycleLabel:"Cycle",monthlyTreasures:"Your monthly treasures"},
+  es:{monthTitle:"Tu mes",monthPrompt:"Antes de ver tus registros: ¿cómo resumirías este último mes?",monthPlaceholder:"Escribe una frase o breve resumen del mes…",monthCompare:"Comparar con mis semanas",monthYourSummary:"Tu resumen del mes",monthWeekly:"Lo que fuiste diciendo semana a semana",monthCombined:"Suma de tus comentarios",monthClose:"Cerrar mes y empezar un nuevo ciclo",monthTreasure:"¿Qué queda de este mes?",monthTreasurePlaceholder:"Escribe una frase que quieras llevar contigo de este mes…",monthTreasureSave:"Guardar y empezar un nuevo ciclo",monthWaiting:"Perspectiva mensual",monthIn:"Revisión mensual en",compareQuestion:"¿Qué cambió entre estos dos momentos?",timelineToday:"Hoy",timelineWrite:"Escribir",timelineDays:"7 días",timelineReencounter:"Reencontrar",timelineMonth:"30 días",timelineReview:"Revisar",weekLabel:"Semana",monthLabel:"Mes",noWeekly:"Todavía no hay reflexiones semanales registradas en este ciclo.",evolutionText:"A lo largo de este mes, algunas ideas volvieron a aparecer en tus semanas. Fíjate en ellas cuando vuelvas a leer este recorrido.",cycleLabel:"Ciclo",monthlyTreasures:"Tus tesoros mensuales"},
+  fr:{monthTitle:"Ton mois",monthPrompt:"Avant de voir tes notes : comment résumerais-tu ce dernier mois ?",monthPlaceholder:"Écris une phrase ou un court résumé du mois…",monthCompare:"Comparer avec mes semaines",monthYourSummary:"Ton résumé du mois",monthWeekly:"Ce que tu as dit semaine après semaine",monthCombined:"Somme de tes retours",monthClose:"Clore le mois et commencer un nouveau cycle",monthTreasure:"Qu’est-ce qui reste de ce mois ?",monthTreasurePlaceholder:"Écris une phrase que tu veux garder de ce mois…",monthTreasureSave:"Enregistrer et commencer un nouveau cycle",monthWaiting:"Perspective mensuelle",monthIn:"Bilan mensuel dans",compareQuestion:"Qu’est-ce qui a changé entre ces deux moments ?",timelineToday:"Aujourd’hui",timelineWrite:"Écrire",timelineDays:"7 jours",timelineReencounter:"Retrouver",timelineMonth:"30 jours",timelineReview:"Revoir",weekLabel:"Semaine",monthLabel:"Mois",noWeekly:"Aucune réflexion hebdomadaire n’est encore enregistrée dans ce cycle.",evolutionText:"Au fil de ce mois, certaines idées sont revenues dans tes semaines. Remarque-les lorsque tu reliras ce parcours.",cycleLabel:"Cycle",monthlyTreasures:"Tes trésors mensuels"}
+} as const;
+
+const FEELINGS=["ansioso","pensativo","amedrontado","esperançoso","cansado","confuso","determinado","inseguro","aliviado","frustrado","curioso","sensível","sobrecarregado","otimista","sozinho","grato","irritado","bloqueado","vulnerável","corajoso","nostálgico","tranquilo","impaciente","desanimado","focado","perdido","orgulhoso","tenso","sereno","incerto","motivado","exausto","preocupado","resiliente","agitado","confiante"];
+
+const BASE_DOMINOES:Domino[]=[
+{id:"stress-agitation",left:"Stress",right:"Agitação",tone:"heavy"},
+{id:"stress-worry",left:"Stress",right:"Preocupação",tone:"heavy"},
+{id:"stress-tension",left:"Stress",right:"Tensão",tone:"heavy"},
+{id:"agitation-tension",left:"Agitação",right:"Tensão",tone:"heavy"},
+{id:"agitation-rush",left:"Agitação",right:"Pressa",tone:"heavy"},
+{id:"tension-alert",left:"Tensão",right:"Alerta",tone:"heavy"},
+{id:"tension-pause",left:"Tensão",right:"Pausa",tone:"light"},
+{id:"worry-fear",left:"Preocupação",right:"Medo",tone:"heavy"},
+{id:"worry-check",left:"Preocupação",right:"Verificar",tone:"heavy"},
+{id:"worry-pause",left:"Preocupação",right:"Pausa",tone:"light"},
+{id:"fear-avoid",left:"Medo",right:"Evitar",tone:"heavy"},
+{id:"fear-observe",left:"Medo",right:"Observar",tone:"light"},
+{id:"alert-check",left:"Alerta",right:"Verificar",tone:"heavy"},
+{id:"alert-breath",left:"Alerta",right:"Respiração",tone:"light"},
+{id:"rush-overload",left:"Pressa",right:"Sobrecarga",tone:"heavy"},
+{id:"overload-fatigue",left:"Sobrecarga",right:"Cansaço",tone:"neutral"},
+{id:"overload-pause",left:"Sobrecarga",right:"Pausa",tone:"light"},
+{id:"check-relief",left:"Verificar",right:"Alívio breve",tone:"neutral"},
+{id:"check-patience",left:"Verificar",right:"Paciência",tone:"neutral"},
+{id:"check-clarity",left:"Verificar",right:"Clareza",tone:"neutral"},
+{id:"check-perspective",left:"Verificar",right:"Perspetiva",tone:"neutral"},
+{id:"check-trust",left:"Verificar",right:"Confiar",tone:"neutral"},
+{id:"check-pause",left:"Verificar",right:"Pausa",tone:"neutral"},
+{id:"check-observe",left:"Verificar",right:"Observar",tone:"neutral"},
+{id:"check-accept",left:"Verificar",right:"Aceitar",tone:"neutral"},
+{id:"check-space",left:"Verificar",right:"Espaço",tone:"neutral"},
+{id:"relief-doubt",left:"Alívio breve",right:"Dúvida",tone:"heavy"},
+{id:"doubt-check",left:"Dúvida",right:"Verificar",tone:"heavy"},
+{id:"doubt-wait",left:"Dúvida",right:"Esperar",tone:"neutral"},
+{id:"avoid-relief",left:"Evitar",right:"Alívio breve",tone:"neutral"},
+{id:"avoid-worry",left:"Evitar",right:"Preocupação",tone:"heavy"},
+{id:"pause-breath",left:"Pausa",right:"Respiração",tone:"light"},
+{id:"pause-space",left:"Pausa",right:"Espaço",tone:"light"},
+{id:"pause-observe",left:"Pausa",right:"Observar",tone:"light"},
+{id:"pause-joy",left:"Pausa",right:"Alegria",tone:"light"},
+{id:"breath-calm",left:"Respiração",right:"Calma",tone:"light"},
+{id:"breath-clarity",left:"Respiração",right:"Clareza",tone:"light"},
+{id:"observe-perspective",left:"Observar",right:"Perspetiva",tone:"light"},
+{id:"observe-accept",left:"Observar",right:"Aceitar",tone:"light"},
+{id:"space-perspective",left:"Espaço",right:"Perspetiva",tone:"light"},
+{id:"perspective-clarity",left:"Perspetiva",right:"Clareza",tone:"light"},
+{id:"clarity-action",left:"Clareza",right:"Ação",tone:"light"},
+{id:"action-confidence",left:"Ação",right:"Confiança",tone:"light"},
+{id:"confidence-courage",left:"Confiança",right:"Coragem",tone:"light"},
+{id:"courage-wellbeing",left:"Coragem",right:"Bem-estar",tone:"light"},
+{id:"calm-presence",left:"Calma",right:"Presença",tone:"light"},
+{id:"presence-balance",left:"Presença",right:"Equilíbrio",tone:"light"},
+{id:"balance-wellbeing",left:"Equilíbrio",right:"Bem-estar",tone:"light"},
+{id:"fatigue-rest",left:"Cansaço",right:"Descanso",tone:"light"},
+{id:"rest-energy",left:"Descanso",right:"Energia",tone:"light"},
+{id:"energy-action",left:"Energia",right:"Ação",tone:"light"},
+{id:"accept-calm",left:"Aceitar",right:"Calma",tone:"light"},
+{id:"wait-clarity",left:"Esperar",right:"Clareza",tone:"light"},
+
+{id:"inquietacao-antecipacao",left:"Inquietação",right:"Antecipação",tone:"heavy"},
+{id:"inquietacao-curiosidade",left:"Inquietação",right:"Curiosidade",tone:"neutral"},
+{id:"inquietacao-espaco",left:"Inquietação",right:"Espaço",tone:"light"},
+{id:"incerteza-curiosidade",left:"Incerteza",right:"Curiosidade",tone:"neutral"},
+{id:"incerteza-esperar",left:"Incerteza",right:"Esperar",tone:"light"},
+{id:"incerteza-aceitar",left:"Incerteza",right:"Aceitar",tone:"light"},
+{id:"antecipacao-pressa",left:"Antecipação",right:"Pressa",tone:"heavy"},
+{id:"antecipacao-planeamento",left:"Antecipação",right:"Planeamento",tone:"neutral"},
+{id:"antecipacao-respiracao",left:"Antecipação",right:"Respiração",tone:"light"},
+{id:"ruminacao-pensamento",left:"Ruminação",right:"Pensamento",tone:"heavy"},
+{id:"ruminacao-pausa",left:"Ruminação",right:"Pausa",tone:"light"},
+{id:"ruminacao-perspetiva",left:"Ruminação",right:"Perspetiva",tone:"light"},
+{id:"pensamento-curiosidade",left:"Pensamento",right:"Curiosidade",tone:"neutral"},
+{id:"pensamento-clareza",left:"Pensamento",right:"Clareza",tone:"light"},
+{id:"pensamento-acao",left:"Pensamento",right:"Ação",tone:"light"},
+{id:"duvida-curiosidade",left:"Dúvida",right:"Curiosidade",tone:"neutral"},
+{id:"duvida-paciencia",left:"Dúvida",right:"Paciência",tone:"light"},
+{id:"duvida-perspetiva",left:"Dúvida",right:"Perspetiva",tone:"light"},
+{id:"receio-aceitar",left:"Receio",right:"Aceitar",tone:"light"},
+{id:"receio-coragem",left:"Receio",right:"Coragem",tone:"light"},
+{id:"receio-observar",left:"Receio",right:"Observar",tone:"light"},
+{id:"nervosismo-respiracao",left:"Nervosismo",right:"Respiração",tone:"light"},
+{id:"nervosismo-pausa",left:"Nervosismo",right:"Pausa",tone:"light"},
+{id:"nervosismo-movimento",left:"Nervosismo",right:"Movimento",tone:"light"},
+{id:"frustracao-paciencia",left:"Frustração",right:"Paciência",tone:"light"},
+{id:"frustracao-aceitar",left:"Frustração",right:"Aceitar",tone:"light"},
+{id:"frustracao-acao",left:"Frustração",right:"Ação",tone:"light"},
+{id:"irritacao-escolha",left:"Irritação",right:"Escolha",tone:"neutral"},
+{id:"irritacao-pausa",left:"Irritação",right:"Pausa",tone:"light"},
+{id:"irritacao-movimento",left:"Irritação",right:"Movimento",tone:"light"},
+{id:"cansaco-limite",left:"Cansaço",right:"Limite",tone:"neutral"},
+{id:"cansaco-recuperacao",left:"Cansaço",right:"Recuperação",tone:"light"},
+{id:"cansaco-presenca",left:"Cansaço",right:"Presença",tone:"light"},
+{id:"exaustao-descanso",left:"Exaustão",right:"Descanso",tone:"light"},
+{id:"exaustao-limite",left:"Exaustão",right:"Limite",tone:"neutral"},
+{id:"exaustao-cuidado",left:"Exaustão",right:"Cuidado",tone:"light"},
+{id:"sobrecarregado-delegar",left:"Sobrecarga",right:"Delegar",tone:"light"},
+{id:"sobrecarga-limite",left:"Sobrecarga",right:"Limite",tone:"neutral"},
+{id:"pressao-limite",left:"Pressão",right:"Limite",tone:"neutral"},
+{id:"pressao-respiracao",left:"Pressão",right:"Respiração",tone:"light"},
+{id:"pressao-prioridade",left:"Pressão",right:"Prioridade",tone:"light"},
+{id:"bloqueio-pausa",left:"Bloqueio",right:"Pausa",tone:"light"},
+{id:"bloqueio-escolha",left:"Bloqueio",right:"Escolha",tone:"light"},
+{id:"bloqueio-aceitar",left:"Bloqueio",right:"Aceitar",tone:"light"},
+{id:"evitar-coragem",left:"Evitar",right:"Coragem",tone:"light"},
+{id:"evitar-escolha",left:"Evitar",right:"Escolha",tone:"neutral"},
+{id:"verificar-incerteza",left:"Verificar",right:"Incerteza",tone:"heavy"},
+{id:"verificar-paciencia",left:"Verificar",right:"Paciência",tone:"light"},
+{id:"verificar-confiar",left:"Verificar",right:"Confiar",tone:"light"},
+{id:"controlo-flexibilidade",left:"Controlo",right:"Flexibilidade",tone:"light"},
+{id:"controlo-confiar",left:"Controlo",right:"Confiar",tone:"light"},
+{id:"controlo-entrega",left:"Controlo",right:"Entrega",tone:"light"},
+{id:"confiar-alivio",left:"Confiar",right:"Alívio",tone:"light"},
+{id:"confiar-presenca",left:"Confiar",right:"Presença",tone:"light"},
+{id:"confiar-coragem",left:"Confiar",right:"Coragem",tone:"light"},
+{id:"alivio-gratidao",left:"Alívio",right:"Gratidão",tone:"light"},
+{id:"alivio-alegria",left:"Alívio",right:"Alegria",tone:"light"},
+{id:"alivio-serenidade",left:"Alívio",right:"Serenidade",tone:"light"},
+{id:"alegria-presenca",left:"Alegria",right:"Presença",tone:"light"},
+{id:"alegria-gratidao",left:"Alegria",right:"Gratidão",tone:"light"},
+{id:"alegria-energia",left:"Alegria",right:"Energia",tone:"light"},
+{id:"esperanca-acao",left:"Esperança",right:"Ação",tone:"light"},
+{id:"esperanca-coragem",left:"Esperança",right:"Coragem",tone:"light"},
+{id:"esperanca-paciencia",left:"Esperança",right:"Paciência",tone:"light"},
+{id:"gratidao-calma",left:"Gratidão",right:"Calma",tone:"light"},
+{id:"gratidao-presenca",left:"Gratidão",right:"Presença",tone:"light"},
+{id:"gratidao-bemestar",left:"Gratidão",right:"Bem-estar",tone:"light"},
+{id:"curiosidade-descoberta",left:"Curiosidade",right:"Descoberta",tone:"neutral"},
+{id:"curiosidade-aprendizagem",left:"Curiosidade",right:"Aprendizagem",tone:"light"},
+{id:"curiosidade-aceitar",left:"Curiosidade",right:"Aceitar",tone:"light"},
+{id:"paciência-esperar",left:"Paciência",right:"Esperar",tone:"light"},
+{id:"paciência-presenca",left:"Paciência",right:"Presença",tone:"light"},
+{id:"paciência-equilibrio",left:"Paciência",right:"Equilíbrio",tone:"light"},
+{id:"limite-cuidado",left:"Limite",right:"Cuidado",tone:"light"},
+{id:"limite-descanso",left:"Limite",right:"Descanso",tone:"light"},
+{id:"limite-escolha",left:"Limite",right:"Escolha",tone:"neutral"},
+{id:"escolha-liberdade",left:"Escolha",right:"Liberdade",tone:"light"},
+{id:"escolha-acao",left:"Escolha",right:"Ação",tone:"light"},
+{id:"escolha-clareza",left:"Escolha",right:"Clareza",tone:"light"},
+{id:"liberdade-leveza",left:"Liberdade",right:"Leveza",tone:"light"},
+{id:"liberdade-confianca",left:"Liberdade",right:"Confiança",tone:"light"},
+{id:"leveza-alegria",left:"Leveza",right:"Alegria",tone:"light"},
+{id:"leveza-respiracao",left:"Leveza",right:"Respiração",tone:"light"},
+{id:"serenidade-calma",left:"Serenidade",right:"Calma",tone:"light"},
+{id:"serenidade-presenca",left:"Serenidade",right:"Presença",tone:"light"},
+{id:"serenidade-espaco",left:"Serenidade",right:"Espaço",tone:"light"},
+{id:"cuidado-recuperacao",left:"Cuidado",right:"Recuperação",tone:"light"},
+{id:"cuidado-presenca",left:"Cuidado",right:"Presença",tone:"light"},
+{id:"cuidado-limite",left:"Cuidado",right:"Limite",tone:"light"},
+{id:"recuperacao-energia",left:"Recuperação",right:"Energia",tone:"light"},
+{id:"recuperacao-descanso",left:"Recuperação",right:"Descanso",tone:"light"},
+{id:"recuperacao-bemestar",left:"Recuperação",right:"Bem-estar",tone:"light"},
+{id:"movimento-energia",left:"Movimento",right:"Energia",tone:"light"},
+{id:"movimento-presenca",left:"Movimento",right:"Presença",tone:"light"},
+{id:"movimento-leveza",left:"Movimento",right:"Leveza",tone:"light"},
+{id:"planeamento-prioridade",left:"Planeamento",right:"Prioridade",tone:"neutral"},
+{id:"planeamento-clareza",left:"Planeamento",right:"Clareza",tone:"light"},
+{id:"planeamento-flexibilidade",left:"Planeamento",right:"Flexibilidade",tone:"light"},
+{id:"prioridade-foco",left:"Prioridade",right:"Foco",tone:"light"},
+{id:"prioridade-equilibrio",left:"Prioridade",right:"Equilíbrio",tone:"light"},
+{id:"foco-presenca",left:"Foco",right:"Presença",tone:"light"},
+{id:"foco-acao",left:"Foco",right:"Ação",tone:"light"},
+{id:"foco-descanso",left:"Foco",right:"Descanso",tone:"light"},
+{id:"flexibilidade-aceitar",left:"Flexibilidade",right:"Aceitar",tone:"light"},
+{id:"flexibilidade-equilibrio",left:"Flexibilidade",right:"Equilíbrio",tone:"light"},
+{id:"entrega-paz",left:"Entrega",right:"Paz",tone:"light"},
+{id:"entrega-confiar",left:"Entrega",right:"Confiar",tone:"light"},
+{id:"paz-presenca",left:"Paz",right:"Presença",tone:"light"},
+{id:"paz-serenidade",left:"Paz",right:"Serenidade",tone:"light"},
+{id:"double-stress",left:"Stress",right:"Stress",tone:"heavy",turn:true},
+{id:"double-agitation",left:"Agitação",right:"Agitação",tone:"heavy",turn:true},
+{id:"double-tension",left:"Tensão",right:"Tensão",tone:"heavy",turn:true},
+{id:"double-worry",left:"Preocupação",right:"Preocupação",tone:"heavy",turn:true},
+{id:"double-pause",left:"Pausa",right:"Pausa",tone:"light",turn:true},
+{id:"double-calm",left:"Calma",right:"Calma",tone:"light",turn:true},
+{id:"double-clarity",left:"Clareza",right:"Clareza",tone:"light",turn:true},
+{id:"double-confidence",left:"Confiança",right:"Confiança",tone:"light",turn:true},
+{id:"stress-fatigue",left:"Stress",right:"Cansaço",tone:"heavy"},
+{id:"stress-pressure",left:"Stress",right:"Pressão",tone:"heavy"},
+{id:"stress-rest",left:"Stress",right:"Descanso",tone:"neutral"},
+{id:"agitation-worry",left:"Agitação",right:"Preocupação",tone:"heavy"},
+{id:"agitation-pause",left:"Agitação",right:"Pausa",tone:"light"},
+{id:"tension-breath",left:"Tensão",right:"Respiração",tone:"light"},
+{id:"tension-space",left:"Tensão",right:"Espaço",tone:"light"},
+{id:"worry-doubt",left:"Preocupação",right:"Dúvida",tone:"heavy"},
+{id:"worry-clarity",left:"Preocupação",right:"Clareza",tone:"light"},
+{id:"fear-accept",left:"Medo",right:"Aceitar",tone:"light"},
+{id:"fear-breath",left:"Medo",right:"Respiração",tone:"light"},
+{id:"fear-courage",left:"Medo",right:"Coragem",tone:"light"},
+{id:"alert-pause",left:"Alerta",right:"Pausa",tone:"light"},
+{id:"alert-observe",left:"Alerta",right:"Observar",tone:"light"},
+{id:"rush-pause",left:"Pressa",right:"Pausa",tone:"light"},
+{id:"rush-rest",left:"Pressa",right:"Descanso",tone:"light"},
+{id:"overload-balance",left:"Sobrecarga",right:"Equilíbrio",tone:"light"},
+{id:"overload-rest",left:"Sobrecarga",right:"Descanso",tone:"light"},
+{id:"check-pause",left:"Verificar",right:"Pausa",tone:"light"},
+{id:"check-clarity",left:"Verificar",right:"Clareza",tone:"light"},
+{id:"check-perspective",left:"Verificar",right:"Perspetiva",tone:"light"},
+{id:"relief-confidence",left:"Alívio breve",right:"Confiança",tone:"light"},
+{id:"relief-calm",left:"Alívio breve",right:"Calma",tone:"light"},
+{id:"doubt-pause",left:"Dúvida",right:"Pausa",tone:"light"},
+{id:"doubt-accept",left:"Dúvida",right:"Aceitar",tone:"light"},
+{id:"avoid-observe",left:"Evitar",right:"Observar",tone:"light"},
+{id:"avoid-accept",left:"Evitar",right:"Aceitar",tone:"light"},
+{id:"pause-clarity",left:"Pausa",right:"Clareza",tone:"light"},
+{id:"pause-presence",left:"Pausa",right:"Presença",tone:"light"},
+{id:"pause-balance",left:"Pausa",right:"Equilíbrio",tone:"light"},
+{id:"breath-presence",left:"Respiração",right:"Presença",tone:"light"},
+{id:"breath-balance",left:"Respiração",right:"Equilíbrio",tone:"light"},
+{id:"observe-calm",left:"Observar",right:"Calma",tone:"light"},
+{id:"observe-confidence",left:"Observar",right:"Confiança",tone:"light"},
+{id:"observe-action",left:"Observar",right:"Ação",tone:"light"},
+{id:"space-calm",left:"Espaço",right:"Calma",tone:"light"},
+{id:"space-accept",left:"Espaço",right:"Aceitar",tone:"light"},
+{id:"perspective-accept",left:"Perspetiva",right:"Aceitar",tone:"light"},
+{id:"perspective-action",left:"Perspetiva",right:"Ação",tone:"light"},
+{id:"clarity-confidence",left:"Clareza",right:"Confiança",tone:"light"},
+{id:"clarity-courage",left:"Clareza",right:"Coragem",tone:"light"},
+{id:"action-calm",left:"Ação",right:"Calma",tone:"light"},
+{id:"action-balance",left:"Ação",right:"Equilíbrio",tone:"light"},
+{id:"confidence-calm",left:"Confiança",right:"Calma",tone:"light"},
+{id:"confidence-presence",left:"Confiança",right:"Presença",tone:"light"},
+{id:"courage-action",left:"Coragem",right:"Ação",tone:"light"},
+{id:"courage-presence",left:"Coragem",right:"Presença",tone:"light"},
+{id:"calm-balance",left:"Calma",right:"Equilíbrio",tone:"light"},
+{id:"calm-wellbeing",left:"Calma",right:"Bem-estar",tone:"light"},
+{id:"presence-clarity",left:"Presença",right:"Clareza",tone:"light"},
+{id:"presence-action",left:"Presença",right:"Ação",tone:"light"},
+{id:"balance-energy",left:"Equilíbrio",right:"Energia",tone:"light"},
+{id:"wellbeing-energy",left:"Bem-estar",right:"Energia",tone:"light"},
+{id:"rest-calm",left:"Descanso",right:"Calma",tone:"light"},
+{id:"rest-balance",left:"Descanso",right:"Equilíbrio",tone:"light"},
+{id:"energy-confidence",left:"Energia",right:"Confiança",tone:"light"},
+{id:"accept-clarity",left:"Aceitar",right:"Clareza",tone:"light"},
+{id:"accept-presence",left:"Aceitar",right:"Presença",tone:"light"},
+{id:"wait-pause",left:"Esperar",right:"Pausa",tone:"light"},
+{id:"wait-accept",left:"Esperar",right:"Aceitar",tone:"light"}
+];
+
+const IMPULSE_QUESTIONS:ImpulseQuestion[]=[
+ {id:"q1",question:"Quando uma pessoa sente ansiedade, qual destas respostas descreve melhor o que pode acontecer?",answers:["A ansiedade obriga sempre a fugir","Pode aumentar a sensação de alerta e influenciar pensamentos e comportamentos","Significa que existe necessariamente um problema físico","Impede qualquer decisão racional"],correct:1,explanation:"A ansiedade pode aumentar o estado de alerta e influenciar a forma como pensamos e agimos, mas não determina uma única resposta."},
+ {id:"q2",question:"Qual destas práticas pode ajudar a criar uma pequena pausa perante um momento de stress?",answers:["Parar e fazer algumas respirações lentas","Ignorar sempre o que se sente","Pesquisar sintomas durante horas","Evitar qualquer atividade"],correct:0,explanation:"Uma pausa curta pode criar espaço para observar o que está a acontecer antes de decidir o próximo passo."},
+ {id:"q3",question:"O que significa reconhecer um padrão emocional?",answers:["Provar que vai acontecer novamente","Perceber relações que se repetem entre situações, pensamentos, emoções e ações","Diagnosticar uma doença","Eliminar automaticamente a emoção"],correct:1,explanation:"Reconhecer padrões é observar relações que parecem repetir-se; não significa prever o futuro nem fazer um diagnóstico."},
+ {id:"q4",question:"Quando uma preocupação aparece repetidamente, qual pode ser uma resposta útil?",answers:["Verificar imediatamente todas as vezes","Criar uma pequena pausa e observar a vontade de verificar","Assumir que a preocupação é verdadeira","Nunca mais pensar no assunto"],correct:1,explanation:"Criar uma pausa permite observar a vontade de agir sem assumir que a preocupação determina o que tens de fazer."},
+ {id:"q5",question:"Qual destas afirmações sobre emoções é mais adequada?",answers:["Emoções difíceis são sempre prejudiciais","Uma emoção difícil pode ser observada sem ter de ser eliminada imediatamente","As emoções determinam sempre o comportamento","Só emoções positivas são úteis"],correct:1,explanation:"Uma emoção pode ser reconhecida e observada sem que seja necessário eliminá-la imediatamente."},
+ {id:"q6",question:"O que pode acontecer quando tentamos controlar todos os pensamentos?",answers:["Podemos ficar mais atentos a eles","Eles desaparecem sempre","Ficamos sempre calmos","Deixamos de sentir emoções"],correct:0,explanation:"Tentar controlar pensamentos de forma rígida pode aumentar a atenção dada a eles."},
+ {id:"q7",question:"Qual é uma forma simples de observar uma emoção?",answers:["Dar-lhe um nome","Negá-la","Fugir sempre","Provar que está errada"],correct:0,explanation:"Dar um nome ao que sentimos pode ajudar a reconhecer a experiência sem a transformar numa certeza."},
+ {id:"q8",question:"Uma preocupação é automaticamente um facto?",answers:["Sim, sempre","Não","Só à noite","Só quando parece intensa"],correct:1,explanation:"Uma preocupação é um pensamento ou possibilidade; não é, por si só, prova de que algo aconteceu."},
+ {id:"q9",question:"O que pode ajudar a interromper uma reação automática?",answers:["Uma pequena pausa","Agir mais depressa","Verificar repetidamente","Ignorar tudo"],correct:0,explanation:"Uma pausa pode criar espaço entre o impulso e a decisão."},
+ {id:"q10",question:"Qual destas opções descreve melhor a respiração lenta?",answers:["Inspirar e expirar sem pressa","Prender a respiração","Respirar o mais rápido possível","Evitar respirar profundamente"],correct:0,explanation:"Respirar de forma confortável e sem pressa pode ser usado como uma pequena pausa."},
+ {id:"q11",question:"O que é um padrão?",answers:["Algo que se repete ou apresenta uma relação","Uma previsão certa","Um diagnóstico","Uma regra sem exceções"],correct:0,explanation:"Um padrão é uma repetição ou relação observável; não é uma garantia do que vai acontecer."},
+ {id:"q12",question:"Quando sentes vontade de verificar algo outra vez, o que podes observar?",answers:["A vontade antes de agir","A certeza de que algo está errado","A obrigação de verificar","A resposta que queres encontrar"],correct:0,explanation:"Observar a vontade antes de agir pode ajudar a distinguir impulso de decisão."},
+ {id:"q13",question:"Qual destas atitudes deixa mais espaço para uma escolha?",answers:["Parar por alguns segundos","Agir imediatamente","Evitar sempre","Pesquisar sem parar"],correct:0,explanation:"Uma breve pausa pode permitir escolher o próximo passo com mais consciência."},
+ {id:"q14",question:"Uma emoção pode mudar ao longo do tempo?",answers:["Sim","Não","Só as emoções positivas","Só depois de dormir"],correct:0,explanation:"As emoções podem mudar de intensidade e forma ao longo do tempo."},
+ {id:"q15",question:"O que significa aceitar uma emoção?",answers:["Reconhecer que ela está presente","Gostar dela","Concordar com todos os pensamentos","Fazer o que ela manda"],correct:0,explanation:"Aceitar aqui significa reconhecer a experiência sem exigir que desapareça imediatamente."},
+ {id:"q16",question:"Qual destas é uma pergunta útil perante um pensamento?",answers:["Tenho a certeza de que isto é verdade?","Como posso verificar 20 vezes?","Como posso eliminar o pensamento?","Como posso evitar senti-lo?"],correct:0,explanation:"Questionar a certeza de um pensamento ajuda a separá-lo de um facto."},
+ {id:"q17",question:"O que pode ajudar a perceber uma reação automática?",answers:["Observar situação, pensamento, emoção e ação","Ignorar a sequência","Procurar uma causa única","Assumir que será sempre igual"],correct:0,explanation:"Observar a sequência pode revelar relações sem assumir que existe apenas uma causa."},
+ {id:"q18",question:"Qual destas opções pode criar distância de um impulso?",answers:["Esperar um pouco antes de agir","Agir imediatamente","Repetir a ação","Aumentar a verificação"],correct:0,explanation:"Esperar um pouco pode criar espaço para decidir em vez de reagir automaticamente."},
+ {id:"q19",question:"O stress significa sempre que algo está errado?",answers:["Não","Sim","Só quando é intenso","Só quando dura um dia"],correct:0,explanation:"Stress é uma resposta que pode surgir perante diferentes exigências e não prova, por si só, que exista um problema."},
+ {id:"q20",question:"Qual destas escolhas pode ser uma pequena ação de autocuidado?",answers:["Beber água","Verificar sintomas repetidamente","Ignorar necessidades básicas","Ficar imóvel por obrigação"],correct:0,explanation:"Atender a necessidades básicas pode ser uma pequena ação de cuidado, sem prometer um resultado emocional específico."},
+ {id:"q21",question:"O que significa mudar o rumo?",answers:["Escolher um próximo passo diferente","Garantir que tudo corre bem","Eliminar emoções difíceis","Controlar o futuro"],correct:0,explanation:"Mudar o rumo significa escolher uma ação diferente; não significa controlar o resultado."},
+ {id:"q22",question:"Qual destas frases separa melhor pensamento e facto?",answers:["Estou a ter o pensamento de que isto vai correr mal","Isto vai certamente correr mal","Se penso, é porque é verdade","Uma preocupação é uma prova"],correct:0,explanation:"Dizer que se está a ter um pensamento ajuda a identificá-lo como pensamento."},
+ {id:"q23",question:"O que pode acontecer quando damos atenção a uma preocupação sem agir logo?",answers:["Podemos notar que o impulso muda","A preocupação torna-se automaticamente verdade","Deixamos de pensar para sempre","Garantimos que nada acontece"],correct:0,explanation:"O impulso pode mudar com o tempo; observar não garante um resultado específico."},
+ {id:"q24",question:"Qual destas opções é mais adequada para uma pergunta de saúde mental?",answers:["Procurar informação fiável","Assumir o pior cenário","Pesquisar indefinidamente","Tratar uma possibilidade como certeza"],correct:0,explanation:"Informação fiável pode ajudar, enquanto transformar possibilidades em certezas pode aumentar a confusão."},
+ {id:"q25",question:"O que pode ajudar quando uma emoção parece muito intensa?",answers:["Reconhecer o que está presente e criar algum espaço","Tentar eliminá-la imediatamente","Pesquisar uma explicação sem parar","Assumir que vai durar para sempre"],correct:0,explanation:"Reconhecer a experiência e criar espaço pode permitir responder sem transformar a intensidade num facto sobre o futuro."},
+ {id:"q26",question:"Qual destas opções distingue melhor impulso e escolha?",answers:["O impulso aparece automaticamente; a escolha pode incluir uma pausa","São exatamente a mesma coisa","Uma escolha nunca envolve emoções","Um impulso é sempre uma decisão certa"],correct:0,explanation:"Um impulso pode surgir automaticamente, enquanto uma escolha pode incluir espaço para observar e decidir."},
+ {id:"q27",question:"Quando não tens a certeza do que sentes, o que podes fazer?",answers:["Dar-te tempo para observar","Forçar imediatamente uma explicação","Assumir o pior significado","Ignorar qualquer sensação"],correct:0,explanation:"Nem sempre é necessário ter uma explicação imediata; observar pode ajudar a perceber melhor a experiência."},
+ {id:"q28",question:"O que pode tornar uma pausa mais útil?",answers:["Usá-la para notar o que está a acontecer antes de agir","Usá-la para verificar repetidamente","Esperar até ter certeza absoluta","Evitar qualquer pensamento"],correct:0,explanation:"Uma pausa pode criar espaço para observar a situação e escolher o próximo passo."},
+ {id:"q29",question:"Uma sensação intensa é necessariamente perigosa?",answers:["Não necessariamente","Sim, sempre","Só se aparecer de manhã","Sim, quando dura alguns minutos"],correct:0,explanation:"A intensidade de uma sensação, por si só, não determina o seu significado ou consequência."},
+ {id:"q30",question:"O que significa observar sem julgar?",answers:["Notar o que acontece sem decidir imediatamente que é bom ou mau","Concordar com tudo o que pensamos","Nunca tomar decisões","Ignorar emoções difíceis"],correct:0,explanation:"Observar sem julgar significa notar a experiência antes de lhe atribuir uma conclusão imediata."},
+ {id:"q31",question:"Qual pode ser uma resposta diferente perante a vontade de verificar?",answers:["Esperar alguns instantes e observar o impulso","Verificar mais vezes para ter certeza","Procurar garantias imediatamente","Assumir que a dúvida prova um problema"],correct:0,explanation:"Esperar e observar pode criar espaço entre a vontade de verificar e a ação."},
+ {id:"q32",question:"O que pode ajudar a lidar com incerteza?",answers:["Reconhecer que nem todas as respostas estão disponíveis agora","Tentar controlar todos os resultados","Pesquisar até desaparecer qualquer dúvida","Tratar uma possibilidade como certeza"],correct:0,explanation:"Reconhecer a incerteza permite continuar sem exigir certeza absoluta antes de cada decisão."},
+ {id:"q33",question:"Qual destas frases descreve melhor uma emoção?",answers:["É uma experiência que pode mudar e ser observada","É uma ordem que temos de obedecer","É uma prova sobre o futuro","É sempre uma indicação de perigo"],correct:0,explanation:"Emoções são experiências que podem mudar e podem ser observadas sem determinar automaticamente uma ação."},
+ {id:"q34",question:"O que pode acontecer quando deixamos de lutar imediatamente contra um pensamento?",answers:["Podemos observá-lo com alguma distância","Ele torna-se automaticamente verdadeiro","Desaparece sempre","Passa a controlar todas as decisões"],correct:0,explanation:"Criar distância pode permitir observar um pensamento sem o tratar como uma ordem ou facto."},
+ {id:"q35",question:"Qual é uma forma de transformar uma preocupação numa pergunta útil?",answers:["Perguntar o que está sob o meu controlo agora","Perguntar como posso verificar infinitamente","Perguntar como garantir o futuro","Perguntar como eliminar toda a incerteza"],correct:0,explanation:"Focar o próximo passo sob controlo pode tornar a preocupação mais concreta sem prometer controlar o resultado."},
+ {id:"q36",question:"Quando uma pessoa se sente bloqueada, o que pode abrir algum espaço?",answers:["Escolher um passo pequeno e possível","Esperar até desaparecer toda a dúvida","Exigir uma solução perfeita","Evitar decidir para sempre"],correct:0,explanation:"Um passo pequeno pode tornar uma situação mais abordável sem exigir uma solução perfeita."},
+ {id:"q37",question:"O que pode ajudar a separar uma previsão de um facto?",answers:["Reconhecer que uma previsão é uma possibilidade","Assumir que imaginar algo o torna real","Procurar sinais que confirmem apenas a preocupação","Repetir a previsão muitas vezes"],correct:0,explanation:"Uma previsão descreve uma possibilidade; reconhecê-la assim ajuda a não confundi-la com um facto."},
+ {id:"q38",question:"Qual destas atitudes pode favorecer flexibilidade?",answers:["Aceitar que o próximo passo pode mudar","Exigir que tudo aconteça como planeado","Evitar qualquer alteração","Tentar controlar todas as variáveis"],correct:0,explanation:"Flexibilidade inclui reconhecer que um plano pode mudar sem que isso determine um resultado negativo."},
+ {id:"q39",question:"O que pode ajudar quando a mente pede uma certeza imediata?",answers:["Notar essa vontade sem ter de responder logo","Procurar mais dez garantias","Pesquisar até ficar completamente seguro","Tratar a dúvida como prova"],correct:0,explanation:"Notar a vontade de certeza pode criar espaço para escolher sem responder automaticamente ao impulso."},
+ {id:"q40",question:"Qual destas opções é uma forma de voltar ao presente?",answers:["Prestar atenção durante alguns segundos ao que estás a fazer","Rever mentalmente todos os cenários futuros","Pesquisar novas possibilidades","Tentar prever o que os outros vão pensar"],correct:0,explanation:"A atenção ao que está a acontecer agora pode reduzir a necessidade de antecipar todos os cenários."},
+ {id:"q41",question:"O que significa dar espaço a uma emoção?",answers:["Permitir reconhecê-la sem exigir uma resposta imediata","Fazer tudo o que ela pede","Aumentá-la de propósito","Negar que existe"],correct:0,explanation:"Dar espaço significa reconhecer a emoção sem assumir que é necessário agir imediatamente por causa dela."},
+ {id:"q42",question:"Qual pode ser um sinal de que estás a reagir automaticamente?",answers:["Sentires uma urgência forte para agir já","Ter várias opções tranquilamente disponíveis","Conseguires esperar sem dificuldade","Estares a observar antes de decidir"],correct:0,explanation:"Uma urgência forte pode acompanhar uma reação automática, embora não seja uma prova isolada de nada."},
+ {id:"q43",question:"O que pode ajudar a escolher entre duas ações possíveis?",answers:["Perguntar qual é o próximo passo mais coerente com o que valorizas","Escolher sempre a opção que elimina toda a dúvida","Verificar até ter certeza absoluta","Escolher apenas para aliviar a ansiedade imediatamente"],correct:0,explanation:"Considerar o que valorizas pode ajudar a escolher sem depender apenas da urgência de aliviar uma emoção."},
+ {id:"q44",question:"Qual destas opções descreve melhor tolerar incerteza?",answers:["Continuar com um pequeno passo mesmo sem garantia total","Esperar por certeza absoluta","Pesquisar todas as possibilidades","Evitar qualquer decisão"],correct:0,explanation:"Tolerar incerteza pode significar continuar com um passo razoável sem exigir garantias totais."},
+ {id:"q45",question:"O que pode ajudar a reconhecer progresso?",answers:["Notar uma pequena escolha diferente da habitual","Exigir que nunca mais apareça ansiedade","Comparar todos os dias com um dia perfeito","Considerar apenas grandes mudanças"],correct:0,explanation:"Pequenas escolhas diferentes podem ser observadas como parte do processo, sem exigir perfeição."},
+ {id:"q46",question:"Quando uma preocupação pede atenção, qual pergunta pode criar distância?",answers:["Estou perante um facto ou perante uma possibilidade?","Como posso verificar isto novamente?","Como posso garantir que nunca acontece?","Como posso eliminar imediatamente esta sensação?"],correct:0,explanation:"Distinguir facto de possibilidade ajuda a não transformar uma preocupação numa certeza."},
+ {id:"q47",question:"O que pode ajudar depois de perceberes que reagiste automaticamente?",answers:["Observar o que aconteceu e pensar no próximo passo","Criticar-te por teres reagido","Tentar apagar o episódio","Repetir a mesma verificação"],correct:0,explanation:"Observar o episódio sem te punires pode ajudar a identificar o próximo passo possível."},
+ {id:"q48",question:"Qual destas atitudes deixa espaço para aprender com uma experiência?",answers:["Perguntar o que posso observar desta vez","Exigir uma conclusão definitiva","Procurar uma única causa","Assumir que vai repetir-se exatamente"],correct:0,explanation:"Observar uma experiência sem exigir uma conclusão definitiva deixa espaço para aprender com ela."},
+ {id:"q49",question:"O que pode ajudar quando uma decisão parece demasiado grande?",answers:["Dividi-la num próximo passo pequeno","Tentar resolver tudo de uma vez","Esperar até desaparecer toda a emoção","Pesquisar todas as opções indefinidamente"],correct:0,explanation:"Dividir uma decisão pode torná-la mais concreta e permitir avançar passo a passo."},
+ {id:"q50",question:"Qual destas frases resume melhor o objetivo desta viagem?",answers:["Observar ligações e escolher o próximo passo com mais consciência","Encontrar uma explicação perfeita para tudo","Eliminar todas as emoções difíceis","Garantir que nunca voltas a sentir ansiedade"],correct:0,explanation:"A viagem procura criar espaço para observar ligações e escolhas, sem prometer eliminar emoções ou controlar o futuro."}
+];
+
+const IMPULSE_TRANSLATIONS:Record<"en"|"es"|"fr",Array<{question:string;answers:string[];explanation:string}>>={
+en:[
+["When a person feels anxiety, which response best describes what can happen?",["Anxiety always forces a person to run away","It can increase alertness and influence thoughts and behaviours","It necessarily means there is a physical problem","It prevents any rational decision"],"Anxiety can increase alertness and influence how we think and act, but it does not determine one single response."],
+["Which practice can help create a small pause during a stressful moment?",["Stop and take a few slow breaths","Always ignore what you feel","Search symptoms for hours","Avoid any activity"],"A short pause can create space to observe what is happening before deciding what to do next."],
+["What does it mean to recognise an emotional pattern?",["To prove it will happen again","To notice relationships that repeat between situations, thoughts, emotions and actions","To diagnose an illness","To automatically eliminate the emotion"],"Recognising patterns means observing relationships that seem to repeat; it does not mean predicting the future or making a diagnosis."],
+["When a worry appears repeatedly, which response can be useful?",["Check immediately every time","Create a small pause and observe the urge to check","Assume the worry is true","Never think about it again"],"Creating a pause allows you to observe the urge to act without assuming that the worry dictates what you must do."],
+["Which statement about emotions is most appropriate?",["Difficult emotions are always harmful","A difficult emotion can be observed without needing to eliminate it immediately","Emotions always determine behaviour","Only positive emotions are useful"],"An emotion can be recognised and observed without needing to eliminate it immediately."],
+["What can happen when we try to control all our thoughts?",["We may become more attentive to them","They always disappear","We always become calm","We stop feeling emotions"],"Trying to control thoughts rigidly can increase the attention we give them."],
+["What is a simple way to observe an emotion?",["Give it a name","Deny it","Always run away","Prove that it is wrong"],"Giving a name to what we feel can help us recognise the experience without turning it into certainty."],
+["Is a worry automatically a fact?",["Yes, always","No","Only at night","Only when it feels intense"],"A worry is a thought or possibility; by itself, it is not proof that something has happened."],
+["What can help interrupt an automatic reaction?",["A small pause","Act faster","Check repeatedly","Ignore everything"],"A pause can create space between an impulse and a decision."],
+["Which option best describes slow breathing?",["Inhale and exhale without rushing","Hold your breath","Breathe as fast as possible","Avoid deep breathing"],"Breathing comfortably and without rushing can be used as a small pause."],
+["What is a pattern?",["Something that repeats or shows a relationship","A certain prediction","A diagnosis","A rule without exceptions"],"A pattern is an observable repetition or relationship; it is not a guarantee of what will happen."],
+["When you feel the urge to check something again, what can you observe?",["The urge before acting","The certainty that something is wrong","The obligation to check","The answer you want to find"],"Observing the urge before acting can help distinguish an impulse from a decision."],
+["Which attitude leaves more room for a choice?",["Stop for a few seconds","Act immediately","Always avoid","Search without stopping"],"A brief pause can allow you to choose the next step more consciously."],
+["Can an emotion change over time?",["Yes","No","Only positive emotions","Only after sleeping"],"Emotions can change in intensity and form over time."],
+["What does it mean to accept an emotion?",["Recognise that it is present","Like it","Agree with all the thoughts it brings","Do whatever it tells you"],"Here, accepting means recognising the experience without requiring it to disappear immediately."],
+["Which is a useful question to ask about a thought?",["Am I certain this is true?","How can I check it 20 times?","How can I eliminate the thought?","How can I avoid feeling it?"],"Questioning the certainty of a thought helps separate it from a fact."],
+["What can help you understand an automatic reaction?",["Observe situation, thought, emotion and action","Ignore the sequence","Look for one single cause","Assume it will always be the same"],"Observing the sequence can reveal relationships without assuming there is only one cause."],
+["Which option can create distance from an impulse?",["Wait a little before acting","Act immediately","Repeat the action","Increase checking"],"Waiting a little can create space to decide instead of reacting automatically."],
+["Does stress always mean something is wrong?",["No","Yes","Only when intense","Only when it lasts a day"],"Stress is a response that can arise from different demands and does not by itself prove there is a problem."],
+["Which choice can be a small act of self-care?",["Drink some water","Check symptoms repeatedly","Ignore basic needs","Stay still out of obligation"],"Attending to basic needs can be a small act of care without promising a specific emotional result."],
+["What does changing direction mean?",["Choosing a different next step","Guaranteeing that everything goes well","Eliminating difficult emotions","Controlling the future"],"Changing direction means choosing a different action; it does not mean controlling the outcome."],
+["Which sentence best separates a thought from a fact?",["I am having the thought that this will go badly","This will certainly go badly","If I think it, it must be true","A worry is proof"],"Saying that you are having a thought helps identify it as a thought."],
+["What can happen when we give a worry attention without acting immediately?",["We may notice that the urge changes","The worry automatically becomes true","We stop thinking forever","We guarantee that nothing happens"],"An urge can change over time; observing it does not guarantee a specific outcome."],
+["Which option is most appropriate for a mental-health question?",["Look for reliable information","Assume the worst case","Search indefinitely","Treat a possibility as a certainty"],"Reliable information can help, while turning possibilities into certainties can increase confusion."],
+["What can help when an emotion feels very intense?",["Recognise what is present and create some space","Try to eliminate it immediately","Search endlessly for an explanation","Assume it will last forever"],"Recognising the experience and creating space can allow a response without turning intensity into a fact about the future."],
+["Which option best distinguishes impulse and choice?",["An impulse appears automatically; a choice can include a pause","They are exactly the same thing","A choice never involves emotions","An impulse is always the right decision"],"An impulse can arise automatically, while a choice can include space to observe and decide."],
+["When you are not sure what you feel, what can you do?",["Give yourself time to observe","Force an explanation immediately","Assume the worst meaning","Ignore any sensation"],"You do not always need an immediate explanation; observing can help you understand the experience better."],
+["What can make a pause more useful?",["Use it to notice what is happening before acting","Use it to check repeatedly","Wait until you have absolute certainty","Avoid any thought"],"A pause can create space to observe the situation and choose the next step."],
+["Is an intense sensation necessarily dangerous?",["Not necessarily","Yes, always","Only if it appears in the morning","Yes, when it lasts a few minutes"],"The intensity of a sensation, by itself, does not determine its meaning or consequence."],
+["What does observing without judging mean?",["Notice what happens without immediately deciding it is good or bad","Agree with everything we think","Never make decisions","Ignore difficult emotions"],"Observing without judging means noticing the experience before reaching an immediate conclusion about it."],
+["What can be a different response to the urge to check?",["Wait a few moments and observe the urge","Check more times to be sure","Seek reassurance immediately","Assume doubt proves a problem"],"Waiting and observing can create space between the urge to check and the action."],
+["What can help when dealing with uncertainty?",["Recognise that not all answers are available right now","Try to control every outcome","Search until every doubt disappears","Treat a possibility as a certainty"],"Recognising uncertainty allows you to continue without requiring absolute certainty before every decision."],
+["Which statement best describes an emotion?",["It is an experience that can change and be observed","It is an order we must obey","It is proof about the future","It is always a sign of danger"],"Emotions are experiences that can change and can be observed without automatically determining an action."],
+["What can happen when we stop immediately fighting a thought?",["We may observe it with some distance","It automatically becomes true","It always disappears","It controls every decision"],"Creating distance can allow us to observe a thought without treating it as an order or fact."],
+["What can help turn a worry into a useful question?",["Ask what is under my control right now","Ask how I can check endlessly","Ask how I can guarantee the future","Ask how I can eliminate all uncertainty"],"Focusing on the next step within your control can make a worry more concrete without promising to control the outcome."],
+["When a person feels stuck, what can create some space?",["Choose one small, possible step","Wait until all doubt disappears","Demand a perfect solution","Avoid deciding forever"],"A small step can make a situation more manageable without requiring a perfect solution."],
+["What can help separate a prediction from a fact?",["Recognise that a prediction is a possibility","Assume imagining something makes it real","Look only for signs that confirm the worry","Repeat the prediction many times"],"A prediction describes a possibility; recognising it as such helps avoid confusing it with a fact."],
+["Which attitude can support flexibility?",["Accept that the next step may change","Demand that everything happens as planned","Avoid any change","Try to control every variable"],"Flexibility includes recognising that a plan may change without that determining a negative outcome."],
+["What can help when the mind asks for immediate certainty?",["Notice the urge without having to respond immediately","Seek ten more reassurances","Search until completely safe","Treat doubt as proof"],"Noticing the desire for certainty can create space to choose without automatically responding to the impulse."],
+["Which option is a way to return to the present?",["Pay attention for a few seconds to what you are doing","Mentally review every future scenario","Search for new possibilities","Try to predict what others will think"],"Paying attention to what is happening now can reduce the need to anticipate every scenario."],
+["What does it mean to give space to an emotion?",["Allow yourself to recognise it without requiring an immediate response","Do everything it asks","Increase it on purpose","Deny that it exists"],"Giving space means recognising the emotion without assuming you need to act immediately because of it."],
+["What can be a sign that you are reacting automatically?",["Feeling a strong urge to act right now","Having several calm options available","Being able to wait comfortably","Observing before deciding"],"A strong urge can accompany an automatic reaction, although it is not by itself proof of anything."],
+["What can help you choose between two possible actions?",["Ask which next step is most consistent with what you value","Always choose the option that removes all doubt","Check until you are absolutely certain","Choose only to relieve anxiety immediately"],"Considering what you value can help you choose without relying only on the urgency to relieve an emotion."],
+["Which option best describes tolerating uncertainty?",["Continue with a small step even without a total guarantee","Wait for absolute certainty","Search every possibility","Avoid any decision"],"Tolerating uncertainty can mean continuing with a reasonable step without requiring total guarantees."],
+["What can help you recognise progress?",["Notice a small choice that differs from your usual one","Demand that anxiety never appears again","Compare every day with a perfect day","Consider only major changes"],"Small choices that differ from the usual can be noticed as part of the process without requiring perfection."],
+["When a worry demands attention, which question can create distance?",["Am I facing a fact or a possibility?","How can I check this again?","How can I guarantee it never happens?","How can I eliminate this feeling immediately?"],"Distinguishing fact from possibility helps avoid turning a worry into certainty."],
+["What can help after you realise you reacted automatically?",["Observe what happened and consider the next step","Criticise yourself for reacting","Try to erase the episode","Repeat the same checking"],"Observing the episode without punishing yourself can help identify a possible next step."],
+["Which attitude leaves room to learn from an experience?",["Ask what I can observe this time","Demand a definitive conclusion","Look for one single cause","Assume it will repeat exactly"],"Observing an experience without demanding a definitive conclusion leaves room to learn from it."],
+["What can help when a decision seems too big?",["Break it into one small next step","Try to solve everything at once","Wait until every emotion disappears","Search all options indefinitely"],"Breaking a decision down can make it more concrete and allow you to move forward step by step."],
+["Which sentence best summarises the purpose of this journey?",["Observe connections and choose the next step more consciously","Find a perfect explanation for everything","Eliminate all difficult emotions","Guarantee that you never feel anxiety again"],"The journey aims to create space to observe connections and choices, without promising to eliminate emotions or control the future."]
+].map(([question,answers,explanation])=>({question,answers,explanation})),
+es:[
+["Cuando una persona siente ansiedad, ¿qué respuesta describe mejor lo que puede ocurrir?",["La ansiedad obliga siempre a huir","Puede aumentar el estado de alerta e influir en pensamientos y conductas","Significa necesariamente que existe un problema físico","Impide cualquier decisión racional"],"La ansiedad puede aumentar el estado de alerta e influir en cómo pensamos y actuamos, pero no determina una única respuesta."],
+["¿Qué práctica puede ayudar a crear una pequeña pausa ante un momento de estrés?",["Parar y hacer unas respiraciones lentas","Ignorar siempre lo que sientes","Buscar síntomas durante horas","Evitar cualquier actividad"],"Una pausa breve puede crear espacio para observar lo que ocurre antes de decidir el siguiente paso."],
+["¿Qué significa reconocer un patrón emocional?",["Probar que volverá a ocurrir","Percibir relaciones que se repiten entre situaciones, pensamientos, emociones y acciones","Diagnosticar una enfermedad","Eliminar automáticamente la emoción"],"Reconocer patrones significa observar relaciones que parecen repetirse; no significa predecir el futuro ni hacer un diagnóstico."],
+["Cuando una preocupación aparece repetidamente, ¿qué respuesta puede ser útil?",["Comprobar inmediatamente cada vez","Crear una pequeña pausa y observar las ganas de comprobar","Dar por cierta la preocupación","No volver a pensar nunca en el tema"],"Crear una pausa permite observar las ganas de actuar sin asumir que la preocupación determina lo que tienes que hacer."],
+["¿Qué afirmación sobre las emociones es más adecuada?",["Las emociones difíciles siempre son perjudiciales","Una emoción difícil puede observarse sin tener que eliminarla de inmediato","Las emociones siempre determinan la conducta","Solo las emociones positivas son útiles"],"Una emoción puede reconocerse y observarse sin necesidad de eliminarla inmediatamente."],
+["¿Qué puede ocurrir cuando intentamos controlar todos nuestros pensamientos?",["Podemos prestarles más atención","Desaparecen siempre","Siempre nos calmamos","Dejamos de sentir emociones"],"Intentar controlar los pensamientos de forma rígida puede aumentar la atención que les prestamos."],
+["¿Cuál es una forma sencilla de observar una emoción?",["Ponerle un nombre","Negarla","Huir siempre","Probar que está equivocada"],"Poner un nombre a lo que sentimos puede ayudar a reconocer la experiencia sin convertirla en una certeza."],
+["¿Una preocupación es automáticamente un hecho?",["Sí, siempre","No","Solo por la noche","Solo cuando parece intensa"],"Una preocupación es un pensamiento o una posibilidad; por sí sola no demuestra que algo haya ocurrido."],
+["¿Qué puede ayudar a interrumpir una reacción automática?",["Una pequeña pausa","Actuar más rápido","Comprobar repetidamente","Ignorarlo todo"],"Una pausa puede crear espacio entre el impulso y la decisión."],
+["¿Qué opción describe mejor la respiración lenta?",["Inspirar y espirar sin prisa","Contener la respiración","Respirar lo más rápido posible","Evitar respirar profundamente"],"Respirar de forma cómoda y sin prisa puede utilizarse como una pequeña pausa."],
+["¿Qué es un patrón?",["Algo que se repite o presenta una relación","Una predicción segura","Un diagnóstico","Una regla sin excepciones"],"Un patrón es una repetición o relación observable; no es una garantía de lo que ocurrirá."],
+["Cuando sientes ganas de comprobar algo otra vez, ¿qué puedes observar?",["Las ganas antes de actuar","La certeza de que algo va mal","La obligación de comprobar","La respuesta que quieres encontrar"],"Observar las ganas antes de actuar puede ayudar a distinguir un impulso de una decisión."],
+["¿Qué actitud deja más espacio para elegir?",["Parar unos segundos","Actuar inmediatamente","Evitar siempre","Buscar sin parar"],"Una breve pausa puede permitir elegir el siguiente paso con más conciencia."],
+["¿Puede cambiar una emoción con el tiempo?",["Sí","No","Solo las emociones positivas","Solo después de dormir"],"Las emociones pueden cambiar de intensidad y forma con el tiempo."],
+["¿Qué significa aceptar una emoción?",["Reconocer que está presente","Que te guste","Estar de acuerdo con todos los pensamientos","Hacer lo que te pide"],"Aceptar aquí significa reconocer la experiencia sin exigir que desaparezca inmediatamente."],
+["¿Cuál es una pregunta útil ante un pensamiento?",["¿Estoy seguro de que esto es verdad?","¿Cómo puedo comprobarlo 20 veces?","¿Cómo puedo eliminar el pensamiento?","¿Cómo puedo evitar sentirlo?"],"Cuestionar la certeza de un pensamiento ayuda a separarlo de un hecho."],
+["¿Qué puede ayudar a comprender una reacción automática?",["Observar situación, pensamiento, emoción y acción","Ignorar la secuencia","Buscar una única causa","Suponer que siempre será igual"],"Observar la secuencia puede revelar relaciones sin asumir que existe una sola causa."],
+["¿Qué opción puede crear distancia respecto a un impulso?",["Esperar un poco antes de actuar","Actuar inmediatamente","Repetir la acción","Aumentar las comprobaciones"],"Esperar un poco puede crear espacio para decidir en lugar de reaccionar automáticamente."],
+["¿El estrés significa siempre que algo va mal?",["No","Sí","Solo cuando es intenso","Solo cuando dura un día"],"El estrés es una respuesta que puede aparecer ante distintas exigencias y no demuestra por sí solo que exista un problema."],
+["¿Cuál puede ser una pequeña acción de autocuidado?",["Beber agua","Comprobar síntomas repetidamente","Ignorar las necesidades básicas","Quedarse inmóvil por obligación"],"Atender las necesidades básicas puede ser una pequeña acción de cuidado, sin prometer un resultado emocional concreto."],
+["¿Qué significa cambiar el rumbo?",["Elegir un siguiente paso diferente","Garantizar que todo saldrá bien","Eliminar las emociones difíciles","Controlar el futuro"],"Cambiar el rumbo significa elegir una acción diferente; no significa controlar el resultado."],
+["¿Qué frase separa mejor un pensamiento de un hecho?",["Estoy teniendo el pensamiento de que esto saldrá mal","Esto saldrá mal con certeza","Si lo pienso, debe ser verdad","Una preocupación es una prueba"],"Decir que estás teniendo un pensamiento ayuda a identificarlo como pensamiento."],
+["¿Qué puede ocurrir cuando prestamos atención a una preocupación sin actuar de inmediato?",["Podemos notar que el impulso cambia","La preocupación se convierte automáticamente en verdad","Dejamos de pensar para siempre","Garantizamos que no ocurrirá nada"],"El impulso puede cambiar con el tiempo; observarlo no garantiza un resultado concreto."],
+["¿Qué opción es más adecuada ante una pregunta de salud mental?",["Buscar información fiable","Suponer el peor escenario","Buscar indefinidamente","Tratar una posibilidad como una certeza"],"La información fiable puede ayudar, mientras que convertir posibilidades en certezas puede aumentar la confusión."],
+["¿Qué puede ayudar cuando una emoción parece muy intensa?",["Reconocer lo que está presente y crear algo de espacio","Intentar eliminarla de inmediato","Buscar sin parar una explicación","Suponer que durará para siempre"],"Reconocer la experiencia y crear espacio puede permitir responder sin convertir la intensidad en un hecho sobre el futuro."],
+["¿Qué opción distingue mejor entre impulso y elección?",["Un impulso aparece automáticamente; una elección puede incluir una pausa","Son exactamente lo mismo","Una elección nunca implica emociones","Un impulso siempre es la decisión correcta"],"Un impulso puede surgir automáticamente, mientras que una elección puede incluir espacio para observar y decidir."],
+["Cuando no estás seguro de lo que sientes, ¿qué puedes hacer?",["Darte tiempo para observar","Forzar una explicación de inmediato","Suponer el peor significado","Ignorar cualquier sensación"],"No siempre es necesario tener una explicación inmediata; observar puede ayudar a comprender mejor la experiencia."],
+["¿Qué puede hacer que una pausa sea más útil?",["Usarla para notar lo que ocurre antes de actuar","Usarla para comprobar repetidamente","Esperar hasta tener certeza absoluta","Evitar cualquier pensamiento"],"Una pausa puede crear espacio para observar la situación y elegir el siguiente paso."],
+["¿Una sensación intensa es necesariamente peligrosa?",["No necesariamente","Sí, siempre","Solo si aparece por la mañana","Sí, cuando dura unos minutos"],"La intensidad de una sensación, por sí sola, no determina su significado ni su consecuencia."],
+["¿Qué significa observar sin juzgar?",["Notar lo que ocurre sin decidir inmediatamente que es bueno o malo","Estar de acuerdo con todo lo que pensamos","No tomar nunca decisiones","Ignorar las emociones difíciles"],"Observar sin juzgar significa notar la experiencia antes de atribuirle una conclusión inmediata."],
+["¿Cuál puede ser una respuesta diferente ante las ganas de comprobar?",["Esperar unos instantes y observar el impulso","Comprobar más veces para estar seguro","Buscar garantías inmediatamente","Suponer que la duda demuestra un problema"],"Esperar y observar puede crear espacio entre las ganas de comprobar y la acción."],
+["¿Qué puede ayudar a afrontar la incertidumbre?",["Reconocer que ahora no están disponibles todas las respuestas","Intentar controlar todos los resultados","Buscar hasta que desaparezca cualquier duda","Tratar una posibilidad como una certeza"],"Reconocer la incertidumbre permite continuar sin exigir certeza absoluta antes de cada decisión."],
+["¿Qué frase describe mejor una emoción?",["Es una experiencia que puede cambiar y observarse","Es una orden que debemos obedecer","Es una prueba sobre el futuro","Siempre indica peligro"],"Las emociones son experiencias que pueden cambiar y observarse sin determinar automáticamente una acción."],
+["¿Qué puede ocurrir cuando dejamos de luchar inmediatamente contra un pensamiento?",["Podemos observarlo con cierta distancia","Se convierte automáticamente en verdad","Siempre desaparece","Pasa a controlar todas las decisiones"],"Crear distancia puede permitir observar un pensamiento sin tratarlo como una orden o un hecho."],
+["¿Qué puede ayudar a convertir una preocupación en una pregunta útil?",["Preguntar qué está bajo mi control ahora","Preguntar cómo puedo comprobarlo indefinidamente","Preguntar cómo puedo garantizar el futuro","Preguntar cómo puedo eliminar toda incertidumbre"],"Centrarse en el siguiente paso que está bajo tu control puede hacer que la preocupación sea más concreta sin prometer controlar el resultado."],
+["Cuando una persona se siente bloqueada, ¿qué puede abrir algo de espacio?",["Elegir un paso pequeño y posible","Esperar hasta que desaparezca toda duda","Exigir una solución perfecta","Evitar decidir para siempre"],"Un paso pequeño puede hacer que una situación sea más abordable sin exigir una solución perfecta."],
+["¿Qué puede ayudar a separar una predicción de un hecho?",["Reconocer que una predicción es una posibilidad","Suponer que imaginar algo lo hace real","Buscar solo señales que confirmen la preocupación","Repetir muchas veces la predicción"],"Una predicción describe una posibilidad; reconocerla como tal ayuda a no confundirla con un hecho."],
+["¿Qué actitud puede favorecer la flexibilidad?",["Aceptar que el siguiente paso puede cambiar","Exigir que todo ocurra como estaba planeado","Evitar cualquier cambio","Intentar controlar todas las variables"],"La flexibilidad incluye reconocer que un plan puede cambiar sin que eso determine un resultado negativo."],
+["¿Qué puede ayudar cuando la mente pide una certeza inmediata?",["Notar ese deseo sin tener que responder de inmediato","Buscar diez garantías más","Buscar hasta sentirse completamente seguro","Tratar la duda como una prueba"],"Notar el deseo de certeza puede crear espacio para elegir sin responder automáticamente al impulso."],
+["¿Cuál es una forma de volver al presente?",["Prestar atención durante unos segundos a lo que estás haciendo","Repasar mentalmente todos los escenarios futuros","Buscar nuevas posibilidades","Intentar predecir lo que pensarán los demás"],"Prestar atención a lo que ocurre ahora puede reducir la necesidad de anticipar todos los escenarios."],
+["¿Qué significa dar espacio a una emoción?",["Permitir reconocerla sin exigir una respuesta inmediata","Hacer todo lo que pide","Aumentarla a propósito","Negar que existe"],"Dar espacio significa reconocer la emoción sin asumir que necesitas actuar inmediatamente por ella."],
+["¿Cuál puede ser una señal de que estás reaccionando automáticamente?",["Sentir una fuerte urgencia por actuar ya","Tener varias opciones tranquilamente disponibles","Poder esperar sin dificultad","Observar antes de decidir"],"Una urgencia fuerte puede acompañar una reacción automática, aunque por sí sola no demuestra nada."],
+["¿Qué puede ayudar a elegir entre dos acciones posibles?",["Preguntar qué siguiente paso es más coherente con lo que valoras","Elegir siempre la opción que elimine toda duda","Comprobar hasta tener certeza absoluta","Elegir solo para aliviar la ansiedad de inmediato"],"Considerar lo que valoras puede ayudar a elegir sin depender únicamente de la urgencia de aliviar una emoción."],
+["¿Qué opción describe mejor tolerar la incertidumbre?",["Continuar con un pequeño paso aunque no haya garantía total","Esperar a tener certeza absoluta","Buscar todas las posibilidades","Evitar cualquier decisión"],"Tolerar la incertidumbre puede significar continuar con un paso razonable sin exigir garantías totales."],
+["¿Qué puede ayudar a reconocer el progreso?",["Notar una pequeña elección diferente de la habitual","Exigir que la ansiedad no vuelva a aparecer nunca","Comparar cada día con un día perfecto","Considerar solo los grandes cambios"],"Las pequeñas elecciones diferentes de lo habitual pueden observarse como parte del proceso sin exigir perfección."],
+["Cuando una preocupación exige atención, ¿qué pregunta puede crear distancia?",["¿Estoy ante un hecho o ante una posibilidad?","¿Cómo puedo comprobar esto otra vez?","¿Cómo puedo garantizar que nunca ocurra?","¿Cómo puedo eliminar esta sensación de inmediato?"],"Distinguir un hecho de una posibilidad ayuda a no convertir una preocupación en una certeza."],
+["¿Qué puede ayudar después de darte cuenta de que reaccionaste automáticamente?",["Observar lo ocurrido y pensar en el siguiente paso","Criticarte por haber reaccionado","Intentar borrar el episodio","Repetir la misma comprobación"],"Observar el episodio sin castigarte puede ayudar a identificar el siguiente paso posible."],
+["¿Qué actitud deja espacio para aprender de una experiencia?",["Preguntar qué puedo observar esta vez","Exigir una conclusión definitiva","Buscar una única causa","Suponer que se repetirá exactamente"],"Observar una experiencia sin exigir una conclusión definitiva deja espacio para aprender de ella."],
+["¿Qué puede ayudar cuando una decisión parece demasiado grande?",["Dividirla en un pequeño siguiente paso","Intentar resolverlo todo de una vez","Esperar hasta que desaparezca toda emoción","Buscar todas las opciones indefinidamente"],"Dividir una decisión puede hacerla más concreta y permitir avanzar paso a paso."],
+["¿Qué frase resume mejor el objetivo de este viaje?",["Observar conexiones y elegir el siguiente paso con más conciencia","Encontrar una explicación perfecta para todo","Eliminar todas las emociones difíciles","Garantizar que nunca volverás a sentir ansiedad"],"El viaje busca crear espacio para observar conexiones y elecciones, sin prometer eliminar las emociones ni controlar el futuro."]
+].map(([question,answers,explanation])=>({question,answers,explanation})),
+fr:[
+["Lorsqu’une personne ressent de l’anxiété, quelle réponse décrit le mieux ce qui peut se produire ?",["L’anxiété oblige toujours à fuir","Elle peut augmenter l’état d’alerte et influencer les pensées et les comportements","Elle signifie nécessairement qu’il existe un problème physique","Elle empêche toute décision rationnelle"],"L’anxiété peut augmenter l’état d’alerte et influencer notre façon de penser et d’agir, sans déterminer une seule réponse."],
+["Quelle pratique peut aider à créer une petite pause pendant un moment de stress ?",["S’arrêter et faire quelques respirations lentes","Toujours ignorer ce que l’on ressent","Rechercher des symptômes pendant des heures","Éviter toute activité"],"Une courte pause peut créer un espace pour observer ce qui se passe avant de décider de la suite."],
+["Que signifie reconnaître un schéma émotionnel ?",["Prouver que cela se reproduira","Repérer des relations qui se répètent entre situations, pensées, émotions et actions","Diagnostiquer une maladie","Éliminer automatiquement l’émotion"],"Reconnaître des schémas consiste à observer des relations qui semblent se répéter ; cela ne signifie ni prédire l’avenir ni poser un diagnostic."],
+["Lorsqu’une inquiétude revient régulièrement, quelle réponse peut être utile ?",["Vérifier immédiatement à chaque fois","Créer une petite pause et observer l’envie de vérifier","Considérer que l’inquiétude est vraie","Ne plus jamais y penser"],"Créer une pause permet d’observer l’envie d’agir sans supposer que l’inquiétude détermine ce que l’on doit faire."],
+["Quelle affirmation sur les émotions est la plus juste ?",["Les émotions difficiles sont toujours nuisibles","Une émotion difficile peut être observée sans devoir être éliminée immédiatement","Les émotions déterminent toujours le comportement","Seules les émotions positives sont utiles"],"Une émotion peut être reconnue et observée sans qu’il soit nécessaire de l’éliminer immédiatement."],
+["Que peut-il se passer lorsque nous essayons de contrôler toutes nos pensées ?",["Nous pouvons devenir plus attentifs à celles-ci","Elles disparaissent toujours","Nous devenons toujours calmes","Nous cessons de ressentir des émotions"],"Essayer de contrôler rigidement les pensées peut augmenter l’attention que nous leur accordons."],
+["Quelle est une façon simple d’observer une émotion ?",["Lui donner un nom","La nier","Toujours fuir","Prouver qu’elle est fausse"],"Donner un nom à ce que l’on ressent peut aider à reconnaître l’expérience sans en faire une certitude."],
+["Une inquiétude est-elle automatiquement un fait ?",["Oui, toujours","Non","Seulement la nuit","Seulement lorsqu’elle semble intense"],"Une inquiétude est une pensée ou une possibilité ; à elle seule, elle ne prouve pas que quelque chose s’est produit."],
+["Qu’est-ce qui peut aider à interrompre une réaction automatique ?",["Une petite pause","Agir plus vite","Vérifier à répétition","Tout ignorer"],"Une pause peut créer un espace entre l’impulsion et la décision."],
+["Quelle option décrit le mieux la respiration lente ?",["Inspirer et expirer sans se presser","Retenir sa respiration","Respirer aussi vite que possible","Éviter de respirer profondément"],"Respirer confortablement et sans se presser peut servir de petite pause."],
+["Qu’est-ce qu’un schéma ?",["Quelque chose qui se répète ou présente une relation","Une prédiction certaine","Un diagnostic","Une règle sans exceptions"],"Un schéma est une répétition ou une relation observable ; ce n’est pas une garantie de ce qui va arriver."],
+["Lorsque tu as envie de vérifier quelque chose à nouveau, que peux-tu observer ?",["L’envie avant d’agir","La certitude que quelque chose ne va pas","L’obligation de vérifier","La réponse que tu veux trouver"],"Observer l’envie avant d’agir peut aider à distinguer une impulsion d’une décision."],
+["Quelle attitude laisse davantage de place au choix ?",["S’arrêter quelques secondes","Agir immédiatement","Toujours éviter","Chercher sans s’arrêter"],"Une brève pause peut permettre de choisir l’étape suivante avec davantage de conscience."],
+["Une émotion peut-elle changer avec le temps ?",["Oui","Non","Seulement les émotions positives","Seulement après avoir dormi"],"Les émotions peuvent changer d’intensité et de forme avec le temps."],
+["Que signifie accepter une émotion ?",["Reconnaître qu’elle est présente","L’aimer","Être d’accord avec toutes les pensées","Faire ce qu’elle demande"],"Ici, accepter signifie reconnaître l’expérience sans exiger qu’elle disparaisse immédiatement."],
+["Laquelle de ces questions peut être utile face à une pensée ?",["Suis-je certain que c’est vrai ?","Comment puis-je le vérifier 20 fois ?","Comment puis-je éliminer cette pensée ?","Comment puis-je éviter de la ressentir ?"],"Questionner la certitude d’une pensée aide à la distinguer d’un fait."],
+["Qu’est-ce qui peut aider à comprendre une réaction automatique ?",["Observer la situation, la pensée, l’émotion et l’action","Ignorer la séquence","Chercher une cause unique","Supposer que ce sera toujours pareil"],"Observer la séquence peut révéler des relations sans supposer qu’il n’existe qu’une seule cause."],
+["Quelle option peut créer une distance avec une impulsion ?",["Attendre un peu avant d’agir","Agir immédiatement","Répéter l’action","Augmenter les vérifications"],"Attendre un peu peut créer un espace pour décider plutôt que réagir automatiquement."],
+["Le stress signifie-t-il toujours que quelque chose ne va pas ?",["Non","Oui","Seulement lorsqu’il est intense","Seulement lorsqu’il dure un jour"],"Le stress est une réponse qui peut apparaître face à différentes exigences et ne prouve pas, à lui seul, qu’il existe un problème."],
+["Quel choix peut être un petit geste de soin de soi ?",["Boire de l’eau","Vérifier les symptômes à répétition","Ignorer les besoins fondamentaux","Rester immobile par obligation"],"Répondre aux besoins fondamentaux peut être un petit geste de soin, sans promettre un résultat émotionnel précis."],
+["Que signifie changer de direction ?",["Choisir une étape suivante différente","Garantir que tout se passera bien","Éliminer les émotions difficiles","Contrôler l’avenir"],"Changer de direction signifie choisir une action différente ; cela ne signifie pas contrôler le résultat."],
+["Quelle phrase sépare le mieux une pensée d’un fait ?",["J’ai la pensée que cela va mal se passer","Cela va certainement mal se passer","Si je le pense, c’est forcément vrai","Une inquiétude est une preuve"],"Dire que l’on a une pensée aide à l’identifier comme une pensée."],
+["Que peut-il se passer lorsque nous accordons de l’attention à une inquiétude sans agir immédiatement ?",["Nous pouvons remarquer que l’impulsion change","L’inquiétude devient automatiquement vraie","Nous cessons de penser pour toujours","Nous garantissons que rien n’arrivera"],"Une impulsion peut changer avec le temps ; l’observer ne garantit pas un résultat précis."],
+["Quelle option est la plus adaptée face à une question de santé mentale ?",["Chercher des informations fiables","Supposer le pire scénario","Rechercher indéfiniment","Traiter une possibilité comme une certitude"],"Des informations fiables peuvent aider, tandis que transformer des possibilités en certitudes peut augmenter la confusion."],
+["Qu’est-ce qui peut aider lorsqu’une émotion semble très intense ?",["Reconnaître ce qui est présent et créer un peu d’espace","Essayer de l’éliminer immédiatement","Chercher sans fin une explication","Supposer qu’elle durera toujours"],"Reconnaître l’expérience et créer de l’espace peut permettre de répondre sans transformer l’intensité en fait sur l’avenir."],
+["Quelle option distingue le mieux impulsion et choix ?",["Une impulsion apparaît automatiquement ; un choix peut inclure une pause","C’est exactement la même chose","Un choix n’implique jamais d’émotions","Une impulsion est toujours la bonne décision"],"Une impulsion peut surgir automatiquement, tandis qu’un choix peut laisser de l’espace pour observer et décider."],
+["Lorsque tu ne sais pas exactement ce que tu ressens, que peux-tu faire ?",["Te donner du temps pour observer","Forcer immédiatement une explication","Supposer le pire sens possible","Ignorer toute sensation"],"Il n’est pas toujours nécessaire d’avoir une explication immédiate ; observer peut aider à mieux comprendre l’expérience."],
+["Qu’est-ce qui peut rendre une pause plus utile ?",["L’utiliser pour remarquer ce qui se passe avant d’agir","L’utiliser pour vérifier à répétition","Attendre d’avoir une certitude absolue","Éviter toute pensée"],"Une pause peut créer un espace pour observer la situation et choisir l’étape suivante."],
+["Une sensation intense est-elle nécessairement dangereuse ?",["Pas nécessairement","Oui, toujours","Seulement si elle apparaît le matin","Oui, lorsqu’elle dure quelques minutes"],"L’intensité d’une sensation, à elle seule, ne détermine ni sa signification ni sa conséquence."],
+["Que signifie observer sans juger ?",["Remarquer ce qui se passe sans décider immédiatement que c’est bien ou mal","Être d’accord avec tout ce que l’on pense","Ne jamais prendre de décisions","Ignorer les émotions difficiles"],"Observer sans juger signifie remarquer l’expérience avant de lui attribuer une conclusion immédiate."],
+["Quelle peut être une réponse différente face à l’envie de vérifier ?",["Attendre quelques instants et observer l’impulsion","Vérifier davantage pour être sûr","Chercher immédiatement des garanties","Supposer que le doute prouve un problème"],"Attendre et observer peut créer un espace entre l’envie de vérifier et l’action."],
+["Qu’est-ce qui peut aider face à l’incertitude ?",["Reconnaître que toutes les réponses ne sont pas disponibles maintenant","Essayer de contrôler tous les résultats","Chercher jusqu’à faire disparaître tout doute","Traiter une possibilité comme une certitude"],"Reconnaître l’incertitude permet de continuer sans exiger une certitude absolue avant chaque décision."],
+["Quelle phrase décrit le mieux une émotion ?",["C’est une expérience qui peut changer et être observée","C’est un ordre auquel nous devons obéir","C’est une preuve sur l’avenir","C’est toujours un signe de danger"],"Les émotions sont des expériences qui peuvent changer et être observées sans déterminer automatiquement une action."],
+["Que peut-il se passer lorsque nous cessons de lutter immédiatement contre une pensée ?",["Nous pouvons l’observer avec une certaine distance","Elle devient automatiquement vraie","Elle disparaît toujours","Elle contrôle toutes les décisions"],"Créer de la distance peut permettre d’observer une pensée sans la traiter comme un ordre ou un fait."],
+["Qu’est-ce qui peut aider à transformer une inquiétude en question utile ?",["Demander ce qui est sous mon contrôle maintenant","Demander comment vérifier indéfiniment","Demander comment garantir l’avenir","Demander comment éliminer toute incertitude"],"Se concentrer sur la prochaine étape qui dépend de soi peut rendre l’inquiétude plus concrète sans promettre de contrôler le résultat."],
+["Lorsqu’une personne se sent bloquée, qu’est-ce qui peut ouvrir un peu d’espace ?",["Choisir une petite étape possible","Attendre que tout doute disparaisse","Exiger une solution parfaite","Éviter de décider pour toujours"],"Une petite étape peut rendre une situation plus abordable sans exiger une solution parfaite."],
+["Qu’est-ce qui peut aider à distinguer une prédiction d’un fait ?",["Reconnaître qu’une prédiction est une possibilité","Supposer qu’imaginer quelque chose le rend réel","Chercher uniquement les signes qui confirment l’inquiétude","Répéter la prédiction de nombreuses fois"],"Une prédiction décrit une possibilité ; la reconnaître comme telle aide à ne pas la confondre avec un fait."],
+["Quelle attitude peut favoriser la flexibilité ?",["Accepter que l’étape suivante puisse changer","Exiger que tout se passe comme prévu","Éviter tout changement","Essayer de contrôler toutes les variables"],"La flexibilité consiste notamment à reconnaître qu’un plan peut changer sans que cela détermine un résultat négatif."],
+["Qu’est-ce qui peut aider lorsque l’esprit demande une certitude immédiate ?",["Remarquer cette envie sans devoir y répondre immédiatement","Chercher dix garanties supplémentaires","Chercher jusqu’à se sentir totalement en sécurité","Traiter le doute comme une preuve"],"Remarquer le besoin de certitude peut créer un espace pour choisir sans répondre automatiquement à l’impulsion."],
+["Quelle option permet de revenir au présent ?",["Prêter attention pendant quelques secondes à ce que tu fais","Revoir mentalement tous les scénarios futurs","Chercher de nouvelles possibilités","Essayer de prévoir ce que les autres vont penser"],"Porter attention à ce qui se passe maintenant peut réduire le besoin d’anticiper tous les scénarios."],
+["Que signifie laisser de la place à une émotion ?",["Permettre de la reconnaître sans exiger une réponse immédiate","Faire tout ce qu’elle demande","L’augmenter volontairement","Nier son existence"],"Laisser de la place signifie reconnaître l’émotion sans supposer qu’il faut agir immédiatement à cause d’elle."],
+["Quel peut être un signe que tu réagis automatiquement ?",["Ressentir une forte urgence d’agir tout de suite","Avoir plusieurs options disponibles calmement","Pouvoir attendre sans difficulté","Observer avant de décider"],"Une forte urgence peut accompagner une réaction automatique, sans constituer à elle seule une preuve de quoi que ce soit."],
+["Qu’est-ce qui peut aider à choisir entre deux actions possibles ?",["Demander quelle prochaine étape est la plus cohérente avec ce qui compte pour toi","Choisir toujours l’option qui élimine tout doute","Vérifier jusqu’à être absolument certain","Choisir uniquement pour soulager immédiatement l’anxiété"],"Tenir compte de ce qui compte pour toi peut aider à choisir sans dépendre uniquement de l’urgence de soulager une émotion."],
+["Quelle option décrit le mieux la tolérance à l’incertitude ?",["Continuer avec une petite étape même sans garantie totale","Attendre une certitude absolue","Rechercher toutes les possibilités","Éviter toute décision"],"Tolérer l’incertitude peut signifier continuer avec une étape raisonnable sans exiger de garantie totale."],
+["Qu’est-ce qui peut aider à reconnaître les progrès ?",["Remarquer un petit choix différent de l’habitude","Exiger que l’anxiété ne revienne jamais","Comparer chaque jour à une journée parfaite","Ne considérer que les grands changements"],"Les petits choix différents de l’habitude peuvent être observés comme faisant partie du processus, sans exiger la perfection."],
+["Lorsqu’une inquiétude réclame de l’attention, quelle question peut créer une distance ?",["Suis-je face à un fait ou à une possibilité ?","Comment puis-je vérifier cela à nouveau ?","Comment puis-je garantir que cela n’arrivera jamais ?","Comment puis-je éliminer immédiatement cette sensation ?"],"Distinguer un fait d’une possibilité aide à ne pas transformer une inquiétude en certitude."],
+["Qu’est-ce qui peut aider après avoir compris que tu as réagi automatiquement ?",["Observer ce qui s’est passé et réfléchir à l’étape suivante","Te critiquer pour avoir réagi","Essayer d’effacer l’épisode","Répéter la même vérification"],"Observer l’épisode sans te punir peut aider à identifier la prochaine étape possible."],
+["Quelle attitude laisse de la place pour apprendre d’une expérience ?",["Demander ce que je peux observer cette fois","Exiger une conclusion définitive","Chercher une cause unique","Supposer que cela se répétera exactement"],"Observer une expérience sans exiger de conclusion définitive laisse de la place pour en apprendre quelque chose."],
+["Qu’est-ce qui peut aider lorsqu’une décision semble trop grande ?",["La diviser en une petite prochaine étape","Essayer de tout résoudre d’un coup","Attendre que toute émotion disparaisse","Chercher toutes les options indéfiniment"],"Diviser une décision peut la rendre plus concrète et permettre d’avancer étape par étape."],
+["Quelle phrase résume le mieux l’objectif de ce voyage ?",["Observer les liens et choisir l’étape suivante avec davantage de conscience","Trouver une explication parfaite à tout","Éliminer toutes les émotions difficiles","Garantir que tu ne ressentiras plus jamais d’anxiété"],"Le voyage cherche à créer un espace pour observer les liens et les choix, sans promettre d’éliminer les émotions ni de contrôler l’avenir."]
+].map(([question,answers,explanation])=>({question,answers,explanation}))
+};
+
+const getLocalizedImpulse=(q:ImpulseQuestion):ImpulseQuestion=>{
+ const language=(localStorage.getItem("confia_language")||"pt").slice(0,2) as "pt"|"en"|"es"|"fr";
+ if(language==="pt")return q;
+ const rows=IMPULSE_TRANSLATIONS[language];
+ const index=Math.max(0,Number(q.id.replace(/\\D/g,""))-1);
+ const row=rows[index];
+ if(!row)return q;
+ return {...q,question:row.question,answers:row.answers,explanation:row.explanation,locale:language};
+};
+
+const IMPULSE_QUESTION_VARIANTS:ImpulseQuestion[]=IMPULSE_QUESTIONS.flatMap(q=>[
+ {...q,id:q.id+"a",variant:"a"},
+ {...q,id:q.id+"b",variant:"b"},
+ {...q,id:q.id+"c",variant:"c"}
+]);
+
+// A carteira pode ter muitas combinações, mas a pesquisa de uma palavra
+// não pode ficar presa a uma única peça. Expandimos o grafo de conceitos
+// até cada conceito ter várias saídas e várias entradas, mantendo pares
+// semanticamente próximos por família.
+const CONCEPT_FAMILIES={
+ anxiety:["Stress","Agitação","Tensão","Preocupação","Medo","Alerta","Inquietação","Incerteza","Antecipação","Ruminação","Dúvida","Receio","Nervosismo","Frustração","Irritação","Pressa","Pressão","Sobrecarga","Bloqueio","Evitar","Verificar"],
+ regulation:["Respiração","Pausa","Calma","Clareza","Presença","Perspetiva","Paciência","Aceitar","Observar","Espaço","Equilíbrio"],
+ action:["Escolha","Ação","Movimento","Limite","Prioridade","Foco","Planeamento","Flexibilidade","Cuidado","Descanso","Recuperação","Delegar"],
+ positive:["Alívio","Alívio breve","Alegria","Gratidão","Serenidade","Esperança","Confiança","Confiar","Coragem","Liberdade","Leveza","Paz","Entrega","Energia","Bem-estar"],
+ cognitive:["Pensamento","Curiosidade","Descoberta","Aprendizagem","Esperar","Controlo"]
+} as const;
+const FAMILY_TARGETS={
+ anxiety:["Pausa","Respiração","Clareza","Perspetiva","Paciência","Observar","Aceitar","Espaço","Coragem","Escolha"],
+ regulation:["Presença","Clareza","Equilíbrio","Perspetiva","Aceitar","Paciência","Respiração","Ação","Leveza","Serenidade"],
+ action:["Escolha","Ação","Flexibilidade","Prioridade","Foco","Cuidado","Recuperação","Descanso","Presença","Clareza"],
+ positive:["Presença","Gratidão","Alegria","Serenidade","Calma","Energia","Confiança","Coragem","Paz","Leveza"],
+ cognitive:["Curiosidade","Clareza","Perspetiva","Aprendizagem","Descoberta","Paciência","Aceitar","Ação","Pausa","Presença"]
+} as const;
+const conceptFamily=(word:string)=>{
+ const normalized=word.toLocaleLowerCase();
+ return (Object.entries(CONCEPT_FAMILIES).find(([,words])=>words.some(w=>w.toLocaleLowerCase()===normalized))?.[0]||"regulation") as keyof typeof FAMILY_TARGETS;
+};
+const expandedPairs=(()=>{
+ const pairs=[...BASE_DOMINOES];
+ const seen=new Set(pairs.map(d=>`${d.left.toLocaleLowerCase()}|${d.right.toLocaleLowerCase()}`));
+ let id=10000;
+ const words=[...new Set(pairs.flatMap(d=>[d.left,d.right]))];
+ const add=(left:string,right:string)=>{
+  const key=`${left.toLocaleLowerCase()}|${right.toLocaleLowerCase()}`;
+  if(left.toLocaleLowerCase()===right.toLocaleLowerCase()||seen.has(key))return false;
+  seen.add(key);pairs.push({id:id++,left,right,tone:"neutral"});return true;
+ };
+ // Primeiro garante pelo menos 6 saídas por palavra. A escolha é feita
+ // dentro da família sem repetir uma combinação já existente.
+ for(const word of words){
+  const family=conceptFamily(word);
+  const targets=FAMILY_TARGETS[family];
+  let count=pairs.filter(d=>d.left.toLocaleLowerCase()===word.toLocaleLowerCase()).length;
+  for(let i=0;i<targets.length&&count<6;i++)if(add(word,targets[i]))count++;
+ }
+ // Depois garante pelo menos 6 entradas por palavra, usando conceitos da
+ // mesma família como origem. Assim a pesquisa funciona também no sentido
+ // inverso (segmentos 5→8 e 9→12).
+ for(const word of words){
+  const family=conceptFamily(word);
+  const sources=CONCEPT_FAMILIES[family];
+  let count=pairs.filter(d=>d.right.toLocaleLowerCase()===word.toLocaleLowerCase()).length;
+  for(let i=0;i<sources.length&&count<6;i++)if(add(sources[i],word))count++;
+ }
+ return pairs;
+})();
+const DOMINOES:Domino[]=expandedPairs;
+
+const QUESTS:Quest[]=[
+{id:"water",label:"water",reward:"extra-choice",icon:"💧"},{id:"pause",label:"pause",reward:"extra-choice",icon:"⏸️"},
+{id:"walk",label:"walk",reward:"reroll",icon:"🚶"},{id:"breathe",label:"breathe",reward:"extra-choice",icon:"🌬️"},
+{id:"stretch",label:"stretch",reward:"hint",icon:"🧘"},{id:"window",label:"window",reward:"reroll",icon:"🌤️"},
+{id:"community",label:"community",reward:"extra-choice",icon:"🤝"}
+];
+
+function readJson<T>(key:string,fallback:T):T{try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}}
+function sample<T>(xs:T[],n:number){return [...xs].sort(()=>Math.random()-.5).slice(0,n)}
+const wordKey=(word:string)=>word.trim().toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+let horizonHandStore:Domino[]|null=null;
+function getHorizonHand(){
+ if(horizonHandStore?.length)return horizonHandStore;
+ const saved=readJson<Domino[]>(HORIZON_HAND_KEY,[]);
+ horizonHandStore=saved.length? (saved.length>3?saved.slice(0,3):saved) : pickHandTiles(3);
+ if(saved.length>3){localStorage.setItem(HORIZON_HAND_KEY,JSON.stringify(horizonHandStore));}
+ return horizonHandStore;
+}
+function setHorizonHand(next:Domino[]){
+ horizonHandStore=next;
+ localStorage.setItem(HORIZON_HAND_KEY,JSON.stringify(next));
+}
+const EXTRA_HORIZON_WORDS=["Atenção","Autocuidado","Autonomia","Abertura","Aceitação","Adaptação","Afeto","Agir","Alento","Amizade","Apoio","Aprender","Autoconfiança","Calma interior","Conexão","Consciência","Conforto","Corpo","Cuidado próprio","Decisão","Descobrir","Descanso","Desacelerar","Determinação","Dignidade","Direção","Disponibilidade","Distância","Equilíbrio interior","Escuta","Escuta interna","Esperar","Experiência","Família","Firmeza","Gentileza","Gratidão","Hábito","Humildade","Imaginação","Independência","Intenção","Liberdade","Limites","Lucidez","Maturidade","Movimento","Mudança","Naturalidade","Necessidade","Oportunidade","Orientação","Paciência","Parar","Paz interior","Presença","Prioridade","Propósito","Proteção","Realidade","Reconhecimento","Recomeço","Recuperar","Reflexão","Resiliência","Respeito","Ritmo","Segurança","Silêncio","Simplicidade","Sono","Suavidade","Tempo","Tranquilidade","Verdade","Vontade","Viver","Vínculo","Confiança","Coragem","Esperança","Leveza","Serenidade","Ação consciente","Escolha consciente","Pequeno passo","Próximo passo"];
+const HORIZON_WORDS=Array.from(new Map([...DOMINOES.flatMap(d=>[d.left,d.right]),...EXTRA_HORIZON_WORDS].map(word=>[wordKey(word),word])).values());
+function makeWordTile(word:string):Domino{return {id:`word-${wordKey(word)}`,left:word,right:"",tone:"neutral"}}
+function pickHandTiles(count:number,excludeIds:string[]=[]){
+ const excluded=new Set(excludeIds);
+ const available=HORIZON_WORDS.filter(word=>!excluded.has(`word-${wordKey(word)}`));
+ return sample(available,count).map(word=>makeWordTile(word));
+}
+function readHorizonProgress():HorizonProgress|null{return readJson<HorizonProgress|null>(HORIZON_PROGRESS_KEY,null)}
+function formatRemaining(ms:number){if(ms<=0)return "0 d 00 h 00 m 00 s";const d=Math.floor(ms/86400000);const h=Math.floor(ms%86400000/3600000);const m=Math.floor(ms%3600000/60000);const s=Math.floor(ms%60000/1000);return `${d} d ${String(h).padStart(2,"0")} h ${String(m).padStart(2,"0")} m ${String(s).padStart(2,"0")} s`}
+
+function PirateChest({open=false}:{open?:boolean}){
+ return <div className="relative mx-auto h-[150px] w-[210px]" aria-hidden="true">
+  <div className="absolute bottom-2 left-1/2 h-8 w-[190px] -translate-x-1/2 rounded-[50%] bg-[#b9844f]/25 blur-sm"/>
+  <motion.svg animate={{y:[0,-3,0]}} transition={{duration:4,repeat:Infinity,ease:"easeInOut"}} viewBox="0 0 220 160" className="relative h-full w-full drop-shadow-[0_16px_16px_rgba(78,49,27,.25)]">
+   <defs>
+    <linearGradient id="wood" x1="0" x2="1"><stop stopColor="#7e4328"/><stop offset=".48" stopColor="#a86235"/><stop offset="1" stopColor="#6c351f"/></linearGradient>
+    <linearGradient id="gold" x1="0" x2="1"><stop stopColor="#f2cf78"/><stop offset=".5" stopColor="#b77b2f"/><stop offset="1" stopColor="#e9b958"/></linearGradient>
+   </defs>
+   <g transform={open?"translate(0 -7) rotate(-5 110 75)":undefined}>
+    <path d="M35 70 C40 28 180 28 185 70 Z" fill="url(#wood)" stroke="#542818" strokeWidth="5"/>
+    <path d="M42 65 C58 44 162 44 178 65" fill="none" stroke="url(#gold)" strokeWidth="10"/>
+    <path d="M67 40 V70 M153 40 V70" stroke="url(#gold)" strokeWidth="8"/>
+   </g>
+   <rect x="30" y="68" width="160" height="72" rx="10" fill="url(#wood)" stroke="#542818" strokeWidth="5"/>
+   <path d="M30 91 H190" stroke="#d79b48" strokeWidth="6"/>
+   <path d="M58 69 V140 M162 69 V140" stroke="url(#gold)" strokeWidth="9"/>
+   <rect x="96" y="88" width="28" height="34" rx="7" fill="url(#gold)" stroke="#704719" strokeWidth="3"/>
+   <circle cx="110" cy="101" r="4" fill="#63401f"/><path d="M110 105 v8" stroke="#63401f" strokeWidth="3" strokeLinecap="round"/>
+   <path d="M35 136 Q110 151 185 136" fill="#5e2f1c" opacity=".35"/>
+   {open&&<motion.g initial={{opacity:0,y:6}} animate={{opacity:1,y:0}}><rect x="78" y="46" width="65" height="42" rx="4" fill="#fff4d8" transform="rotate(-7 110 67)"/><path d="M88 58 H132 M88 66 H128 M88 74 H120" stroke="#c9a978" strokeWidth="2"/></motion.g>}
+  </motion.svg>
+ </div>
+}
+
+function DominoPiece({tile,draggable=false,compact=false,onDrop}:{tile:Domino;draggable?:boolean;compact?:boolean;onDrop?:(tile:Domino,x:number,y:number)=>void}){
+ return <motion.div drag={draggable} dragSnapToOrigin dragElastic={0.16} whileDrag={{scale:1.07,rotate:2,zIndex:80}} onDragEnd={(event,info)=>{
+  const e=event as any;
+  const clientX=typeof e?.clientX==="number"?e.clientX:info.point.x-window.scrollX;
+  const clientY=typeof e?.clientY==="number"?e.clientY:info.point.y-window.scrollY;
+  onDrop?.(tile,clientX,clientY);
+ }} className={`relative flex ${compact?"min-h-[29px] min-w-[74px] rounded-[8px]":"min-h-[58px] min-w-[148px] rounded-[13px]"} shrink-0 cursor-grab touch-none select-none items-center justify-center overflow-hidden border border-white/90 bg-gradient-to-br from-white to-[#eef5f3] px-4 text-center shadow-[0_10px_20px_rgba(31,86,94,.18)] active:cursor-grabbing`}>
+  <span className={`${compact?"text-[9px]":"text-[13px]"} font-black leading-tight text-[#285966]`}>{tile.left}</span>
+  <span className="absolute left-2 top-2 h-1.5 w-1.5 rounded-full bg-[#6c9aa0]/25"/><span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-[#6c9aa0]/25"/>
+ </motion.div>
+}
+export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
+ const {i18n}=useTranslation();
+ const lang=(i18n.resolvedLanguage||i18n.language||"pt").slice(0,2) as keyof typeof COPY;
+ const c=COPY[lang]||COPY.pt;
+ const monthCopy=MONTH_COPY[lang]||MONTH_COPY.pt;
+ const boardRef=useRef<HTMLDivElement|null>(null);
+ const [section,setSection]=useState<Section>("sky");
+ const [capsule,setCapsule]=useState<Capsule|null>(()=>readJson(CAPSULE_KEY,null));
+ const [draft,setDraft]=useState("");
+ const [now,setNow]=useState(Date.now());
+ const [guess,setGuess]=useState("");
+ const [revealed,setRevealed]=useState(false);
+ const [feedback,setFeedback]=useState("");
+ const [weeklyLog,setWeeklyLog]=useState<WeeklyReflection[]>(()=>readJson(WEEKLY_LOG_KEY,[]));
+ const [monthTracker,setMonthTracker]=useState<MonthTracker|null>(()=>readJson(MONTH_TRACKER_KEY,null));
+ const [monthSummary,setMonthSummary]=useState("");
+ const [monthTreasure,setMonthTreasure]=useState("");
+ const [monthlyTreasures,setMonthlyTreasures]=useState<MonthlyTreasure[]>(()=>readJson(MONTH_TREASURES_KEY,[]));
+ const [monthCompared,setMonthCompared]=useState(false);
+ const [placed,setPlaced]=useState<PlacedDomino[]>(()=>readHorizonProgress()?.placed||readJson(DOMINO_KEY,[]));
+ const [hand,setHand]=useState<Domino[]>(()=>getHorizonHand());
+ const [bonuses,setBonuses]=useState(()=>readHorizonProgress()?.bonuses||readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));
+ const [quest,setQuest]=useState<Quest>(()=>readHorizonProgress()?.quest||sample(QUESTS,1)[0]);
+ const [questDone,setQuestDone]=useState(()=>readHorizonProgress()?.questDone||false);
+ const [toast,setToast]=useState("");
+ const [impulse,setImpulse]=useState<ImpulseQuestion|null>(null);
+ const [impulseAnswer,setImpulseAnswer]=useState<number|null>(null);
+ const [usedImpulseQuestions,setUsedImpulseQuestions]=useState<string[]>([]);
+ const [recentImpulseQuestions,setRecentImpulseQuestions]=useState<string[]>(()=>readJson<string[]>(HORIZON_QUESTION_HISTORY_KEY,[]));
+ const [islandReflection,setIslandReflection]=useState<{island:number;words:string[];text:string}|null>(null);
+ const [islandReflectionText,setIslandReflectionText]=useState("");
+ const [islandReflections,setIslandReflections]=useState<IslandReflection[]>(()=>readJson<IslandReflection[]>(HORIZON_ISLAND_REFLECTIONS_KEY,[]));
+ const [pendingDrop,setPendingDrop]=useState<{tile:Domino;x:number;y:number;rotate:number;direction:Direction;obstacle:boolean}|null>(null);
+ const [selectedPlaced,setSelectedPlaced]=useState<number|null>(null);
+
+ const [unlockedIslands,setUnlockedIslands]=useState<number[]>(()=>readHorizonProgress()?.unlockedIslands||[0]);
+ const [treasureOpen,setTreasureOpen]=useState(false);
+ const [treasureAnswer,setTreasureAnswer]=useState(()=>readHorizonProgress()?.treasureAnswer||"");
+ const [treasureHistoryOpen,setTreasureHistoryOpen]=useState(false);
+ const [treasureHistory,setTreasureHistory]=useState<TreasureHistoryEntry[]>(()=>readJson<TreasureHistoryEntry[]>(HORIZON_TREASURE_HISTORY_KEY,[]));
+ const [horizonIntroOpen,setHorizonIntroOpen]=useState(false);
+ const [horizonResumeOpen,setHorizonResumeOpen]=useState(false);
+ const [junction,setJunction]=useState<JunctionPair|null>(null);
+ const [junctionExplanation,setJunctionExplanation]=useState("");
+ const [junctions,setJunctions]=useState<Junction[]>(()=>readHorizonProgress()?.junctions||readJson(HORIZON_JUNCTIONS_KEY,[]));
+ const [wordPromptOpen,setWordPromptOpen]=useState(false);
+ const [neededWord,setNeededWord]=useState("");
+ const [wordTile,setWordTile]=useState<Domino|null>(null);
+ const [wordMoment,setWordMoment]=useState("");
+
+ useEffect(()=>{setNow(Date.now());const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id)},[]);
+ useEffect(()=>{localStorage.setItem(WEEKLY_LOG_KEY,JSON.stringify(weeklyLog))},[weeklyLog]);
+ useEffect(()=>{if(monthTracker)localStorage.setItem(MONTH_TRACKER_KEY,JSON.stringify(monthTracker))},[monthTracker]);
+ useEffect(()=>{if(!capsule)return;const buried=new Date(capsule.buriedAt).getTime();const opens=new Date(capsule.opensAt).getTime();if(opens-buried>8*86400000){const migrated={...capsule,opensAt:new Date(buried+7*86400000).toISOString()};localStorage.setItem(CAPSULE_KEY,JSON.stringify(migrated));setCapsule(migrated)}},[]);
+ useEffect(()=>{if(!capsule||monthTracker)return;const start=new Date(capsule.buriedAt);const tracker={startedAt:start.toISOString(),dueAt:new Date(start.getTime()+30*86400000).toISOString()};setMonthTracker(tracker)},[capsule,monthTracker]);
+ useEffect(()=>{if(monthTracker?.comparedAt){setMonthCompared(true);setMonthSummary(monthTracker.summary||"")}},[]);
+ useEffect(()=>{localStorage.setItem(DOMINO_KEY,JSON.stringify(placed))},[placed]);
+ useEffect(()=>{localStorage.setItem(BONUS_KEY,JSON.stringify(bonuses))},[bonuses]);
+ useEffect(()=>{localStorage.setItem(HORIZON_JUNCTIONS_KEY,JSON.stringify(junctions))},[junctions]);
+ useEffect(()=>{localStorage.setItem(HORIZON_TREASURE_HISTORY_KEY,JSON.stringify(treasureHistory))},[treasureHistory]);
+ useEffect(()=>{localStorage.setItem(HORIZON_ISLAND_REFLECTIONS_KEY,JSON.stringify(islandReflections))},[islandReflections]);
+ useEffect(()=>{localStorage.setItem(HORIZON_QUESTION_HISTORY_KEY,JSON.stringify(recentImpulseQuestions.slice(-90)))},[recentImpulseQuestions]);
+ useEffect(()=>{setHorizonHand(hand);localStorage.setItem(HORIZON_PROGRESS_KEY,JSON.stringify({placed,hand,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone}))},[hand,placed,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone]);
+ useEffect(()=>{const onCommunity=()=>{setBonuses(readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));setToast(c.bonus);setTimeout(()=>setToast(""),2200)};window.addEventListener(COMMUNITY_EVENT,onCommunity);return()=>window.removeEventListener(COMMUNITY_EVENT,onCommunity)},[c.bonus]);
+
+ const hasSavedJourney=placed.length>0||junctions.length>0||unlockedIslands.length>1||Boolean(treasureAnswer.trim());
+ const remaining=capsule?new Date(capsule.opensAt).getTime()-now:0;
+ const canOpen=Boolean(capsule&&remaining<=0);
+ const monthRemaining=monthTracker?new Date(monthTracker.dueAt).getTime()-now:0;
+ const monthDue=Boolean(monthTracker&&monthRemaining<=0);
+ const monthReflections=useMemo(()=>monthTracker?weeklyLog.filter(item=>new Date(item.at).getTime()>=new Date(monthTracker.startedAt).getTime()&&new Date(item.at).getTime()<=new Date(monthTracker.dueAt).getTime()+86400000):[],[weeklyLog,monthTracker]);
+ const connectionValue=(p:PlacedDomino|undefined)=>{
+  if(!p)return "Stress";
+  // Quando a peça está virada para cima, o valor que fica no topo é o
+  // lado esquerdo original; virada para baixo, o valor no fundo é o
+  // lado direito original. A ligação seguinte deve usar esse extremo visível.
+  if(p.rotate===270)return p.tile.left;
+  if(p.rotate===90)return p.tile.right;
+  return p.tile.right;
+};
+ const lastRight=connectionValue(placed[placed.length-1]);
+ const lastPlaced=placed[placed.length-1];
+
+ const reverseWordDirection=useMemo(()=>{
+  const nextSlot=placed.length;
+  const segment=Math.floor(nextSlot/3);
+  return segment%2===1;
+ },[placed.length]);
+ const usedTileIds=useMemo(()=>new Set(placed.map(p=>p.tile.id)),[placed]);
+ const availableWordTiles=useMemo(()=>[],[]);
+ const neededWordSuggestions=useMemo(()=>[],[]);
+ const bury=()=>{if(!draft.trim())return;const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:draft.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:(capsule?.cycle||0)+1};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);if(!monthTracker){setMonthTracker({startedAt:buriedAt.toISOString(),dueAt:new Date(buriedAt.getTime()+30*86400000).toISOString()})}setNow(Date.now());setDraft("");setGuess("");setRevealed(false)};
+ const rebury=()=>{if(!capsule||!feedback.trim())return;const reflection={at:new Date().toISOString(),message:capsule.message,guess:guess.trim(),feedback:feedback.trim()};setWeeklyLog(prev=>[...prev,reflection]);const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:feedback.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:capsule.cycle+1,feedback:feedback.trim()};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);setNow(Date.now());setFeedback("");setGuess("");setRevealed(false)};
+ const compareMonth=()=>{if(!monthTracker||!monthSummary.trim())return;setMonthCompared(true);setMonthTracker({...monthTracker,summary:monthSummary.trim(),comparedAt:new Date().toISOString()})};
+ const closeMonth=()=>{if(monthTreasure.trim()){const nextTreasures=[...monthlyTreasures,{date:new Date().toISOString(),text:monthTreasure.trim()}].slice(-24);setMonthlyTreasures(nextTreasures);localStorage.setItem(MONTH_TREASURES_KEY,JSON.stringify(nextTreasures));}const start=new Date();const next={startedAt:start.toISOString(),dueAt:new Date(start.getTime()+30*86400000).toISOString()};setMonthTracker(next);setMonthSummary("");setMonthTreasure("");setMonthCompared(false)};
+
+ const rewardQuest=()=>{
+  if(questDone)return;
+  setBonuses((b:any)=>quest.reward==="extra-choice"?{...b,extraChoices:Math.min(2,b.extraChoices+1)}:quest.reward==="reroll"?{...b,rerolls:b.rerolls+1}:{...b,hints:b.hints+1});
+  const next=sample(QUESTS.filter(q=>q.id!==quest.id),1)[0]||quest;
+  setQuest(next);
+  setQuestDone(false);
+  setToast(c.bonus);setTimeout(()=>setToast(""),2200);
+ };
+ const reset=()=>{const freshHand=pickHandTiles(3);setBonuses({extraChoices:0,rerolls:0,hints:0});setHorizonHand(freshHand);setHand(freshHand);setPlaced([]);localStorage.removeItem(DOMINO_KEY);localStorage.removeItem(HORIZON_PROGRESS_KEY);setQuest(sample(QUESTS,1)[0]);setQuestDone(false);setUnlockedIslands([0]);setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setUsedImpulseQuestions([]);setIslandReflection(null);setIslandReflectionText("");setIslandReflections([]);localStorage.removeItem(HORIZON_ISLAND_REFLECTIONS_KEY);setSelectedPlaced(null);setJunction(null);setJunctionExplanation("");setJunctions([]);localStorage.removeItem(HORIZON_JUNCTIONS_KEY);setTreasureOpen(false);setTreasureAnswer("");setWordPromptOpen(false);setNeededWord("");setWordTile(null);setWordMoment("")};
+ const enterSection=(next:Section)=>{setSection(next);if(next==="sea"){setImpulse(null);setPendingDrop(null);setImpulseAnswer(null);setUsedImpulseQuestions([]);setSelectedPlaced(null);setHorizonResumeOpen(true)}};
+ const startNewJourney=()=>{reset();setHorizonResumeOpen(false);setHorizonIntroOpen(true)};
+ const continueJourney=()=>{setHorizonResumeOpen(false)};
+ const reroll=()=>{if(bonuses.rerolls<=0)return;setBonuses((b:any)=>({...b,rerolls:b.rerolls-1}));setQuestDone(v=>!v)};
+ const islands=Array.from({length:12},(_,index)=>{
+  const row=Math.floor(index/4);
+  const column=index%4;
+  const snakeColumn=row%2===0?column:3-column;
+  return {x:[.10,.36,.64,.90][snakeColumn],y:[.16,.50,.84][row],...(index===11?{treasure:true}: {})};
+ });
+ const islandNames=lang==="pt"?["Perceber","Observar","Escolher","Experimentar","Aceitar","Pausar","Mudar","Cuidar","Avançar","Confiar","Libertar","Tesouro"]:lang==="es"?["Percibir","Observar","Elegir","Experimentar","Aceptar","Pausar","Cambiar","Cuidar","Avanzar","Confiar","Liberar","Tesoro"]:lang==="fr"?["Percevoir","Observer","Choisir","Expérimenter","Accepter","Faire une pause","Changer","Prendre soin","Avancer","Faire confiance","Libérer","Trésor"]:["Notice","Observe","Choose","Experiment","Accept","Pause","Change","Care","Move forward","Trust","Let go","Treasure"];
+ const seaObstacles=[
+  {x:.50,y:.16,type:"🌀",label:lang==="pt"?"Remoinho":lang==="es"?"Remolino":lang==="fr"?"Tourbillon":"Whirlpool"},
+  {x:.50,y:.50,type:"🐙",label:"Kraken"},
+  {x:.25,y:.84,type:"🌀",label:lang==="pt"?"Remoinho":lang==="es"?"Remolino":lang==="fr"?"Tourbillon":"Whirlpool"}
+ ];
+ const touchingObstacle=(x:number,y:number,boardWidth:number,boardHeight:number,rotate=0)=>{
+  const w=rotate===90||rotate===270?29:74;
+  const h=rotate===90||rotate===270?74:29;
+  return seaObstacles.some(o=>{
+   const cx=boardWidth*o.x,cy=boardHeight*o.y;
+   return x+w>=cx-28&&x<=cx+28&&y+h>=cy-28&&y<=cy+28;
+  });
+ };
+ const routeSlot=(slot:number,boardWidth:number,boardHeight:number)=>{
+  const segment=Math.floor(slot/3);
+  const within=slot%3;
+  const from=islands[segment];
+  const to=islands[segment+1];
+  const t=(within+1)/4;
+  const fromX=boardWidth*from.x;
+  const fromY=boardHeight*from.y;
+  const toX=boardWidth*to.x;
+  const toY=boardHeight*to.y;
+  const vertical=from.y!==to.y;
+  const w=vertical?29:74;
+  const h=vertical?74:29;
+  return {
+   x:Math.max(4,Math.min(boardWidth-w-4,fromX+(toX-fromX)*t-w/2)),
+   y:Math.max(6,Math.min(boardHeight-h-6,fromY+(toY-fromY)*t-h/2)),
+   rotate:vertical?90:0,
+   direction:vertical?"down":"right" as Direction
+  };
+ };
+ const requestWord=()=>{setNeededWord("");setWordTile(null);setWordMoment("");setWordPromptOpen(true)};
+ const findNeededWord=()=>{
+  const wanted=neededWord.trim();
+  if(!wanted)return;
+  const normalized=wordKey(wanted);
+  const existing=HORIZON_WORDS.find(word=>wordKey(word)===normalized);
+  const word=existing||wanted;
+  setWordTile(makeWordTile(word));
+  setWordMoment("");
+ };
+ const saveWordMoment=()=>{
+  if(!wordTile||!wordMoment.trim()||!boardRef.current)return;
+  const rect=boardRef.current.getBoundingClientRect();if(placed.length>=33)return;
+  const slot=routeSlot(placed.length,rect.width,rect.height);
+  const obstacle=touchingObstacle(slot.x,slot.y,rect.width,rect.height,slot.rotate);
+  const pending={tile:wordTile,x:slot.x,y:slot.y,rotate:slot.rotate,direction:slot.direction,obstacle};
+  if(obstacle){setWordTile(null);setWordMoment("");setWordPromptOpen(false);askQuestionForDrop(pending);return}
+  setPlaced(prev=>[...prev,{tile:wordTile,x:slot.x,y:slot.y,rotate:slot.rotate,direction:slot.direction,connectionExplanation:wordMoment.trim()} as PlacedDomino]);
+  replenishHand(wordTile);
+  finishPlacement(placed.length);
+  setWordTile(null);setWordMoment("");setWordPromptOpen(false);setToast(c.needWordSaved);setTimeout(()=>setToast(""),2200);
+ };
+ const junctionForIsland=(islandIndex:number):JunctionPair|null=>{
+  const pairs:JunctionPair[]=[
+   {slot:1,left:lang==="pt"?"MEDO":lang==="es"?"MIEDO":lang==="fr"?"PEUR":"FEAR",right:lang==="pt"?"PESQUISAS":lang==="es"?"INVESTIGACIONES":lang==="fr"?"RECHERCHES":"RESEARCH"},
+   {slot:5,left:lang==="pt"?"ANSIEDADE":lang==="es"?"ANSIEDAD":lang==="fr"?"ANXIÉTÉ":"ANXIETY",right:"TIQUES"},
+   {slot:8,left:lang==="pt"?"CONTROLO":lang==="es"?"CONTROL":lang==="fr"?"CONTRÔLE":"CONTROL",right:lang==="pt"?"ALÍVIO":lang==="es"?"ALIVIO":lang==="fr"?"SOULAGEMENT":"RELIEF"}
+  ];
+  return pairs.find(p=>p.slot===islandIndex)||null;
+ };
+ const openJunction=(islandIndex:number)=>{const pair=junctionForIsland(islandIndex);if(pair){setJunction(pair);setJunctionExplanation("");}};
+ const saveJunction=()=>{if(!junction||!junctionExplanation.trim())return;setJunctions(prev=>[...prev.filter(x=>x.slot!==junction.slot),{slot:junction.slot,left:junction.left,right:junction.right,explanation:junctionExplanation.trim()}]);setJunction(null);setJunctionExplanation("");setToast(c.junctionSaved);setTimeout(()=>setToast(""),1800)};
+ const saveTreasureToHistory=()=>{
+  const reflection=buildTreasureReflection();
+  const entry:TreasureHistoryEntry={date:new Date().toISOString(),reflection,answer:treasureAnswer.trim(),words:placed.map(p=>p.tile.left).filter(Boolean)};
+  const day=new Date().toLocaleDateString("sv-SE");
+  setTreasureHistory(prev=>{const next=[...prev.filter(item=>new Date(item.date).toLocaleDateString("sv-SE")!==day),entry];return next.sort((a,b)=>new Date(b.date).getTime()-new Date(a.date).getTime()).slice(0,60)});
+ };
+ const buildTreasureReflection=()=>{
+  if(placed.length<3)return c.treasureEmpty;
+  const texts=islandReflections.map(r=>r.text.trim()).filter(Boolean);
+  if(!texts.length)return c.treasureReactiveEmpty;
+  const counts=new Map<string,number>();
+  texts.join(" ").toLocaleLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").split(/[^\\p{L}\\p{N}]+/u).filter(w=>w.length>=5).forEach(w=>counts.set(w,(counts.get(w)||0)+1));
+  const top=[...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,4).map(([w])=>w);
+  const selectedWords=[...new Set(islandReflections.flatMap(r=>r.words))].slice(0,9).join(" → ");
+  const pattern=top.length?c.treasureReactivePatterns.replace("{words}",top.join(", ")):c.treasureReactiveEmpty;
+  const path=c.treasureReactivePath.replace("{count}",String(islandReflections.length));
+  return [c.treasureReactiveIntro,pattern,path,selectedWords].filter(Boolean).join(" ");
+ };
+ const getIslandWords=(island:number,extra?:Domino)=>[...placed.map(p=>p.tile),...(extra?[extra]:[])].slice((island-1)*3,(island-1)*3+3).map(t=>t.left).filter(Boolean);
+ const openIslandReflection=(island:number,extra?:Domino)=>{
+  const words=getIslandWords(island,extra);
+  if(words.length<3)return;
+  setIslandReflection({island,words,text:""});
+  setIslandReflectionText("");
+ };
+ const registerQuestionUse=(id:string)=>{
+  setUsedImpulseQuestions(prev=>prev.includes(id)?prev:[...prev,id]);
+  setRecentImpulseQuestions(prev=>[...prev.filter(x=>x!==id),id].slice(-90));
+ };
+ const saveIslandReflection=()=>{
+  if(!islandReflection||!islandReflectionText.trim())return;
+  const entry:IslandReflection={island:islandReflection.island,words:islandReflection.words,text:islandReflectionText.trim(),at:new Date().toISOString()};
+  setIslandReflections(prev=>[...prev.filter(x=>x.island!==entry.island),entry]);
+  setIslandReflection(null);setIslandReflectionText("");
+  const next=nextImpulseQuestion();
+  setTimeout(()=>{setImpulse(next);setImpulseAnswer(null);setPendingDrop(null);registerQuestionUse(next.id)},220);
+ };
+ const finishPlacement=(nextSlot:number,extra?:Domino)=>{
+  if(nextSlot%3===2){
+   const reachedIsland=Math.floor(nextSlot/3)+1;
+   if(reachedIsland<islands.length)setUnlockedIslands(prev=>prev.includes(reachedIsland)?prev:[...prev,reachedIsland]);
+   if(reachedIsland===11){setTimeout(()=>setTreasureOpen(true),520);return;}
+   setTimeout(()=>openIslandReflection(reachedIsland,extra),420);
+  }
+ };
+ const nextImpulseQuestion=(excludeId?:string)=>{
+  const recent=new Set(recentImpulseQuestions.slice(-90));
+  const available=IMPULSE_QUESTION_VARIANTS.filter(q=>q.id!==excludeId&&!usedImpulseQuestions.includes(q.id)&&!recent.has(q.id));
+  const pool=available.length?available:IMPULSE_QUESTION_VARIANTS.filter(q=>q.id!==excludeId&&!usedImpulseQuestions.includes(q.id));
+  const base=sample(pool.length?pool:IMPULSE_QUESTION_VARIANTS,1)[0];
+  const localized=getLocalizedImpulse(base);
+  if(!base.variant||base.variant==="a")return localized;
+  const language=(localStorage.getItem("confia_language")||"pt").slice(0,2);
+  const prefixes:any={
+   pt:{b:"Numa situação semelhante, ",c:"Ao observares este tema de outra forma, "},
+   en:{b:"In a similar situation, ",c:"Looking at this topic another way, "},
+   es:{b:"En una situación similar, ",c:"Al observar este tema de otra manera, "},
+   fr:{b:"Dans une situation similaire, ",c:"En regardant ce thème autrement, "}
+  };
+  const prefix=prefixes[language]?.[base.variant]||prefixes.pt[base.variant];
+  return {...localized,question:prefix+localized.question.charAt(0).toLocaleLowerCase()+localized.question.slice(1)};
+ };
+ const askQuestionForDrop=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction;obstacle:boolean})=>{
+  const first=nextImpulseQuestion();
+  setPendingDrop(drop);setImpulse(first);setImpulseAnswer(null);registerQuestionUse(first.id);
+ };
+ const replenishHand=(usedTile:Domino)=>{
+  setHand(current=>{
+   if(!current.some(tile=>tile.id===usedTile.id))return current;
+   const usedIds=new Set([...current.map(tile=>tile.id),...placed.map(p=>p.tile.id),usedTile.id]);
+   const candidates=HORIZON_WORDS.filter(word=>!usedIds.has(`word-${wordKey(word)}`));
+   const replacement=candidates.length?makeWordTile(sample(candidates,1)[0]):null;
+   const next=replacement?[...current.filter(tile=>tile.id!==usedTile.id),replacement]:current;
+   setHorizonHand(next);
+   return next;
+  });
+ };
+ const placeTile=(drop:{tile:Domino;x:number;y:number;rotate:number;direction:Direction;obstacle:boolean})=>{
+  setPlaced(prev=>[...prev,{tile:drop.tile,x:drop.x,y:drop.y,rotate:drop.rotate,direction:drop.direction}]);
+  replenishHand(drop.tile);
+  if(bonuses.extraChoices>0)setBonuses((b:any)=>({...b,extraChoices:Math.max(0,b.extraChoices-1)}));
+  setQuest(sample(QUESTS,1)[0]);setQuestDone(false);
+ };
+ const answerImpulse=(index:number)=>{
+  if(!impulse)return;
+  setImpulseAnswer(index);
+  if(index===impulse.correct){
+   if(pendingDrop){
+    const nextSlot=placed.length;
+    placeTile(pendingDrop);
+    finishPlacement(nextSlot,pendingDrop?.tile);
+   }
+   setTimeout(()=>{setImpulse(null);setImpulseAnswer(null);setPendingDrop(null)},850);
+  } else {
+   if(pendingDrop?.obstacle){
+    setPlaced([]);
+    setUnlockedIslands([0]);
+    setPendingDrop(null);
+    setImpulse(null);
+    setImpulseAnswer(null);
+    setUsedImpulseQuestions([]);
+    setToast("O mar levou-te de volta à Ilha 1.");
+    setTimeout(()=>setToast(""),2400);
+    return;
+   }
+   // Nas perguntas normais, o erro pede outra reflexão sem perder o percurso.
+   setTimeout(()=>{
+    const next=nextImpulseQuestion(impulse.id);
+    setImpulse(next);setImpulseAnswer(null);registerQuestionUse(next.id);
+   },650);
+  }
+ };
+ const dropDomino=(tile:Domino,clientX:number,clientY:number)=>{
+  const board=boardRef.current;if(!board)return;
+  const rect=board.getBoundingClientRect();
+  const inside=clientX>=rect.left&&clientX<=rect.right&&clientY>=rect.top&&clientY<=rect.bottom;
+  if(!inside){setToast(c.choose);setTimeout(()=>setToast(""),1400);return}
+  if(placed.length>=33){setToast("O teu horizonte está completo.");setTimeout(()=>setToast(""),1800);return}
+  const slot=routeSlot(placed.length,rect.width,rect.height);
+  const obstacle=touchingObstacle(slot.x,slot.y,rect.width,rect.height,slot.rotate);
+  const pending={tile,x:slot.x,y:slot.y,rotate:slot.rotate,direction:slot.direction,obstacle};
+  // O mapa decide automaticamente a posição e a direção da peça.
+  // Remoinhos e Kraken são provas do percurso: se o utilizador errar, regressa à Ilha 1.
+  if(obstacle){
+   askQuestionForDrop(pending);
+   return;
+  }
+  placeTile(pending);
+  // Inclui a peça que acabou de ser colocada: o estado `placed` ainda não foi atualizado neste render.
+  // Sem isto, ao chegar a uma nova ilha o cálculo podia encontrar apenas 2 palavras e saltar a reflexão.
+  finishPlacement(placed.length, tile);
+ };
+
+ return <div className="mx-auto w-full max-w-3xl pb-4">
+  <div className="relative overflow-hidden rounded-[30px] border border-[#d9d2ca]/70 bg-[#fffaf6] shadow-[0_20px_55px_rgba(61,47,40,.11)]">
+   <div className="relative min-h-[205px] overflow-hidden bg-[linear-gradient(180deg,#52669e_0%,#8794c0_48%,#f1b7a1_100%)] px-5 pb-16 pt-5 text-white">
+    <div className="absolute inset-0 opacity-75" style={{backgroundImage:"radial-gradient(circle at 12% 20%,white 0 1px,transparent 1.8px),radial-gradient(circle at 42% 36%,white 0 1.3px,transparent 2px),radial-gradient(circle at 70% 15%,white 0 1px,transparent 1.7px),radial-gradient(circle at 88% 30%,white 0 1.2px,transparent 2px)"}}/>
+    <div className="absolute right-8 top-7 h-10 w-10 rounded-full bg-[#fff2c8] shadow-[0_0_28px_rgba(255,241,195,.55)] before:absolute before:-left-2 before:-top-1 before:h-10 before:w-10 before:rounded-full before:bg-[#6071aa]"/>
+    <motion.div animate={{y:[0,-3,0]}} transition={{duration:5,repeat:Infinity}} className="relative z-10 max-w-[82%]">
+      <p className="text-[10px] font-black uppercase tracking-[.24em] text-white/70">✦ CONFIA</p>
+      <h2 className="mt-2 text-[26px] font-black tracking-[-.02em]">{c.horizon}</h2>
+      <p className="mt-1 text-[12px] font-semibold leading-relaxed text-white/82">{c.horizonSub}</p>
+    </motion.div>
+   </div>
+
+   <div className="relative z-30 -mt-7 mx-3 grid grid-cols-3 overflow-hidden rounded-[22px] border border-white/70 bg-white/80 p-1.5 shadow-[0_10px_26px_rgba(83,58,45,.10)] backdrop-blur-xl">
+    {([["sky",c.sky,"✦"],["sand",c.sand,"⌁"],["sea",c.sea,"≈"]] as const).map(([id,label,icon])=><button key={id} onClick={()=>enterSection(id)} className={`rounded-[17px] px-2 py-2.5 text-[10px] font-black transition ${section===id?"bg-white text-[#8f503e] shadow-sm":"text-[#776863]"}`}><span className="mr-1.5">{icon}</span>{label}</button>)}
+   </div>
+
+   <AnimatePresence mode="wait">
+    {section==="sky"&&<motion.section key="sky" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="px-5 pb-6 pt-7">
+      <button onClick={onOpenSky} className="group relative w-full overflow-hidden rounded-[24px] border border-[#7f8bc4]/25 bg-[#11162e] p-5 text-left text-white shadow-[0_14px_30px_rgba(21,24,55,.18)]">
+       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(137,153,228,.35),transparent_34%),radial-gradient(circle_at_85%_80%,rgba(136,91,177,.28),transparent_42%)]"/>
+       <div className="relative flex items-center gap-4"><div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10"><Sparkles size={20}/></div><div><p className="text-[15px] font-black">{c.sky}</p><p className="mt-1 text-[11px] font-medium text-white/65">{c.skySub}</p></div><ChevronRight className="ml-auto opacity-70" size={18}/></div>
+      </button>
+    </motion.section>}
+
+    {section==="sand"&&<motion.section key="sand" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="relative overflow-hidden px-5 pb-7 pt-7">
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,#fff9ef_0%,#f5d7ad_100%)]"/>
+      <div className="absolute -bottom-12 -left-12 h-48 w-[125%] rotate-[-2deg] rounded-[50%] bg-[#e7bb82]/55"/>
+      <div className="relative">
+       <div className="mb-5 rounded-[20px] border border-[#e2cdb5]/70 bg-white/65 px-3 py-3 shadow-[0_8px_20px_rgba(102,72,50,.05)]">
+        <div className="flex items-center justify-between text-center">
+         <div className="flex-1"><span className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[#fff0dc] text-sm">✉️</span><p className="mt-1 text-[8px] font-black uppercase tracking-[.12em] text-[#8f6049]">{monthCopy.timelineToday}</p><p className="mt-0.5 text-[9px] font-bold text-[#76645c]">{monthCopy.timelineWrite}</p></div>
+         <div className="h-px flex-1 bg-[#d8bea0]"/>
+         <div className="flex-1"><span className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[#edf5ed] text-sm">🔓</span><p className="mt-1 text-[8px] font-black uppercase tracking-[.12em] text-[#6d7d62]">{monthCopy.timelineDays}</p><p className="mt-0.5 text-[9px] font-bold text-[#76645c]">{monthCopy.timelineReencounter}</p></div>
+         <div className="h-px flex-1 bg-[#d8bea0]"/>
+         <div className="flex-1"><span className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[#edf3df] text-sm">🌱</span><p className="mt-1 text-[8px] font-black uppercase tracking-[.12em] text-[#6d7d62]">{monthCopy.timelineMonth}</p><p className="mt-0.5 text-[9px] font-bold text-[#76645c]">{monthCopy.timelineReview}</p></div>
+        </div>
+       </div>
+       <div><h3 className="text-[20px] font-black text-[#3d302b]">{c.capsule}</h3><p className="mt-1 text-[11px] font-semibold leading-relaxed text-[#7b665d]">{c.sandSub}</p></div>
+       <PirateChest open={revealed}/>
+       {monthTracker&&<div className="mb-4 rounded-[22px] border border-[#d9c3a8]/70 bg-white/72 p-4 shadow-[0_10px_24px_rgba(102,72,50,.08)] backdrop-blur-sm">
+        {!monthDue?<div className="flex items-center justify-between gap-3"><div><p className="text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthWaiting}</p><p className="mt-1 text-[11px] font-semibold text-[#6e5a50]">{monthCopy.monthIn}</p></div><p className="text-[13px] font-black text-[#7e4f39]">{formatRemaining(monthRemaining)}</p></div>:
+        !monthCompared?<div><p className="text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthTitle}</p><p className="mt-2 text-[13px] font-black leading-relaxed text-[#49372f]">{monthCopy.monthPrompt}</p><textarea value={monthSummary} onChange={e=>setMonthSummary(e.target.value)} maxLength={900} placeholder={monthCopy.monthPlaceholder} className="mt-3 min-h-[115px] w-full resize-none rounded-[16px] border border-[#dcc5ad] bg-white/90 p-3 text-[12px] font-medium text-[#49372f] outline-none"/><button disabled={!monthSummary.trim()} onClick={compareMonth} className="mt-3 w-full rounded-[16px] bg-[#6f4938] py-3 text-[11px] font-black text-white disabled:opacity-40">{monthCopy.monthCompare}</button></div>:
+        <div><p className="text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthYourSummary}</p><p className="mt-2 rounded-[16px] bg-[#fff8ed] p-3 text-[12px] font-bold leading-relaxed text-[#49372f]">{monthTracker.summary||monthSummary}</p><p className="mt-4 text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthWeekly}</p><div className="mt-2 grid gap-2">{monthReflections.length?monthReflections.map((item,index)=><div key={item.at+index} className="rounded-[14px] border border-[#ead8c4] bg-white/85 p-3"><p className="text-[9px] font-black text-[#a06a4f]">{monthCopy.weekLabel} {index+1}</p><p className="mt-1 text-[11px] font-semibold leading-relaxed text-[#5d4b42]">{item.feedback}</p></div>):<p className="rounded-[14px] bg-white/75 p-3 text-[11px] font-semibold text-[#7a675f]">{monthCopy.noWeekly}</p>}</div><p className="mt-4 text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthCombined}</p><p className="mt-2 rounded-[16px] bg-[#f8efe2] p-3 text-[11px] font-semibold leading-relaxed text-[#58483f]">{monthReflections.map(item=>item.feedback).join(" • ")||"—"}</p>
+         <div className="mt-4 rounded-[18px] border border-[#dfccb2] bg-white/70 p-3"><div className="flex items-center justify-between gap-1 text-center">{[0,1,2,3].map(index=><div key={index} className="flex-1"><div className={`mx-auto h-2.5 w-2.5 rounded-full ${monthReflections.length>index?"bg-[#8f503e]":"bg-[#d9c9b8]"}`}/><p className="mt-1 text-[8px] font-black text-[#8d6956]">{monthCopy.weekLabel} {index+1}</p></div>)}<div className="flex-1"><div className="mx-auto h-2.5 w-2.5 rounded-full bg-[#6f8f67]"/><p className="mt-1 text-[8px] font-black text-[#6f8f67]">{monthCopy.monthLabel}</p></div></div></div>
+         {monthReflections.length>1&&<p className="mt-3 rounded-[15px] bg-[#f2eee7] p-3 text-[10px] font-semibold leading-relaxed text-[#68574f]">{monthCopy.evolutionText}</p>}
+         <div className="mt-4 rounded-[18px] border border-[#d8c5a8] bg-[#fff9ed] p-3"><p className="text-[9px] font-black uppercase tracking-[.14em] text-[#9a6549]">{monthCopy.monthTreasure}</p><textarea value={monthTreasure} onChange={e=>setMonthTreasure(e.target.value)} maxLength={300} placeholder={monthCopy.monthTreasurePlaceholder} className="mt-2 min-h-[78px] w-full resize-none rounded-[14px] border border-[#ead8c4] bg-white p-3 text-[11px] font-medium text-[#49372f] outline-none"/><button disabled={!monthTreasure.trim()} onClick={closeMonth} className="mt-2 w-full rounded-[16px] bg-[#8f503e] py-3 text-[11px] font-black text-white disabled:opacity-40">{monthCopy.monthTreasureSave}</button></div>
+         {monthlyTreasures.length>0&&<div className="mt-4"><p className="text-[9px] font-black uppercase tracking-[.14em] text-[#9a6549]">{monthCopy.monthlyTreasures}</p><div className="mt-2 grid gap-2">{monthlyTreasures.slice().reverse().slice(0,6).map(item=><div key={item.date} className="rounded-[14px] bg-white/80 p-3"><p className="text-[9px] font-black text-[#9a6549]">{new Date(item.date).toLocaleDateString()}</p><p className="mt-1 text-[11px] font-bold leading-relaxed text-[#5d4b42]">🏝️ {item.text}</p></div>)}</div></div>}</div>}
+       </div>}
+       {!capsule?<div className="-mt-3 rounded-[24px] border border-white/70 bg-white/65 p-4 shadow-[0_12px_30px_rgba(102,72,50,.08)] backdrop-blur-sm"><textarea value={draft} onChange={e=>setDraft(e.target.value)} maxLength={700} placeholder={c.placeholder} className="min-h-[120px] w-full resize-none rounded-[18px] border border-[#e7d4bd] bg-white/80 p-3 text-[13px] font-medium text-[#493b35] outline-none placeholder:text-[#a7958c]"/><button onClick={bury} disabled={!draft.trim()} className="mt-3 flex w-full items-center justify-center gap-2 rounded-[18px] bg-[#8f503e] px-4 py-3 text-[11px] font-black text-white shadow-[0_9px_20px_rgba(143,80,62,.22)] disabled:opacity-40"><LockKeyhole size={15}/>{c.bury}</button></div>:
+       <div className="-mt-3">
+        <div className="rounded-[24px] border border-white/70 bg-white/75 p-4 text-center shadow-[0_12px_28px_rgba(102,72,50,.10)] backdrop-blur-md"><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#a4654d]">{c.buried}</p><p className="mt-1.5 text-[22px] font-black text-[#4a352d]">{formatRemaining(remaining)}</p><p className="mt-1 text-[10px] font-bold text-[#8d776e]">{monthCopy.cycleLabel} {capsule.cycle}</p></div>
+        {canOpen&&!revealed&&<div className="mt-4 rounded-[22px] bg-white/70 p-4"><p className="text-[12px] font-black text-[#49372f]">{c.guess}</p><textarea value={guess} onChange={e=>setGuess(e.target.value)} maxLength={700} placeholder={c.guessPlaceholder} className="mt-3 min-h-[110px] w-full resize-none rounded-[16px] border border-[#dcc5ad] bg-white/90 p-3 text-[12px] font-medium text-[#49372f] outline-none placeholder:text-[#a18d82]"/><button disabled={!guess.trim()} onClick={()=>setRevealed(true)} className="mt-4 w-full rounded-[16px] bg-[#3d302b] py-3 text-[11px] font-black text-white disabled:opacity-40">{c.open}</button></div>}
+        {revealed&&<div className="mt-4 rounded-[22px] border border-white/70 bg-white/85 p-4 shadow-sm"><p className="text-[9px] font-black uppercase tracking-[.17em] text-[#a4654d]">{c.reveal}</p><div className="mt-3 grid gap-3"><div className="rounded-[16px] border border-[#ead7c4] bg-[#fffdf9] p-3"><p className="text-[9px] font-black uppercase tracking-[.14em] text-[#9b765f]">{c.remembered}</p><p className="mt-1.5 whitespace-pre-wrap text-[12px] font-semibold leading-relaxed text-[#5b4840]">{guess}</p></div><div className="rounded-[16px] border border-[#d9c1a3] bg-[#fff7e9] p-3"><p className="text-[9px] font-black uppercase tracking-[.14em] text-[#9a5b3f]">{c.actual}</p><p className="mt-1.5 whitespace-pre-wrap text-[13px] font-bold leading-relaxed text-[#443631]">{capsule.message}</p></div></div><p className="mt-4 rounded-[14px] bg-[#f3eadf] p-3 text-[11px] font-black leading-relaxed text-[#49372f]">{monthCopy.compareQuestion}</p><p className="mt-3 text-[11px] font-black text-[#49372f]">{c.feedback}</p><textarea value={feedback} onChange={e=>setFeedback(e.target.value)} className="mt-2 min-h-[90px] w-full rounded-[16px] border border-[#ead7c4] bg-white p-3 text-[12px] outline-none"/><button disabled={!feedback.trim()} onClick={rebury} className="mt-3 w-full rounded-[16px] bg-[#8f503e] py-3 text-[11px] font-black text-white disabled:opacity-40">{c.rebury}</button></div>}
+       </div>}
+      </div>
+    </motion.section>}
+
+    {section==="sea"&&<motion.section key="sea" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="relative overflow-hidden px-4 pb-7 pt-6">
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,#e7f7f4_0%,#b9e5e2_24%,#78c8ce_58%,#4eabb8_100%)]"/>
+      <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,.96),transparent_70%)]"/>
+      <div className="relative">
+       <div className="px-1"><div className="flex items-start gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/55 text-[#176878] shadow-sm"><Waves size={22}/></div><div><h3 className="text-[20px] font-black text-[#174f5b]">{c.sea}</h3><p className="mt-1 text-[11px] font-semibold leading-relaxed text-[#39727b]">{c.seaSub}</p></div></div></div>
+       <div ref={boardRef} className="relative mt-4 h-[430px] overflow-hidden rounded-[28px] border border-white/60 bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,.48),transparent_24%),linear-gradient(180deg,rgba(255,255,255,.16),rgba(27,128,145,.18))] shadow-[inset_0_0_45px_rgba(255,255,255,.22)]">
+        <motion.div animate={{x:[-16,16,-16]}} transition={{duration:8,repeat:Infinity,ease:"easeInOut"}} className="absolute -left-10 top-7 h-10 w-[120%] rounded-[50%] border-t border-white/40 opacity-70"/>
+        <motion.div animate={{x:[14,-14,14]}} transition={{duration:10,repeat:Infinity,ease:"easeInOut"}} className="absolute -left-10 top-32 h-12 w-[120%] rounded-[50%] border-t border-white/30 opacity-70"/>
+        {seaObstacles.map((o,i)=><motion.div key={o.type+i} animate={{y:[0,-3,0],rotate:o.type==="🌀"?[0,8,-8,0]:[0,-2,0]}} transition={{duration:o.type==="🌀"?5:6,repeat:Infinity}} className="absolute z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-white/40 bg-[#0e6572]/25 text-center shadow-sm" style={{left:`${o.x*100}%`,top:`${o.y*100}%`}}><span className="text-[20px] leading-none">{o.type}</span><span className="mt-0.5 text-[5px] font-black uppercase tracking-[.08em] text-white/80">{o.label}</span></motion.div>)}
+        {islands.map((island,index)=>{const unlocked=unlockedIslands.includes(index);const treasure=Boolean((island as any).treasure);return <div key={index} className={`absolute flex h-12 ${treasure?"w-20":"w-16"} -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border text-center shadow-[0_7px_14px_rgba(38,103,116,.20)] ${treasure?"border-[#f2cf70] bg-[radial-gradient(ellipse_at_45%_35%,#fff1b4,#c99942)]":unlocked?"border-emerald-300 bg-[radial-gradient(ellipse_at_45%_35%,#d9f4df,#75c69a)]":"border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)]"}`} style={{left:`${island.x*100}%`,top:`${island.y*100}%`}}><span className={`text-[6px] font-black uppercase tracking-[.10em] ${treasure?"text-[#765018]":unlocked?"text-emerald-800":"text-[#6d5b3d]"}`}>{treasure?"🏆 ":unlocked?"✓ ":""}{islandNames[index]}</span></div>})}
+        <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[9px] font-black text-[#286b76]">{c.start}: {placed[0]?.tile.left}</div>
+        {placed.map((p,i)=><motion.div key={p.tile.id+"-"+i} drag={false} onClick={()=>setSelectedPlaced(i)} onDragEnd={(_,info)=>{const w=74;const board=boardRef.current;if(!board)return;const rect=board.getBoundingClientRect();const prev=placed[i-1];const next=placed[i+1];let nx=Math.max(4,Math.min(rect.width-w-4,p.x+info.offset.x));const ny=Math.max(6,Math.min(rect.height-35,p.y+info.offset.y));if(prev){const requiredX=prev.x+w+4;if(Math.abs(nx-requiredX)>12){setToast("A peça tem de ficar ligada à lateral direita da anterior");setTimeout(()=>setToast(""),1800);return}nx=requiredX}if(next&&next.x<=nx+w+4){setToast("Não podes ultrapassar a peça seguinte");setTimeout(()=>setToast(""),1600);return}setPlaced(prevPlaced=>prevPlaced.map((q,j)=>j===i?{...q,x:nx,y:ny}:q));}} initial={{opacity:0,scale:.88}} animate={selectedPlaced===i?{opacity:1,scale:1,y:[0,i%2?2:-2,0]}:{opacity:1,scale:1,y:0}} transition={selectedPlaced===i?{opacity:{duration:.2},scale:{duration:.2},y:{duration:4,repeat:Infinity}}:{opacity:{duration:.2},scale:{duration:.2}}} className={`cursor-grab touch-none ${selectedPlaced===i?"ring-2 ring-[#f0b35b] ring-offset-1 rounded-xl":""}`} style={{position:"absolute",left:p.x,top:p.y,rotate:p.rotate}}><DominoPiece tile={p.tile} compact/></motion.div>)}
+       </div>
+
+       <div className="mt-4 rounded-[24px] border border-white/60 bg-white/58 p-4 backdrop-blur-md">
+        <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-black uppercase tracking-[.16em] text-[#337582]">{c.choose}</p><p className="mt-1 text-[10px] font-semibold text-[#4b7b82]">{c.dragTip}</p></div><button onClick={reset} className="rounded-full bg-white/80 p-2 text-[#37727d]" title={c.restart}><Star size={15}/></button></div>
+        <div className="mt-3 grid grid-cols-2 gap-3 pb-3 pt-1">{hand.map(tile=><div key={tile.id} className="flex justify-center"><DominoPiece tile={tile} draggable onDrop={dropDomino}/></div>)}</div>
+        <button onClick={requestWord} className="mx-auto flex items-center justify-center gap-2 rounded-full border border-[#2f7882]/30 bg-[#effaf7]/95 px-5 py-2.5 text-[10px] font-black text-[#286773] shadow-sm active:scale-[.98]">✦ <span>{c.needWord}</span></button>
+        <p className="text-center text-[9px] font-bold text-[#477b84]">{bonuses.extraChoices>0?`+${bonuses.extraChoices} escolha(s) extra desbloqueada(s)`:""}</p>
+       </div>
+
+       <div className="mt-4 rounded-[24px] border border-[#ead7b5] bg-[#fff8ed]/90 p-4 backdrop-blur-md"><div className="flex items-center gap-3"><span className="text-2xl">🏆</span><div className="min-w-0 flex-1"><p className="text-[9px] font-black uppercase tracking-[.17em] text-[#9a7040]">{c.treasureHistory}</p><p className="mt-1 text-[12px] font-black leading-relaxed text-[#5b4639]">{c.treasureHistoryPrompt}</p></div></div><button onClick={()=>setTreasureHistoryOpen(true)} className="mt-3 w-full rounded-[16px] border border-[#dfc99f] bg-white/90 py-2.5 text-[10px] font-black text-[#8b6434]">{c.treasureHistory}</button></div>
+      </div>
+    </motion.section>}
+   </AnimatePresence>
+  </div>
+<AnimatePresence>{horizonResumeOpen&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[235] flex items-center justify-center bg-[#123f48]/65 p-5 backdrop-blur-sm">
+   <motion.div initial={{opacity:0,y:22,scale:.96}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[30px] border border-white/80 bg-[#fffdf7] p-6 shadow-[0_30px_80px_rgba(12,54,63,.34)]">
+    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] bg-[#dff2ee] text-2xl">🌊</div>
+    <p className="mt-4 text-center text-[9px] font-black uppercase tracking-[.2em] text-[#39737c]">{c.savedProgress}</p>
+    <h3 className="mt-1 text-center text-[21px] font-black text-[#294f57]">{hasSavedJourney?c.resumeTitle:c.startJourney}</h3>
+    <p className="mt-3 text-center text-[12px] font-semibold leading-relaxed text-[#587177]">{hasSavedJourney?c.resumeText:c.introText}</p>{!hasSavedJourney&&<><p className="mt-3 rounded-[17px] bg-[#eef8f5] p-3 text-center text-[11px] font-bold leading-relaxed text-[#3d6970]">{c.introExample}</p><p className="mt-3 text-center text-[11px] font-medium leading-relaxed text-[#6a7b7f]">{c.introExplain}</p></>}
+    <div className="mt-5 grid gap-2">
+     {hasSavedJourney&&<button onClick={continueJourney} className="w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white">{c.continueJourney}</button>}
+     <button onClick={startNewJourney} className={`w-full rounded-[17px] py-3.5 text-[11px] font-black ${hasSavedJourney?"border border-[#286773]/25 bg-white text-[#286773]":"bg-[#286773] text-white"}`}>{c.startJourney}</button>
+    </div>
+   </motion.div>
+  </motion.div>}</AnimatePresence>
+  <AnimatePresence>{wordPromptOpen&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[225] flex items-center justify-center bg-[#123f48]/65 p-5 backdrop-blur-sm">
+   <motion.div initial={{opacity:0,y:22,scale:.96}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[30px] border border-white/80 bg-[#fffdf7] p-6 shadow-[0_30px_80px_rgba(12,54,63,.34)]">
+    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] bg-[#e6f5f1] text-2xl">✦</div>
+    <h3 className="mt-4 text-center text-[21px] font-black text-[#294f57]">{wordTile?c.needWordMoment:c.needWordTitle}</h3>
+    {!wordTile&&<><p className="mt-3 text-center text-[12px] font-semibold leading-relaxed text-[#587177]">{c.needWordPrompt}</p><input autoFocus value={neededWord} onChange={e=>setNeededWord(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")findNeededWord()}} placeholder={c.needWordPlaceholder} className="mt-5 w-full rounded-[17px] border border-[#d8e5e3] bg-white p-3.5 text-[13px] font-bold text-[#405a60] outline-none"/><button onClick={findNeededWord} className="mt-3 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white">{c.needWordFind}</button></>}
+    {wordTile&&<><div className="mt-4 flex justify-center"><button onClick={()=>setWordTile(null)} className="cursor-pointer"><DominoPiece tile={wordTile}/></button></div><p className="mt-5 text-[13px] font-black leading-relaxed text-[#304f56]">{c.needWordMoment}</p><textarea autoFocus value={wordMoment} onChange={e=>setWordMoment(e.target.value)} maxLength={700} placeholder={c.needWordMomentPlaceholder} className="mt-3 min-h-[135px] w-full resize-none rounded-[17px] border border-[#d8e5e3] bg-white p-3 text-[12px] font-medium text-[#405a60] outline-none"/><button disabled={!wordMoment.trim()} onClick={saveWordMoment} className="mt-3 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white disabled:opacity-40">{c.needWordSave}</button></>}
+    <button onClick={()=>{setWordPromptOpen(false);setWordTile(null);setWordMoment("")}} className="mt-2 w-full py-2 text-[10px] font-bold text-[#718185]">×</button>
+   </motion.div>
+  </motion.div>}</AnimatePresence>
+  <AnimatePresence>{horizonIntroOpen&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[230] flex items-center justify-center bg-[#123f48]/65 p-5 backdrop-blur-sm">
+   <motion.div initial={{opacity:0,y:22,scale:.96}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[30px] border border-white/80 bg-[#fffdf7] p-6 shadow-[0_30px_80px_rgba(12,54,63,.34)]">
+    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-[#dff2ee] text-3xl">🌊</div>
+    <p className="mt-4 text-center text-[9px] font-black uppercase tracking-[.2em] text-[#39737c]">✦ CONFIA</p>
+    <h3 className="mt-1 text-center text-[21px] font-black text-[#294f57]">{c.introTitle}</h3>
+    <p className="mt-3 text-[12px] font-semibold leading-relaxed text-[#587177]">{c.introText}</p>
+    <div className="mt-4 rounded-[18px] border border-[#d9e9e7] bg-[#f2faf8] p-4 text-center"><p className="text-[10px] font-black uppercase tracking-[.15em] text-[#36717a]">PALAVRA <span className="mx-1">→</span> PALAVRA</p><p className="mt-2 text-[11px] font-semibold leading-relaxed text-[#567077]">{c.introExample}</p></div>
+    <p className="mt-4 text-[11px] font-semibold leading-relaxed text-[#64777b]">{c.introExplain}</p>
+    <button onClick={()=>{localStorage.setItem(HORIZON_INTRO_KEY,"1");setHorizonIntroOpen(false)}} className="mt-5 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white">{c.introButton}</button>
+   </motion.div>
+  </motion.div>}</AnimatePresence>
+  <AnimatePresence>{junction&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[220] flex items-center justify-center bg-[#123f48]/65 p-5 backdrop-blur-sm">
+   <motion.div initial={{opacity:0,y:22,scale:.96}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[30px] border border-white/80 bg-[#fffdf7] p-6 shadow-[0_30px_80px_rgba(12,54,63,.34)]">
+    <div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#9b7950]">{c.junctionStep.replace("{step}",String(junctions.length+1))}</p><h3 className="mt-1 text-[21px] font-black text-[#294f57]">{c.junctionTitle}</h3></div><span className="text-3xl">🧩</span></div>
+    <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-2"><div className="rounded-[18px] bg-[#edf7f5] p-4 text-center text-[14px] font-black text-[#2d6872]">{junction.left}</div><span className="text-xl text-[#d19a4a]">＋</span><div className="rounded-[18px] bg-[#fff3df] p-4 text-center text-[14px] font-black text-[#8b6434]">{junction.right}</div></div>
+    <p className="mt-5 text-[14px] font-black leading-relaxed text-[#304f56]">{c.junctionPrompt}</p>
+    <p className="mt-2 text-[10px] font-semibold text-[#718185]">{c.junctionExplain}</p>
+    <textarea autoFocus value={junctionExplanation} onChange={e=>setJunctionExplanation(e.target.value)} maxLength={700} placeholder={c.junctionPlaceholder} className="mt-4 min-h-[135px] w-full resize-none rounded-[17px] border border-[#d8e5e3] bg-white p-3 text-[12px] font-medium text-[#405a60] outline-none"/>
+    <button disabled={!junctionExplanation.trim()} onClick={saveJunction} className="mt-3 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white disabled:opacity-40">{c.junctionSave}</button>
+   </motion.div>
+  </motion.div>}</AnimatePresence>
+    <AnimatePresence>{treasureOpen&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[210] flex items-center justify-center bg-[#123f48]/65 p-5 backdrop-blur-sm">
+   <motion.div initial={{opacity:0,y:20,scale:.96}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[30px] border border-[#f4d78a] bg-[#fffaf0] p-6 text-center shadow-[0_30px_80px_rgba(12,54,63,.34)]">
+    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[24px] border border-[#e8c66b] bg-[#f8dda0] text-4xl shadow-inner">🎁</div>
+    <p className="mt-4 text-[9px] font-black uppercase tracking-[.2em] text-[#9a7040]">{c.treasureLabel}</p>
+    <h3 className="mt-1 text-[21px] font-black text-[#4c3829]">{c.treasureTitle}</h3>
+    <p className="mt-2 text-[11px] font-semibold leading-relaxed text-[#735f51]">{c.treasureSubtitle}</p>
+    <div className="mt-5 rounded-[20px] border border-[#ead7b5] bg-white p-4 text-left">
+      <div className="rounded-[16px] border border-[#dcebe8] bg-[#f2faf8] p-3"><p className="text-[10px] font-black uppercase tracking-[.14em] text-[#36717a]">{c.treasureReactive}</p><p className="mt-2 text-[10px] font-semibold leading-relaxed text-[#567077]">{buildTreasureReflection()}</p></div>
+      <p className="text-[10px] font-black uppercase tracking-[.14em] text-[#a06f3d]">{c.treasureThread}</p>
+      <div className="mt-3 grid gap-2">{[...junctions].sort((a,b)=>a.slot-b.slot).map((j,i)=><div key={j.slot} className="rounded-[15px] bg-[#fff8ed] p-3"><p className="text-[9px] font-black text-[#9b765f]">0{i+1}</p><p className="mt-1 text-[11px] font-black text-[#4d4038]">{j.left} ＋ {j.right}</p><p className="mt-1.5 text-[10px] font-semibold leading-relaxed text-[#66574f]">{j.explanation}</p></div>)}</div>
+      <p className="mt-4 text-[12px] font-black leading-relaxed text-[#4d4038]">{buildTreasureReflection()}</p>
+      <p className="mt-4 text-[11px] font-black text-[#49372f]">{c.treasureQuestion}</p>
+      <textarea value={treasureAnswer} onChange={e=>setTreasureAnswer(e.target.value)} maxLength={500} placeholder={c.junctionPlaceholder} className="mt-3 min-h-[100px] w-full resize-none rounded-[16px] border border-[#e4d7c4] bg-[#fffdf9] p-3 text-[12px] font-medium text-[#4f4037] outline-none"/>
+      <button onClick={()=>setTreasureHistoryOpen(true)} className="mt-2 w-full rounded-[16px] border border-[#dfc99f] bg-white py-3 text-[11px] font-black text-[#8b6434]">{c.treasureHistory}</button>
+      <button disabled={!treasureAnswer.trim()} onClick={()=>{saveTreasureToHistory();setTreasureOpen(false);setToast(c.treasureClose);setTimeout(()=>setToast(""),2400)}} className="mt-3 w-full rounded-[16px] bg-[#8f503e] py-3 text-[11px] font-black text-white disabled:opacity-40">{c.treasureClose}</button>
+    </div>
+   </motion.div>
+  </motion.div>}</AnimatePresence>
+  <AnimatePresence>{treasureHistoryOpen&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[215] flex items-center justify-center bg-[#123f48]/65 p-5 backdrop-blur-sm">
+   <motion.div initial={{opacity:0,y:20,scale:.96}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md max-h-[82vh] overflow-hidden rounded-[30px] border border-[#ead7b5] bg-[#fffaf0] p-6 shadow-[0_30px_80px_rgba(12,54,63,.34)]">
+    <div className="flex items-center justify-between"><div><p className="text-[9px] font-black uppercase tracking-[.2em] text-[#9a7040]">✦ CONFIA</p><h3 className="mt-1 text-[21px] font-black text-[#4c3829]">{c.treasureHistory}</h3></div><span className="text-3xl">🏆</span></div>
+    <div className="mt-5 max-h-[58vh] overflow-y-auto pr-1">{treasureHistory.length===0?<p className="rounded-[18px] bg-white p-5 text-center text-[11px] font-semibold text-[#735f51]">{c.treasureHistoryEmpty}</p>:treasureHistory.map((entry,index)=><div key={entry.date} className="mb-3 rounded-[18px] border border-[#ead7b5] bg-white p-4"><div className="flex items-center justify-between"><p className="text-[9px] font-black uppercase tracking-[.15em] text-[#a06f3d]">{new Date(entry.date).toLocaleDateString()}</p><span className="text-sm">🏆</span></div><p className="mt-2 text-[11px] font-black leading-relaxed text-[#4d4038]">{entry.reflection}</p>{entry.answer&&<p className="mt-2 rounded-[12px] bg-[#fff8ed] p-2.5 text-[10px] font-semibold leading-relaxed text-[#66574f]">{entry.answer}</p>}<p className="mt-2 text-[9px] font-bold text-[#9b765f]">{entry.words.slice(0,8).join(" → ")}{entry.words.length>8?" → …":""}</p></div>)}</div>
+    <button onClick={()=>setTreasureHistoryOpen(false)} className="mt-3 w-full rounded-[17px] bg-[#8f503e] py-3.5 text-[11px] font-black text-white">{c.treasureHistoryClose}</button>
+   </motion.div>
+  </motion.div>}</AnimatePresence>
+  <AnimatePresence>{islandReflection&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[205] flex items-center justify-center bg-[#123f48]/55 p-5 backdrop-blur-sm">
+   <motion.div initial={{opacity:0,y:18,scale:.97}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[28px] border border-white/80 bg-[#fffdf7] p-5 shadow-[0_25px_70px_rgba(12,54,63,.28)]">
+    <div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e9d7a8] text-lg">🏝️</div><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#9b7950]">{c.islandReflectionWords}</p><p className="text-[11px] font-bold text-[#6f5d52]">{c.islandReflectionTitle}</p></div></div>
+    <div className="mt-5 grid grid-cols-3 gap-2">{islandReflection.words.map((word,i)=><div key={word+i} className="rounded-[16px] border border-[#dcebe8] bg-[#f2faf8] px-2 py-3 text-center text-[11px] font-black text-[#2d6872]">{word}</div>)}</div>
+    <p className="mt-5 text-[14px] font-black leading-relaxed text-[#304f56]">{c.islandReflectionPrompt}</p>
+    <textarea autoFocus value={islandReflectionText} onChange={e=>setIslandReflectionText(e.target.value)} maxLength={700} placeholder={c.islandReflectionPlaceholder} className="mt-4 min-h-[135px] w-full resize-none rounded-[17px] border border-[#d8e5e3] bg-white p-3 text-[12px] font-medium text-[#405a60] outline-none"/>
+    <button disabled={!islandReflectionText.trim()} onClick={saveIslandReflection} className="mt-3 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white disabled:opacity-40">{c.islandReflectionContinue}</button>
+   </motion.div>
+  </motion.div>}</AnimatePresence>
+  <AnimatePresence>{impulse&&<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="fixed inset-0 z-[200] flex items-center justify-center bg-[#123f48]/55 p-5 backdrop-blur-sm">
+   <motion.div initial={{opacity:0,y:18,scale:.97}} animate={{opacity:1,y:0,scale:1}} className="w-full max-w-md rounded-[28px] border border-white/80 bg-[#fffdf7] p-5 shadow-[0_25px_70px_rgba(12,54,63,.28)]">
+    <div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e9d7a8] text-lg">🏝️</div><div><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#9b7950]">{c.questionTitle}</p><p className="text-[11px] font-bold text-[#6f5d52]">{c.questionSubtitle}</p></div></div>
+    <p className="mt-5 text-[15px] font-black leading-relaxed text-[#2f4f57]">{impulse.question}</p>
+    <div className="mt-4 grid gap-2">{impulse.answers.map((answer,index)=>{const selected=impulseAnswer===index;const correct=selected&&index===impulse.correct;const wrong=selected&&index!==impulse.correct;return <button key={answer} onClick={()=>answerImpulse(index)} className={`rounded-[16px] border px-4 py-3 text-left text-[11px] font-bold transition ${correct?"border-emerald-400 bg-emerald-50 text-emerald-800":wrong?"border-red-300 bg-red-50 text-red-700":"border-[#d9e5e5] bg-white hover:bg-[#f3f9f8] text-[#355b63]"}`}>{String.fromCharCode(65+index)}. {answer}</button>})}</div>
+    {impulseAnswer!==null&&impulseAnswer!==impulse.correct&&<div className="mt-4 rounded-[15px] bg-[#fff4e7] p-3 text-[10px] font-semibold leading-relaxed text-[#78583e]">{impulse.explanation}<br/><span className="font-black">{c.questionRetry}</span></div>}
+    {impulseAnswer===impulse.correct&&<div className="mt-4 rounded-[15px] bg-[#edf8f2] p-3 text-[10px] font-black text-emerald-800">✓ Resposta certa. A tua peça pode continuar o caminho.</div>}
+   </motion.div>
+  </motion.div>}</AnimatePresence>
+  <AnimatePresence>{toast&&<motion.div initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="fixed bottom-24 left-1/2 z-[100] -translate-x-1/2 rounded-full bg-[#253f45] px-4 py-2 text-[11px] font-black text-white shadow-xl">{toast}</motion.div>}</AnimatePresence>
+ </div>
+}

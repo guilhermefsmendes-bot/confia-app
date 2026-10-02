@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Plus, Trash2, Heart, Award, Smile, Coffee, Users, Sparkles, ArrowRight, CircleCheckBig, Footprints, Route, ShieldCheck, X } from 'lucide-react';
+import { Check, Plus, Trash2, Heart, Award, Smile, Coffee, Users, Sparkles, ArrowRight, CircleCheckBig, Footprints, Route, ShieldCheck, X, Flag } from 'lucide-react';
 import { Objective } from '../types';
 import { useTranslation } from "react-i18next";
 import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
@@ -30,6 +30,22 @@ const { t, i18n } = useTranslation();
   const [minimumDraft, setMinimumDraft] = useState("");
   const [normalDraft, setNormalDraft] = useState("");
   const [extraDraft, setExtraDraft] = useState("");
+  const [climberGender, setClimberGender] = useState<'male' | 'female' | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const saved = window.localStorage.getItem('confia_climber_gender_v1');
+    return saved === 'female' || saved === 'male' ? saved : null;
+  });
+  const [showClimberChoice, setShowClimberChoice] = useState(false);
+
+  useEffect(() => {
+    if (!climberGender) setShowClimberChoice(true);
+  }, [climberGender]);
+
+  const chooseClimber = (gender: 'male' | 'female') => {
+    setClimberGender(gender);
+    setShowClimberChoice(false);
+    window.localStorage.setItem('confia_climber_gender_v1', gender);
+  };
 
   useEffect(() => {
     const refresh = () => setJourneyRevision(value => value + 1);
@@ -200,11 +216,73 @@ const { t, i18n } = useTranslation();
   };
 
   const completedCount = objectives.filter(o => o.completed).length;
+  const [everstressFlags, setEverstressFlags] = React.useState(() => {
+    if (typeof window === 'undefined') return 0;
+    return Number(window.localStorage.getItem('confia_everstress_flags_v1') || '0');
+  });
+  const summitWasCompleted = React.useRef(false);
+
+  React.useEffect(() => {
+    const today = new Date();
+    const todayKey = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, '0'),
+      String(today.getDate()).padStart(2, '0'),
+    ].join('-');
+    const hasReachedSummit = objectives.length === 5 && completedCount === 5;
+
+    if (!hasReachedSummit) {
+      summitWasCompleted.current = false;
+      return;
+    }
+
+    if (summitWasCompleted.current) return;
+    if (window.localStorage.getItem('confia_everstress_last_awarded_date_v1') === todayKey) {
+      summitWasCompleted.current = true;
+      return;
+    }
+
+    summitWasCompleted.current = true;
+    window.localStorage.setItem('confia_everstress_last_awarded_date_v1', todayKey);
+    setEverstressFlags(current => {
+      const next = current + 1;
+      window.localStorage.setItem('confia_everstress_flags_v1', String(next));
+      return next;
+    });
+  }, [completedCount, objectives.length]);
 
   const completionPercentage =
     objectives.length > 0
       ? Math.round((completedCount / objectives.length) * 100)
       : 0;
+
+  const mountainRoute = [
+    { x: 22, y: 79 },
+    { x: 35, y: 65 },
+    { x: 49, y: 49 },
+    { x: 64, y: 34 },
+    { x: 78, y: 20 },
+  ];
+  const routePosition = (completionPercentage / 100) * (mountainRoute.length - 1);
+  const routeIndex = Math.min(mountainRoute.length - 2, Math.floor(routePosition));
+  const routeProgress = routePosition - routeIndex;
+  const climberPosition = {
+    x: mountainRoute[routeIndex].x + (mountainRoute[routeIndex + 1].x - mountainRoute[routeIndex].x) * routeProgress,
+    y: mountainRoute[routeIndex].y + (mountainRoute[routeIndex + 1].y - mountainRoute[routeIndex].y) * routeProgress,
+  };
+
+  const graduationLevels = [
+    { days: 1, label: '⚪', color: '#D7D0CB', bg: 'bg-white', border: 'border-[#D7D0CB]' },
+    { days: 3, label: '🟡', color: '#D6B83B', bg: 'bg-[#F2D34F]', border: 'border-[#D6B83B]' },
+    { days: 7, label: '🟠', color: '#D77C29', bg: 'bg-[#F39A45]', border: 'border-[#D77C29]' },
+    { days: 14, label: '🟢', color: '#4F8D54', bg: 'bg-[#67A96B]', border: 'border-[#4F8D54]' },
+    { days: 21, label: '🔵', color: '#4775A7', bg: 'bg-[#5E8FC7]', border: 'border-[#4775A7]' },
+    { days: 30, label: '🟣', color: '#72518B', bg: 'bg-[#8E68A9]', border: 'border-[#72518B]' },
+    { days: 45, label: '🟤', color: '#704C3B', bg: 'bg-[#8A624E]', border: 'border-[#704C3B]' },
+    { days: 60, label: '🔴', color: '#A9443C', bg: 'bg-[#C95B52]', border: 'border-[#A9443C]' },
+    { days: 90, label: '⚫', color: '#151515', bg: 'bg-[#252525]', border: 'border-[#151515]' },
+  ];
+  const currentGraduation = [...graduationLevels].reverse().find(level => everstressFlags >= level.days) ?? graduationLevels[0];
 
   const earnedXp = objectives
     .filter(objective => objective.completed)
@@ -228,7 +306,7 @@ const { t, i18n } = useTranslation();
     completedCount === objectives.length;
 
   return (
-    <div className="relative max-w-md mx-auto space-y-5 py-4">
+    <div className="relative w-full min-h-[calc(100vh-120px)] overflow-hidden">
       <AnimatePresence>
         {objectiveCelebration && (
           <motion.div
@@ -300,7 +378,7 @@ const { t, i18n } = useTranslation();
       </AnimatePresence>
 
       {/* 2B — Identidade premium + progresso diário */}
-      <section className="relative overflow-hidden rounded-[30px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF9F5] via-white to-[#F3E3DC]/70 p-5 shadow-sm">
+      <section className="relative min-h-[calc(100vh-120px)] overflow-hidden bg-[#E9E0D7]">
         <div
           className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#B85F48]/10 blur-2xl"
           aria-hidden="true"
@@ -311,15 +389,17 @@ const { t, i18n } = useTranslation();
           aria-hidden="true"
         />
 
-        <div className="relative">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="mb-2 flex items-center gap-2">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#B85F48]/25 bg-white text-[#934A38] shadow-sm">
-                  <Award size={16} strokeWidth={2.2} />
+        <div className="relative min-h-[calc(100vh-120px)]">
+          <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-white/35 via-transparent to-[#3F2C27]/25" />
+          <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_50%_18%,rgba(255,255,255,.55),transparent_45%)]" />
+          <div className="relative z-20 flex items-start justify-between gap-4 px-5 pt-5">
+            <div className="min-w-0 flex-1">
+              <div className="mb-3 flex items-center justify-center gap-2">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#B85F48]/25 bg-white text-[#934A38] shadow-sm">
+                  <Award size={18} strokeWidth={2.2} />
                 </span>
 
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38] font-display">
+                <span className="text-[20px] font-black uppercase tracking-[0.12em] text-[#934A38] font-display text-center">
                   {t("objectivesPremium.eyebrow")}
                 </span>
               </div>
@@ -344,7 +424,38 @@ const { t, i18n } = useTranslation();
             </div>
           </div>
 
-          <div className="mt-5 rounded-[22px] border border-white/80 bg-white/75 p-4 shadow-sm backdrop-blur-sm">
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="relative h-full overflow-hidden bg-gradient-to-b from-[#DDE8EA] via-[#D4DFE1] to-[#B9A99D]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(255,255,255,.95),transparent_42%)]" />
+              <div className="absolute left-[7%] top-5 text-3xl opacity-70">☁️</div>
+              <div className="absolute right-[9%] top-12 text-2xl opacity-55">☁️</div>
+              <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M0 100 L0 86 C8 84 13 78 18 80 C20 80 21 79 22 79 C26 78 30 69 35 65 C39 62 44 57 49 49 C54 46 58 40 64 34 C69 31 73 24 78 20 C81 18 84 24 88 29 C93 37 97 42 100 47 L100 100 Z" fill="#B79F91" />
+                <path d="M0 100 L0 92 C9 89 15 85 22 83 C27 80 31 75 35 70 C40 67 45 61 49 55 C55 51 59 45 64 40 C70 36 74 29 78 26 C84 25 91 37 100 55 L100 100 Z" fill="#80685D" opacity=".55" />
+                <path d="M22 79 C26 78 30 69 35 65 C39 62 44 57 49 49 C54 46 58 40 64 34 C69 31 73 24 78 20" fill="none" stroke="#F8F3EE" strokeWidth="1.2" strokeDasharray="1.2 1.8" opacity=".9" vectorEffect="non-scaling-stroke" />
+                <path d="M72 25 C74 23 76 21 78 20 C80 20 82 22 84 24" fill="none" stroke="#FFFDF9" strokeWidth="2.2" opacity=".75" vectorEffect="non-scaling-stroke" />
+              </svg>
+              {[
+                {level:1,x:22,y:79},{level:2,x:35,y:65},{level:3,x:49,y:49},{level:4,x:64,y:34},{level:5,x:78,y:20}
+              ].map(point=><div key={point.level} className="absolute z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full border-2 border-white bg-[#8F503E] shadow" style={{left:`${point.x}%`,top:`${point.y}%`}} />)}
+              <motion.div animate={{left:`${climberPosition.x}%`,top:`${climberPosition.y}%`}} transition={{duration:.9,ease:'easeInOut'}} className="absolute z-30 -translate-x-1/2 -translate-y-full text-[42px] drop-shadow-[0_8px_8px_rgba(40,30,25,.28)]" aria-label={climberGender === 'female' ? t('objectivesPremium.climberFemaleAlt') : t('objectivesPremium.climberMaleAlt')}>
+                {climberGender === 'female' ? '🧗‍♀️' : '🧗‍♂️'}
+              </motion.div>
+              <div className="absolute left-4 top-[11.5rem] z-20 w-[190px] rounded-2xl border border-white/75 bg-white/80 px-2.5 py-2 shadow-sm backdrop-blur-sm">
+                <p className="text-[8px] font-black uppercase tracking-[.14em] text-[#765D52]">{t('objectivesPremium.graduationTitle')}</p>
+                <div className="mt-1.5 flex items-center gap-1">
+                  {graduationLevels.map(level => (
+                    <div key={level.days} className="flex min-w-0 flex-1 flex-col items-center gap-0.5" title={`${level.days} ${level.days === 1 ? t('objectivesPremium.climberDay') : t('objectivesPremium.climberDays')}`}>
+                      <span className={`h-3.5 w-3.5 rounded-full border ${level.border} ${level.bg} shadow-sm ${currentGraduation.days === level.days ? 'ring-2 ring-[#B85F48]/45 ring-offset-1' : ''}`} />
+                      <span className="text-[7px] font-black text-[#8A7770]">{level.days}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="absolute right-4 top-4 z-20 flex items-center gap-2 rounded-full border border-white/80 bg-white/75 px-3 py-2 backdrop-blur-sm"><Flag size={19} strokeWidth={2.4} style={{ color: currentGraduation.color }} /><span className="text-sm font-black text-[#765D52]">{everstressFlags}</span></div>
+              <div className="absolute bottom-1 left-5 right-5 z-20 flex items-end justify-between"><div><p className="text-[9px] font-black uppercase tracking-[.16em] text-[#8F503E]">{completedCount===objectives.length&&objectives.length>0?t("objectivesPremium.mountainSummitTitle"):t("objectivesPremium.mountainBase")}</p><p className="mt-1 max-w-[230px] text-[11px] font-semibold leading-relaxed text-white/90 drop-shadow">{completedCount===objectives.length&&objectives.length>0?t("objectivesPremium.mountainSummitHint"):t("objectivesPremium.mountainHint")}</p></div><span className="text-2xl">🏔️</span></div>
+            </div>
+            <div className="border-t border-white/70 bg-white/65 p-4 backdrop-blur-sm">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#A88A7D]">
@@ -414,6 +525,7 @@ const { t, i18n } = useTranslation();
                 {completedCount}/{objectives.length}
               </span>
             </div>
+          </div>
           </div>
         </div>
       </section>
@@ -687,6 +799,19 @@ const { t, i18n } = useTranslation();
         </section>
       )}
       <AnimatePresence>
+        {showClimberChoice && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[80] flex items-center justify-center bg-[#2F2926]/35 px-5 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, y: 14, scale: .97 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="w-full max-w-sm rounded-[30px] border border-[#E8DDD4] bg-[#FFFDFC] p-6 shadow-2xl">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F3E3DC] text-3xl">🏔️</div>
+              <h3 className="mt-4 text-center text-lg font-black text-[#2F2926]">{t('objectivesPremium.climberChoiceTitle')}</h3>
+              <p className="mt-2 text-center text-xs font-medium leading-relaxed text-[#8A7770]">{t('objectivesPremium.climberChoiceHint')}</p>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <button type="button" onClick={() => chooseClimber('male')} className="rounded-2xl border border-[#E8DDD4] bg-white p-4 text-center transition hover:border-[#B85F48]/45 hover:bg-[#FFF8F4]"><span className="block text-5xl">🧗‍♂️</span><span className="mt-2 block text-[10px] font-black uppercase tracking-wider text-[#765D52]">{t('objectivesPremium.climberMaleAlt')}</span></button>
+                <button type="button" onClick={() => chooseClimber('female')} className="rounded-2xl border border-[#E8DDD4] bg-white p-4 text-center transition hover:border-[#B85F48]/45 hover:bg-[#FFF8F4]"><span className="block text-5xl">🧗‍♀️</span><span className="mt-2 block text-[10px] font-black uppercase tracking-wider text-[#765D52]">{t('objectivesPremium.climberFemaleAlt')}</span></button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
         {editingJourneyId && (() => {
           const objective = objectives.find(item => item.id === editingJourneyId);
           if (!objective) return null;

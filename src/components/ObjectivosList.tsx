@@ -441,7 +441,7 @@ const { t, i18n } = useTranslation();
               <motion.div animate={{left:`${climberPosition.x}%`,top:`${climberPosition.y}%`}} transition={{duration:.9,ease:'easeInOut'}} className="absolute z-30 -translate-x-1/2 -translate-y-full text-[42px] drop-shadow-[0_8px_8px_rgba(40,30,25,.28)]" aria-label={climberGender === 'female' ? t('objectivesPremium.climberFemaleAlt') : t('objectivesPremium.climberMaleAlt')}>
                 {climberGender === 'female' ? '🧗‍♀️' : '🧗‍♂️'}
               </motion.div>
-              <div className="absolute left-4 top-[11.5rem] z-20 w-[190px] rounded-2xl border border-white/75 bg-white/80 px-2.5 py-2 shadow-sm backdrop-blur-sm">
+              <div className="absolute left-4 top-[11.5rem] z-20 w-[114px] rounded-2xl border border-white/75 bg-white/80 px-2 py-1.5 shadow-sm backdrop-blur-sm">
                 <p className="text-[8px] font-black uppercase tracking-[.14em] text-[#765D52]">{t('objectivesPremium.graduationTitle')}</p>
                 <div className="mt-1.5 flex items-center gap-1">
                   {graduationLevels.map(level => (

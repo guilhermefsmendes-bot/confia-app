@@ -2670,7 +2670,7 @@
       "body": "On {{date}} you recorded {{mood}}/10. {{days}} days later you recorded {{recovery}}/10. The past does not predict today, but similar states have changed before."
     },
     "counterfactual": {
-      "title": "Counterfactual Me",
+      "title": "What if...?",
       "body": "Across comparable moments, we found {{withCount}} intervals with immediate support use (average change {{withDelta}}) and {{withoutCount}} without recorded use ({{withoutDelta}})."
     }
   },

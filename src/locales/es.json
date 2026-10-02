@@ -2670,7 +2670,7 @@
       "body": "El {{date}} registraste {{mood}}/10. {{days}} días después registraste {{recovery}}/10. El pasado no predice hoy, pero estados parecidos ya cambiaron."
     },
     "counterfactual": {
-      "title": "Counterfactual Me",
+      "title": "¿Y si...?",
       "body": "En momentos comparables encontramos {{withCount}} intervalos con uso de apoyo inmediato (cambio medio {{withDelta}}) y {{withoutCount}} sin uso registrado ({{withoutDelta}})."
     }
   },

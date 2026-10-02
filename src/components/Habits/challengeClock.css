@@ -28,6 +28,8 @@
   width: 74%;
   gap: clamp(.25rem, 1.3cqw, .375rem);
   z-index: 1;
+  transform: scale(.7);
+  transform-origin: center;
 }
 .challenge-clock-heading {
   margin: 0;

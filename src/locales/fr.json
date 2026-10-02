@@ -2670,7 +2670,7 @@
       "body": "Le {{date}}, tu avais noté {{mood}}/10. {{days}} jours plus tard, tu avais noté {{recovery}}/10. Le passé ne prédit pas aujourd’hui, mais des états similaires ont déjà changé."
     },
     "counterfactual": {
-      "title": "Counterfactual Me",
+      "title": "Et si... ?",
       "body": "Dans des moments comparables, nous avons trouvé {{withCount}} intervalles avec soutien immédiat (variation moyenne {{withDelta}}) et {{withoutCount}} sans utilisation enregistrée ({{withoutDelta}})."
     }
   },

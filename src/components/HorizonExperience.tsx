@@ -629,8 +629,8 @@ function DominoPiece({tile,draggable=false,compact=false,onDrop}:{tile:Domino;dr
   const clientX=typeof e?.clientX==="number"?e.clientX:info.point.x-window.scrollX;
   const clientY=typeof e?.clientY==="number"?e.clientY:info.point.y-window.scrollY;
   onDrop?.(tile,clientX,clientY);
- }} className={`relative flex ${compact?"min-h-[29px] min-w-[74px] rounded-[8px]":"min-h-[58px] min-w-[148px] rounded-[13px]"} shrink-0 cursor-grab touch-none select-none items-center justify-center overflow-hidden border border-white/90 bg-gradient-to-br from-white to-[#eef5f3] px-4 text-center shadow-[0_10px_20px_rgba(31,86,94,.18)] active:cursor-grabbing`}>
-  <span className={`${compact?"text-[9px]":"text-[13px]"} font-black leading-tight text-[#285966]`}>{tile.left}</span>
+ }} className={`relative flex ${compact?"min-h-[18px] min-w-[44px] rounded-[5px]":"min-h-[58px] min-w-[148px] rounded-[13px]"} shrink-0 cursor-grab touch-none select-none items-center justify-center overflow-hidden border border-white/90 bg-gradient-to-br from-white to-[#eef5f3] px-1 text-center shadow-[0_7px_14px_rgba(31,86,94,.16)] active:cursor-grabbing`}>
+  <span className={`${compact?"text-[6px]":"text-[13px]"} font-black leading-tight text-[#285966]`}>{tile.left}</span>
   <span className="absolute left-2 top-2 h-1.5 w-1.5 rounded-full bg-[#6c9aa0]/25"/><span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-[#6c9aa0]/25"/>
  </motion.div>
 }
@@ -744,10 +744,10 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const continueJourney=()=>{setHorizonResumeOpen(false)};
  const reroll=()=>{if(bonuses.rerolls<=0)return;setBonuses((b:any)=>({...b,rerolls:b.rerolls-1}));setQuestDone(v=>!v)};
  const islands=Array.from({length:12},(_,index)=>{
-  const row=Math.floor(index/4);
-  const column=index%4;
-  const snakeColumn=row%2===0?column:3-column;
-  return {x:[.10,.36,.64,.90][snakeColumn],y:[.16,.50,.84][row],...(index===11?{treasure:true}: {})};
+  const row=Math.floor(index/3);
+  const column=index%3;
+  const snakeColumn=row%2===0?column:2-column;
+  return {x:[.17,.50,.83][snakeColumn],y:[.12,.37,.62,.87][row],...(index===11?{treasure:true}: {})};
  });
  const islandNames=lang==="pt"?["Perceber","Observar","Escolher","Experimentar","Aceitar","Pausar","Mudar","Cuidar","Avançar","Confiar","Libertar","Tesouro"]:lang==="es"?["Percibir","Observar","Elegir","Experimentar","Aceptar","Pausar","Cambiar","Cuidar","Avanzar","Confiar","Liberar","Tesoro"]:lang==="fr"?["Percevoir","Observer","Choisir","Expérimenter","Accepter","Faire une pause","Changer","Prendre soin","Avancer","Faire confiance","Libérer","Trésor"]:["Notice","Observe","Choose","Experiment","Accept","Pause","Change","Care","Move forward","Trust","Let go","Treasure"];
  const seaObstacles=[
@@ -756,8 +756,8 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   {x:.25,y:.84,type:"🌀",label:lang==="pt"?"Remoinho":lang==="es"?"Remolino":lang==="fr"?"Tourbillon":"Whirlpool"}
  ];
  const touchingObstacle=(x:number,y:number,boardWidth:number,boardHeight:number,rotate=0)=>{
-  const w=rotate===90||rotate===270?29:74;
-  const h=rotate===90||rotate===270?74:29;
+  const w=rotate===90||rotate===270?18:44;
+  const h=rotate===90||rotate===270?44:18;
   return seaObstacles.some(o=>{
    const cx=boardWidth*o.x,cy=boardHeight*o.y;
    return x+w>=cx-28&&x<=cx+28&&y+h>=cy-28&&y<=cy+28;
@@ -774,8 +774,8 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
   const toX=boardWidth*to.x;
   const toY=boardHeight*to.y;
   const vertical=from.y!==to.y;
-  const w=vertical?29:74;
-  const h=vertical?74:29;
+  const w=vertical?18:44;
+  const h=vertical?44:18;
   return {
    x:Math.max(4,Math.min(boardWidth-w-4,fromX+(toX-fromX)*t-w/2)),
    y:Math.max(6,Math.min(boardHeight-h-6,fromY+(toY-fromY)*t-h/2)),
@@ -1016,7 +1016,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
         {seaObstacles.map((o,i)=><motion.div key={o.type+i} animate={{y:[0,-3,0],rotate:o.type==="🌀"?[0,8,-8,0]:[0,-2,0]}} transition={{duration:o.type==="🌀"?5:6,repeat:Infinity}} className="absolute z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-white/40 bg-[#0e6572]/25 text-center shadow-sm" style={{left:`${o.x*100}%`,top:`${o.y*100}%`}}><span className="text-[20px] leading-none">{o.type}</span><span className="mt-0.5 text-[5px] font-black uppercase tracking-[.08em] text-white/80">{o.label}</span></motion.div>)}
         {islands.map((island,index)=>{const unlocked=unlockedIslands.includes(index);const treasure=Boolean((island as any).treasure);return <div key={index} className={`absolute flex h-12 ${treasure?"w-20":"w-16"} -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border text-center shadow-[0_7px_14px_rgba(38,103,116,.20)] ${treasure?"border-[#f2cf70] bg-[radial-gradient(ellipse_at_45%_35%,#fff1b4,#c99942)]":unlocked?"border-emerald-300 bg-[radial-gradient(ellipse_at_45%_35%,#d9f4df,#75c69a)]":"border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)]"}`} style={{left:`${island.x*100}%`,top:`${island.y*100}%`}}><span className={`text-[6px] font-black uppercase tracking-[.10em] ${treasure?"text-[#765018]":unlocked?"text-emerald-800":"text-[#6d5b3d]"}`}>{treasure?"🏆 ":unlocked?"✓ ":""}{islandNames[index]}</span></div>})}
         <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[9px] font-black text-[#286b76]">{c.start}: {placed[0]?.tile.left}</div>
-        {placed.map((p,i)=><motion.div key={p.tile.id+"-"+i} drag={false} onClick={()=>setSelectedPlaced(i)} onDragEnd={(_,info)=>{const w=74;const board=boardRef.current;if(!board)return;const rect=board.getBoundingClientRect();const prev=placed[i-1];const next=placed[i+1];let nx=Math.max(4,Math.min(rect.width-w-4,p.x+info.offset.x));const ny=Math.max(6,Math.min(rect.height-35,p.y+info.offset.y));if(prev){const requiredX=prev.x+w+4;if(Math.abs(nx-requiredX)>12){setToast("A peça tem de ficar ligada à lateral direita da anterior");setTimeout(()=>setToast(""),1800);return}nx=requiredX}if(next&&next.x<=nx+w+4){setToast("Não podes ultrapassar a peça seguinte");setTimeout(()=>setToast(""),1600);return}setPlaced(prevPlaced=>prevPlaced.map((q,j)=>j===i?{...q,x:nx,y:ny}:q));}} initial={{opacity:0,scale:.88}} animate={selectedPlaced===i?{opacity:1,scale:1,y:[0,i%2?2:-2,0]}:{opacity:1,scale:1,y:0}} transition={selectedPlaced===i?{opacity:{duration:.2},scale:{duration:.2},y:{duration:4,repeat:Infinity}}:{opacity:{duration:.2},scale:{duration:.2}}} className={`cursor-grab touch-none ${selectedPlaced===i?"ring-2 ring-[#f0b35b] ring-offset-1 rounded-xl":""}`} style={{position:"absolute",left:p.x,top:p.y,rotate:p.rotate}}><DominoPiece tile={p.tile} compact/></motion.div>)}
+        {placed.map((p,i)=><motion.div key={p.tile.id+"-"+i} drag={false} onClick={()=>setSelectedPlaced(i)} onDragEnd={(_,info)=>{const w=44;const board=boardRef.current;if(!board)return;const rect=board.getBoundingClientRect();const prev=placed[i-1];const next=placed[i+1];let nx=Math.max(4,Math.min(rect.width-w-4,p.x+info.offset.x));const ny=Math.max(6,Math.min(rect.height-22,p.y+info.offset.y));if(prev){const requiredX=prev.x+w+4;if(Math.abs(nx-requiredX)>12){setToast("A peça tem de ficar ligada à lateral direita da anterior");setTimeout(()=>setToast(""),1800);return}nx=requiredX}if(next&&next.x<=nx+w+4){setToast("Não podes ultrapassar a peça seguinte");setTimeout(()=>setToast(""),1600);return}setPlaced(prevPlaced=>prevPlaced.map((q,j)=>j===i?{...q,x:nx,y:ny}:q));}} initial={{opacity:0,scale:.88}} animate={selectedPlaced===i?{opacity:1,scale:1,y:[0,i%2?2:-2,0]}:{opacity:1,scale:1,y:0}} transition={selectedPlaced===i?{opacity:{duration:.2},scale:{duration:.2},y:{duration:4,repeat:Infinity}}:{opacity:{duration:.2},scale:{duration:.2}}} className={`cursor-grab touch-none ${selectedPlaced===i?"ring-2 ring-[#f0b35b] ring-offset-1 rounded-lg":""}`} style={{position:"absolute",left:p.x,top:p.y,rotate:p.rotate}}><DominoPiece tile={p.tile} compact/></motion.div>)}
        </div>
 
        <div className="mt-4 rounded-[24px] border border-white/60 bg-white/58 p-4 backdrop-blur-md">

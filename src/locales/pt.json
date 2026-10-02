@@ -2666,7 +2666,7 @@
       "body": "Em {{date}} registaste {{mood}}/10. {{days}} dias depois tinhas registado {{recovery}}/10. O passado não prevê hoje, mas recorda que estados semelhantes já mudaram."
     },
     "counterfactual": {
-      "title": "Counterfactual Me",
+      "title": "E se...?",
       "body": "Entre momentos comparáveis, encontrámos {{withCount}} intervalos com utilização do apoio imediato (alteração média {{withDelta}}) e {{withoutCount}} sem utilização registada ({{withoutDelta}})."
     }
   },

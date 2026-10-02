@@ -1,7 +1,6 @@
 import {habitDestination,screenName} from "./navigation";
 import {recordPersonalScreenView} from "./data/personal/personalAnalytics";
 import type { CompanionAction } from "./components/Companheiro/CompanionVoice";
-import { startNativeNotices,connectNoticeNavigation } from "./notifications/service";
 import type { NoticeTarget } from "./notifications/model";
 import { emitCompanionBrainEvent } from "./data/reactive/companionBrain/companionBrainEvents";
 import React, { lazy, Suspense, memo, useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -123,9 +122,18 @@ useEffect(() => {
     initLanguage();
 }, []);
 useEffect(() => {
-  void import("./data/personal").then(({ syncPersonalEventsFromLegacySources }) => {
-    try { syncPersonalEventsFromLegacySources(); } catch { /* complementar */ }
-  });
+  const run = () => {
+    void import("./data/personal").then(({ syncPersonalEventsFromLegacySources }) => {
+      try { syncPersonalEventsFromLegacySources(); } catch { /* complementar */ }
+    });
+  };
+  const idle = (window as any).requestIdleCallback;
+  if (typeof idle === "function") {
+    const id = idle(run, { timeout: 2500 });
+    return () => (window as any).cancelIdleCallback?.(id);
+  }
+  const timer = window.setTimeout(run, 1200);
+  return () => window.clearTimeout(timer);
 }, []);
 useEffect(() => {
   void import("./firebaseAuth").then(({ initAnonymousAuth }) =>
@@ -274,19 +282,26 @@ const preloadTab = (tab: number) => {
 };
 
 const changeTab = (tab:number) => {
-  // Inicia o carregamento antes da mudança visual, para que o separador
-  // já tenha os módulos prontos quando a renderização acontecer.
-  preloadTab(tab);
+  // Primeiro mudamos o separador: a interação do utilizador nunca fica
+  // à espera do carregamento de um chunk. O preload continua em background.
   setHomeScreen("home");
   setCurrentTab(tab);
+  const run = () => preloadTab(tab);
+  const idle = (window as any).requestIdleCallback;
+  if (typeof idle === "function") {
+    idle(run, { timeout: 1200 });
+  } else {
+    window.setTimeout(run, 0);
+  }
 };
 
 useEffect(() => {
   // Prefetch discreto depois da primeira pintura. Não bloqueia o caminho inicial.
+  // A Comunidade fica fora deste primeiro prefetch porque Chat/Firestore são
+  // recursos pesados e devem continuar a carregar sem competir com Home/Horizonte/Objetivos.
   const runPrefetch = () => {
     preloadTab(1);
     preloadTab(2);
-    preloadTab(4);
   };
   const idle = (window as any).requestIdleCallback;
   if (typeof idle === "function") {
@@ -294,6 +309,19 @@ useEffect(() => {
     return () => (window as any).cancelIdleCallback?.(id);
   }
   const timer = window.setTimeout(runPrefetch, 1800);
+  return () => window.clearTimeout(timer);
+}, []);
+
+useEffect(() => {
+  // Aquecimento tardio da Comunidade: dá tempo para a app estabilizar primeiro.
+  // Não altera listeners, autenticação, mensagens ou regras do chat.
+  const warmCommunity = () => preloadTab(4);
+  const idle = (window as any).requestIdleCallback;
+  if (typeof idle === "function") {
+    const timer = window.setTimeout(() => idle(warmCommunity, { timeout: 4000 }), 8000);
+    return () => window.clearTimeout(timer);
+  }
+  const timer = window.setTimeout(warmCommunity, 10000);
   return () => window.clearTimeout(timer);
 }, []);
   const [triageOpen, setTriageOpen] = useState(false);
@@ -305,13 +333,47 @@ const [avatarMemoryMessage, setAvatarMemoryMessage] = useState("");
 const [showStopMode, setShowStopMode] = useState(false);
 const [openHabitSupport, setOpenHabitSupport] = useState(false);
 const [homeOverviewExpanded,setHomeOverviewExpanded]=useState(false);
-useEffect(() => { void import("./data/habits/sync").then(m => m.startHabitSync()); }, []);
+useEffect(() => {
+  const run = () => void import("./data/habits/sync").then(m => m.startHabitSync());
+  const idle = (window as any).requestIdleCallback;
+  if (typeof idle === "function") {
+    const id = idle(run, { timeout: 3500 });
+    return () => (window as any).cancelIdleCallback?.(id);
+  }
+  const timer = window.setTimeout(run, 1800);
+  return () => window.clearTimeout(timer);
+}, []);
 const [showCommunityTerms, setShowCommunityTerms] = useState(false);
 const [noticeDestination,setNoticeDestination]=useState<NoticeTarget|null>(null);
 const [habitEntry,setHabitEntry]=useState({page:"home",key:0});
 const [noticeMessage,setNoticeMessage]=useState("");
 const [noticeMessageId,setNoticeMessageId]=useState<string|undefined>();
-useEffect(()=>{const stop=connectNoticeNavigation(setNoticeDestination);void startNativeNotices();return stop;},[]);
+useEffect(() => {
+  let stop = () => {};
+  let cancelled = false;
+  const run = () => {
+    void import("./notifications/service").then(({ connectNoticeNavigation, startNativeNotices }) => {
+      if (cancelled) return;
+      stop = connectNoticeNavigation(setNoticeDestination);
+      void startNativeNotices();
+    }).catch((error) => console.error("Notificações:", error));
+  };
+  const idle = (window as any).requestIdleCallback;
+  if (typeof idle === "function") {
+    const id = idle(run, { timeout: 3000 });
+    return () => {
+      cancelled = true;
+      (window as any).cancelIdleCallback?.(id);
+      stop();
+    };
+  }
+  const timer = window.setTimeout(run, 1500);
+  return () => {
+    cancelled = true;
+    window.clearTimeout(timer);
+    stop();
+  };
+}, []);
 
 // Chat privado da comunidade
 const [chatPost, setChatPost] = useState<SharePost | null>(null);
@@ -1465,6 +1527,11 @@ useEffect(() => {
 
   const startCommunityListener = async () => {
     try {
+      // Garantimos autenticação anónima antes do primeiro snapshot.
+      // Sem isto, o primeiro snapshot pode ser recebido sem UID e
+      // as reações/chat ficam sem saber quem é o utilizador.
+      const { initAnonymousAuth } = await import("./firebaseAuth");
+      await initAnonymousAuth();
       const { subscribeToCommunityPosts } = await import("./data/community/communityService");
       if (cancelled) return;
       unsubscribe = subscribeToCommunityPosts(setPosts, t);
@@ -2135,11 +2202,9 @@ const handleLikePost = useCallback(async (
   reaction: "yellow" | "green" | "red"
 ) => {
   try {
-    const user = auth.currentUser;
-
-    if (!user) return;
-
-
+    // reactToCommunityPost garante a autenticação anónima quando
+    // necessário. Não bloqueamos a reação só porque o estado auth
+    // ainda não chegou ao componente.
     const post = posts.find(p => p.id === id);
     if (!post) return;
 
@@ -3467,7 +3532,7 @@ const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp }: EmbraceTabPr
   return (
     <motion.div
       key="embrace-tab"
-      initial={{ opacity: 0, y: 10 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
     >
@@ -3511,7 +3576,7 @@ const ObjectivesTab = memo(function ObjectivesTab({
   return (
     <motion.div
       key="goals-tab"
-      initial={{ opacity: 0, y: 10 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
     >
       <div className="confia-surface-panel">
@@ -3573,7 +3638,7 @@ const CommunityTab = memo(function CommunityTab(props: CommunityTabProps) {
   return (
     <motion.div
       key="community-tab"
-      initial={{ opacity: 0, y: 10 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       className="w-full min-w-0 overflow-x-clip"

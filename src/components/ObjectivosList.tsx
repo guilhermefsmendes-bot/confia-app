@@ -12,13 +12,13 @@ interface ObjectivosListProps {
   onDeleteObjective: (id: string) => void;
 }
 
-export const ObjectivosList: React.FC<ObjectivosListProps> = ({
+export const ObjectivosList = React.memo(function ObjectivosList({
 
   objectives,
   onToggleComplete,
   onAddCustomObjective,
   onDeleteObjective
-}) => {
+}) {
 const { t, i18n } = useTranslation();
   const [newText, setNewText] = useState('');
   const [newCategory, setNewCategory] = useState<'corporeo' | 'mental' | 'social' | 'nutricao'>('mental');
@@ -438,10 +438,10 @@ const { t, i18n } = useTranslation();
               {[
                 {level:1,x:22,y:79},{level:2,x:35,y:65},{level:3,x:49,y:49},{level:4,x:64,y:34},{level:5,x:78,y:20}
               ].map(point=><div key={point.level} className="absolute z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full border-2 border-white bg-[#8F503E] shadow" style={{left:`${point.x}%`,top:`${point.y}%`}} />)}
-              <motion.div animate={{left:`${climberPosition.x}%`,top:`${climberPosition.y}%`}} transition={{duration:.9,ease:'easeInOut'}} className="absolute z-30 -translate-x-1/2 -translate-y-full text-[42px] drop-shadow-[0_8px_8px_rgba(40,30,25,.28)]" aria-label={climberGender === 'female' ? t('objectivesPremium.climberFemaleAlt') : t('objectivesPremium.climberMaleAlt')}>
+              <div className="absolute z-30 -translate-x-1/2 -translate-y-full text-[42px] drop-shadow-[0_8px_8px_rgba(40,30,25,.28)]" style={{ left: `${climberPosition.x}%`, top: `${climberPosition.y}%` }} aria-label={climberGender === 'female' ? t('objectivesPremium.climberFemaleAlt') : t('objectivesPremium.climberMaleAlt')}>
                 {climberGender === 'female' ? '🧗‍♀️' : '🧗‍♂️'}
-              </motion.div>
-              <div className="absolute left-4 top-[11.5rem] z-20 w-[114px] rounded-2xl border border-white/75 bg-white/80 px-2 py-1.5 shadow-sm backdrop-blur-sm">
+              </div>
+              <div className="absolute left-4 top-[15.5rem] z-20 w-[114px] rounded-2xl border border-white/75 bg-white/80 px-2 py-1.5 shadow-sm backdrop-blur-sm">
                 <p className="text-[8px] font-black uppercase tracking-[.14em] text-[#765D52]">{t('objectivesPremium.graduationTitle')}</p>
                 <div className="mt-1.5 flex items-center gap-1">
                   {graduationLevels.map(level => (
@@ -942,5 +942,4 @@ const { t, i18n } = useTranslation();
       )}
 
     </div>
-  );
-};
+  )});

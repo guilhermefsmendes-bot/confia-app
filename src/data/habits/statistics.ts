@@ -11,19 +11,16 @@ export function habitStats(records: HabitRecord[], habitId: string, today = loca
   const cycleAt = [lastRestart?.updatedAt??"",saved?.cycleAt??""].sort().at(-1)!;
   const cycleDate = lastRestart?.updatedAt===cycleAt ? lastRestart.date : saved?.cycleDate;
 
-  const eligible = logs.filter(r => !cycleAt || (r.date >= (cycleDate??"") && r.updatedAt > cycleAt));
+  const eligible = logs.filter(r => !cycleAt || r.updatedAt > cycleAt);
+  const completed = eligible.filter(r => r.data.completed).sort((a,b)=>a.date.localeCompare(b.date));
   const byDay = new Map(eligible.map(r=>[r.date,r]));
-  let anchor = today;
-  if (!byDay.has(anchor)) anchor = shiftDay(anchor,-1);
-  // One full local day to confirm yesterday. Missing entries never become failures.
-  if (!byDay.has(anchor) && anchor === shiftDay(today,-1)) anchor = shiftDay(anchor,-1);
-  const runEnd = byDay.get(anchor)?.data.completed ? anchor : "";
-  let current = 0;
-  while (byDay.get(anchor)?.data.completed) { current++; anchor = shiftDay(anchor,-1); }
-  if (!byDay.has(anchor) && saved?.runStart && saved.cycleAt===cycleAt && anchor>=saved.runStart && anchor<=saved.runEnd && current>0) {
-    let day=anchor;
-    while(day>=saved.runStart){current++;day=shiftDay(day,-1);}
-  }
+
+  // The streak is now calendar-based: after the first successful registration
+  // in the current cycle, every local calendar day counts automatically.
+  // The user only needs to act again when they explicitly restart the habit.
+  const cycleStart = lastRestart ? (completed[0]?.date ?? "") : [completed[0]?.date, saved?.runStart].filter((value): value is string => Boolean(value)).sort().at(0) ?? "";
+  const current = cycleStart ? Math.max(0, Math.floor((new Date(today+"T12:00:00").getTime()-new Date(cycleStart+"T12:00:00").getTime())/86400000)+1) : 0;
+  const runEnd = current > 0 ? today : "";
   let run = 0, best = Math.max(saved?.best??0,...restarts.map(r=>r.data.bestBefore??0)), previous: typeof logs[number] | undefined;
   for (const log of logs) {
     const resetBetween = previous && restarts.some(r=>r.updatedAt > previous!.updatedAt && r.updatedAt < log.updatedAt && r.date >= previous!.date && r.date <= log.date);
@@ -37,7 +34,7 @@ export function habitStats(records: HabitRecord[], habitId: string, today = loca
     today: byDay.get(today)?.data.completed,
     yesterday: byDay.get(shiftDay(today,-1))?.data.completed,
     cycleStart: lastRestart?.date,
-    awaitingYesterday: !byDay.has(shiftDay(today,-1)) && current > 0 };
+    awaitingYesterday: false };
 }
 export function progressStage(days: number): number { return days >= 30 ? 4 : days >= 14 ? 3 : days >= 7 ? 2 : days >= 3 ? 1 : 0; }
 export function nutritionWeek(records: HabitRecord[], start = weekStart(), end = shiftDay(start,6)) {

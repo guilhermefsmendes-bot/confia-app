@@ -1,4 +1,4 @@
-import {Apple,Footprints} from "lucide-react";
+import {Apple,Footprints,MoonStar} from "lucide-react";
 const LifestyleReview=lazy(()=>import("./LifestyleReview"));
 const WellbeingPlans=lazy(()=>import("./WellbeingPlans"));
 import { lazy,Suspense,useEffect,useMemo,useState,useSyncExternalStore } from "react";
@@ -17,6 +17,7 @@ const HabitSetup=lazy(()=>import("./HabitSetup"));
 const HabitHistory=lazy(()=>import("./HabitHistory"));
 const NutritionDashboard=lazy(()=>import("./NutritionDashboard"));
 const ExerciseDashboard=lazy(()=>import("./ExerciseDashboard"));
+const SleepDashboard=lazy(()=>import("./SleepDashboard"));
 const Support=lazy(()=>import("../ImpulsoSOS").then(m=>({default:m.ImpulsoSOS})));
 export default function HabitDashboard({onAddXp,openSupport=false,initialPage="home",navigationKey=0,embedded=false}:{onAddXp:(n:number)=>void;openSupport?:boolean;initialPage?:string;navigationKey?:number;embedded?:boolean}) {
   const {t}=useTranslation();const today=useLocalDay();
@@ -42,6 +43,7 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
   const back=()=>setPage("home");
   useEffect(()=>{if(page==="home"&&!embedded)document.getElementById("habits-title")?.focus();},[page,embedded]);
   const food=records.find(r=>r.kind==="nutrition" && r.date===today);
+  const sleep=records.find(r=>r.kind==="sleep" && r.date===today);
   const movement=records.filter((r):r is Extract<typeof r,{kind:"exercise"}>=>r.kind==="exercise" && r.date===today);
   const foodSummary=food?.kind==="nutrition"?Object.entries(food.data):[];
   const finishDay=(completed:boolean)=>{
@@ -67,16 +69,22 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
         <button type="button" onClick={()=>go("nutrition")} className={(embedded?"min-h-28 ":"min-h-48 ")+"rounded-[28px] border border-[#BDCEAF] bg-gradient-to-br from-[#E4EEDB] to-[#F7FBF1] p-4 text-left shadow-sm focus-visible:ring-2 focus-visible:ring-[#587044]"}><Apple aria-hidden="true" size={24}/><h2 className="mt-2 text-base font-black">{t("habitHub.nutrition.title")}</h2><p className="mt-2 text-xs leading-5">{foodSummary.length?t("habitHub.nutrition.summary",{count:foodSummary.length}):t("habitHub.nutrition.empty")}</p><span className="mt-3 block text-sm font-bold">{t("habitHub.register")} →</span></button>
         <button type="button" onClick={()=>go("exercise")} className={(embedded?"min-h-28 ":"min-h-48 ")+"rounded-[28px] border border-[#CFC5DF] bg-gradient-to-br from-[#E9E1F0] to-[#FAF7FC] p-4 text-left shadow-sm focus-visible:ring-2 focus-visible:ring-[#87739F]"}><Footprints aria-hidden="true" size={24}/><h2 className="mt-2 text-base font-black">{t("habitHub.exercise.title")}</h2><p className="mt-2 text-xs leading-5">{movement.length?t("habitHub.minutes",{count:movement.reduce((n,r)=>n+r.data.minutes,0)}):t("habitHub.exercise.empty")}</p><span className="mt-3 block text-sm font-bold">{t("habitHub.register")} →</span></button>
       </div>
+      <button type="button" onClick={()=>go("sleep")} aria-label={t("habitHub.sleep.title")} className={(embedded?"min-h-28 ":"min-h-36 ")+" w-full rounded-[28px] border border-[#D7D1E6] bg-gradient-to-br from-[#E9E4F3] via-[#F7F4FA] to-[#FFFDF8] p-5 text-left shadow-sm focus-visible:ring-2 focus-visible:ring-[#87739F]"}>
+        <span className="grid h-11 w-11 place-items-center rounded-full bg-white/80"><MoonStar size={24} aria-hidden="true"/></span>
+        <h2 className="mt-3 text-base font-black">{t("habitHub.sleep.title")}</h2>
+      </button>
       {foodSummary.length>0 && <details className="rounded-2xl border border-[#E8DDD7] bg-white p-4 text-sm"><summary className="min-h-8 cursor-pointer font-bold">{t("habitHub.nutrition.today")}</summary><ul className="mt-2 space-y-1">{foodSummary.map(([key,value])=><li key={key}>{t("habitHub.food."+key)}: {value} {t("habitHub.units."+key)}</li>)}</ul></details>}
-      <details open={expanded} onToggle={e=>setExpanded(e.currentTarget.open)} className="rounded-2xl border border-[#E8DDD7] bg-white p-4">
-        <summary className="min-h-11 cursor-pointer font-semibold">{t("homeDaily.more")}</summary>
-        {expanded && <Suspense fallback={<p>{t("loading")}</p>}><div className="space-y-4 pt-3">
-      <LifestyleReview records={records} date={today} today={today} compact/>
-      <HabitInsights events={events} today={today}/>
-      <WellbeingPlans records={records} today={today} run={run} events={events}/>
-        </div></Suspense>}
-      </details>
-      <button className={buttonClass+" w-full"} type="button" onClick={()=>go("support")}>{t("habitHub.support")}</button>
+      {!embedded && <>
+        <details open={expanded} onToggle={e=>setExpanded(e.currentTarget.open)} className="rounded-2xl border border-[#E8DDD7] bg-white p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">{t("homeDaily.more")}</summary>
+          {expanded && <Suspense fallback={<p>{t("loading")}</p>}><div className="space-y-4 pt-3">
+        <LifestyleReview records={records} date={today} today={today} compact/>
+        <HabitInsights events={events} today={today}/>
+        <WellbeingPlans records={records} today={today} run={run} events={events}/>
+          </div></Suspense>}
+        </details>
+        <button className={buttonClass+" w-full"} type="button" onClick={()=>go("support")}>{t("habitHub.support")}</button>
+      </>}
     </> : <Panel title={t("habitHub.pages."+page)} onBack={back}><Suspense fallback={<p role="status">{t("loading")}</p>}>
       {page==="setup" && <HabitSetup habits={habits} primaryId={primary?.id} run={run} onDone={back}/>}
       {page==="history" && primary && <HabitHistory habit={primary} records={records} today={today}/>}
@@ -84,8 +92,8 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
       {page==="restart" && primary && <div className="space-y-4 rounded-[28px] border border-[#E8DDD7] bg-white p-5"><h3 className="text-lg font-bold">{t("habitHub.restartQuestion")}</h3><p className="text-sm leading-6">{t("habitHub.restartHelp")}</p>{(["once","several","fresh"] as const).map(reason=><button key={reason} className={buttonClass+" w-full"} type="button" onClick={()=>{if(run(()=>restartHabit(primary.id,reason),t("habitHub.encouragement.restart")))back();}}>{t("habitHub.reasons."+reason)}</button>)}</div>}
       {page==="nutrition" && <NutritionDashboard records={records} today={today} run={run} onDone={back}/>}
       {page==="exercise" && <ExerciseDashboard records={records} today={today} run={run} onDone={back}/>}
+      {page==="sleep" && <SleepDashboard records={records} today={today} run={run} onDone={back}/>}
       {page==="support" && <Support onAddXp={onAddXp}/>}
     </Suspense></Panel>}
-    <div className="px-2 text-xs leading-5 text-[#6F5D51]"><p role="status">{t("habitHub.sync."+status)}</p>{status==="error" && <button className={buttonClass+" mt-2"} type="button" onClick={()=>void syncHabits(true)}>{t("habitHub.retry")}</button>}</div>
   </div>;
 }

@@ -2827,7 +2827,8 @@
       "restart": "Recomeçar ciclo",
       "nutrition": "Alimenta-me",
       "exercise": "Exercício",
-      "support": "Apoio imediato"
+      "support": "Apoio imediato",
+      "sleep": "Sono"
     },
     "nutrition": {
       "title": "Alimenta-me",
@@ -2837,7 +2838,30 @@
       "help": "Preenche só o que quiseres. Um campo vazio significa «sem registo»; zero é uma quantidade que escolheste confirmar. Sem calorias ou julgamentos.",
       "weekEmpty": "A tua semana começa com os teus registos. O resumo aparece a partir de 3 dias registados nesta semana.",
       "average": "Média: {{value}} {{unit}} por dia registado · {{count}} dias com registo",
-      "positive": "Consumo registado em {{count}} dias"
+      "positive": "Consumo registado em {{count}} dias",
+      "comparisonTitle": "O teu registo vs referência geral",
+      "comparisonIntro": "Uma comparação simples com referências populacionais. Não é uma meta individual nem uma avaliação clínica.",
+      "comparisonEmpty": "Regista café, chá, bebidas energéticas ou fruta/vegetais para aparecer uma comparação relevante.",
+      "detailTitle": "Ver os registos detalhados",
+      "you": "Tu",
+      "referenceLabel": "Referência geral",
+      "compare": {
+        "caffeine": "Cafeína total",
+        "produce": "Fruta + vegetais"
+      },
+      "values": {
+        "mg": "{{value}} mg",
+        "portions": "{{value}} porções"
+      },
+      "references": {
+        "caffeine": "até {{value}} mg/dia",
+        "produce": "pelo menos {{value}} porções/dia"
+      },
+      "status": {
+        "ok": "Dentro da referência geral",
+        "high": "Acima da referência geral",
+        "low": "Abaixo da referência geral"
+      }
     },
     "comparison": {
       "more": "↑ Média superior à semana anterior",
@@ -2943,7 +2967,12 @@
       "fastFood": "Fast food / ultraprocessados",
       "fruit": "Fruta",
       "vegetables": "Legumes",
-      "sweets": "Doces"
+      "sweets": "Doces",
+      "tea": "Chá",
+      "cereals": "Cereais",
+      "protein": "Proteína",
+      "fats": "Gorduras",
+      "salty": "Alimentos ricos em sal"
     },
     "activities": {
       "walk": "Caminhada",
@@ -2953,7 +2982,10 @@
       "swim": "Natação",
       "sport": "Desporto",
       "yoga": "Yoga / mobilidade",
-      "other": "Outro"
+      "other": "Outro",
+      "dance": "Dança",
+      "hiit": "HIIT",
+      "stretch": "Alongamentos"
     },
     "units": {
       "coffee": "cafés",
@@ -3189,6 +3221,41 @@
         "occasion": "Doces",
         "other": "Outro",
         "unspecified": "Registo anterior (tipo não indicado)"
+      },
+      "tea": {
+        "black": "Chá preto",
+        "green": "Chá verde",
+        "herbal": "Infusão sem cafeína",
+        "other": "Outro"
+      },
+      "cereals": {
+        "oats": "Aveia",
+        "wholegrain": "Cereais integrais",
+        "rice": "Arroz",
+        "pasta": "Massa",
+        "bread": "Pão",
+        "other": "Outro"
+      },
+      "protein": {
+        "fish": "Peixe",
+        "chicken": "Frango",
+        "eggs": "Ovos",
+        "legumes": "Leguminosas",
+        "yogurt": "Iogurte",
+        "other": "Outro"
+      },
+      "fats": {
+        "oliveOil": "Azeite",
+        "nuts": "Frutos secos",
+        "avocado": "Abacate",
+        "butter": "Manteiga",
+        "other": "Outro"
+      },
+      "salty": {
+        "chips": "Batatas fritas/snacks",
+        "processedMeat": "Carnes processadas",
+        "saltySnack": "Snack salgado",
+        "other": "Outro"
       }
     },
     "plans": {
@@ -3276,6 +3343,42 @@
         "timing": "proporção de dias registados com cafeína tardia (0–1)",
         "routine": "presença de registo alimentar (0–1)"
       }
+    },
+    "sleep": {
+      "title": "Sono",
+      "intro": "Regista o descanso da noite e deixa o Companheiro perceber como ele se relaciona com o teu dia.",
+      "hours": "Horas dormidas",
+      "quality": "Qualidade do sono (1–5)",
+      "qualityHelp": "1 = muito fraco · 5 = muito reparador",
+      "awakenings": "Despertares durante a noite",
+      "save": "Guardar sono",
+      "saved": "Registo de sono guardado.",
+      "history": "Histórico recente",
+      "empty": "Ainda não há registos de sono.",
+      "emptyToday": "Ainda não registaste o sono de hoje.",
+      "summary": "{hours} h · qualidade {quality}/5",
+      "hoursShort": "{hours} h",
+      "qualityShort": "qualidade {quality}/5",
+      "disclaimer": "O sono varia de pessoa para pessoa. As respostas do Companheiro usam referências gerais e os teus próprios registos, não fazem diagnósticos.",
+      "scienceShort": "A maioria dos adultos precisa de cerca de 7–9 horas, mas a necessidade individual varia."
+    },
+    "evolution": {
+      "title": "Evolução",
+      "intro": "Compara as últimas semanas para perceber a tendência dos teus registos.",
+      "empty": "Ainda não há dados suficientes para mostrar uma evolução.",
+      "previous": "Semana anterior: {{value}}",
+      "lastWeeks": "Últimas quatro semanas",
+      "current": "Atual",
+      "weekNumber": "Semana {{n}}",
+      "increase": "aumentou",
+      "decrease": "diminuiu",
+      "stable": "estável",
+      "exerciseMinutes": "Minutos de exercício",
+      "activeDays": "Dias ativos",
+      "sleepHours": "Horas de sono",
+      "sleepQuality": "Qualidade do sono",
+      "caffeine": "Cafeína média (mg)",
+      "produce": "Fruta + vegetais (porções/dia)"
     }
   },
   "notifications": {
@@ -3393,12 +3496,16 @@
     "actions": {
       "habits": "Ver o meu desafio",
       "habitHistory": "Ver progresso do desafio",
-      "nutrition": "Ver alimentação",
-      "exercise": "Ver movimento",
+      "nutrition": "Abrir Alimentar",
+      "exercise": "Abrir Exercício",
       "plans": "Ver plano",
       "breathe": "Respirar um pouco",
       "progress": "Ver evolução",
-      "patterns": "Ver padrões"
+      "patterns": "Ver padrões",
+      "completeObjective": "Fazer um objetivo",
+      "communityPost": "Partilhar um pensamento",
+      "mood": "Fazer o registo",
+      "sleep": "Abrir Sono"
     },
     "restart": [
       "Recomeçar não apaga os dias que já construíste.",
@@ -3449,9 +3556,139 @@
       "Tens registos de água em {{count}} dias desta semana. Queres olhar para eles?",
       "Nos últimos sete dias, registaste água em {{count}} dias.",
       "Há {{count}} dias com registos de água esta semana. Podemos observar sem avaliar."
-    ]
+    ],
+    "mode": {
+      "insight": "O que percebi",
+      "suggestion": "Uma sugestão para ti"
+    },
+    "morningTrend": [
+      "Nos teus registos recentes, a tua média da manhã passou de {{previous}} para {{recent}}. É uma mudança positiva; vale a pena rever o que te pode estar a ajudar.",
+      "Tenho reparado que a tua média da manhã passou de {{previous}} para {{recent}}. Não é uma conclusão sobre a causa, mas é uma mudança que merece ser observada.",
+      "As tuas últimas avaliações da manhã estão mais altas: a média passou de {{previous}} para {{recent}}. Talvez valha a pena perceber o que tem ajudado."
+    ],
+    "morningTrendDeclining": [
+      "Nos teus registos recentes, a tua média da manhã passou de {{previous}} para {{recent}}. Podemos observar esta mudança sem tirar conclusões precipitadas.",
+      "Tenho reparado que a tua média da manhã passou de {{previous}} para {{recent}}. Se quiseres, podemos acompanhar como evolui nos próximos dias.",
+      "As tuas últimas avaliações da manhã estão mais baixas: a média passou de {{previous}} para {{recent}}. Vale a pena observar o que acontece, sem te julgares."
+    ],
+    "objectiveSuggestion": [
+      "Hoje tens {{completed}} de {{total}} objetivos concluídos. Se fizer sentido, podes escolher um e começar por aí.",
+      "Ainda há objetivos por fazer hoje. Um pequeno passo já conta — queres fazer um deles?",
+      "Tens {{completed}}/{{total}} objetivos hoje. Podes escolher apenas um agora e continuar a partir daí."
+    ],
+    "communitySuggestion": [
+      "Se te apetecer, podes deixar um pensamento na Comunidade. Às vezes, pôr em palavras o que está a acontecer também ajuda a dar-lhe forma.",
+      "A Comunidade está por perto. Se houver algo que queiras partilhar hoje, podes escrever um pequeno pensamento.",
+      "Queres deixar uma ideia ou experiência na Comunidade? Pode ser apenas uma frase sobre como estás hoje."
+    ],
+    "objectiveCelebration": [
+      "Boa. Acabaste de concluir um objetivo. Pequenas ações repetidas também contam.",
+      "Mais um objetivo feito. Vale a pena reparar no que te ajudou a avançar.",
+      "Objetivo concluído. Gosto de ver esta parte do teu caminho."
+    ],
+    "caffeineGuidance": {
+      "0": "Registaste cerca de {mg} mg de cafeína hoje. A referência da EFSA para adultos saudáveis é até 400 mg por dia; o Companheiro usa este valor como referência geral, não como diagnóstico."
+    },
+    "caffeineCountGuidance": {
+      "0": "Já registaste {coffeeCount} cafés. A quantidade de cafeína varia muito entre bebidas, por isso o Companheiro olha para a estimativa e não apenas para o número de cafés."
+    },
+    "lateCaffeineGuidance": {
+      "0": "Registaste cerca de {mg} mg de cafeína, incluindo consumo mais tarde no dia. A EFSA refere que 100 mg perto da hora de dormir podem afetar o sono em algumas pessoas."
+    },
+    "activityGuidance": {
+      "0": "Já tens {minutes} minutos de atividade moderada registados nesta semana. Se te fizer sentido, uma pequena caminhada ou outra atividade confortável pode ajudar a aproximar-te gradualmente das recomendações gerais."
+    },
+    "produceGuidance": {
+      "0": "Já registaste {portions} porções de fruta/vegetais. A referência geral é pelo menos 5 porções, cerca de 400 g, por dia."
+    },
+    "teaGuidance": {
+      "0": "Hoje registaste {count} registo(s) de chá. Dependendo do tipo, o chá pode contribuir para a ingestão de cafeína e faz parte da variedade alimentar."
+    },
+    "cerealsGuidance": {
+      "0": "Registaste {count} porção(ões) de cereais. Dar preferência frequente a cereais integrais ajuda a aumentar a presença de fibra na alimentação."
+    },
+    "proteinGuidance": {
+      "0": "Registaste {count} porção(ões) de alimentos proteicos. Uma alimentação variada pode combinar fontes animais e vegetais de proteína."
+    },
+    "fatsGuidance": {
+      "0": "Registaste {count} porção(ões) de alimentos ricos em gordura. As gorduras fazem parte de uma alimentação saudável; a qualidade e a quantidade importam."
+    },
+    "sweetsGuidance": {
+      "0": "Registaste {count} registo(s) de doces. A OMS recomenda limitar os açúcares livres e privilegiar uma alimentação variada."
+    },
+    "saltyGuidance": {
+      "0": "Registaste {count} alimento(s) da categoria salgada. A OMS recomenda limitar o sal a menos de 5 g por dia nos adultos."
+    },
+    "processedFoodGuidance": {
+      "0": "Registaste {count} registo(s) de fast food/ultraprocessados. Muitos destes alimentos podem ser ricos em sal, açúcares ou gorduras menos favoráveis, por isso vale a pena olhar para o conjunto do dia."
+    },
+    "hydrationGuidance": {
+      "0": "Registaste cerca de {ml} ml de água. A hidratação necessária varia com a pessoa, clima e atividade; este sinal serve apenas para te lembrar de verificar se tens bebido ao longo do dia."
+    },
+    "sleepShortGuidance": {
+      "0": "Registaste {hours} horas de sono. A maioria dos adultos precisa de cerca de 7–9 horas, embora a necessidade individual varie. Hoje pode ser útil proteger um pouco mais o teu descanso."
+    },
+    "sleepGoodGuidance": {
+      "0": "Registaste {hours} horas de sono com qualidade {quality}/5. É um dado positivo para acompanhar ao longo do tempo, sem assumir que uma noite determina como te vais sentir hoje."
+    },
+    "sleepQualityGuidance": {
+      "0": "Avaliaste a qualidade do sono em {quality}/5. Uma noite menos reparadora pode ser acompanhada por mais cansaço durante o dia; hoje pode valer a pena manter o ritmo mais gentil."
+    },
+    "morningLowGuidance": {
+      "0": "A tua manhã foi avaliada em {rating}/5. Uma manhã mais difícil pode acompanhar a forma como atravessas o resto do dia, mas não determina o que vai acontecer. Experimenta escolher uma ação simples e concreta para esta manhã."
+    },
+    "afternoonLowGuidance": {
+      "0": "A tua tarde foi avaliada em {rating}/5. Se o dia está a pesar, pode ajudar fazer uma pausa curta, mudar de ambiente ou escolher uma tarefa pequena antes de continuares."
+    },
+    "dayRecoveryGuidance": {
+      "0": "Passaste de {morning}/5 de manhã para {afternoon}/5 à tarde. Isso mostra uma mudança positiva no teu próprio registo; não prova uma causa, mas é uma diferença interessante para acompanhar."
+    },
+    "exerciseType": {
+      "walk": {
+        "0": "Registaste {minutes} minutos de caminhada. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "run": {
+        "0": "Registaste {minutes} minutos de corrida. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "bike": {
+        "0": "Registaste {minutes} minutos de bicicleta. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "swim": {
+        "0": "Registaste {minutes} minutos de natação. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "gym": {
+        "0": "Registaste {minutes} minutos de ginásio. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "yoga": {
+        "0": "Registaste {minutes} minutos de alongamentos/mobilidade. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "sport": {
+        "0": "Registaste {minutes} minutos de desporto. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "other": {
+        "0": "Registaste {minutes} minutos de outra atividade. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "dance": {
+        "0": "Registaste {minutes} minutos de Dança. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "hiit": {
+        "0": "Registaste {minutes} minutos de HIIT. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "stretch": {
+        "0": "Registaste {minutes} minutos de Alongamentos. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      }
+    }
   },
   "companionBrain.actionRegisterMorning": "Registar a manhã",
   "companionBrain.actionRegisterAfternoon": "Registar a tarde",
-  "companionBrain.actionTalkAboutIt": "Abrir a Comunidade"
+  "companionBrain.actionTalkAboutIt": "Abrir a Comunidade",
+  "companionClick": {
+    "eyebrow": "Reparei nisso",
+    "reactions": [
+      "Vi que escolheste «{{label}}». Estou contigo — vamos passo a passo.",
+      "Boa escolha. Registei este pequeno movimento e continuo por aqui contigo.",
+      "Vi essa ação. Cada pequena escolha pode fazer parte do teu caminho.",
+      "Escolheste «{{label}}». Gosto quando dás espaço às tuas próprias escolhas."
+    ]
+  }
 }

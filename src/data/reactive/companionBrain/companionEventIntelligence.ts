@@ -41,6 +41,7 @@ export type CompanionSemanticArea =
   | "shop"
   | "inventory"
   | "exercise"
+  | "sleep"
   | "other";
 
 export type CompanionInteractionKind =

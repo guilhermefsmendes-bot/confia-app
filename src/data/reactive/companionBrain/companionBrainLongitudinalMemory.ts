@@ -38,6 +38,15 @@ export interface CompanionLongitudinalMoodMemory {
 
   averageMorning?: number;
 
+  /** Tendência específica das avaliações da manhã. */
+  morningTrend: CompanionMoodTrend;
+
+  recentMorningAverage?: number;
+
+  previousMorningAverage?: number;
+
+  morningTrendDifference?: number;
+
   averageAfternoon?: number;
 
   averageDaily?: number;
@@ -478,6 +487,30 @@ export function buildCompanionLongitudinalMoodMemory(
           typeof value === "number"
       );
 
+  const morningTrendValues = recent
+    .filter(item => typeof item.morning === "number")
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map(item => item.morning as number);
+
+  let morningTrend: CompanionMoodTrend = "insufficient";
+  let recentMorningAverage: number | undefined;
+  let previousMorningAverage: number | undefined;
+  let morningTrendDifference: number | undefined;
+
+  if (morningTrendValues.length >= 5) {
+    const split = Math.floor(morningTrendValues.length / 2);
+    const previous = morningTrendValues.slice(0, split);
+    const latest = morningTrendValues.slice(split);
+    previousMorningAverage = average(previous);
+    recentMorningAverage = average(latest);
+    if (previousMorningAverage !== undefined && recentMorningAverage !== undefined) {
+      morningTrendDifference = recentMorningAverage - previousMorningAverage;
+      if (morningTrendDifference >= 0.8) morningTrend = "improving";
+      else if (morningTrendDifference <= -0.8) morningTrend = "declining";
+      else morningTrend = "stable";
+    }
+  }
+
   const afternoonValues =
     recent
       .map(
@@ -556,6 +589,14 @@ export function buildCompanionLongitudinalMoodMemory(
       average(
         morningValues
       ),
+
+    morningTrend,
+
+    recentMorningAverage,
+
+    previousMorningAverage,
+
+    morningTrendDifference,
 
     averageAfternoon:
       average(

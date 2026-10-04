@@ -1,5 +1,6 @@
 import { PERIODS,type DayPeriod } from "../../data/habits/catalog";
 import LifestyleReview from "./LifestyleReview";
+import HabitEvolution from "./HabitEvolution";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ACTIVITY_TYPES,ACTIVITY_ICONS,type ActivityType,type HabitRecord } from "../../data/habits/types";
@@ -23,5 +24,6 @@ export default function ExerciseDashboard({records,today,run,onDone}:{records:Ha
     {daily.length>0 && <ul className="space-y-2 text-sm">{daily.map(r=><li key={r.id}>{r.data.minutes===0?t("habitHub.exercise.noMovementRecorded"):t("habitHub.exercise.session",{activity:t("habitHub.activities."+r.data.activity),minutes:r.data.minutes})}</li>)}</ul>}
     <button type="button" className={buttonClass+" w-full"} onClick={onDone}>{t("habitHub.detail.finish")}</button>
   </form>
-  <section className="rounded-[28px] border border-[#E8DDD7] bg-white p-5"><h3 className="text-lg font-black">{t("habitHub.week")}</h3><p className="mt-1 text-xs">{t("habitHub.weekDates",{start:formatDay(weekStart(today),i18n.language),end:formatDay(today,i18n.language)})}</p>{week.days ? <><p className="mt-4 text-2xl font-black">{t("habitHub.minutes",{count:week.minutes})}</p><p className="mt-2 text-sm">{t("habitHub.exercise.days",{count:new Set(records.filter(r=>r.kind==="exercise" && r.data.minutes>0 && r.date>=weekStart(today) && r.date<=today).map(r=>r.date)).size})}</p><ul className="mt-3 space-y-1 text-sm">{week.activities.map(item=><li key={item.activity}>{ACTIVITY_ICONS[item.activity]} {t("habitHub.activities."+item.activity)} · {item.count}</li>)}</ul><p className="mt-4 text-sm leading-6">{t("habitHub.exercise.kind")}</p></> : <p className="mt-3 text-sm">{t("habitHub.exercise.empty")}</p>}</section><LifestyleReview records={records} date={date} today={today}/></div>;
+  <section className="rounded-[28px] border border-[#E8DDD7] bg-white p-5"><h3 className="text-lg font-black">{t("habitHub.week")}</h3><p className="mt-1 text-xs">{t("habitHub.weekDates",{start:formatDay(weekStart(today),i18n.language),end:formatDay(today,i18n.language)})}</p>{week.days ? <><p className="mt-4 text-2xl font-black">{t("habitHub.minutes",{count:week.minutes})}</p><p className="mt-2 text-sm">{t("habitHub.exercise.days",{count:new Set(records.filter(r=>r.kind==="exercise" && r.data.minutes>0 && r.date>=weekStart(today) && r.date<=today).map(r=>r.date)).size})}</p><ul className="mt-3 space-y-1 text-sm">{week.activities.map(item=><li key={item.activity}>{ACTIVITY_ICONS[item.activity]} {t("habitHub.activities."+item.activity)} · {item.count}</li>)}</ul><p className="mt-4 text-sm leading-6">{t("habitHub.exercise.kind")}</p></> : <p className="mt-3 text-sm">{t("habitHub.exercise.empty")}</p>}</section><HabitEvolution records={records} today={today} kind="exercise"/>
+  <LifestyleReview records={records} date={date} today={today}/></div>;
 }

@@ -8,6 +8,18 @@
  * conversacional, prioridade e silêncio inteligente.
  */
 
+export type CompanionIntent =
+  | "observe"
+  | "explain"
+  | "celebrate"
+  | "suggest"
+  | "remind"
+  | "accompany"
+  | "ask"
+  | "silent";
+
+export type CompanionConfidence = "strong" | "moderate" | "insufficient";
+
 export type CompanionBrainCategory =
   | "emotional_followup"
   | "impulse_followup"
@@ -43,7 +55,8 @@ export type CompanionBrainTrigger =
   | "community_posted"
   | "avatar_tapped"
   | "time_context"
-  | "context_changed";
+  | "context_changed"
+  | "companion_action_clicked";
 
 export interface CompanionBrainEvent {
   id: string;
@@ -85,10 +98,16 @@ export interface CompanionBrainCandidate {
       | "patterns"
       | "objectives"
       | "community"
-      | "habits" | "habitHistory" | "nutrition" | "exercise" | "plans" | "breathe" | "progress";
+      | "habits" | "habitHistory" | "nutrition" | "exercise" | "sleep" | "plans" | "breathe" | "progress";
   };
 
   metadata?: Record<string, unknown>;
+
+  /** Premium Companion layer: why this candidate deserves to speak. */
+  intent?: CompanionIntent;
+  confidence?: CompanionConfidence;
+  evidenceCount?: number;
+  evidenceWindowDays?: number;
 }
 
 export interface CompanionBrainDecision {

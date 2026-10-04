@@ -14,6 +14,18 @@ function ConfiaCompanionHome({avatar,avatarCelebrating,avatarMemoryMessage,morni
  const {t}=useTranslation();const [emotion,setEmotion]=useState('neutral');const [accessories,setAccessories]=useState(readAccessories);const [showWidgetSuggestion,setShowWidgetSuggestion]=useState(false);
  useEffect(()=>{const refresh=()=>setAccessories(readAccessories());const events=['confia:equipment-changed','storage','focus'];events.forEach(e=>window.addEventListener(e,refresh));return()=>events.forEach(e=>window.removeEventListener(e,refresh));},[]);
  useEffect(()=>{if(!isNativeAndroid())return;let cancelled=false;void ConfiaDevice.widgetInfo().then(({installed})=>{if(cancelled||installed)return;const key='confia_widget_suggestion_last_v1';const last=Number(localStorage.getItem(key)??0);const week=7*24*60*60*1000;if(!last||Date.now()-last>=week){setShowWidgetSuggestion(true);localStorage.setItem(key,String(Date.now()));}}).catch(()=>{});return()=>{cancelled=true;};},[]);
+ useEffect(()=>{
+  const reactToButton=(event:MouseEvent)=>{
+   const target=event.target as HTMLElement|null;
+   const button=target?.closest('button,[role=button]') as HTMLElement|null;
+   if(!button||button.closest('[data-testid=companion-voice]'))return;
+   const label=(button.getAttribute('aria-label')||button.getAttribute('title')||button.textContent||'').replace(/\s+/g,' ').trim();
+   if(!label)return;
+   window.dispatchEvent(new CustomEvent('confia:avatar-button-reaction',{detail:{label:label.slice(0,80)}}));
+  };
+  window.addEventListener('click',reactToButton,true);
+  return()=>window.removeEventListener('click',reactToButton,true);
+ },[]);
  const addWidget=()=>{void ConfiaDevice.pinWidget().then(()=>setShowWidgetSuggestion(false)).catch(()=>setShowWidgetSuggestion(false));};
  const reaction=emotion==='warm'||emotion==='concerned'?'supportive':emotion==='celebrating'||emotion==='encouraging'?'celebrating':emotion==='curious'?'curious':'neutral';
  const evolutionProgress=Math.max(0,Math.min(100,avatar.maxXp>0?(avatar.xp/avatar.maxXp)*100:0));
@@ -25,6 +37,7 @@ function ConfiaCompanionHome({avatar,avatarCelebrating,avatarMemoryMessage,morni
    <button type="button" onClick={()=>onCompanionAction('shop')} className="flex h-12 w-12 items-center justify-center" aria-label={t('shop')}><ShoppingBag size={18}/></button>
   </div></div>
   <div className="flex min-h-52 justify-center"><Avatar avatar={avatar} onPet={handlePetAvatar} levelUpTrigger={avatarCelebrating} moodRating={voiceInput.todayLogged?(afternoonRating??morningRating):undefined} memoryMessage={avatarMemoryMessage} companionWorldMood={worldMood} reactionState={reaction} equippedAccessoryIds={accessories}/></div>
+  <CompanionVoice input={voiceInput} onAction={onCompanionAction} onEmotion={setEmotion}/>
   <div className="rounded-[24px] border border-[#E9D9D1] bg-gradient-to-br from-white to-[#FFF7F2] p-4 shadow-[0_10px_28px_rgba(91,66,56,.055)]">
    <div className="flex items-center justify-between gap-3">
     <div><p className="text-[9px] font-black uppercase tracking-[.16em] text-[#A36A55]">{t('companionEvolutionPanel.eyebrow')}</p><p className="mt-1 text-sm font-black text-[#4A352F]">{t('stage'+visualStage+'Name')}</p></div>
@@ -35,7 +48,6 @@ function ConfiaCompanionHome({avatar,avatarCelebrating,avatarMemoryMessage,morni
    </div>
    <p className="mt-2 text-[10px] font-semibold leading-4 text-[#806D65]">{nextFormLevel?t('companionEvolutionPanel.nextForm',{level:nextFormLevel}):t('companionEvolutionPanel.finalForm')}</p>
   </div>
-  <CompanionVoice input={voiceInput} onAction={onCompanionAction} onEmotion={setEmotion}/>
   {showWidgetSuggestion&&<div className="rounded-3xl border border-[#E9D9D1] bg-[#FFFCFA] p-4 text-center shadow-[0_10px_28px_rgba(91,66,56,.045)]">
    <p className="text-sm font-medium leading-relaxed text-[#674D44]">{t('companionWidgetPrompt.message')}</p>
    <button type="button" onClick={addWidget} className="mt-3 min-h-12 rounded-full border border-[#DCC1B4] bg-white px-5 py-2 text-sm font-semibold text-[#844530]">{t('companionWidgetPrompt.action')}</button>

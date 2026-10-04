@@ -328,31 +328,8 @@ export default function HomeProgressSummary({
         </div>
       </div>
 
-      {/* Evolução + XP — ações secundárias */}
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#E8DDD7]/50 pt-3">
-        <button
-          type="button"
-          onClick={() => {
-            emitCompanionInteraction(
-              "progress_viewed",
-              "progress"
-            );
-            onOpenProgress();
-          }}
-          className="group inline-flex min-h-9 items-center gap-2 rounded-xl px-1 text-left text-[10px] font-black text-[#934A38] transition-opacity active:opacity-70"
-        >
-          <span>
-            {t("homeProgress.openEvolution")}
-          </span>
-
-          <span
-            aria-hidden="true"
-            className="transition-transform group-active:translate-x-0.5"
-          >
-            →
-          </span>
-        </button>
-
+      {/* XP — mantém o indicador, sem ação de navegação para evolução no Principal */}
+      <div className="mt-4 flex justify-end border-t border-[#E8DDD7]/50 pt-3">
         <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#B85F48]/15 bg-white/80 px-2.5 py-1.5 text-[9px] font-black tracking-wide text-[#934A38]">
           <Sparkles size={11} />
           {analysis.xp} XP

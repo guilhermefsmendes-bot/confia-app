@@ -76,5 +76,5 @@ export function getHomeCompanionBrainDecision(input: HomeDecisionInput) {
     priority:reaction.priority,reason:"shared_reactive",cooldownMinutes:1440,
     action:{target:reaction.state==="supportive"?"breathe":"progress",labelKey:reaction.state==="supportive"?"companionDaily.actions.breathe":"companionDaily.actions.progress"}
   });
-  return decideCompanionThought([...candidates,...dailyCandidates(getHabitSnapshot().records,readPersonalEvents(),now)],now);
+  return decideCompanionThought([...candidates,...dailyCandidates(getHabitSnapshot().records,readPersonalEvents(),now,companionCollectedData)],now);
 }

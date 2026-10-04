@@ -2827,7 +2827,8 @@
       "restart": "Recommencer un cycle",
       "nutrition": "Me nourrir",
       "exercise": "Activité physique",
-      "support": "Soutien immédiat"
+      "support": "Soutien immédiat",
+      "sleep": "Sommeil"
     },
     "nutrition": {
       "title": "Me nourrir",
@@ -2837,7 +2838,30 @@
       "help": "Renseigne seulement ce que tu souhaites. Un champ vide signifie « sans saisie » ; zéro est une quantité que tu confirmes. Sans calories ni jugement.",
       "weekEmpty": "Ta semaine commence avec tes saisies. Le résumé apparaît après 3 jours renseignés cette semaine.",
       "average": "Moyenne : {{value}} {{unit}} par jour renseigné · {{count}} jours renseignés",
-      "positive": "Consommation notée sur {{count}} jours"
+      "positive": "Consommation notée sur {{count}} jours",
+      "comparisonTitle": "Ton relevé vs référence générale",
+      "comparisonIntro": "Une comparaison simple avec des références de population. Ce n’est ni un objectif individuel ni une évaluation clinique.",
+      "comparisonEmpty": "Enregistre du café, du thé, des boissons énergétiques ou des fruits/légumes pour voir une comparaison pertinente.",
+      "detailTitle": "Voir les relevés détaillés",
+      "you": "Toi",
+      "referenceLabel": "Référence générale",
+      "compare": {
+        "caffeine": "Caféine totale",
+        "produce": "Fruits + légumes"
+      },
+      "values": {
+        "mg": "{{value}} mg",
+        "portions": "{{value}} portions"
+      },
+      "references": {
+        "caffeine": "jusqu’à {{value}} mg/jour",
+        "produce": "au moins {{value}} portions/jour"
+      },
+      "status": {
+        "ok": "Dans la référence générale",
+        "high": "Au-dessus de la référence générale",
+        "low": "En dessous de la référence générale"
+      }
     },
     "comparison": {
       "more": "↑ Moyenne supérieure à la semaine précédente",
@@ -2943,7 +2967,12 @@
       "fastFood": "Restauration rapide / aliments ultra-transformés",
       "fruit": "Fruits",
       "vegetables": "Légumes",
-      "sweets": "Sucreries"
+      "sweets": "Sucreries",
+      "tea": "Thé",
+      "cereals": "Céréales",
+      "protein": "Protéines",
+      "fats": "Matières grasses",
+      "salty": "Aliments riches en sel"
     },
     "activities": {
       "walk": "Marche",
@@ -2953,7 +2982,10 @@
       "swim": "Natation",
       "sport": "Sport",
       "yoga": "Yoga / mobilité",
-      "other": "Autre"
+      "other": "Autre",
+      "dance": "Danse",
+      "hiit": "HIIT",
+      "stretch": "Étirements"
     },
     "units": {
       "coffee": "cafés",
@@ -3189,6 +3221,41 @@
         "occasion": "Sucreries",
         "other": "Autre",
         "unspecified": "Ancienne entrée (type non précisé)"
+      },
+      "tea": {
+        "black": "Thé noir",
+        "green": "Thé vert",
+        "herbal": "Infusion",
+        "other": "Autre"
+      },
+      "cereals": {
+        "oats": "Avoine",
+        "wholegrain": "Céréales complètes",
+        "rice": "Riz",
+        "pasta": "Pâtes",
+        "bread": "Pain",
+        "other": "Autre"
+      },
+      "protein": {
+        "fish": "Poisson",
+        "chicken": "Poulet",
+        "eggs": "Œufs",
+        "legumes": "Légumineuses",
+        "yogurt": "Yaourt",
+        "other": "Autre"
+      },
+      "fats": {
+        "oliveOil": "Huile d’olive",
+        "nuts": "Fruits à coque",
+        "avocado": "Avocat",
+        "butter": "Beurre",
+        "other": "Autre"
+      },
+      "salty": {
+        "chips": "Chips/snacks",
+        "processedMeat": "Viandes transformées",
+        "saltySnack": "Snack salé",
+        "other": "Autre"
       }
     },
     "plans": {
@@ -3276,6 +3343,42 @@
         "timing": "proportion de jours renseignés avec caféine tardive (0–1)",
         "routine": "présence d’une entrée alimentaire (0–1)"
       }
+    },
+    "sleep": {
+      "title": "Sommeil",
+      "intro": "Enregistre ton repos nocturne et laisse le Compagnon comprendre comment il se relie à ta journée.",
+      "hours": "Heures dormies",
+      "quality": "Qualité du sommeil (1–5)",
+      "qualityHelp": "1 = très mauvaise · 5 = très réparatrice",
+      "awakenings": "Réveils nocturnes",
+      "save": "Enregistrer le sommeil",
+      "saved": "Sommeil enregistré.",
+      "history": "Historique récent",
+      "empty": "Aucun enregistrement de sommeil.",
+      "emptyToday": "Tu n’as pas encore enregistré le sommeil d’aujourd’hui.",
+      "summary": "{hours} h · qualité {quality}/5",
+      "hoursShort": "{hours} h",
+      "qualityShort": "qualité {quality}/5",
+      "disclaimer": "Les besoins de sommeil varient selon les personnes. Les réponses du Compagnon utilisent des références générales et tes propres données; elles ne posent pas de diagnostic.",
+      "scienceShort": "La plupart des adultes ont besoin d’environ 7–9 heures, mais les besoins individuels varient."
+    },
+    "evolution": {
+      "title": "Évolution",
+      "intro": "Compare les dernières semaines pour comprendre la tendance de tes données.",
+      "empty": "Il n’y a pas encore assez de données pour afficher une évolution.",
+      "previous": "Semaine précédente : {{value}}",
+      "lastWeeks": "Quatre dernières semaines",
+      "current": "Actuelle",
+      "weekNumber": "Semaine {{n}}",
+      "increase": "a augmenté",
+      "decrease": "a diminué",
+      "stable": "stable",
+      "exerciseMinutes": "Minutes d’exercice",
+      "activeDays": "Jours actifs",
+      "sleepHours": "Heures de sommeil",
+      "sleepQuality": "Qualité du sommeil",
+      "caffeine": "Caféine moyenne (mg)",
+      "produce": "Fruits + légumes (portions/jour)"
     }
   },
   "notifications": {
@@ -3393,12 +3496,16 @@
     "actions": {
       "habits": "Voir mon défi",
       "habitHistory": "Voir les progrès du défi",
-      "nutrition": "Voir l’alimentation",
-      "exercise": "Voir le mouvement",
+      "nutrition": "Ouvrir Alimentation",
+      "exercise": "Ouvrir Exercice",
       "plans": "Voir le programme",
       "breathe": "Respirer un peu",
       "progress": "Voir l’évolution",
-      "patterns": "Voir les tendances"
+      "patterns": "Voir les tendances",
+      "completeObjective": "Faire un objectif",
+      "communityPost": "Partager une pensée",
+      "mood": "Faire le bilan",
+      "sleep": "Ouvrir Sommeil"
     },
     "restart": [
       "Recommencer n’efface pas les jours que tu as déjà construits.",
@@ -3449,9 +3556,139 @@
       "Tu as des notes sur l’eau pour {{count}} jours cette semaine. Veux-tu les regarder ?",
       "Sur les sept derniers jours, tu as noté de l’eau sur {{count}} jours.",
       "Il y a {{count}} jours avec des notes sur l’eau cette semaine. Nous pouvons observer sans juger."
-    ]
+    ],
+    "mode": {
+      "insight": "Ce que j’ai observé",
+      "suggestion": "Une suggestion pour toi"
+    },
+    "morningTrend": [
+      "Dans tes notes récentes, ta moyenne du matin est passée de {{previous}} à {{recent}}. Cela peut valoir la peine d’observer ce qui pourrait t’aider.",
+      "J’ai remarqué que ta moyenne du matin est passée de {{previous}} à {{recent}}. Ce n’est pas une conclusion sur la cause, mais c’est un changement qui mérite d’être observé.",
+      "Tes dernières évaluations du matin sont plus élevées : la moyenne est passée de {{previous}} à {{recent}}. Cela peut valoir la peine de regarder ce qui t’aide."
+    ],
+    "morningTrendDeclining": [
+      "Dans tes notes récentes, ta moyenne du matin est passée de {{previous}} à {{recent}}. Nous pouvons observer ce changement sans tirer de conclusions trop vite.",
+      "J’ai remarqué que ta moyenne du matin est passée de {{previous}} à {{recent}}. Si tu veux, nous pouvons suivre son évolution dans les prochains jours.",
+      "Tes dernières évaluations du matin sont plus basses : la moyenne est passée de {{previous}} à {{recent}}. Cela mérite d’être observé sans te juger."
+    ],
+    "objectiveSuggestion": [
+      "Aujourd’hui, tu as terminé {{completed}} objectifs sur {{total}}. Si tu en as envie, tu peux en choisir un pour commencer.",
+      "Il reste des objectifs à faire aujourd’hui. Un petit pas compte — veux-tu en faire un ?",
+      "Tu as {{completed}}/{{total}} objectifs aujourd’hui. Tu peux simplement en choisir un maintenant et continuer ensuite."
+    ],
+    "communitySuggestion": [
+      "Si tu en as envie, tu peux laisser une pensée dans la Communauté. Mettre ce qui se passe en mots peut parfois aider.",
+      "La Communauté est là. Si tu veux partager quelque chose aujourd’hui, tu peux écrire une petite pensée.",
+      "Veux-tu laisser une idée ou une expérience dans la Communauté ? Cela peut être une seule phrase sur ton état aujourd’hui."
+    ],
+    "objectiveCelebration": [
+      "Bien. Tu viens de terminer un objectif. Les petites actions répétées comptent aussi.",
+      "Un objectif de plus. Cela vaut la peine de remarquer ce qui t’a aidé à avancer.",
+      "Objectif terminé. J’aime voir cette partie de ton chemin."
+    ],
+    "caffeineGuidance": {
+      "0": "Tu as enregistré environ {mg} mg de caféine aujourd’hui. La référence générale de l’EFSA pour les adultes en bonne santé va jusqu’à 400 mg par jour; le Compagnon l’utilise comme repère populationnel, pas comme diagnostic."
+    },
+    "caffeineCountGuidance": {
+      "0": "Tu as enregistré {coffeeCount} cafés. La quantité de caféine varie beaucoup, donc le Compagnon regarde l’estimation plutôt que le nombre de cafés seul."
+    },
+    "lateCaffeineGuidance": {
+      "0": "Tu as enregistré environ {mg} mg de caféine, dont une consommation plus tard dans la journée. L’EFSA indique que 100 mg près du coucher peuvent affecter le sommeil chez certains adultes."
+    },
+    "activityGuidance": {
+      "0": "Tu as enregistré {minutes} minutes d’activité modérée cette semaine. Si cela te convient, une courte marche ou une autre activité confortable peut t’aider à progresser progressivement vers les recommandations générales."
+    },
+    "produceGuidance": {
+      "0": "Tu as enregistré {portions} portions de fruits/légumes. Le repère général est d’au moins 5 portions, environ 400 g, par jour."
+    },
+    "teaGuidance": {
+      "0": "Tu as enregistré {count} prise(s) de thé. Selon le type, le thé peut apporter de la caféine et participe à la variété alimentaire."
+    },
+    "cerealsGuidance": {
+      "0": "Tu as enregistré {count} portion(s) de céréales. Choisir régulièrement des céréales complètes peut augmenter les fibres alimentaires."
+    },
+    "proteinGuidance": {
+      "0": "Tu as enregistré {count} portion(s) d’aliments protéinés. Une alimentation variée peut combiner des sources animales et végétales de protéines."
+    },
+    "fatsGuidance": {
+      "0": "Tu as enregistré {count} portion(s) d’aliments riches en matières grasses. Les graisses font partie d’une alimentation saine; le type et la quantité comptent."
+    },
+    "sweetsGuidance": {
+      "0": "Tu as enregistré {count} aliment(s) sucré(s). L’OMS recommande de limiter les sucres libres et de privilégier une alimentation variée."
+    },
+    "saltyGuidance": {
+      "0": "Tu as enregistré {count} aliment(s) salé(s). L’OMS recommande de limiter le sel à moins de 5 g par jour chez l’adulte."
+    },
+    "processedFoodGuidance": {
+      "0": "Tu as enregistré {count} élément(s) de restauration rapide/aliments ultra-transformés. Beaucoup peuvent être riches en sel, sucres libres ou graisses moins favorables; il est utile de regarder l’ensemble de la journée."
+    },
+    "hydrationGuidance": {
+      "0": "Tu as enregistré environ {ml} ml d’eau. Les besoins d’hydratation varient; ce signal sert simplement à vérifier que tu bois au cours de la journée."
+    },
+    "sleepShortGuidance": {
+      "0": "Tu as enregistré {hours} heures de sommeil. La plupart des adultes ont besoin d’environ 7–9 heures, même si les besoins individuels varient. Aujourd’hui, il peut être utile de protéger un peu plus ton repos."
+    },
+    "sleepGoodGuidance": {
+      "0": "Tu as enregistré {hours} heures de sommeil avec une qualité de {quality}/5. C’est un point positif à suivre, sans supposer qu’une seule nuit détermine ta journée."
+    },
+    "sleepQualityGuidance": {
+      "0": "Tu as évalué la qualité de ton sommeil à {quality}/5. Une nuit moins réparatrice peut s’accompagner de plus de fatigue; aujourd’hui, un rythme plus doux peut être utile."
+    },
+    "morningLowGuidance": {
+      "0": "Tu as évalué ta matinée à {rating}/5. Une matinée plus difficile peut accompagner la façon dont le reste de la journée est vécu, sans la déterminer. Choisis une action simple et concrète pour ce matin."
+    },
+    "afternoonLowGuidance": {
+      "0": "Tu as évalué ton après-midi à {rating}/5. Si la journée pèse, une courte pause, changer d’environnement ou choisir une petite tâche peut aider avant de continuer."
+    },
+    "dayRecoveryGuidance": {
+      "0": "Tu es passé de {morning}/5 le matin à {afternoon}/5 l’après-midi. C’est un changement positif dans ton propre registre; cela ne prouve pas une cause, mais c’est intéressant à suivre."
+    },
+    "exerciseType": {
+      "walk": {
+        "0": "Tu as enregistré {minutes} minutes de marche. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      },
+      "run": {
+        "0": "Tu as enregistré {minutes} minutes de course. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      },
+      "bike": {
+        "0": "Tu as enregistré {minutes} minutes de vélo. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      },
+      "swim": {
+        "0": "Tu as enregistré {minutes} minutes de natation. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      },
+      "gym": {
+        "0": "Tu as enregistré {minutes} minutes de renforcement/salle. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      },
+      "yoga": {
+        "0": "Tu as enregistré {minutes} minutes de étirements/mobilité. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      },
+      "sport": {
+        "0": "Tu as enregistré {minutes} minutes de sport. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      },
+      "other": {
+        "0": "Tu as enregistré {minutes} minutes de autre activité. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      },
+      "dance": {
+        "0": "Tu as enregistré {minutes} minutes de Danse. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      },
+      "hiit": {
+        "0": "Tu as enregistré {minutes} minutes de HIIT. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      },
+      "stretch": {
+        "0": "Tu as enregistré {minutes} minutes de Étirements. Cette donnée rejoint ta semaine et aide le Compagnon à comprendre quel mouvement fait partie de ta routine."
+      }
+    }
   },
   "companionBrain.actionRegisterMorning": "Noter la matinée",
   "companionBrain.actionRegisterAfternoon": "Noter l’après-midi",
-  "companionBrain.actionTalkAboutIt": "Ouvrir la communauté"
+  "companionBrain.actionTalkAboutIt": "Ouvrir la communauté",
+  "companionClick": {
+    "eyebrow": "Je l’ai remarqué",
+    "reactions": [
+      "J’ai vu que tu as choisi «{{label}}». Je suis avec toi, pas à pas.",
+      "Bon choix. J’ai remarqué ce petit mouvement et je reste là avec toi.",
+      "J’ai remarqué cette action. Les petits choix peuvent aussi faire partie de ton chemin.",
+      "Tu as choisi «{{label}}». J’aime te voir faire de la place à tes propres choix."
+    ]
+  }
 }

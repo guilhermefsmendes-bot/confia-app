@@ -7,6 +7,7 @@ import type {
   CompanionBrainCandidate,
   CompanionBrainDecision,
 } from "./companionBrainTypes";
+import { resolveCompanionIntent } from "./companionIntent";
 
 import {
   wasCompanionCategoryShownRecently,
@@ -167,6 +168,7 @@ export function decideCompanionThought(
       typeof candidate.priority === "number" &&
       typeof candidate.cooldownMinutes === "number" &&
       candidate.priority >= 40 &&
+      candidate.intent !== "silent" &&
       !isExpired(candidate,now) &&
       !recent.some(m=>m.id===candidate.id&&nowMs-Date.parse(m.shownAt)<candidate.cooldownMinutes*60_000) &&
       !recent.some(m=>m.category===candidate.category&&nowMs-Date.parse(m.shownAt)<20*60_000) &&
@@ -178,9 +180,12 @@ export function decideCompanionThought(
   }
 
   // CONFIA_FASE12A_CONTEXTUAL_RANKING
+  const intentReady = eligible.map(resolveCompanionIntent).filter(candidate => candidate.intent !== "silent");
+  if (intentReady.length === 0) return null;
+
   const ranked =
     rankCompanionCandidatesContextually(
-      eligible,
+      intentReady,
       now
     );
 

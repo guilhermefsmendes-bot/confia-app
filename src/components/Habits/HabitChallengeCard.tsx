@@ -44,8 +44,8 @@ export default function HabitChallengeCard({habit,records,today,onOpen}:{habit?:
     </div>
     <div className="challenge-clock-actions">
       {habit && <p className="challenge-clock-goal"><span className="sr-only">{name}. </span>{habit.data.goal}</p>}
-      <button type="button" className={primaryClass+" challenge-clock-primary"} onClick={()=>onOpen(habit?"log":"setup")}>
-        {t(habit?"habitHub.register":"habitHub.choose")}
+      <button type="button" className={primaryClass+" challenge-clock-primary"} onClick={()=>onOpen(habit?(days>0?"restart":"log"):"setup")}>
+        {t(habit?(days>0?"habitHub.restart":"habitHub.register"):"habitHub.choose")}
       </button>
       {habit && stats && <>
         {stats.today!==undefined && <p className="challenge-clock-note">{t("habitHub.status."+(stats.today?"done":"notDone"))}</p>}

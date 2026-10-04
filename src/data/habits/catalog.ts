@@ -5,17 +5,22 @@ export type FoodUnit = 'item'|'portion'|'cup'|'can'|'bottle'|'ml'|'occasion'|'me
 export interface FoodItem { category:FoodType; subtype:string; quantity:number; unit:FoodUnit; servingMl?:number; period?:DayPeriod; time?:string; size?:'small'|'medium'|'large'; intensity?:'mild'|'medium'|'strong'; caffeine?:'yes'|'no'|'unknown'; sugar?:'yes'|'no'|'unknown'; deleted:boolean; }
 export const FOOD_CATALOG: Record<FoodType,readonly string[]> = {
  coffee:['espresso','short','long','americano','filter','capsule','instant','decaf','other'],
+ tea:['black','green','herbal','other'],
  fruit:['apple','banana','orange','pear','kiwi','strawberry','berries','grapes','mango','pineapple','peach','melon','watermelon','other'],
  vegetables:['salad','soup','boiled','grilled','other'],
  soda:['cocaCola','cocaColaZero','pepsi','pepsiMax','sprite','sevenUp','fanta','guarana','orangeJuice','appleJuice','nectar','iceTea','freshJuice','other'],
  water:['still','sparkling'],energy:['energy','sugarFree','other'],
+ cereals:['oats','wholegrain','rice','pasta','bread','other'],
+ protein:['fish','chicken','eggs','legumes','yogurt','other'],
+ fats:['oliveOil','nuts','avocado','butter','other'],
+ salty:['chips','processedMeat','saltySnack','other'],
  alcohol:['other'],tobacco:['other'],fastFood:['meal','other'],sweets:['occasion','other']
 };
 export function defaultUnit(category:FoodType,subtype:string):FoodUnit {
  if(category==='fruit')return ['strawberry','berries','grapes','melon','watermelon','pineapple'].includes(subtype)?'portion':'item';
- return category==='vegetables'?'portion':category==='sweets'?'occasion':category==='fastFood'?'meal':['water','soda','alcohol'].includes(category)?'cup':category==='energy'?'can':'item';
+ return category==='vegetables'||category==='cereals'||category==='protein'?'portion':category==='sweets'||category==='salty'?'occasion':category==='fastFood'?'meal':['water','soda','alcohol','tea'].includes(category)?'cup':category==='energy'?'can':'item';
 }
-export const isDrink=(category:FoodType)=>['coffee','water','soda','energy','alcohol'].includes(category);
+export const isDrink=(category:FoodType)=>['coffee','tea','water','soda','energy','alcohol'].includes(category);
 // Brands are display choices, not a nutritional database. Ask the user to check
 // the label: formulations vary by market. Unknown never means caffeine-free.
 export function foodProperties(item:FoodItem) {

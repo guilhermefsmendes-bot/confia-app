@@ -8,6 +8,7 @@ export type PersonalAnalyticsEvent =
   | "wellbeing_plan_completed"
   | "habit_created"
   | "exercise_log_added"
+  | "sleep_log_added"
   | "nutrition_log_added"
   | "habit_milestone_reached"
   | "check_in_completed"

@@ -49,6 +49,12 @@ export function recordExercise(date:string,activity:ActivityType,minutes:number,
   recordPersonalAnalytics("exercise_log_added");
 }
 
+export function recordSleep(date:string,hours:number,quality:number,awakenings?:number) {
+  if(!editableDay(date) || !Number.isFinite(hours) || hours<0 || hours>24 || !Number.isFinite(quality) || !Number.isInteger(quality) || quality<1 || quality>5 || (awakenings!==undefined && (!Number.isInteger(awakenings)||awakenings<0||awakenings>100))) throw new Error("invalid");
+  saveHabitRecord(makeRecord({id:"sleep_"+date,kind:"sleep",data:{hours,quality,...(awakenings!==undefined?{awakenings}:{})}},date));
+  recordPersonalAnalytics("sleep_log_added");
+}
+
 export function saveFoodItem(date:string,data:FoodItem,id?:string) {
   if(!editableDay(date)||!validFoodItem(data))throw new Error("invalid");
   const records=getHabitSnapshot().records;

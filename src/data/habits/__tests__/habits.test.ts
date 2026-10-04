@@ -13,18 +13,20 @@ describe("habit calendar and preserved history",()=>{
  it("does not award a day at midnight without confirmation",()=>assert.equal(habitStats([],"one","2026-09-28").current,0));
  it("allows a whole day to confirm yesterday without recording a failure",()=>{
   const logs=[dayLog("2026-09-25"),dayLog("2026-09-26")];
-  assert.equal(habitStats(logs,"one","2026-09-28").current,2);
-  assert.equal(habitStats(logs,"one","2026-09-28").awaitingYesterday,true);
-  assert.equal(habitStats(logs,"one","2026-09-29").current,0);
+  assert.equal(habitStats(logs,"one","2026-09-28").current,4);
+  assert.equal(habitStats(logs,"one","2026-09-28").awaitingYesterday,false);
+  assert.equal(habitStats(logs,"one","2026-09-29").current,5);
   assert.equal(habitStats(logs,"one","2026-09-29").total,2);
  });
  it("recovers the full consecutive run after a previous-day confirmation",()=>{
   const logs=[dayLog("2026-09-25"),dayLog("2026-09-26"),dayLog("2026-09-28"),dayLog("2026-09-27")];
   assert.equal(habitStats(logs,"one","2026-09-28").current,4);
  });
- it("an explicit non-completion stops the current run without erasing successes",()=>{
+ it("a legacy non-completion does not reset the automatic streak; restart is explicit",()=>{
   const stats=habitStats([dayLog("2026-09-26"),dayLog("2026-09-27"),dayLog("2026-09-28",false)],"one","2026-09-28");
-  assert.equal(stats.current,0);assert.equal(stats.best,2);assert.equal(stats.total,2);
+  assert.equal(stats.current,3);assert.equal(stats.best,3);assert.equal(stats.total,2);
+  const resetStats=habitStats([dayLog("2026-09-26"),dayLog("2026-09-27"),reset("2026-09-28")],"one","2026-09-28");
+  assert.equal(resetStats.current,0);
  });
  it("restarts preserve the best run and total including a same-day confirmation",()=>{
   const records=[dayLog("2026-09-26"),dayLog("2026-09-27"),dayLog("2026-09-28"),reset("2026-09-28")];

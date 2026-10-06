@@ -623,14 +623,20 @@ function PirateChest({open=false}:{open?:boolean}){
  </div>
 }
 
+const SEA_WORDS=["Aceitar","Agitação","Alegria","Alerta","Alívio breve","Antecipação","Ação","Bem-estar","Bloqueio","Calma","Cansaço","Clareza","Confiança","Confiar","Controlo","Coragem","Cuidado","Curiosidade","Delegar","Descanso","Dúvida","Energia","Entrega","Equilíbrio","Escolha","Espaço","Esperar","Evitar","Exaustão","Flexibilidade","Frustração","Incerteza","Inquietação","Irritação","Limite","Medo","Movimento","Nervosismo","Observar","Paciência","Pausa","Pensamento","Perspetiva","Planeamento","Preocupação","Presença","Pressa","Pressão","Prioridade","Receio","Recuperação","Respiração","Ruminação","Sobrecarga","Stress","Tensão","Verificar"] as const;
+const SEA_LABELS={en:["Accept","Agitation","Joy","Alert","Brief relief","Anticipation","Action","Wellbeing","Block","Calm","Fatigue","Clarity","Confidence","Trust","Control","Courage","Care","Curiosity","Delegate","Rest","Doubt","Energy","Surrender","Balance","Choice","Space","Wait","Avoid","Exhaustion","Flexibility","Frustration","Uncertainty","Restlessness","Irritation","Boundary","Fear","Movement","Nervousness","Observe","Patience","Pause","Thought","Perspective","Planning","Worry","Presence","Rush","Pressure","Priority","Apprehension","Recovery","Breathing","Rumination","Overload","Stress","Tension","Check"],es:["Aceptar","Agitación","Alegría","Alerta","Alivio breve","Anticipación","Acción","Bienestar","Bloqueo","Calma","Cansancio","Claridad","Confianza","Confiar","Control","Valentía","Cuidado","Curiosidad","Delegar","Descanso","Duda","Energía","Entrega","Equilibrio","Elección","Espacio","Esperar","Evitar","Agotamiento","Flexibilidad","Frustración","Incertidumbre","Inquietud","Irritación","Límite","Miedo","Movimiento","Nerviosismo","Observar","Paciencia","Pausa","Pensamiento","Perspectiva","Planificación","Preocupación","Presencia","Prisa","Presión","Prioridad","Temor","Recuperación","Respiración","Rumiación","Sobrecarga","Estrés","Tensión","Comprobar"],fr:["Accepter","Agitation","Joie","Alerte","Soulagement bref","Anticipation","Action","Bien-être","Blocage","Calme","Fatigue","Clarté","Confiance","Faire confiance","Contrôle","Courage","Soin","Curiosité","Déléguer","Repos","Doute","Énergie","Lâcher-prise","Équilibre","Choix","Espace","Attendre","Éviter","Épuisement","Flexibilité","Frustration","Incertitude","Agitation intérieure","Irritation","Limite","Peur","Mouvement","Nervosité","Observer","Patience","Pause","Pensée","Perspective","Planification","Inquiétude","Présence","Précipitation","Pression","Priorité","Appréhension","Récupération","Respiration","Rumination","Surcharge","Stress","Tension","Vérifier"]} as const;
+
 function DominoPiece({tile,draggable=false,compact=false,onDrop}:{tile:Domino;draggable?:boolean;compact?:boolean;onDrop?:(tile:Domino,x:number,y:number)=>void}){
+ const {i18n}=useTranslation();
+ const lang=(i18n.resolvedLanguage||i18n.language||"pt").slice(0,2);
+ const label=(word:string)=>{const index=SEA_WORDS.indexOf(word as typeof SEA_WORDS[number]);return index>=0&&lang!=="pt"?(SEA_LABELS as Record<string,readonly string[]>)[lang]?.[index]??word:word;};
  return <motion.div drag={draggable} dragSnapToOrigin dragElastic={0.16} whileDrag={{scale:1.07,rotate:2,zIndex:80}} onDragEnd={(event,info)=>{
   const e=event as any;
   const clientX=typeof e?.clientX==="number"?e.clientX:info.point.x-window.scrollX;
   const clientY=typeof e?.clientY==="number"?e.clientY:info.point.y-window.scrollY;
   onDrop?.(tile,clientX,clientY);
  }} className={`relative flex ${compact?"min-h-[18px] min-w-[44px] rounded-[5px]":"min-h-[58px] min-w-[148px] rounded-[13px]"} shrink-0 cursor-grab touch-none select-none items-center justify-center overflow-hidden border border-white/90 bg-gradient-to-br from-white to-[#eef5f3] px-1 text-center shadow-[0_7px_14px_rgba(31,86,94,.16)] active:cursor-grabbing`}>
-  <span className={`${compact?"text-[6px]":"text-[13px]"} font-black leading-tight text-[#285966]`}>{tile.left}</span>
+  <span className={`${compact?"text-[6px]":"text-[13px]"} font-black leading-tight text-[#285966]`}>{label(tile.left)}</span>
   <span className="absolute left-2 top-2 h-1.5 w-1.5 rounded-full bg-[#6c9aa0]/25"/><span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-[#6c9aa0]/25"/>
  </motion.div>
 }

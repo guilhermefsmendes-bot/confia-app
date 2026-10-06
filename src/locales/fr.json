@@ -3647,7 +3647,7 @@
       "Il y a {{count}} jours avec des notes sur l’eau cette semaine. Nous pouvons observer sans juger."
     ],
     "mode": {
-      "insight": "Ce que j’ai observé",
+      "insight": "Ce que j’ai remarqué",
       "suggestion": "Une suggestion pour toi"
     },
     "morningTrend": [

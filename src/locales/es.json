@@ -3647,7 +3647,7 @@
       "Hay {{count}} días con registros de agua esta semana. Podemos observar sin evaluar."
     ],
     "mode": {
-      "insight": "Lo que he observado",
+      "insight": "Lo que he notado",
       "suggestion": "Una sugerencia para ti"
     },
     "morningTrend": [

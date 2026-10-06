@@ -1075,7 +1075,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
     <p className="mt-4 text-center text-[9px] font-black uppercase tracking-[.2em] text-[#39737c]">✦ CONFIA</p>
     <h3 className="mt-1 text-center text-[21px] font-black text-[#294f57]">{c.introTitle}</h3>
     <p className="mt-3 text-[12px] font-semibold leading-relaxed text-[#587177]">{c.introText}</p>
-    <div className="mt-4 rounded-[18px] border border-[#d9e9e7] bg-[#f2faf8] p-4 text-center"><p className="text-[10px] font-black uppercase tracking-[.15em] text-[#36717a]">PALAVRA <span className="mx-1">→</span> PALAVRA</p><p className="mt-2 text-[11px] font-semibold leading-relaxed text-[#567077]">{c.introExample}</p></div>
+    <div className="mt-4 rounded-[18px] border border-[#d9e9e7] bg-[#f2faf8] p-4 text-center"><p className="text-[10px] font-black uppercase tracking-[.15em] text-[#36717a]">{lang==="en"?"WORD":lang==="es"?"PALABRA":lang==="fr"?"MOT":"PALAVRA"} <span className="mx-1">→</span> {lang==="en"?"WORD":lang==="es"?"PALABRA":lang==="fr"?"MOT":"PALAVRA"}</p><p className="mt-2 text-[11px] font-semibold leading-relaxed text-[#567077]">{c.introExample}</p></div>
     <p className="mt-4 text-[11px] font-semibold leading-relaxed text-[#64777b]">{c.introExplain}</p>
     <button onClick={()=>{localStorage.setItem(HORIZON_INTRO_KEY,"1");setHorizonIntroOpen(false)}} className="mt-5 w-full rounded-[17px] bg-[#286773] py-3.5 text-[11px] font-black text-white">{c.introButton}</button>
    </motion.div>

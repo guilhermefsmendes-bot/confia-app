@@ -501,7 +501,7 @@ const getLocalizedImpulse=(q:ImpulseQuestion):ImpulseQuestion=>{
  const language=(localStorage.getItem("confia_language")||"pt").slice(0,2) as "pt"|"en"|"es"|"fr";
  if(language==="pt")return q;
  const rows=IMPULSE_TRANSLATIONS[language];
- const index=Math.max(0,Number(q.id.replace(/\\D/g,""))-1);
+ const index=Math.max(0,Number(q.id.replace(/\D/g,""))-1);
  const row=rows[index];
  if(!row)return q;
  return {...q,question:row.question,answers:row.answers,explanation:row.explanation,locale:language};

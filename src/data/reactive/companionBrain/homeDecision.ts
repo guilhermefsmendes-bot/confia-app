@@ -23,6 +23,7 @@ export type HomeDecisionInput = {
   morningRating: number;
   afternoonRating: number;
   ratings: DailyRating[];
+  reactiveWriteAt?: number;
   personalDiscovery?: {
     id: string;
     messageKey?: string;
@@ -34,7 +35,7 @@ export type HomeDecisionInput = {
 };
 
 export function getHomeCompanionBrainDecision(input: HomeDecisionInput) {
-  const { currentTab, homeScreen, selectedDate, todayLogged, morningRating, afternoonRating, ratings, personalDiscovery } = input;
+  const { currentTab, homeScreen, selectedDate, todayLogged, morningRating, afternoonRating, ratings, personalDiscovery, reactiveWriteAt } = input;
   if (currentTab !== 0 || homeScreen !== "home") return null;
   const now = new Date();
   const localToday = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
@@ -76,5 +77,5 @@ export function getHomeCompanionBrainDecision(input: HomeDecisionInput) {
     priority:reaction.priority,reason:"shared_reactive",cooldownMinutes:1440,
     action:{target:reaction.state==="supportive"?"breathe":"progress",labelKey:reaction.state==="supportive"?"companionDaily.actions.breathe":"companionDaily.actions.progress"}
   });
-  return decideCompanionThought([...candidates,...dailyCandidates(getHabitSnapshot().records,readPersonalEvents(),now,companionCollectedData)],now);
+  return decideCompanionThought([...candidates,...dailyCandidates(getHabitSnapshot().records,readPersonalEvents(),now,companionCollectedData,reactiveWriteAt)],now);
 }

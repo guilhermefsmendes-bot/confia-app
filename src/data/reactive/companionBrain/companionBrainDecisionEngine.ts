@@ -159,7 +159,8 @@ export function decideCompanionThought(
   const recent=memory.shownMessages.filter(m=>Number.isFinite(Date.parse(m.shownAt))&&Date.parse(m.shownAt)<=nowMs);
   const last=recent.at(-1);
   if(recent.filter(m=>getLocalCalendarDate(new Date(m.shownAt))===today).length>=4)return null;
-  if(last&&nowMs-Date.parse(last.shownAt)<45*60_000)return null;
+  const hasFreshReactiveCandidate=candidates.some(c=>c.metadata?.reactiveWrite===true);
+  if(last&&nowMs-Date.parse(last.shownAt)<45*60_000&&!hasFreshReactiveCandidate)return null;
   const eligible = candidates.filter(
     (candidate) =>
       Boolean(candidate) &&
@@ -171,8 +172,8 @@ export function decideCompanionThought(
       candidate.intent !== "silent" &&
       !isExpired(candidate,now) &&
       !recent.some(m=>m.id===candidate.id&&nowMs-Date.parse(m.shownAt)<candidate.cooldownMinutes*60_000) &&
-      !recent.some(m=>m.category===candidate.category&&nowMs-Date.parse(m.shownAt)<20*60_000) &&
-      !recent.some(m=>candidate.metadata?.family&&m.reason===candidate.reason&&nowMs-Date.parse(m.shownAt)<20*3600_000)
+      (candidate.metadata?.reactiveWrite===true || !recent.some(m=>m.category===candidate.category&&nowMs-Date.parse(m.shownAt)<20*60_000)) &&
+      (candidate.metadata?.reactiveWrite===true || !recent.some(m=>candidate.metadata?.family&&m.reason===candidate.reason&&nowMs-Date.parse(m.shownAt)<20*3600_000))
   );
 
   if (eligible.length === 0) {

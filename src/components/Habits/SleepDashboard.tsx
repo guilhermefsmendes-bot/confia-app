@@ -1,13 +1,16 @@
 import { MoonStar, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import HabitEvolution from "./HabitEvolution";
 import type { HabitRecord } from "../../data/habits/types";
 import { recordSleep } from "../../data/habits/actions";
 import { shiftDay } from "../../data/habits/calendar";
 import { DayPicker,buttonClass,inputClass,primaryClass,type RunAction } from "./shared";
 
 export default function SleepDashboard({records,today,run,onDone}:{records:HabitRecord[];today:string;run:RunAction;onDone:()=>void}) {
- const {t}=useTranslation(); const [date,setDate]=useState(today);
+ const {t,i18n}=useTranslation(); const [date,setDate]=useState(today);
+ const locale=i18n.language.startsWith("pt")?"pt-PT":i18n.language.startsWith("es")?"es-ES":i18n.language.startsWith("fr")?"fr-FR":"en-US";
+ const formatDate=(value:string)=>new Date(`${value}T12:00:00`).toLocaleDateString(locale,{day:"numeric",month:"long",year:"numeric"});
  const current=useMemo(()=>records.find(r=>r.kind==="sleep"&&r.date===date),[records,date]);
  const [hours,setHours]=useState(current?.kind==="sleep"?current.data.hours:8);
  const [quality,setQuality]=useState(current?.kind==="sleep"?current.data.quality:4);
@@ -27,6 +30,6 @@ export default function SleepDashboard({records,today,run,onDone}:{records:Habit
    <button type="button" className={buttonClass+" w-full"} onClick={onDone}>{t("habitHub.detail.finish")}</button>
   </form>
   <HabitEvolution records={records} today={today} kind="sleep"/>
-  <section className="rounded-[28px] border border-[#E8DDD7] bg-[#FFFDF7] p-5"><h3 className="text-lg font-black">{t("habitHub.sleep.history")}</h3>{history.length===0?<p className="mt-3 text-sm">{t("habitHub.sleep.empty")}</p>:<ul className="mt-3 space-y-2 text-sm">{history.map(r=><li key={r.id} className="rounded-xl bg-white p-3">{r.date} · {t("habitHub.sleep.hoursShort",{hours:r.data.hours})} · {t("habitHub.sleep.qualityShort",{quality:r.data.quality})}</li>)}</ul>}<p className="mt-4 text-xs leading-5 text-[#6F5D51]">{t("habitHub.sleep.disclaimer")}</p></section>
+  <section className="rounded-[28px] border border-[#E8DDD7] bg-[#FFFDF7] p-5"><h3 className="text-lg font-black">{t("habitHub.sleep.history")}</h3>{history.length===0?<p className="mt-3 text-sm">{t("habitHub.sleep.empty")}</p>:<ul className="mt-3 space-y-2 text-sm">{history.map(r=><li key={r.id} className="rounded-xl bg-white p-3">{formatDate(r.date)} · {t("habitHub.sleep.hoursShort",{hours:r.data.hours})} · {t("habitHub.sleep.qualityShort",{quality:r.data.quality})}</li>)}</ul>}<p className="mt-4 text-xs leading-5 text-[#6F5D51]">{t("habitHub.sleep.disclaimer")}</p></section>
  </div>;
 }

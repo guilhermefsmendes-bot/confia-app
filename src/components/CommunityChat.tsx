@@ -179,8 +179,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
           const existingChat = chatsSnapshot.docs[0];
 
           if (import.meta.env.DEV) {
-            console.debug("[Confia] Existing private chat found.");
-          }
+                }
 
           if (!cancelled) {
             setChatId(existingChat.id);
@@ -213,8 +212,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
 
         if (!otherUserId || otherUserId === myUid) {
           if (import.meta.env.DEV) {
-            console.debug("[Confia] Private chat participant is not available yet.");
-          }
+                }
 
           setLoading(false);
           return;

@@ -17,15 +17,16 @@ export const SCIENTIFIC_GUIDANCE = {
 const caffeineBase: Record<string, number> = { espresso:80, short:80, long:90, americano:90, filter:90, capsule:80, instant:80, other:80 };
 function coffeeEstimate(item: FoodItem): number | undefined {
   if (item.category !== "coffee" || item.subtype === "decaf") return item.category === "coffee" ? 0 : undefined;
+  if (["g","ml"].includes(item.unit)) return undefined;
   const base=caffeineBase[item.subtype]??80;
   const sizeFactor=item.size==="large"?1.5:item.size==="small"?0.75:1;
   const intensityFactor=item.intensity==="strong"?1.25:item.intensity==="mild"?0.75:1;
   return item.quantity*base*sizeFactor*intensityFactor;
 }
 function otherCaffeineEstimate(item:FoodItem):number {
-  if(item.category==="tea" && ["black","green"].includes(item.subtype)) return item.quantity*50;
-  if(item.category==="energy"){const ml=itemVolume(item);return item.quantity*(ml?ml/250:1)*80;}
-  if(item.category==="soda" && item.caffeine==="yes"){const ml=itemVolume(item);return item.quantity*(ml?ml/355:1)*40;}
+  if(item.category==="tea" && ["black","green"].includes(item.subtype) && !["g","ml"].includes(item.unit)) return item.quantity*50;
+  if(item.category==="energy"){const ml=itemVolume(item);return ml?ml/250*80:item.quantity*80;}
+  if(item.category==="soda" && item.caffeine==="yes"){const ml=itemVolume(item);return ml?ml/355*40:item.quantity*40;}
   return 0;
 }
 export function estimateDailyCaffeine(records:HabitRecord[],date:string){
@@ -45,7 +46,22 @@ export function weeklyExercise(records:HabitRecord[],now:Date){
  const byType=Object.fromEntries((['walk','run','bike','swim','gym','dance','sport','hiit','stretch','yoga','other'] as ActivityType[]).map(type=>[type,{minutes:sessions.filter(r=>r.data.activity===type).reduce((n,r)=>n+r.data.minutes,0),days:new Set(sessions.filter(r=>r.data.activity===type&&r.data.minutes>0).map(r=>r.date)).size}]));
  return {moderateMinutes,vigorousMinutes,activeDays:activeDays.size,strengthDays,loggedDays:new Set(sessions.map(r=>r.date)).size,byType};
 }
-export function fruitVegetableRegistrations(records:HabitRecord[],date:string){const items=dayFoodItems(records,date).filter(r=>r.data.category==="fruit"||r.data.category==="vegetables");return {explicitPortions:items.reduce((n,r)=>n+(r.data.unit==="portion"?r.data.quantity:0),0),registrations:items.length};}
+export function fruitVegetableRegistrations(records:HabitRecord[],date:string){const items=dayFoodItems(records,date).filter(r=>r.data.category==="fruit"||r.data.category==="vegetables");const portions=items.reduce((n,r)=>n+(r.data.unit==="portion"?r.data.quantity:0),0);const grams=items.reduce((n,r)=>n+(r.data.unit==="g"?r.data.quantity:0),0);return {explicitPortions:portions,grams,registrations:items.length};}
+
+export type FoodReferenceAnalysis={value:number;reference:number;unit:"g"|"ml"|"portion"|"mg";ratio:number;state:"ok"|"high"|"low"|"neutral"};
+export function analyseFoodReference(category:string,items:FoodItem[]):FoodReferenceAnalysis|undefined {
+ const active=items.filter(i=>!i.deleted); if(!active.length)return undefined;
+ const same=(unit:FoodItem["unit"])=>active.filter(i=>i.unit===unit).reduce((n,i)=>n+i.quantity,0);
+ if(category==="fruit"||category==="vegetables"||category==="produce"){
+  const grams=same("g"), portions=same("portion");
+  if(grams>0)return {value:grams,reference:SCIENTIFIC_GUIDANCE.fruitVegetables.grams,unit:"g",ratio:grams/SCIENTIFIC_GUIDANCE.fruitVegetables.grams,state:grams>=SCIENTIFIC_GUIDANCE.fruitVegetables.grams?"ok":"low"};
+  if(portions>0)return {value:portions,reference:SCIENTIFIC_GUIDANCE.fruitVegetables.portions,unit:"portion",ratio:portions/SCIENTIFIC_GUIDANCE.fruitVegetables.portions,state:portions>=SCIENTIFIC_GUIDANCE.fruitVegetables.portions?"ok":"low"};
+ }
+ if(category==="salty"){
+  const grams=same("g"); if(grams>0)return {value:grams,reference:SCIENTIFIC_GUIDANCE.salt.maxGrams,unit:"g",ratio:grams/SCIENTIFIC_GUIDANCE.salt.maxGrams,state:grams>SCIENTIFIC_GUIDANCE.salt.maxGrams?"high":"ok"};
+ }
+ return undefined;
+}
 export function foodCategorySignals(records:HabitRecord[],date:string){
  const items=dayFoodItems(records,date);const count=(category:string)=>items.filter(r=>r.data.category===category&&!r.data.deleted).reduce((n,r)=>n+r.data.quantity,0);
  return {tea:count("tea"),cereals:count("cereals"),protein:count("protein"),fats:count("fats"),sweets:count("sweets"),salty:count("salty"),fastFood:count("fastFood"),waterMl:items.filter(r=>r.data.category==="water").reduce((n,r)=>n+(itemVolume(r.data)??r.data.quantity*250),0)};

@@ -8,7 +8,7 @@ import { startHabitSync,syncHabits } from "../../data/habits/sync";
 import { recordHabitDay,restartHabit } from "../../data/habits/actions";
 import { habitStats } from "../../data/habits/statistics";
 import { readPersonalEvents,PERSONAL_EVENTS_UPDATED_EVENT } from "../../data/personal/personalEventStorage";
-import { type HabitDefinition } from "../../data/habits/types";
+import { type HabitDefinition,type HabitRecord } from "../../data/habits/types";
 import { recordPersonalAnalytics,recordPersonalScreenView } from "../../data/personal/personalAnalytics";
 import { buttonClass,primaryClass,DayPicker,Panel,useLocalDay,type RunAction } from "./shared";
 import HabitChallengeCard from "./HabitChallengeCard";
@@ -73,7 +73,7 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
         <span className="grid h-11 w-11 place-items-center rounded-full bg-white/80"><MoonStar size={24} aria-hidden="true"/></span>
         <h2 className="mt-3 text-base font-black">{t("habitHub.sleep.title")}</h2>
       </button>
-      {foodSummary.length>0 && <details className="rounded-2xl border border-[#E8DDD7] bg-white p-4 text-sm"><summary className="min-h-8 cursor-pointer font-bold">{t("habitHub.nutrition.today")}</summary><ul className="mt-2 space-y-1">{foodSummary.map(([key,value])=><li key={key}>{t("habitHub.food."+key)}: {value} {t("habitHub.units."+key)}</li>)}</ul></details>}
+
       {!embedded && <>
         <details open={expanded} onToggle={e=>setExpanded(e.currentTarget.open)} className="rounded-2xl border border-[#E8DDD7] bg-white p-4">
           <summary className="min-h-11 cursor-pointer font-semibold">{t("homeDaily.more")}</summary>

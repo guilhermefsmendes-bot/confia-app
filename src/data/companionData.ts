@@ -66,7 +66,7 @@ export interface CompanionCollectedData {
 /**
  * Lê os registos de humor existentes.
  */
-function readMoodHistory(): CompanionMoodRecord[] {
+export function readMoodHistory(): CompanionMoodRecord[] {
   try {
     const raw = localStorage.getItem("confia_ratings_v2");
 

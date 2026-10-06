@@ -127,11 +127,52 @@
     }
   },
   "shop": "Shop",
-  "companionEvolutionPanel": {
-    "eyebrow": "CONFIA evolution",
-    "progressAria": "Progress toward the next evolution",
-    "nextForm": "The next visual change happens at level {{level}}. Evolution XP is no longer spent in the shop.",
-    "finalForm": "You have reached the adult form. XP still marks your journey."
+  "companionSynergy": {
+    "eyebrow": "Connection Web",
+    "title": "What I’m noticing",
+    "hypothesis": "This is a hypothesis based on your own records. CONFIA does not assume that a habit directly causes your wellbeing.",
+    "food": {
+      "0": "Across your last {{evidenceDays}} days with check-ins, your wellbeing average is {{mood}}/10 ({{recentMood}}/10 in the most recent days). At the same time, repeated food-related signals appear.\n\nSome of these habits may be associated with days when you feel worse. This does not prove a cause — it is a hypothesis based on your own history.\n\nWe can test one small change and observe what happens."
+    },
+    "sleep": {
+      "0": "Across your last {{evidenceDays}} days with check-ins, your wellbeing average is {{mood}}/10 ({{recentMood}}/10 in the most recent days). There are also several days with less than 7 hours of sleep.\n\nThis pattern may be associated with days when you feel worse, but the records do not prove causality.\n\nWe can observe the next few days before drawing conclusions."
+    },
+    "movement": {
+      "0": "Across your last {{evidenceDays}} days with check-ins, your wellbeing average is {{mood}}/10 ({{recentMood}}/10 in the most recent days). You have no exercise recorded this week.\n\nThis does not mean you did no movement outside CONFIA, but it gives us an opportunity to test whether adding some movement changes how you feel."
+    },
+    "food_sleep": {
+      "0": "Across your last {{evidenceDays}} days with check-ins, your wellbeing average is {{mood}}/10 ({{recentMood}}/10 in the most recent days). At the same time, repeated food-related signals and several days with less than 7 hours of sleep appear.\n\nThese patterns may be associated with days when you feel worse. They do not prove causality — they are clues we can keep observing.\n\nWe can test one small change and compare the next check-ins."
+    },
+    "food_movement": {
+      "0": "Across your last {{evidenceDays}} days with check-ins, your wellbeing average is {{mood}}/10 ({{recentMood}}/10 in the most recent days). At the same time, repeated food-related signals appear and you have no exercise recorded this week.\n\nThis combination may be associated with less good days. It is not a cause-and-effect conclusion — it is a hypothesis we can test.\n\nA small movement goal could be a useful experiment for the next few days."
+    },
+    "sleep_movement": {
+      "0": "Across your last {{evidenceDays}} days with check-ins, your wellbeing average is {{mood}}/10 ({{recentMood}}/10 in the most recent days). There are also several days with less than 7 hours of sleep and no exercise recorded this week.\n\nThis combination is worth observing, but it does not prove it is causing less good days.\n\nWe can test one small change and track the response."
+    },
+    "food_sleep_movement": {
+      "0": "Across your last {{evidenceDays}} days with check-ins, your wellbeing average is {{mood}}/10 ({{recentMood}}/10 in the most recent days). At the same time, repeated food-related signals, several days with less than 7 hours of sleep, and no exercise recorded this week appear.\n\nThis combination of habits may be associated with days when you feel worse. It does not prove causality — it is a hypothesis based on your own history.\n\nWe can test one small change and compare the next few days."
+    },
+    "subtitle": "CONFIA brings together signals from your own story.",
+    "analysisTitle": "Reading your current moment",
+    "waiting": "I'm still gathering enough signals to find a connection with confidence. Keep recording how you feel, what you do and your habits — the reading becomes more personal over time.",
+    "sources": "food · movement · sleep · wellbeing · goals",
+    "window": "continuous reading · last 7 days",
+    "combined": {
+      "0": "Across your last {{evidenceDays}} days with records, your wellbeing average is {{mood}}/10 ({{recentMood}}/10 in the most recent days). CONFIA found several signals appearing together: {{caffeineDays}} days with higher coffee/caffeine, {{sweetsDays}} days with sweets, {{fastFoodDays}} days with fast food, {{shortSleepDays}} days with less than 7 hours of sleep, {{exerciseDays}} recorded exercise days, {{objectiveDays}} days with goals and {{impulseDays}} days with Impulso episodes.\n\nThere were also {{lowCheckInDays}} low check-ins. These signals do not prove that a habit is causing your wellbeing, but together they give us a richer hypothesis to observe.\n\nRather than drawing a conclusion, we can try one small change and compare the next days with your own history."
+    },
+    "periods": {
+      "day": "Today",
+      "7days": "7 days",
+      "month": "1 month"
+    },
+    "periodFood": "Recorded food",
+    "periodExercise": "Movement",
+    "periodExerciseRef": "reference: up to {{value}} min",
+    "periodCaffeine": "Average daily caffeine",
+    "periodSleep": "Average sleep",
+    "periodEmpty": "No records in this period.",
+    "wellbeing": "Well-being",
+    "wellbeingAverage": "morning/afternoon average"
   },
   "companionWidgetPrompt": {
     "message": "Want to take me with you to your home screen? I can show your challenge and small daily goals without you having to open the app.",
@@ -1968,12 +2009,18 @@
     "title": "My Manual",
     "subtitle": "What CONFIA is learning about how you work — built only from your own records.",
     "observations": "observations",
+    "observationsTitle": "Observations CONFIA identifies",
     "days": "days",
     "completeness": "coverage",
     "currentTitle": "What is present",
     "learning": "CONFIA is still learning. Keep recording to discover your patterns.",
     "needObserved": "The need “{{need}}” appears {{count}} times in your records.",
     "discoveries": "Discoveries",
+    "suggestions": "Personalized suggestions",
+    "suggestionsSubtitle": "Small experiments based on patterns CONFIA identified in your records.",
+    "suggestionInsufficient": "There is not enough evidence yet for a personalized suggestion. Keep recording so CONFIA can learn with you.",
+    "suggestionAct": "When this pattern appears, try a small change and observe whether your wellbeing follows.",
+    "suggestionObserve": "Over the next few days, observe this pattern and record how you feel when it appears.",
     "personalInsights": {
       "trendUp": "In your recent records, your average state has risen.",
       "trendDown": "In your recent records, your average state has fallen.",
@@ -2851,17 +2898,57 @@
       },
       "values": {
         "mg": "{{value}} mg",
-        "portions": "{{value}} portions"
+        "portions": "{{value}} portions",
+        "sleepHours": "{{value}} h"
       },
       "references": {
         "caffeine": "up to {{value}} mg/day",
-        "produce": "at least {{value}} portions/day"
+        "produce": "at least {{value}} portions/day",
+        "coffeeCups": "up to {{value}} cups/day",
+        "limit": "Limit; there is no international daily portion limit",
+        "exerciseWeekly": "150–300 min moderate/week or 75–150 vigorous; strength ≥2 days/week",
+        "sleepHours": "7–9 hours/night",
+        "teaCaffeine": "up to {{value}} mg/day of total caffeine",
+        "energyCaffeine": "up to {{value}} mg/day of total caffeine",
+        "sugar": "free sugars <10% of daily energy; ideally <5%",
+        "water": "No universal international daily limit in cups",
+        "alcohol": "Less is lower risk; none is best for health",
+        "tobacco": "There is no safe level of tobacco use",
+        "wholegrain": "Prefer whole grains; no universal number of portions",
+        "protein": "Varied diet with protein sources; no universal number of portions",
+        "fat": "total fat <30% of energy; saturated fat <10%",
+        "salt": "less than 5 g salt/day",
+        "notComparable": "General reference, but this record does not allow a direct numerical comparison"
       },
       "status": {
         "ok": "Within the general reference",
         "high": "Above the general reference",
-        "low": "Below the general reference"
-      }
+        "low": "Below the general reference",
+        "neutral": "No numerical comparison"
+      },
+      "mirrorIntro": "A visual mirror of your records today. CONFIA shows what you recorded and only makes a numerical comparison where a suitable international reference exists.",
+      "mirrorLabels": {
+        "coffee": "Coffee",
+        "energy": "Energy drinks",
+        "fastFood": "Fast food / ultra-processed",
+        "sweets": "Sweets",
+        "produce": "Fruit + vegetables",
+        "exercise": "Exercise",
+        "sleep": "Sleep",
+        "tea": "Tea",
+        "soda": "Soft drinks and juices",
+        "water": "Water",
+        "alcohol": "Alcohol",
+        "tobacco": "Tobacco",
+        "fruit": "Fruit",
+        "vegetables": "Vegetables",
+        "cereals": "Cereals",
+        "protein": "Protein",
+        "fats": "Fats",
+        "salty": "Salty foods",
+        "wellbeing": "Wellbeing"
+      },
+      "proportion": "{{value}}% of the reference"
     },
     "comparison": {
       "more": "↑ Higher average than last week",
@@ -2972,7 +3059,8 @@
       "cereals": "Cereals",
       "protein": "Protein",
       "fats": "Fats",
-      "salty": "Salty foods"
+      "salty": "Salty foods",
+      "wellbeing": "Wellbeing"
     },
     "activities": {
       "walk": "Walking",
@@ -3060,7 +3148,8 @@
         "occasion_one": "occasion",
         "occasion_other": "occasions",
         "meal_one": "meal",
-        "meal_other": "meals"
+        "meal_other": "meals",
+        "g": "grams"
       },
       "periods": {
         "morning": "Morning",
@@ -3356,9 +3445,9 @@
       "history": "Recent history",
       "empty": "No sleep records yet.",
       "emptyToday": "You have not logged today’s sleep yet.",
-      "summary": "{hours} h · quality {quality}/5",
-      "hoursShort": "{hours} h",
-      "qualityShort": "quality {quality}/5",
+      "summary": "{{hours}} h · quality {{quality}}/5",
+      "hoursShort": "{{hours}} h",
+      "qualityShort": "quality {{quality}}/5",
       "disclaimer": "Sleep needs vary between people. Companion responses use general references and your own records; they do not diagnose.",
       "scienceShort": "Most adults need around 7–9 hours, but individual needs vary."
     },
@@ -3587,95 +3676,98 @@
       "Objective completed. I like seeing this part of your journey."
     ],
     "caffeineGuidance": {
-      "0": "You logged about {mg} mg of caffeine today. EFSA’s general reference for healthy adults is up to 400 mg per day; the Companion uses this as a population reference, not a diagnosis."
+      "0": "You logged {{coffeeCount}} cups of coffee today. EFSA’s reference for healthy adults is up to about 5 cups per day; caffeine varies between drinks."
     },
     "caffeineCountGuidance": {
-      "0": "You have logged {coffeeCount} coffees. Caffeine varies a lot between drinks, so the Companion looks at the estimate rather than coffee count alone."
+      "0": "You have logged {{coffeeCount}} coffees. Caffeine varies a lot between drinks, so the Companion looks at the estimate rather than coffee count alone."
     },
     "lateCaffeineGuidance": {
-      "0": "You logged about {mg} mg of caffeine, including later-day intake. EFSA notes that 100 mg close to bedtime may affect sleep in some adults."
+      "0": "You logged {{coffeeCount}} cups of coffee, including later-day intake. Caffeine close to bedtime may affect sleep in some people."
     },
     "activityGuidance": {
-      "0": "You have {minutes} minutes of moderate activity logged this week. If it feels right, a short walk or another comfortable activity can gradually move you towards general recommendations."
+      "0": "You have {{minutes}} minutes of moderate activity logged this week. If it feels right, a short walk or another comfortable activity can gradually move you towards general recommendations."
     },
     "produceGuidance": {
-      "0": "You have logged {portions} portions of fruit/vegetables. The general reference is at least 5 portions, around 400 g, per day."
+      "0": "You have logged {{portions}} portions of fruit/vegetables. The general reference is at least 5 portions, around 400 g, per day."
     },
     "teaGuidance": {
-      "0": "You logged {count} tea entry/entries today. Depending on the type, tea can contribute caffeine and is part of dietary variety."
+      "0": "You logged {{count}} tea entry/entries today. Depending on the type, tea can contribute caffeine and is part of dietary variety."
     },
     "cerealsGuidance": {
-      "0": "You logged {count} cereal portion(s). Choosing whole grains regularly can increase the fibre content of the diet."
+      "0": "You logged {{count}} cereal portion(s). Choosing whole grains regularly can increase the fibre content of the diet."
     },
     "proteinGuidance": {
-      "0": "You logged {count} protein-food portion(s). A varied diet can combine animal and plant protein sources."
+      "0": "You logged {{count}} protein-food portion(s). A varied diet can combine animal and plant protein sources."
     },
     "fatsGuidance": {
-      "0": "You logged {count} fat-rich food portion(s). Fats are part of a healthy diet; type and amount matter."
+      "0": "You logged {{count}} fat-rich food portion(s). Fats are part of a healthy diet; type and amount matter."
     },
     "sweetsGuidance": {
-      "0": "You logged {count} sweet-food entry/entries. WHO recommends limiting free sugars and favouring a varied diet."
+      "0": "You logged {{count}} sweet-food entry/entries. WHO recommends limiting free sugars and favouring a varied diet."
     },
     "saltyGuidance": {
-      "0": "You logged {count} salty-food item(s). WHO recommends limiting salt to less than 5 g per day for adults."
+      "0": "You logged {{count}} salty-food item(s). WHO recommends limiting salt to less than 5 g per day for adults."
     },
     "processedFoodGuidance": {
-      "0": "You logged {count} fast-food/ultra-processed entry/entries. Many can be high in salt, free sugars or less favourable fats, so it can help to look at the whole day."
+      "0": "You logged {{count}} fast-food/ultra-processed entry/entries. Many can be high in salt, free sugars or less favourable fats, so it can help to look at the whole day."
     },
     "hydrationGuidance": {
-      "0": "You logged about {ml} ml of water. Hydration needs vary with the person, climate and activity; this signal is simply a reminder to check in with your drinking across the day."
+      "0": "You logged {{ml}} ml of water today. This is the amount you recorded; hydration also comes from other foods and drinks."
+    },
+    "foodTypeSpecial": {
+      "0": "You logged {{count}} record(s) from this category today. Companion tracks this data and can compare it with your wider context over time."
     },
     "sleepShortGuidance": {
-      "0": "You logged {hours} hours of sleep. Most adults need around 7–9 hours, although individual needs vary. Today it may help to protect your rest a little more."
+      "0": "You logged {{hours}} hours of sleep. Most adults need around 7–9 hours, although individual needs vary. Today it may help to protect your rest a little more."
     },
     "sleepGoodGuidance": {
-      "0": "You logged {hours} hours of sleep with quality {quality}/5. That is a useful positive data point to track, without assuming one night determines how you feel today."
+      "0": "You logged {{hours}} hours of sleep with quality {{quality}}/5. That is a useful positive data point to track, without assuming one night determines how you feel today."
     },
     "sleepQualityGuidance": {
-      "0": "You rated sleep quality {quality}/5. A less restorative night can go with more daytime tiredness; today may be a good day to keep the pace gentler."
+      "0": "You rated sleep quality {{quality}}/5. A less restorative night can go with more daytime tiredness; today may be a good day to keep the pace gentler."
     },
     "morningLowGuidance": {
-      "0": "You rated your morning {rating}/5. A harder morning can accompany how the rest of the day feels, but it does not determine what happens. Try one simple, concrete action for this morning."
+      "0": "You rated your morning {{rating}}/5. A harder morning can accompany how the rest of the day feels, but it does not determine what happens. Try one simple, concrete action for this morning."
     },
     "afternoonLowGuidance": {
-      "0": "You rated your afternoon {rating}/5. If the day feels heavy, a short pause, a change of setting, or one small task may help before you continue."
+      "0": "You rated your afternoon {{rating}}/5. If the day feels heavy, a short pause, a change of setting, or one small task may help before you continue."
     },
     "dayRecoveryGuidance": {
-      "0": "You moved from {morning}/5 in the morning to {afternoon}/5 in the afternoon. That is a positive change in your own record; it does not prove a cause, but it is interesting to track."
+      "0": "You moved from {{morning}}/5 in the morning to {{afternoon}}/5 in the afternoon. That is a positive change in your own record; it does not prove a cause, but it is interesting to track."
     },
     "exerciseType": {
       "walk": {
-        "0": "You logged {minutes} minutes of walking. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of walking. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       },
       "run": {
-        "0": "You logged {minutes} minutes of running. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of running. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       },
       "bike": {
-        "0": "You logged {minutes} minutes of cycling. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of cycling. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       },
       "swim": {
-        "0": "You logged {minutes} minutes of swimming. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of swimming. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       },
       "gym": {
-        "0": "You logged {minutes} minutes of strength training. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of strength training. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       },
       "yoga": {
-        "0": "You logged {minutes} minutes of stretching/mobility. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of stretching/mobility. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       },
       "sport": {
-        "0": "You logged {minutes} minutes of sport. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of sport. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       },
       "other": {
-        "0": "You logged {minutes} minutes of another activity. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of another activity. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       },
       "dance": {
-        "0": "You logged {minutes} minutes of Dance. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of Dance. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       },
       "hiit": {
-        "0": "You logged {minutes} minutes of HIIT. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of HIIT. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       },
       "stretch": {
-        "0": "You logged {minutes} minutes of Stretching. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+        "0": "You logged {{minutes}} minutes of Stretching. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
       }
     }
   },
@@ -3690,5 +3782,54 @@
       "I noticed that action. Small choices can become part of your path.",
       "You chose “{{label}}”. I like seeing you make space for your own choices."
     ]
+  },
+  "premiumIntelligence": {
+    "homeTitle": "Understand yourself better",
+    "homeSubtitle": "Your story, patterns and personal learning.",
+    "eyebrow": "CONFIA+",
+    "title": "Personal intelligence",
+    "badge": "CONFIA+ · personal understanding",
+    "heroTitle": "Not more tracking. More understanding.",
+    "heroText": "CONFIA looks across your own history to surface repeated patterns, learning and change, without inventing conclusions.",
+    "dataNote": "The analysis uses {{count}} personal records available on this device.",
+    "observations": "observations",
+    "activeDays": "active days",
+    "scales": {
+      "title": "Your story across time",
+      "subtitle": "We only show what your data can support.",
+      "day": "24 hours",
+      "week": "7 days",
+      "month": "30 days",
+      "quarter": "90 days",
+      "history": "History"
+    },
+    "learning": {
+      "title": "What your story is already teaching",
+      "subtitle": "Repeated learning, while keeping contradictory results visible.",
+      "insufficient": "There is not enough repeated evidence for a strong personal learning yet. Keep recording; CONFIA does not fill gaps for you."
+    },
+    "interventions": {
+      "title": "What happened after certain interventions",
+      "subtitle": "Observed results from your own episodes.",
+      "improved": "improvements"
+    },
+    "ask": {
+      "title": "Ask your history",
+      "subtitle": "Answers come only from your available records."
+    },
+    "questions": {
+      "what_helps": "What seems to help me?",
+      "am_i_changing": "Am I changing?",
+      "have_i_been_here": "Have I been in a similar moment?",
+      "when_harder": "When do my days tend to be harder?"
+    },
+    "confidence": {
+      "high": "strong evidence",
+      "moderate": "moderate evidence",
+      "low": "limited evidence"
+    },
+    "evidence": "evidence",
+    "insufficient": "insufficient data",
+    "guardrail": "CONFIA uses your own history, keeps contradictions and does not turn associations into causality. This is not a clinical diagnosis."
   }
 }

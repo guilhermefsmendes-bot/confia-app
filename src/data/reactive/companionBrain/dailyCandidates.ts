@@ -8,6 +8,7 @@ import { buildPersonalSignalSnapshot } from "../../personal/personalSignalEngine
 import type { CompanionCollectedData } from "../../companionData";
 import { buildCompanionLongitudinalMoodMemory } from "./companionBrainLongitudinalMemory";
 import { getRecentCompanionBrainEvents } from "./companionBrainMemory";
+import { buildLifestyleSynergyCandidate } from "./lifestyleSynergy";
 import { readCompanionInteractions } from "./companionEventIntelligence";
 import {
   estimateDailyCaffeine,
@@ -23,10 +24,15 @@ export function dailyCandidates(
   events: PersonalEvent[],
   now = new Date(),
   companionData?: CompanionCollectedData,
+  reactiveWriteAt?: number,
 ): Candidate[] {
   const today = localDay(now),
     since = shiftDay(today, -6),
     out: Candidate[] = [];
+  if (companionData) {
+    const synergy = buildLifestyleSynergyCandidate(records, companionData, now);
+    if (synergy) out.push(synergy);
+  }
   const recentObjectiveCompletion = readCompanionInteractions()
     .filter((e) => e.kind === "goal_completed")
     .at(-1);
@@ -51,6 +57,7 @@ export function dailyCandidates(
         labelKey: "companionDaily.actions.progress",
       },
     });
+  const reactiveWrite = typeof reactiveWriteAt === "number" && now.getTime() - reactiveWriteAt <= 10_000;
   const add = (
     family: string,
     fact: string,
@@ -90,6 +97,7 @@ export function dailyCandidates(
               ? 1
               : 3,
         evidenceWindowDays: 7,
+        ...(reactiveWrite ? { reactiveWrite: true } : {}),
       },
       action: {
         target,
@@ -159,7 +167,7 @@ export function dailyCandidates(
   ) {
     add(
       "caffeineGuidance",
-      today,
+      `${today}:${caffeine.mg}:${caffeine.coffeeCount}`,
       98,
       "discovery",
       "nutrition",
@@ -170,7 +178,7 @@ export function dailyCandidates(
   } else if (caffeine.mg !== undefined && caffeine.mg >= 300) {
     add(
       "caffeineGuidance",
-      today,
+      `${today}:${caffeine.mg}:${caffeine.coffeeCount}`,
       82,
       "discovery",
       "nutrition",
@@ -184,8 +192,8 @@ export function dailyCandidates(
   ) {
     add(
       "caffeineCountGuidance",
-      today,
-      68,
+      `${today}:${caffeine.coffeeCount}`,
+      92,
       "discovery",
       "nutrition",
       { coffeeCount: caffeine.coffeeCount },
@@ -210,6 +218,26 @@ export function dailyCandidates(
     );
   }
   const activity = weeklyExercise(records, now);
+  // After an exercise write, respond to the actual movement just recorded.
+  // The weekly recommendation remains separate and still requires enough history.
+  if (reactiveWrite) {
+    const latestExercise = records
+      .filter((r): r is Extract<HabitRecord, { kind: "exercise" }> => r.kind === "exercise" && r.date === today && r.data.minutes > 0)
+      .sort((a, b) => a.updatedAt.localeCompare(b.updatedAt))
+      .at(-1);
+    if (latestExercise) {
+      add(
+        `exerciseType.${latestExercise.data.activity}`,
+        `${latestExercise.id}:${latestExercise.updatedAt}`,
+        94,
+        "progress",
+        "exercise",
+        { minutes: latestExercise.data.minutes },
+        "insight",
+        "companionDaily.actions.exercise",
+      );
+    }
+  }
   if (
     activity.loggedDays >= 3 &&
     activity.moderateMinutes < SCIENTIFIC_GUIDANCE.activity.moderateMinutes &&
@@ -227,10 +255,6 @@ export function dailyCandidates(
     );
   }
   const typeGuidance = activity.byType as Record<string,{minutes:number;days:number}>;
-  (Object.keys(typeGuidance) as Array<keyof typeof typeGuidance>).forEach(type => {
-    const data = typeGuidance[type];
-    if (data.days > 0) add(`exerciseType.${type}`, today, type === "gym" ? 74 : 48, "progress", "exercise", { minutes: data.minutes, days: data.days }, "insight", "companionDaily.actions.exercise");
-  });
   if (activity.strengthDays > 0 && activity.strengthDays < SCIENTIFIC_GUIDANCE.activity.strengthDays) {
     add("strengthGuidance", today, 72, "discovery", "exercise", { days: activity.strengthDays, target: SCIENTIFIC_GUIDANCE.activity.strengthDays }, "suggestion", "companionDaily.actions.exercise");
   }
@@ -256,10 +280,15 @@ export function dailyCandidates(
   }
 
   const foodSignals = foodCategorySignals(records, today);
-  if (foodSignals.tea > 0) add("teaGuidance", today, 54, "discovery", "nutrition", { count: foodSignals.tea }, "insight", "companionDaily.actions.nutrition");
-  if (foodSignals.cereals > 0) add("cerealsGuidance", today, 52, "discovery", "nutrition", { count: foodSignals.cereals }, "insight", "companionDaily.actions.nutrition");
-  if (foodSignals.protein > 0) add("proteinGuidance", today, 52, "discovery", "nutrition", { count: foodSignals.protein }, "insight", "companionDaily.actions.nutrition");
-  if (foodSignals.fats > 0) add("fatsGuidance", today, 50, "discovery", "nutrition", { count: foodSignals.fats }, "insight", "companionDaily.actions.nutrition");
+  if (reactiveWrite) {
+    const latestFood = records.filter((r): r is Extract<HabitRecord, { kind: "foodItem" }> => r.kind === "foodItem" && r.date === today && !r.data.deleted && r.data.quantity > 0).sort((a,b) => a.updatedAt.localeCompare(b.updatedAt)).at(-1);
+    if (latestFood) {
+      const amount = latestFood.data.category === "water" ? (latestFood.data.unit === "ml" ? latestFood.data.quantity : (latestFood.data.servingMl ? latestFood.data.quantity * latestFood.data.servingMl : latestFood.data.quantity * 250)) : latestFood.data.quantity;
+      const category=latestFood.data.category;
+      const family=category==="coffee"?"caffeineCountGuidance":category==="energy"?"energyGuidance":category==="tea"?"teaGuidance":category==="fruit"||category==="vegetables"?"produceGuidance":category==="fastFood"?"processedFoodGuidance":category==="sweets"?"sweetsGuidance":category==="salty"?"saltyGuidance":category==="water"?"hydrationGuidance":"foodTypeSpecial";
+      add(family, `${latestFood.id}:${latestFood.updatedAt}`, 95, "discovery", "nutrition", { count: latestFood.data.quantity, coffeeCount: latestFood.data.quantity, portions: latestFood.data.quantity, ml: Math.round(amount) }, "insight", "companionDaily.actions.nutrition");
+    }
+  }
   if (foodSignals.sweets > 0) add("sweetsGuidance", today, 64, "discovery", "nutrition", { count: foodSignals.sweets }, "suggestion", "companionDaily.actions.nutrition");
   if (foodSignals.salty > 0) add("saltyGuidance", today, 64, "discovery", "nutrition", { count: foodSignals.salty }, "suggestion", "companionDaily.actions.nutrition");
   if (foodSignals.fastFood > 0) add("processedFoodGuidance", today, 60, "discovery", "nutrition", { count: foodSignals.fastFood }, "suggestion", "companionDaily.actions.nutrition");
@@ -267,9 +296,19 @@ export function dailyCandidates(
 
   const sleep = sleepSignal(records, today);
   if (sleep) {
-    if (sleep.hours < SCIENTIFIC_GUIDANCE.sleep.typicalHoursMin) add("sleepShortGuidance", today, 86, "discovery", "sleep", { hours: sleep.hours }, "suggestion", "companionDaily.actions.sleep");
-    else if (sleep.hours <= SCIENTIFIC_GUIDANCE.sleep.typicalHoursMax && sleep.quality >= 4) add("sleepGoodGuidance", today, 58, "progress", "sleep", { hours: sleep.hours, quality: sleep.quality }, "insight", "companionDaily.actions.sleep");
-    if (sleep.quality <= 2) add("sleepQualityGuidance", today, 82, "emotional_followup", "sleep", { quality: sleep.quality }, "suggestion", "companionDaily.actions.sleep");
+    if (sleep.hours < SCIENTIFIC_GUIDANCE.sleep.typicalHoursMin) {
+      add("sleepShortGuidance", today, 86, "discovery", "sleep", { hours: sleep.hours }, "suggestion", "companionDaily.actions.sleep");
+    } else if (sleep.quality <= 2) {
+      add("sleepQualityGuidance", today, 82, "emotional_followup", "sleep", { quality: sleep.quality }, "suggestion", "companionDaily.actions.sleep");
+    } else if (reactiveWrite) {
+      const latestSleep = records
+        .filter((r): r is Extract<HabitRecord, { kind: "sleep" }> => r.kind === "sleep" && r.date === today)
+        .sort((a, b) => a.updatedAt.localeCompare(b.updatedAt))
+        .at(-1);
+      if (latestSleep) {
+        add("sleepGoodGuidance", `${latestSleep.id}:${latestSleep.updatedAt}`, 90, "progress", "sleep", { hours: sleep.hours, quality: sleep.quality }, "insight", "companionDaily.actions.sleep");
+      }
+    }
   }
 
   const todayMood = companionData?.mood.find(item => item.date === today);

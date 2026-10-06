@@ -1,7 +1,7 @@
 import type { FoodType } from './types';
 export const PERIODS = ['morning','lunch','afternoon','evening'] as const;
 export type DayPeriod = typeof PERIODS[number];
-export type FoodUnit = 'item'|'portion'|'cup'|'can'|'bottle'|'ml'|'occasion'|'meal';
+export type FoodUnit = 'item'|'portion'|'cup'|'can'|'bottle'|'ml'|'g'|'occasion'|'meal';
 export interface FoodItem { category:FoodType; subtype:string; quantity:number; unit:FoodUnit; servingMl?:number; period?:DayPeriod; time?:string; size?:'small'|'medium'|'large'; intensity?:'mild'|'medium'|'strong'; caffeine?:'yes'|'no'|'unknown'; sugar?:'yes'|'no'|'unknown'; deleted:boolean; }
 export const FOOD_CATALOG: Record<FoodType,readonly string[]> = {
  coffee:['espresso','short','long','americano','filter','capsule','instant','decaf','other'],
@@ -28,8 +28,8 @@ export function foodProperties(item:FoodItem) {
 }
 export function validFoodItem(d:FoodItem):boolean {
  return !!d && (FOOD_CATALOG[d.category]?.includes(d.subtype)||d.subtype==='unspecified'&&d.category in FOOD_CATALOG) && Number.isFinite(d.quantity) && d.quantity>=0 && d.quantity<=10000 &&
- ['item','portion','cup','can','bottle','ml','occasion','meal'].includes(d.unit) && typeof d.deleted==='boolean' &&
- (d.unit==='ml'||Number.isInteger(d.quantity)) && (d.unit==='ml'||d.quantity<=100) &&
+ ['item','portion','cup','can','bottle','ml','g','occasion','meal'].includes(d.unit) && typeof d.deleted==='boolean' &&
+ (d.unit==='ml'||d.unit==='g'||Number.isInteger(d.quantity)) && (d.unit==='ml'||d.unit==='g'||d.quantity<=100) &&
  (d.servingMl===undefined||(Number.isInteger(d.servingMl)&&d.servingMl>=1&&d.servingMl<=2000)) &&
  (!d.period||PERIODS.includes(d.period)) && (!d.time||/^([01]\d|2[0-3]):[0-5]\d$/.test(d.time)) &&
  (!d.size||['small','medium','large'].includes(d.size)) && (!d.intensity||['mild','medium','strong'].includes(d.intensity)) &&

@@ -264,19 +264,26 @@ useEffect(() => {
   const [currentTab, setCurrentTab] = useState<number>(0);
   useEffect(()=>recordPersonalScreenView(screenName(currentTab,homeScreen)),[currentTab,homeScreen]);
 const preloadTab = (tab: number) => {
+  const preload = (loader: () => Promise<unknown>, label: string) => {
+    void loader().catch((error) => {
+      // Prefetch é apenas uma otimização: uma falha de chunk nunca pode
+      // transformar-se num erro global nem impedir a navegação normal.
+      console.warn(`[Confia] prefetch_failed:${label}`, error);
+    });
+  };
   if (tab === 1) {
-    void import("./components/HorizonExperience");
-    void import("./components/AbracoTimer");
+    preload(() => import("./components/HorizonExperience"), "horizon");
+    preload(() => import("./components/AbracoTimer"), "abraco");
     return;
   }
   if (tab === 2) {
-    void import("./components/ObjectivosList").then(m => m.ObjectivosList);
-    void import("./components/WeeklyGoalSection").then(m => m.WeeklyGoalSection);
+    preload(() => import("./components/ObjectivosList"), "objectives");
+    preload(() => import("./components/WeeklyGoalSection"), "weekly-goal");
     return;
   }
   if (tab === 4) {
-    void import("./components/PartilhaFeed").then(m => m.PartilhaFeed);
-    void import("./components/CommunityChat").then(m => m.CommunityChat);
+    preload(() => import("./components/PartilhaFeed"), "community-feed");
+    preload(() => import("./components/CommunityChat"), "community-chat");
     return;
   }
 };

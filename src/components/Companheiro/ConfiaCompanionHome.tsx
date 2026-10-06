@@ -22,8 +22,8 @@ function ConfiaCompanionHome({avatar,avatarCelebrating,avatarMemoryMessage,morni
  const reaction=emotion==='warm'||emotion==='concerned'?'supportive':emotion==='celebrating'||emotion==='encouraging'?'celebrating':emotion==='curious'?'curious':'neutral';
  const [showSynergy,setShowSynergy]=useState(false);const [analysisTick,setAnalysisTick]=useState(0);
  useEffect(()=>{const refresh=()=>setAnalysisTick(v=>v+1);const events=['confia:habit-write','confia:objective-completed','storage','focus'];events.forEach(e=>window.addEventListener(e,refresh));return()=>events.forEach(e=>window.removeEventListener(e,refresh));},[]);
- const records=getHabitSnapshot().records;
- const synergy=useMemo(()=>{const companionData=collectCompanionData();return buildLifestyleSynergyCandidate(records,companionData,new Date());},[analysisTick,voiceInput.ratings]);
+ const records=useMemo(()=>{try{return getHabitSnapshot().records;}catch(error){console.error("[Confia] companion_habit_snapshot_error",error);return []; }},[analysisTick]);
+ const synergy=useMemo(()=>{try{const companionData=collectCompanionData();return buildLifestyleSynergyCandidate(records,companionData,new Date());}catch(error){console.error("[Confia] companion_synergy_error",error);return undefined;}},[records,analysisTick,voiceInput.ratings]);
  const synergyText=synergy?.translationKey?t(synergy.translationKey,synergy.translationValues):null;
  return <section aria-label={t('companion')} className="space-y-3">
   <div className="flex items-center justify-between gap-2"><div><h2 className="text-lg font-bold text-[#674D44]">{t('companion')}</h2><p className="text-xs text-[#76584D]">{t('level')} {avatar.level} · {t('companionAging.'+relationshipStage,{count:relationshipObservationCount})}</p></div><div className="flex">

@@ -2276,13 +2276,12 @@ const handleOpenProgress = useCallback(() => {
 const handleMainNavigation = useCallback((index: number) => {
   setOpenHabitSupport(false);
   setHomeScreen("home");
-  if (index === 4 && currentTab !== 4) {
-    setOpenPendingChatOnCommunityEntry(Boolean(pendingCommunityChat));
-  } else {
-    setOpenPendingChatOnCommunityEntry(false);
-  }
+  // Entrar no separador Comunidade deve mostrar primeiro o feed e o seu fundo.
+  // Uma conversa por ler nunca deve abrir um modal automaticamente por cima do feed;
+  // continua assinalada no ícone e pode ser aberta pelo utilizador.
+  setOpenPendingChatOnCommunityEntry(false);
   setCurrentTab(index === 3 ? 0 : index);
-}, [currentTab, pendingCommunityChat]);
+}, []);
 
 return (
     <div className="confia-app min-h-screen flex flex-col antialiased">
@@ -2331,7 +2330,9 @@ className="flex items-center justify-center w-24 h-24 relative"
       <AppHeader avatar={avatar} />
 
       {/* Main Content Stage */}
-      <main className="confia-main flex-1 pb-28 px-4 sm:px-6 w-full pt-5 sm:pt-7">
+      <main
+        className={`confia-main confia-main--tab-${currentTab === 1 ? "horizon" : currentTab === 2 ? "objectives" : currentTab === 4 ? "community" : "home"} flex-1 pb-28 px-4 sm:px-6 w-full pt-5 sm:pt-7`}
+      >
 {currentTab === 0 && homeScreen === "dailyCheckIn" && (
   <MorningSheet
     onComplete={() => {

@@ -265,3 +265,54 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .confia-element-tab, .confia-element-icon, .confia-element-aura { transition:none !important; animation:none !important; }
 }
+
+
+/* Fotografia real da natureza como fundo dos quatro separadores principais.
+   Imagens Unsplash comprimidas em WebP e guardadas localmente para funcionar offline. */
+.confia-main {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100dvh - 150px);
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: scroll;
+  transition: background-image 0s;
+}
+.confia-main--tab-home {
+  background-image: linear-gradient(180deg, rgb(255 255 255 / .48), rgb(255 255 255 / .70)), url('/images/backgrounds/home.webp');
+}
+.confia-main--tab-horizon {
+  background-image: linear-gradient(180deg, rgb(255 255 255 / .43), rgb(255 255 255 / .66)), url('/images/backgrounds/horizon.webp');
+}
+.confia-main--tab-objectives {
+  background-image: linear-gradient(180deg, rgb(255 255 255 / .48), rgb(255 255 255 / .70)), url('/images/backgrounds/objectives.webp');
+}
+/* Comunidade usa a mesma camada de fundo direta que os outros separadores.
+   Evita uma pseudo-camada independente que pode ser coberta durante atualizações React. */
+.confia-main--tab-community {
+  background-color: #f7f5f2;
+  background-image: linear-gradient(180deg, rgb(255 255 255 / .43), rgb(255 255 255 / .66)), url('/images/backgrounds/community.webp');
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: scroll;
+}
+/* Deixa a fotografia visível entre os cartões sem sacrificar a leitura. */
+.confia-main--tab-home .bg-white,
+.confia-main--tab-horizon .bg-white,
+.confia-main--tab-objectives .bg-white,
+.confia-main--tab-community .bg-white {
+  background-color: rgb(255 255 255 / .84) !important;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+.confia-main--tab-home .bg-slate-50,
+.confia-main--tab-horizon .bg-slate-50,
+.confia-main--tab-objectives .bg-slate-50,
+.confia-main--tab-community .bg-slate-50 {
+  background-color: rgb(250 248 246 / .82) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .confia-main { transition: none; }
+}

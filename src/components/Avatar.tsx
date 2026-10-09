@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next";
 import { motion } from 'motion/react';
 import { ShieldCheck, Flame, Sparkles, MessageCircleCode } from 'lucide-react';
 import { AvatarState } from '../types';
-import ConfiaCreature, { type ConfiaCreatureState } from "./Companheiro/ConfiaCreature";
+import UniversalCompanion from "./Companheiro/UniversalCompanion";
+import { getSelectedCompanion } from "../data/companionAvatars";
+import type { CompanionAvatarId } from "../data/companionAvatars";
+import { type ConfiaCreatureState } from "./Companheiro/ConfiaCreature";
 import type {
   CompanionReactionState,
 } from "../data/reactive/companionReactionEngine";
@@ -35,6 +38,17 @@ const AvatarComponent: React.FC<AvatarProps> = ({
 
 const { t } = useTranslation();
   const [isJumping, setIsJumping] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<CompanionAvatarId>(() => getSelectedCompanion());
+
+  useEffect(() => {
+    const refreshSelectedAvatar = () => setSelectedAvatar(getSelectedCompanion());
+    window.addEventListener("confia:companion-avatar-changed", refreshSelectedAvatar);
+    window.addEventListener("storage", refreshSelectedAvatar);
+    return () => {
+      window.removeEventListener("confia:companion-avatar-changed", refreshSelectedAvatar);
+      window.removeEventListener("storage", refreshSelectedAvatar);
+    };
+  }, []);
 
 
 
@@ -212,7 +226,8 @@ return (
   )}
 
   {/* A4.4 — halo de evolução */}
-  <ConfiaCreature
+  <UniversalCompanion
+    avatarId={selectedAvatar}
     level={avatar.level}
     state={creatureState}
     reacting={isJumping}

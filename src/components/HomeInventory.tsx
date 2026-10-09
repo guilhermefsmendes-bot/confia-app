@@ -15,7 +15,8 @@ import {
 } from "../storage/homeInventory";
 
 import { getWeeklyTrophies } from "../storage/weeklyTrophies";
-import ConfiaCreature from "./Companheiro/ConfiaCreature";
+import UniversalCompanion from "./Companheiro/UniversalCompanion";
+import { companionAvatars, getCompanionXp, getSelectedCompanion, getUnlockedCompanionIds, selectCompanionAvatar, type CompanionAvatarId } from "../data/companionAvatars";
 import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
 
 interface HomeInventoryProps {
@@ -45,6 +46,9 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({
 }) => {
   const { t } = useTranslation();
   const [, setRefresh] = useState(0);
+  const [selectedAvatar, setSelectedAvatar] = useState<CompanionAvatarId>(() => getSelectedCompanion());
+  const [xp, setXp] = useState(() => getCompanionXp());
+  const unlockedCompanionIds = getUnlockedCompanionIds();
 
   const inventory = getInventory();
   const equipped = getEquipped();
@@ -171,11 +175,10 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({
             />
 
             <div className="relative flex h-[195px] w-[195px] items-center justify-center">
-              <ConfiaCreature
+              <UniversalCompanion
+                avatarId={selectedAvatar}
                 level={companionLevel}
-                equippedAccessoryIds={
-                  equippedCompanionAccessoryIds
-                }
+                equippedAccessoryIds={equippedCompanionAccessoryIds}
               />
             </div>
 
@@ -184,11 +187,45 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({
         </div>
       </div>
 
-      {/* =====================================================
-          ACESSÓRIOS DA CONFIA
-      ===================================================== */}
-
+      {/* Universo de personagens desbloqueáveis por XP */}
       <section className="space-y-4">
+        <div className="px-1">
+          <h2 className="font-extrabold text-[#2F2926]">O teu universo</h2>
+          <p className="mt-1 text-sm leading-relaxed text-[#8A756D]">Ganha XP, desbloqueia personagens e acompanha a evolução de cada um.</p>
+          <div className="mt-3 flex items-center justify-between rounded-2xl border border-[#E8D8C9] bg-white/80 px-4 py-3">
+            <span className="text-sm font-semibold text-[#6D574C]">Experiência acumulada</span>
+            <span className="text-sm font-extrabold text-[#B07742]">{xp} XP</span>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {companionAvatars.map((avatar) => {
+            const unlocked = unlockedCompanionIds.includes(avatar.id);
+            const selected = selectedAvatar === avatar.id;
+            return (
+              <button key={avatar.id} type="button" disabled={!unlocked}
+                onClick={() => {
+                  selectCompanionAvatar(avatar.id);
+                  setSelectedAvatar(avatar.id);
+                  setRefresh((value) => value + 1);
+                }}
+                className={selected ? "relative min-w-0 overflow-hidden rounded-[24px] border border-[#C99B66] bg-[#FFF5E8] p-3 text-left shadow-[0_8px_22px_rgba(177,132,77,0.14)]" : unlocked ? "relative min-w-0 overflow-hidden rounded-[24px] border border-[#E9DDD5] bg-white p-3 text-left" : "relative min-w-0 overflow-hidden rounded-[24px] border border-[#E8E2DD] bg-[#F7F5F3] p-3 text-left opacity-75"}>
+                <div className="relative mb-2 flex h-[130px] items-center justify-center overflow-hidden rounded-[18px] bg-gradient-to-b from-[#F8F7F4] to-white">
+                  <div className="absolute bottom-3 h-14 w-14 rounded-full blur-xl" style={{ backgroundColor: avatar.accent, opacity: 0.22 }} />
+                  <div className="relative scale-[0.57]"><UniversalCompanion avatarId={avatar.id} level={companionLevel} /></div>
+                  {!unlocked && <div className="absolute inset-0 flex items-center justify-center bg-white/45"><span className="rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-xs font-extrabold text-[#66564D]">🔒 {avatar.unlockXp} XP</span></div>}
+                  {selected && <span className="absolute right-2 top-2 rounded-full bg-[#B77B42] px-2 py-1 text-[10px] font-extrabold text-white">ATIVO</span>}
+                </div>
+                <p className="text-sm font-extrabold text-[#302A27]">{avatar.name}</p>
+                <p className="mt-1 min-h-[34px] text-[11px] leading-snug text-[#88756B]">{avatar.description}</p>
+                <p className="mt-2 text-[11px] font-bold text-[#B07742]">{unlocked ? (selected ? "Personagem ativo" : "Desbloqueado") : "Faltam " + Math.max(0, avatar.unlockXp - xp) + " XP"}</p>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Acessórios antigos mantidos internamente para compatibilidade. */}
+      <section className="hidden">
 
         <div className="px-1">
           <div className="flex items-center gap-2">
@@ -298,32 +335,16 @@ const HomeInventory: React.FC<HomeInventoryProps> = ({
 
                       setRefresh(v => v + 1);
                     }}
-                    className={`mt-3 w-full rounded-xl px-3 py-2.5 text-xs font-extrabold transition-colors ${
-                      isEquipped
-                        ? "bg-[#C87960] text-white"
-                        : "bg-[#F2E8E1] text-[#684F46]"
-                    }`}
+                    className="mt-3 w-full rounded-full bg-[#F0E3D8] px-3 py-2 text-xs font-bold text-[#654A42]"
                   >
-                    {isEquipped
-                      ? `✓ ${t(
-                          "companionCustomization.equipped"
-                        )}`
-                      : t(
-                          "companionCustomization.equip"
-                        )}
+                    {isEquipped ? t("companionCustomization.remove") : t("companionCustomization.equip")}
                   </button>
-
                 </div>
               );
             })}
-
           </div>
         )}
-
       </section>
-
-
-
     </div>
   );
 };

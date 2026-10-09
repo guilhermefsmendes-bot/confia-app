@@ -288,22 +288,34 @@ body {
 .confia-main--tab-objectives {
   background-image: linear-gradient(180deg, rgb(255 255 255 / .48), rgb(255 255 255 / .70)), url('/images/backgrounds/objectives.webp');
 }
-/* Comunidade: fotografia real de céu e mar ao entardecer, escurecida para as letras douradas flutuarem.
-   Usa o recurso local já incluído na app: sem pedidos externos ou animações. */
+/* Comunidade: ambiente claro e arejado, com palavras douradas levadas suavemente pelo vento. */
 .confia-main--tab-community {
-  background-color: #102b4a !important;
+  background-color: #e9f4f7 !important;
   background-image:
-    linear-gradient(160deg, rgb(5 19 39 / .50) 0%, rgb(10 37 61 / .48) 48%, rgb(8 31 49 / .60) 100%),
-    url('/images/backgrounds/horizon.webp') !important;
-  background-position: center center !important;
+    radial-gradient(ellipse at 15% 12%, rgb(255 255 255 / .98) 0%, rgb(255 255 255 / 0) 42%),
+    radial-gradient(ellipse at 85% 36%, rgb(202 232 239 / .78) 0%, rgb(202 232 239 / 0) 48%),
+    linear-gradient(155deg, #f7fbfa 0%, #e6f3f6 52%, #d5eaf0 100%) !important;
+  background-position: center top !important;
   background-repeat: no-repeat !important;
   background-size: cover !important;
   background-attachment: scroll;
 }
-/* Títulos e controlos sobre a fotografia ficam dourados; o texto dos cartões mantém contraste escuro. */
+/* Letras douradas leves, com movimento lateral discreto para sugerir uma brisa. */
 .confia-main--tab-community :is(h1, h2, h3, h4, p, label, span, button):not(.bg-white *):not(.bg-slate-50 *):not(button.bg-white) {
-  color: #f0d18a !important;
-  text-shadow: 0 1px 8px rgb(240 209 138 / .24);
+  color: #a87925 !important;
+  text-shadow: 0 1px 5px rgb(255 255 255 / .78);
+  animation: confia-community-breeze 7s ease-in-out infinite alternate;
+}
+.confia-main--tab-community :is(button, a, [role="button"]) {
+  transition: transform 1.8s ease-in-out;
+}
+@keyframes confia-community-breeze {
+  0% { translate: 0 0; }
+  45% { translate: 1px -1px; }
+  100% { translate: -1px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confia-main--tab-community :is(h1, h2, h3, h4, p, label, span, button) { animation: none; }
 }
 .confia-main--tab-community button.bg-white,
 .confia-main--tab-community .bg-white button {

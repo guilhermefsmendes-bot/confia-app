@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - release/confia-support-performance-1.0.47
 
 jobs:
   build:

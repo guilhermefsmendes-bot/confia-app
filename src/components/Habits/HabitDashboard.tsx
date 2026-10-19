@@ -59,12 +59,17 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
   return <div className="mx-auto max-w-2xl space-y-5 pb-6 text-[#332824]">
     <header className={page==="home"?"text-center":""}>
       <h1 id="habits-title" tabIndex={-1} className={page==="home"?"sr-only":"font-display text-3xl font-black outline-none"}>{t("habitHub.title")}</h1>
-      <p className="text-sm leading-6 text-[#6F5D51]">{t("habitHub.clock.intro1")}<br/>{t("habitHub.clock.intro2")}</p>
+      {!embedded && <p className="text-sm leading-6 text-[#6F5D51]">{t("habitHub.clock.intro1")}<br/>{t("habitHub.clock.intro2")}</p>}
     </header>
     {message && <p role="status" className="rounded-2xl border border-[#BFCDAF] bg-[#F1F7E8] p-4 text-sm leading-6">{message}</p>}
     {error && <p role="alert" className="rounded-2xl border border-[#D9BD97] bg-[#FFF7E9] p-4 text-sm">{error}</p>}
     {page==="home" ? <>
       <HabitChallengeCard habit={primary} records={records} today={today} onOpen={go}/>
+      <div className="flex items-center gap-3 pt-1">
+        <span className="h-px flex-1 bg-[#E8DDD7]" />
+        <span className="text-[11px] font-black uppercase tracking-[0.16em] text-[#806F63]">{t("habitHub.today")}</span>
+        <span className="h-px flex-1 bg-[#E8DDD7]" />
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <button type="button" onClick={()=>go("nutrition")} className={(embedded?"min-h-28 ":"min-h-48 ")+"rounded-[28px] border border-[#BDCEAF] bg-gradient-to-br from-[#E4EEDB] to-[#F7FBF1] p-4 text-left shadow-sm focus-visible:ring-2 focus-visible:ring-[#587044]"}><Apple aria-hidden="true" size={24}/><h2 className="mt-2 text-base font-black">{t("habitHub.nutrition.title")}</h2><p className="mt-2 text-xs leading-5">{foodSummary.length?t("habitHub.nutrition.summary",{count:foodSummary.length}):t("habitHub.nutrition.empty")}</p><span className="mt-3 block text-sm font-bold">{t("habitHub.register")} →</span></button>
         <button type="button" onClick={()=>go("exercise")} className={(embedded?"min-h-28 ":"min-h-48 ")+"rounded-[28px] border border-[#CFC5DF] bg-gradient-to-br from-[#E9E1F0] to-[#FAF7FC] p-4 text-left shadow-sm focus-visible:ring-2 focus-visible:ring-[#87739F]"}><Footprints aria-hidden="true" size={24}/><h2 className="mt-2 text-base font-black">{t("habitHub.exercise.title")}</h2><p className="mt-2 text-xs leading-5">{movement.length?t("habitHub.minutes",{count:movement.reduce((n,r)=>n+r.data.minutes,0)}):t("habitHub.exercise.empty")}</p><span className="mt-3 block text-sm font-bold">{t("habitHub.register")} →</span></button>

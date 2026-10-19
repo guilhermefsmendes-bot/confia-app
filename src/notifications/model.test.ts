@@ -6,5 +6,7 @@ it('notification routing rejects external schemes, missing and injected document
 it('routes push, check-in, widget and no-habit setup without relying on feed pagination',()=>{
  assert.deepEqual(noticeTarget('confia://community?chatId=thread&postId=older_post&messageId=reply'),{kind:'community',chatId:'thread',postId:'older_post',messageId:'reply'});
  assert.deepEqual(noticeTarget('confia://checkin'),{kind:'checkin'});assert.deepEqual(noticeTarget('confia://habits/log'),{kind:'habit',action:'log'});assert.deepEqual(noticeTarget('confia://habits/setup'),{kind:'habit',action:'setup'});
+ assert.deepEqual(noticeTarget('confia://listening?requestId=req_123&mode=request'),{kind:'listening',requestId:'req_123',mode:'request'});
+ assert.deepEqual(noticeTarget('confia://listening?requestId=req_123&mode=matched'),{kind:'listening',requestId:'req_123',mode:'matched'});
 });
 it('default consent is off and reminder time is validated',()=>{assert.equal(DEFAULT_NOTICES.community,false);assert.equal(DEFAULT_NOTICES.reminder,false);assert.equal(DEFAULT_NOTICES.time,'20:30');assert.ok(validTime('00:00'));assert.ok(validTime('23:59'));assert.ok(!validTime('24:00'));assert.ok(!validTime('8:30'));});

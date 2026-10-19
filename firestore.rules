@@ -151,6 +151,18 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.recipientId == chatData.authorId;
     }
 
+    // A listening chat can only be created in the same transaction that
+    // claims a waiting request for one eligible volunteer.
+    function validListeningSupportMatch(chatData) {
+      return chatData.keys().hasAny(['listeningRequestId'])
+        && chatData.listeningRequestId is string
+        && getAfter(/databases/$(database)/documents/listeningRequests/$(chatData.listeningRequestId)).data.status == 'matched'
+        && getAfter(/databases/$(database)/documents/listeningRequests/$(chatData.listeningRequestId)).data.requesterId in chatData.participants
+        && getAfter(/databases/$(database)/documents/listeningRequests/$(chatData.listeningRequestId)).data.acceptedBy in chatData.participants
+        && getAfter(/databases/$(database)/documents/listeningRequests/$(chatData.listeningRequestId)).data.requesterId == chatData.authorId
+        && chatData.postId == 'listen_' + chatData.listeningRequestId;
+    }
+
     // =====================================================
     // PUBLICAÇÕES DA COMUNIDADE
     // =====================================================
@@ -313,6 +325,101 @@ service cloud.firestore {
     // =====================================================
     // EXPERIENCE MATCHING — preferências privadas e pedidos bilaterais
     // =====================================================
+    // Profiles for opt-in peer listening. Only the owner can edit their themes.
+    match /listeningProfiles/{userId} {
+      allow get: if request.auth != null && request.auth.uid == userId;
+      allow list: if false;
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['ownerId','active','themes','updatedAt'])
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.active is bool
+        && request.resource.data.themes is list
+        && request.resource.data.themes.size() <= 8
+        && request.resource.data.themes.hasOnly(['anxiety','depression','loneliness','stress','relationships','grief','selfEsteem','other'])
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /listeningRequests/{requestId} {
+      // Requesters can follow their own request; eligible listeners only see
+      // waiting requests for topics they opted into.
+      allow get, list: if request.auth != null
+        && (
+          resource.data.requesterId == request.auth.uid
+          || (resource.data.status == 'matched' && resource.data.acceptedBy == request.auth.uid)
+          || (
+            resource.data.status == 'waiting'
+            && get(/databases/$(database)/documents/listeningProfiles/$(request.auth.uid)).data.active == true
+            && resource.data.theme in get(/databases/$(database)/documents/listeningProfiles/$(request.auth.uid)).data.themes
+          )
+        );
+
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['requesterId','theme','note','status','acceptedBy','createdAt','expiresAt'])
+        && request.resource.data.requesterId == request.auth.uid
+        && request.resource.data.theme in ['anxiety','depression','loneliness','stress','relationships','grief','selfEsteem','other']
+        && request.resource.data.note is string
+        && request.resource.data.note.size() <= 300
+        && request.resource.data.status == 'waiting'
+        && request.resource.data.acceptedBy == null
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt > request.time;
+
+      allow update: if request.auth != null
+        && resource.data.status in ['waiting','matched']
+        && request.resource.data.requesterId == resource.data.requesterId
+        && request.resource.data.theme == resource.data.theme
+        && request.resource.data.note == resource.data.note
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.expiresAt == resource.data.expiresAt
+        && (
+          (
+            resource.data.status == 'waiting'
+            && request.auth.uid == resource.data.requesterId
+            && request.resource.data.status == 'cancelled'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','cancelledAt'])
+            && request.resource.data.cancelledAt is timestamp
+          )
+          || (
+            resource.data.status == 'waiting'
+            && request.auth.uid != resource.data.requesterId
+            && request.resource.data.status == 'matched'
+            && request.resource.data.acceptedBy == request.auth.uid
+            && request.resource.data.matchedAt is timestamp
+            // Claiming a request and creating its private chat must be atomic.
+            // Otherwise a client could reserve a request without opening a conversation.
+            && existsAfter(/databases/$(database)/documents/chats/$('listen_' + requestId))
+            && getAfter(/databases/$(database)/documents/chats/$('listen_' + requestId)).data.listeningRequestId == requestId
+            && getAfter(/databases/$(database)/documents/chats/$('listen_' + requestId)).data.postId == 'listen_' + requestId
+            && getAfter(/databases/$(database)/documents/chats/$('listen_' + requestId)).data.authorId == resource.data.requesterId
+            && getAfter(/databases/$(database)/documents/chats/$('listen_' + requestId)).data.participants is list
+            && getAfter(/databases/$(database)/documents/chats/$('listen_' + requestId)).data.participants.size() == 2
+            && resource.data.requesterId in getAfter(/databases/$(database)/documents/chats/$('listen_' + requestId)).data.participants
+            && request.auth.uid in getAfter(/databases/$(database)/documents/chats/$('listen_' + requestId)).data.participants
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','acceptedBy','matchedAt'])
+            && resource.data.expiresAt > request.time
+            && get(/databases/$(database)/documents/listeningProfiles/$(request.auth.uid)).data.active == true
+            && resource.data.theme in get(/databases/$(database)/documents/listeningProfiles/$(request.auth.uid)).data.themes
+            && !exists(/databases/$(database)/documents/blocks/$(request.auth.uid + '_' + resource.data.requesterId))
+            && !exists(/databases/$(database)/documents/blocks/$(resource.data.requesterId + '_' + request.auth.uid))
+          )
+          || (
+            resource.data.status == 'matched'
+            && (request.auth.uid == resource.data.requesterId || request.auth.uid == resource.data.acceptedBy)
+            && request.resource.data.status == 'closed'
+            && request.resource.data.closedAt is timestamp
+            && getAfter(/databases/$(database)/documents/chats/$('listen_' + requestId)).data.closedBy == request.auth.uid
+            && getAfter(/databases/$(database)/documents/chats/$('listen_' + requestId)).data.closedAt is timestamp
+            && !(request.auth.uid in getAfter(/databases/$(database)/documents/chats/$('listen_' + requestId)).data.participants)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','closedAt'])
+          )
+        );
+
+      allow delete: if request.auth != null && resource.data.requesterId == request.auth.uid;
+    }
+
     match /communityMatchProfiles/{userId} {
       allow get: if request.auth != null && request.auth.uid == userId;
       allow list: if false;
@@ -365,7 +472,18 @@ service cloud.firestore {
     // CIRCULOS DE EXPERIENCE MATCHING — 1 a 8 membros
     // =====================================================
     match /experienceMatchCircles/{circleId} {
-      allow get, list: if request.auth != null
+      // Allow an eligible user to inspect a circle by ID before joining it.
+      // Listing remains restricted to members to avoid exposing other circles.
+      allow get: if request.auth != null
+        && (
+          resource == null
+          || request.auth.uid in resource.data.participants
+          || (
+            get(/databases/$(database)/documents/communityMatchProfiles/$(request.auth.uid)).data.active == true
+            && resource.data.experienceTag in get(/databases/$(database)/documents/communityMatchProfiles/$(request.auth.uid)).data.activeTags
+          )
+        );
+      allow list: if request.auth != null
         && request.auth.uid in resource.data.participants;
 
       allow create: if request.auth != null
@@ -455,9 +573,8 @@ service cloud.firestore {
       // ---------------------------------------------------
       // CRIAR CHAT
       // ---------------------------------------------------
-      // O chat tem de estar ligado à publicação real e ao seu autor.
-      // O utilizador autenticado tem de ser o autor ou ter reagido
-      // à publicação; a conversa fica limitada ao par autor <-> utilizador.
+      // O chat tem de estar ligado a uma publicação real ou a um pedido
+      // de escuta validado; cada pedido de escuta só pode gerar um chat.
       allow create: if request.auth != null
         && request.resource.data.participants is list
         && request.resource.data.participants.size() == 2
@@ -467,16 +584,22 @@ service cloud.firestore {
         && request.auth.uid in request.resource.data.participants
         && request.resource.data.authorId is string
         && request.resource.data.postId is string
+        && (!request.resource.data.keys().hasAny(['listeningRequestId']) || chatId == 'listen_' + request.resource.data.listeningRequestId)
         && request.resource.data.createdAt is timestamp
         && request.resource.data.lastMessage is string
         && request.resource.data.lastMessage.size() <= 2000
         && request.resource.data.lastMessageAt is timestamp
         && request.resource.data.authorId in request.resource.data.participants
-        && request.resource.data.authorId == get(
-          /databases/$(database)/documents/posts/$(request.resource.data.postId)
-        ).data.authorId
         && (
           validAcceptedExperienceMatch(request.resource.data)
+          || validListeningSupportMatch(request.resource.data)
+          || request.resource.data.authorId == get(
+            /databases/$(database)/documents/posts/$(request.resource.data.postId)
+          ).data.authorId
+        )
+        && (
+          validAcceptedExperienceMatch(request.resource.data)
+          || validListeningSupportMatch(request.resource.data)
           || request.auth.uid == request.resource.data.authorId
           || request.auth.uid in get(
             /databases/$(database)/documents/posts/$(request.resource.data.postId)
@@ -490,6 +613,7 @@ service cloud.firestore {
         )
         && (
           validAcceptedExperienceMatch(request.resource.data)
+          || validListeningSupportMatch(request.resource.data)
           || request.auth.uid != request.resource.data.authorId
           || (
             (
@@ -581,7 +705,9 @@ service cloud.firestore {
             'lastMessageAt',
             'lastSenderId',
             'unreadBy',
-            'participants'
+            'participants',
+            'closedAt',
+            'closedBy'
           ])
         && (
           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['unreadBy'])
@@ -598,6 +724,19 @@ service cloud.firestore {
             && request.resource.data.participants.size() == 1
             && !(request.auth.uid in request.resource.data.participants)
             && request.resource.data.participants[0] in resource.data.participants
+          )
+        )
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['closedAt','closedBy'])
+          || (
+            resource.data.keys().hasAny(['listeningRequestId'])
+            && request.resource.data.closedAt is timestamp
+            && request.resource.data.closedBy == request.auth.uid
+            && request.resource.data.closedBy in resource.data.participants
+            && request.resource.data.participants.size() == 1
+            && !(request.auth.uid in request.resource.data.participants)
+            && getAfter(/databases/$(database)/documents/listeningRequests/$(resource.data.listeningRequestId)).data.status == 'closed'
+            && getAfter(/databases/$(database)/documents/listeningRequests/$(resource.data.listeningRequestId)).data.closedAt is timestamp
           )
         )
         ;
@@ -637,6 +776,13 @@ service cloud.firestore {
             get(
               /databases/$(database)/documents/chats/$(chatId)
             ).data.participants
+          && (
+            !get(/databases/$(database)/documents/chats/$(chatId)).data.keys().hasAny(['listeningRequestId'])
+            || (
+              !get(/databases/$(database)/documents/chats/$(chatId)).data.keys().hasAny(['closedAt'])
+              && get(/databases/$(database)/documents/chats/$(chatId)).data.participants.size() == 2
+            )
+          )
           && request.resource.data.text is string
           && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 2000;

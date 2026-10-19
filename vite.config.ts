@@ -14,6 +14,7 @@ export default defineConfig(() => ({
             { name: 'firebaseFirestore', test: /node_modules[\\/](?:firebase[\\/]firestore|@firebase[\\/]firestore)[\\/]/, priority: 35 },
             { name: 'i18n', test: /node_modules[\\/](?:i18next|react-i18next)[\\/]/, priority: 30 },
             { name: 'icons', test: /node_modules[\\/]lucide-react[\\/]/, priority: 25 },
+            { name: 'motion', test: /node_modules[\\/]motion[\\/]/, priority: 25 },
           ],
         },
       },

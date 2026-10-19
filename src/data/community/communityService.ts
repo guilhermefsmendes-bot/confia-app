@@ -5,12 +5,14 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   increment,
   limit,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebaseFirestore";
@@ -102,11 +104,23 @@ export async function reportCommunityPost(post: SharePost, reason: string) {
 export async function blockCommunityUser(blockedUserId: string) {
   const user = await ensureAuth();
   if (user.uid === blockedUserId) return;
-  await addDoc(collection(db, "blocks"), {
-    blockerId: user.uid,
-    blockedUserId,
-    createdAt: serverTimestamp(),
-  });
+  // Use the same deterministic ID as Firestore rules and listening support.
+  // Rules intentionally forbid updating existing block records; if a repeated
+  // create is rejected, confirm that the canonical block already exists.
+  const blockRef = doc(db, "blocks", `${user.uid}_${blockedUserId}`);
+  try {
+    await setDoc(blockRef, {
+      blockerId: user.uid,
+      blockedUserId,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    const existing = await getDoc(blockRef);
+    if (existing.exists()
+      && existing.data().blockerId === user.uid
+      && existing.data().blockedUserId === blockedUserId) return;
+    throw error;
+  }
 }
 
 export async function createCommunityPost(feeling: string, topic: string, message: string, options?: { experienceTag?: string; supportMode?: "share" | "other_side" | "seeking_match" | "give_back"; circleExpiresAt?: number }) {

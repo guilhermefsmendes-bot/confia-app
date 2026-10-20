@@ -250,9 +250,28 @@ useEffect(() => {
   const [personalEventRevision, setPersonalEventRevision] = useState(0);
   const [personalDiscovery, setPersonalDiscovery] = useState<PersonalInsight | undefined>(undefined);
 
+  // O listener mantém-se montado durante a sessão; não é recriado a cada avaliação.
   useEffect(() => {
     let cancelled = false;
     let unsubscribe = () => {};
+    void import("./data/personal")
+      .then(({ PERSONAL_EVENTS_UPDATED_EVENT }) => {
+        if (cancelled) return;
+        const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
+        window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+        unsubscribe = () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
+
+  // As avaliações e os eventos pessoais podem alterar as descobertas. Calculamos
+  // novamente quando mudam, mas sem voltar a registar o listener global.
+  useEffect(() => {
+    let cancelled = false;
     let idleId: number | undefined;
     let timerId: number | undefined;
     const cancelScheduledWork = () => {
@@ -261,32 +280,33 @@ useEffect(() => {
       }
       if (timerId !== undefined) window.clearTimeout(timerId);
     };
-    void import("./data/personal").then(({ PERSONAL_EVENTS_UPDATED_EVENT, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle }) => {
-      if (cancelled) return;
-      const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
-      window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
-      unsubscribe = () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
-      const calculateDiscovery = () => {
+
+    void import("./data/personal")
+      .then(({ readPersonalEvents, buildPersonalInsights, applyInsightLifecycle }) => {
         if (cancelled) return;
-        const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
-        setPersonalDiscovery(insights
-          .filter(insight => insight.status === "consistent" || insight.status === "possible")
-          .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")
-          .sort((a, b) => {
-            const confidence = { high: 3, moderate: 2, low: 1 };
-            const actionability = { high: 3, medium: 2, low: 1 };
-            return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
-          })[0]);
-      };
-      const idle = (window as any).requestIdleCallback;
-      if (typeof idle === "function") idleId = idle(calculateDiscovery, { timeout: 500 });
-      else timerId = window.setTimeout(calculateDiscovery, 50);
-    }).catch(() => { if (!cancelled) setPersonalDiscovery(undefined); });
-    return () => { cancelled = true; cancelScheduledWork(); unsubscribe(); };
-  // A análise depende dos eventos pessoais, não das avaliações diárias.
-  // Manter ratings nesta lista repetia uma análise potencialmente dispendiosa
-  // e recriava o listener sempre que uma avaliação mudava.
-  }, [personalEventRevision]);
+        const calculateDiscovery = () => {
+          if (cancelled) return;
+          const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
+          setPersonalDiscovery(insights
+            .filter(insight => insight.status === "consistent" || insight.status === "possible")
+            .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")
+            .sort((a, b) => {
+              const confidence = { high: 3, moderate: 2, low: 1 };
+              const actionability = { high: 3, medium: 2, low: 1 };
+              return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
+            })[0]);
+        };
+        const idle = (window as any).requestIdleCallback;
+        if (typeof idle === "function") idleId = idle(calculateDiscovery, { timeout: 500 });
+        else timerId = window.setTimeout(calculateDiscovery, 50);
+      })
+      .catch(() => { if (!cancelled) setPersonalDiscovery(undefined); });
+
+    return () => {
+      cancelled = true;
+      cancelScheduledWork();
+    };
+  }, [ratings, personalEventRevision]);
 
   const [posts, setPosts] = useState<SharePost[]>(() =>
     readStoredJson<SharePost[]>(STORAGE_KEYS.POSTS, INITIAL_POSTS)

@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 
 
 
-import { initLanguage, setLanguage } from "./i18n/language";
+import { setLanguage } from "./i18n/language";
 import { emitCompanionInteraction } from "./data/reactive/companionBrain/companionInteractionEvents";
 
 const HomeProgressSummary = lazy(() => import("./components/HomeProgressSummary"));
@@ -118,9 +118,6 @@ const changeAppLanguage = (lang: "pt" | "en" | "es" | "fr") => {
     setLanguage(lang);
 };
 
-useEffect(() => {
-    initLanguage();
-}, []);
 useEffect(() => {
   const run = () => {
     void import("./data/personal").then(({ syncPersonalEventsFromLegacySources }) => {

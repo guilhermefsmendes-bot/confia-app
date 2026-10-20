@@ -299,6 +299,12 @@ const preloadTab = useCallback((tab: number) => {
       console.warn(`[Confia] prefetch_failed:${label}`, error);
     });
   };
+  if (tab === 0) {
+    // O painel do companheiro é o conteúdo central do separador inicial.
+    // Aquecê-lo também evita uma nova espera ao regressar ao início.
+    preload(() => import("./components/Companheiro/ConfiaCompanionHome"), "companion-home");
+    return;
+  }
   if (tab === 1) {
     preload(() => import("./components/HorizonExperience"), "horizon");
     preload(() => import("./components/AbracoTimer"), "abraco");
@@ -327,6 +333,7 @@ useEffect(() => {
 
   const warmPrimaryTabs = () => {
     if (cancelled) return;
+    preloadTab(0);
     preloadTab(1);
     preloadTab(2);
     preloadTab(4);

@@ -341,9 +341,9 @@ useEffect(() => {
 
   const requestIdle = (window as any).requestIdleCallback;
   if (typeof requestIdle === "function") {
-    idleId = requestIdle(warmPrimaryTabs, { timeout: 900 });
+    idleId = requestIdle(warmPrimaryTabs, { timeout: 250 });
   } else {
-    timerId = window.setTimeout(warmPrimaryTabs, 900);
+    timerId = window.setTimeout(warmPrimaryTabs, 250);
   }
 
   return () => {
@@ -353,19 +353,14 @@ useEffect(() => {
   };
 }, [preloadTab]);
 
-const changeTab = (tab:number) => {
-  // Primeiro mudamos o separador: a interação do utilizador nunca fica
-  // à espera do carregamento de um chunk. O preload continua em background.
+const changeTab = useCallback((tab: number) => {
+  // Inicia o download do código antes do novo separador renderizar.
+  // import() é assíncrono: a navegação não fica bloqueada e o React.lazy
+  // reutiliza o mesmo módulo quando começa a renderização.
+  preloadTab(tab);
   setHomeScreen("home");
   setCurrentTab(tab);
-  const run = () => preloadTab(tab);
-  const idle = (window as any).requestIdleCallback;
-  if (typeof idle === "function") {
-    idle(run, { timeout: 1200 });
-  } else {
-    window.setTimeout(run, 0);
-  }
-};
+}, [preloadTab]);
 
 // Os separadores são pré-carregados quando o utilizador demonstra intenção
 // (foco/ponteiro na navegação) e novamente após o clique. Evita descarregar

@@ -5,12 +5,14 @@ import { useTranslation } from "react-i18next";
 type Props = {
   currentTab: number;
   onNavigate: (index: number) => void;
+  onIntent?: (index: number) => void;
   hasUnreadCommunityMessage?: boolean;
 };
 
 export const MainNavigation = memo(function MainNavigation({
   currentTab,
   onNavigate,
+  onIntent,
   hasUnreadCommunityMessage = false
 }: Props) {
   const { t } = useTranslation();
@@ -27,7 +29,9 @@ export const MainNavigation = memo(function MainNavigation({
           const active = currentTab === index;
           return (
             <button key={index} type="button" aria-current={active ? "page" : undefined}
-              className={`confia-element-tab confia-element-${element} ${active ? "is-active confia-nav-active font-black" : "confia-nav-inactive"}`}
+              className={`confia-element-tab confia-element-${element} ${active ? "is-active confia-nav-active font-black" : "confia-nav-inactive"} ${index === 0 && active ? "confia-nav-home-active" : ""}`}
+              onPointerEnter={() => onIntent?.(index)}
+              onFocus={() => onIntent?.(index)}
               onClick={() => { window.dispatchEvent(new Event("stop-background-audio")); onNavigate(index); }}>
               <span className="confia-element-aura" aria-hidden="true" />
               <span className="confia-element-mark" aria-hidden="true" />

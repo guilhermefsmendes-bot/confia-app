@@ -8,12 +8,11 @@ import {
   CheckCircle,
   Tag,
   HeartHandshake,
-  MessagesSquare
+  ChevronDown
 } from 'lucide-react';
 import { SharePost } from '../types';
 import { useTranslation } from 'react-i18next';
 import CommunityCircles from './CommunityCircles';
-import CommunityPremiumHub from './CommunityPremiumHub';
 import ExperienceMatchingPanel from './ExperienceMatchingPanel';
 import { EXPERIENCE_MATCHING_IDS, type ExperienceMatchingId } from '../data/community/experienceMatching';
 import { subscribeBlockedUserIds, subscribeExperienceMatchProfile, subscribeExperienceMatchRequests, type ExperienceMatchProfile, type ExperienceMatchRequest } from '../data/community/experienceMatchingService';
@@ -86,7 +85,6 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   onAddPost,
   onLikePost,
   onOpenChat,
-  onConnectMatch,
   onOpenMatchedChat,
   onDeletePost,
   onReportPost,
@@ -147,33 +145,6 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   return (
     <div className="mx-auto w-full min-w-0 max-w-md overflow-x-clip space-y-5 py-4">
 
-      {/* Header Banner */}
-      <div className="text-center px-4">
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <span className="text-[#B85F48] text-2xl">🤝</span>
-          <h2 className="text-xl font-black text-[#2F2926] font-display">
-            {t("shareCornerTitle")}
-          </h2>
-        </div>
-
-        <p className="text-xs text-[var(--cf-text-soft)] leading-relaxed max-w-sm mx-auto font-medium">
-          {t("shareCornerDescription")}
-        </p>
-      </div>
-
-      <div className="grid min-w-0 grid-cols-2 gap-2 px-1">
-        <button type="button" onClick={() => setCommunityView("feed")} className={(communityView === "feed" ? "bg-[#2F2926] text-white" : "bg-white text-[#6F554B] border border-[#E8DDD7]") + " flex min-h-12 items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black"}>
-          <MessagesSquare size={16}/>{t("experienceMatching.community")}
-        </button>
-        <button type="button" onClick={() => setCommunityView("matching")} className={(communityView === "matching" ? "bg-[#A85F45] text-white" : "bg-white text-[#934A38] border border-[#E5CFC5]") + " relative flex min-h-12 items-center justify-center gap-2 rounded-2xl px-3 text-[10px] font-black"}>
-          <HeartHandshake size={16}/>{t("experienceMatching.menu")}
-          {matchRequests.some(r => r.recipientId === auth.currentUser?.uid && r.status === "pending") && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-white ring-2 ring-[#A85F45]"/>}
-        </button>
-      </div>
-
-      {communityView === "matching" ? (
-        <ExperienceMatchingPanel posts={posts} profile={matchProfile} requests={matchRequests} blockedUserIds={blockedMatchUsers} onOpenMatchedChat={onOpenMatchedChat}/>
-      ) : <>
       {/* Success Notification */}
       <AnimatePresence>
         {successMsg && (
@@ -319,9 +290,24 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
         </motion.form>
       )}
 
-      <CommunityPremiumHub posts={posts} onConnect={onConnectMatch} onCreate={onAddPost} onOpenChat={onOpenChat} />
-
       <CommunityCircles posts={posts} onOpenChat={onOpenChat} />
+
+      <button
+        type="button"
+        aria-expanded={communityView === "matching"}
+        onClick={() => setCommunityView(communityView === "matching" ? "feed" : "matching")}
+        className="flex w-full items-center justify-between rounded-2xl border border-white/50 bg-white/55 px-4 py-3 text-left text-sm font-bold text-[#6F554B] shadow-sm backdrop-blur-sm transition hover:bg-white/70"
+      >
+        <span className="flex items-center gap-2"><HeartHandshake size={17} className="text-[#A85F45]" />{t("experienceMatching.menu")}</span>
+        <span className="flex items-center gap-2">
+          {matchRequests.some(r => r.recipientId === auth.currentUser?.uid && r.status === "pending") && <span className="h-2 w-2 rounded-full bg-[#B85F48]"/>}
+          <ChevronDown size={18} className={"transition-transform duration-200 " + (communityView === "matching" ? "rotate-180" : "rotate-0")} />
+        </span>
+      </button>
+
+      {communityView === "matching" && (
+        <ExperienceMatchingPanel posts={posts} profile={matchProfile} requests={matchRequests} blockedUserIds={blockedMatchUsers} onOpenMatchedChat={onOpenMatchedChat}/>
+      )}
 
       {/* Topic filters */}
       <div className="w-full min-w-0 overflow-x-auto px-1">
@@ -613,7 +599,6 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
           })}
         </AnimatePresence>
       </div>
-      </>}
     </div>
   );
 };

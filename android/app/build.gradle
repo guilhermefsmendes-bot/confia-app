@@ -10,8 +10,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        versionCode 63
-        versionName "1.0.46"
+        versionCode 66
+        versionName "1.0.48"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

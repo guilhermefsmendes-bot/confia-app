@@ -12,7 +12,61 @@
   "cancel": "Cancelar",
   "petCompanion": "Companheiro",
   "crisisQuestion": "Estás a passar por um momento difícil?",
-  "crisisStartSupport": "Começar apoio SOS",
+  "crisisStartSupport": "Escolher um apoio agora",
+  "listeningSupport": {
+    "title": "Quero desabafar",
+    "subtitle": "Encontra alguém da comunidade disponível para te ouvir.",
+    "tabs": { "talk": "Preciso de falar", "listen": "Estou disponível para ouvir" },
+    "chooseTheme": "Sobre o que precisas de falar?",
+    "chooseThemeText": "Escolhe o tema que melhor se aproxima do que estás a viver. Não precisas de contar tudo.",
+    "themes": {
+      "anxiety": "Ansiedade e ataques de pânico",
+      "depression": "Tristeza e depressão",
+      "loneliness": "Solidão e isolamento",
+      "stress": "Stress e sobrecarga",
+      "relationships": "Relações e família",
+      "grief": "Luto e perda",
+      "selfEsteem": "Autoestima e insegurança",
+      "other": "Outro assunto / preciso de falar"
+    },
+    "noteLabel": "Queres acrescentar uma mensagem? (opcional)",
+    "notePlaceholder": "Partilha apenas o que te sentires confortável em dizer...",
+    "waitingTitle": "Pedido enviado",
+    "noMatch": "Ainda não encontrámos alguém disponível para conversar contigo. Podes tentar novamente ou escolher outro tema.",
+    "waitingText": "Estamos à procura de alguém disponível para ouvir sobre: {{theme}}. O pedido expira ao fim de 10 minutos.",
+    "cancelRequest": "Cancelar pedido",
+    "requestButton": "Encontrar alguém para conversar",
+    "sending": "A enviar pedido...",
+    "matchedTitle": "Alguém aceitou conversar contigo",
+    "memberName": "Membro da CONFIA",
+    "chatIntro": "Conversa de apoio entre membros da comunidade.",
+    "chatClosed": "Esta conversa foi terminada. Já não é possível enviar mensagens aqui.",
+    "endConversation": "Terminar conversa para ambos",
+    "openConversation": "Abrir conversa",
+    "safetyNote": "Este é um espaço de apoio entre membros, não um serviço clínico ou de emergência. Partilha apenas o que quiseres e não incluas dados pessoais.",
+    "volunteerTitle": "Escolhe os temas em que te sentes confortável a ouvir",
+    "volunteerText": "Receberás pedidos apenas dos temas selecionados quando estiveres disponível. Não precisas de dar conselhos nem de resolver o problema.",
+    "availableToggle": "Estou disponível para receber pedidos de escuta",
+    "saveAvailability": "Guardar disponibilidade",
+    "saving": "A guardar...",
+    "currentlyAvailable": "Estás disponível para ouvir em {{count}} tema(s).",
+    "volunteerSafety": "A tua disponibilidade mantém-se ativa depois de aceitares um pedido, por isso poderás receber outros. Aceita apenas se tiveres disponibilidade emocional; podes desativá-la quando quiseres. Em perigo imediato, contacta o 112.",
+    "incomingTitle": "Pedidos disponíveis ({{count}})",
+    "incomingToastTitle": "Tens um pedido de escuta disponível",
+    "incomingToastText": "Novo pedido sobre {{theme}}. Podes ouvir?",
+    "newRequest": "Novo pedido",
+    "noNote": "A pessoa não acrescentou uma mensagem. Podes começar por perguntar como se está a sentir.",
+    "acceptDisclaimer": "Ao aceitar, o pedido desaparece para os outros voluntários e abre-se um chat privado. És um membro da comunidade, não um terapeuta.",
+    "acceptButton": "Aceitar e abrir chat",
+    "noIncoming": "Ainda não há pedidos para os temas que escolheste. Quando surgir um, aparecerá aqui.",
+    "footer": "A CONFIA não garante uma resposta imediata. Em perigo imediato, liga 112. Não partilhes palavras-passe, moradas ou outros dados sensíveis.",
+    "errors": {
+      "save": "Não foi possível guardar a disponibilidade. Tenta novamente.",
+      "request": "Não foi possível enviar o pedido. Verifica a ligação e tenta novamente.",
+      "accept": "Este pedido já pode ter sido aceite por outra pessoa ou expirado. Atualiza a lista e tenta outro.",
+      "cancel": "Não foi possível cancelar o pedido. Tenta novamente."
+    }
+  },
   "wellbeingDescription": "Escolhe uma atividade para cuidares do teu bem-estar.",
   "readBookTitle": "Ler um livro",
   "readBookDesc": "Dedica alguns minutos à leitura.",
@@ -2782,6 +2836,7 @@
     "groupsText": "Pequenos grupos anónimos com até 8 pessoas que escolheram a mesma experiência.",
     "groupMembers": "{{count}}/8 pessoas",
     "groupWaiting": "Ainda não entraste neste círculo",
+    "joinError": "Não foi possível entrar no grupo. Verifica a ligação e tenta novamente.",
     "groupName": "Círculo anónimo",
     "groupContext": "Grupo privado sobre {{experience}}",
     "openGroup": "Abrir grupo",
@@ -2945,7 +3000,8 @@
         "cereals": "Cereais",
         "protein": "Proteína",
         "fats": "Gorduras",
-        "salty": "Alimentos ricos em sal", "wellbeing": "Bem-estar"
+        "salty": "Alimentos ricos em sal",
+        "wellbeing": "Bem-estar"
       },
       "proportion": "{{value}}% da referência"
     },
@@ -3058,7 +3114,8 @@
       "cereals": "Cereais",
       "protein": "Proteína",
       "fats": "Gorduras",
-      "salty": "Alimentos ricos em sal", "wellbeing": "Bem-estar"
+      "salty": "Alimentos ricos em sal",
+      "wellbeing": "Bem-estar"
     },
     "activities": {
       "walk": "Caminhada",
@@ -3767,7 +3824,15 @@
       "stretch": {
         "0": "Registaste {{minutes}} minutos de Alongamentos. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
       }
-    }
+    },
+    "whatILearned": "O que a CONFIA percebeu",
+    "why": {
+      "title": "Porque digo isto",
+      "general": "Estou a basear-me nos teus registos e no contexto que tens construído comigo.",
+      "withWindow": "Estou a comparar os teus registos disponíveis nos últimos {{days}} dias.",
+      "insufficient": "Ainda tenho pouca informação para tirar uma conclusão. Estou a observar, não a adivinhar."
+    },
+    "nextStep": "O que podes fazer agora"
   },
   "companionBrain.actionRegisterMorning": "Registar a manhã",
   "companionBrain.actionRegisterAfternoon": "Registar a tarde",

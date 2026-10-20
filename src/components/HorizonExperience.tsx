@@ -390,7 +390,7 @@ en:[
 ["Which attitude leaves room to learn from an experience?",["Ask what I can observe this time","Demand a definitive conclusion","Look for one single cause","Assume it will repeat exactly"],"Observing an experience without demanding a definitive conclusion leaves room to learn from it."],
 ["What can help when a decision seems too big?",["Break it into one small next step","Try to solve everything at once","Wait until every emotion disappears","Search all options indefinitely"],"Breaking a decision down can make it more concrete and allow you to move forward step by step."],
 ["Which sentence best summarises the purpose of this journey?",["Observe connections and choose the next step more consciously","Find a perfect explanation for everything","Eliminate all difficult emotions","Guarantee that you never feel anxiety again"],"The journey aims to create space to observe connections and choices, without promising to eliminate emotions or control the future."]
-].map(([question,answers,explanation])=>({question,answers,explanation})),
+].map(([question, answers, explanation]: [string, string[], string]) => ({ question, answers, explanation })),
 es:[
 ["Cuando una persona siente ansiedad, ¿qué respuesta describe mejor lo que puede ocurrir?",["La ansiedad obliga siempre a huir","Puede aumentar el estado de alerta e influir en pensamientos y conductas","Significa necesariamente que existe un problema físico","Impide cualquier decisión racional"],"La ansiedad puede aumentar el estado de alerta e influir en cómo pensamos y actuamos, pero no determina una única respuesta."],
 ["¿Qué práctica puede ayudar a crear una pequeña pausa ante un momento de estrés?",["Parar y hacer unas respiraciones lentas","Ignorar siempre lo que sientes","Buscar síntomas durante horas","Evitar cualquier actividad"],"Una pausa breve puede crear espacio para observar lo que ocurre antes de decidir el siguiente paso."],
@@ -442,7 +442,7 @@ es:[
 ["¿Qué actitud deja espacio para aprender de una experiencia?",["Preguntar qué puedo observar esta vez","Exigir una conclusión definitiva","Buscar una única causa","Suponer que se repetirá exactamente"],"Observar una experiencia sin exigir una conclusión definitiva deja espacio para aprender de ella."],
 ["¿Qué puede ayudar cuando una decisión parece demasiado grande?",["Dividirla en un pequeño siguiente paso","Intentar resolverlo todo de una vez","Esperar hasta que desaparezca toda emoción","Buscar todas las opciones indefinidamente"],"Dividir una decisión puede hacerla más concreta y permitir avanzar paso a paso."],
 ["¿Qué frase resume mejor el objetivo de este viaje?",["Observar conexiones y elegir el siguiente paso con más conciencia","Encontrar una explicación perfecta para todo","Eliminar todas las emociones difíciles","Garantizar que nunca volverás a sentir ansiedad"],"El viaje busca crear espacio para observar conexiones y elecciones, sin prometer eliminar las emociones ni controlar el futuro."]
-].map(([question,answers,explanation])=>({question,answers,explanation})),
+].map(([question, answers, explanation]: [string, string[], string]) => ({ question, answers, explanation })),
 fr:[
 ["Lorsqu’une personne ressent de l’anxiété, quelle réponse décrit le mieux ce qui peut se produire ?",["L’anxiété oblige toujours à fuir","Elle peut augmenter l’état d’alerte et influencer les pensées et les comportements","Elle signifie nécessairement qu’il existe un problème physique","Elle empêche toute décision rationnelle"],"L’anxiété peut augmenter l’état d’alerte et influencer notre façon de penser et d’agir, sans déterminer une seule réponse."],
 ["Quelle pratique peut aider à créer une petite pause pendant un moment de stress ?",["S’arrêter et faire quelques respirations lentes","Toujours ignorer ce que l’on ressent","Rechercher des symptômes pendant des heures","Éviter toute activité"],"Une courte pause peut créer un espace pour observer ce qui se passe avant de décider de la suite."],
@@ -494,7 +494,7 @@ fr:[
 ["Quelle attitude laisse de la place pour apprendre d’une expérience ?",["Demander ce que je peux observer cette fois","Exiger une conclusion définitive","Chercher une cause unique","Supposer que cela se répétera exactement"],"Observer une expérience sans exiger de conclusion définitive laisse de la place pour en apprendre quelque chose."],
 ["Qu’est-ce qui peut aider lorsqu’une décision semble trop grande ?",["La diviser en une petite prochaine étape","Essayer de tout résoudre d’un coup","Attendre que toute émotion disparaisse","Chercher toutes les options indéfiniment"],"Diviser une décision peut la rendre plus concrète et permettre d’avancer étape par étape."],
 ["Quelle phrase résume le mieux l’objectif de ce voyage ?",["Observer les liens et choisir l’étape suivante avec davantage de conscience","Trouver une explication parfaite à tout","Éliminer toutes les émotions difficiles","Garantir que tu ne ressentiras plus jamais d’anxiété"],"Le voyage cherche à créer un espace pour observer les liens et les choix, sans promettre d’éliminer les émotions ni de contrôler l’avenir."]
-].map(([question,answers,explanation])=>({question,answers,explanation}))
+].map(([question, answers, explanation]: [string, string[], string]) => ({ question, answers, explanation }))
 };
 
 const getLocalizedImpulse=(q:ImpulseQuestion):ImpulseQuestion=>{
@@ -543,7 +543,7 @@ const expandedPairs=(()=>{
  const add=(left:string,right:string)=>{
   const key=`${left.toLocaleLowerCase()}|${right.toLocaleLowerCase()}`;
   if(left.toLocaleLowerCase()===right.toLocaleLowerCase()||seen.has(key))return false;
-  seen.add(key);pairs.push({id:id++,left,right,tone:"neutral"});return true;
+  seen.add(key);pairs.push({id:String(id++),left,right,tone:"neutral"});return true;
  };
  // Primeiro garante pelo menos 6 saídas por palavra. A escolha é feita
  // dentro da família sem repetir uma combinação já existente.

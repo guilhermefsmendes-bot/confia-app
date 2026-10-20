@@ -540,16 +540,28 @@ function ConfiaCreature({
             cy="28%"
             r="75%"
           >
-            <stop
-              offset="0"
-              stopColor={eyePalette[0]}
-            />
-
-            <stop
-              offset="1"
-              stopColor={eyePalette[1]}
-            />
+            <stop offset="0" stopColor={eyePalette[0]} />
+            <stop offset="1" stopColor={eyePalette[1]} />
           </radialGradient>
+
+          {/* Volume subtil: luz lateral e sombra de contacto, sem filtros pesados. */}
+          <linearGradient id="confiaFormShadow" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#FFF7EF" stopOpacity="0.18" />
+            <stop offset="0.42" stopColor="#FFFFFF" stopOpacity="0" />
+            <stop offset="1" stopColor="#75483E" stopOpacity="0.22" />
+          </linearGradient>
+
+          <linearGradient id="confiaSilkHighlight" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.52" />
+            <stop offset="0.52" stopColor="#FFFFFF" stopOpacity="0.10" />
+            <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+          </linearGradient>
+
+          <linearGradient id="confiaEyeGlass" x1="0" y1="0" x2="0.8" y2="1">
+            <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.42" />
+            <stop offset="0.42" stopColor="#FFFFFF" stopOpacity="0.05" />
+            <stop offset="1" stopColor="#241713" stopOpacity="0.16" />
+          </linearGradient>
         </defs>
 
         {/* ===================================================
@@ -774,7 +786,8 @@ function ConfiaCreature({
               "
               fill="url(#confiaBodyPremium)"
               stroke="#A75D4B"
-              strokeWidth="3"
+              strokeOpacity="0.72"
+              strokeWidth="1.7"
               strokeLinejoin="round"
             />
 
@@ -799,7 +812,8 @@ function ConfiaCreature({
               "
               fill="url(#confiaBodyPremium)"
               stroke="#A75D4B"
-              strokeWidth="3"
+              strokeOpacity="0.72"
+              strokeWidth="1.7"
               strokeLinejoin="round"
             />
 
@@ -963,8 +977,26 @@ function ConfiaCreature({
               "
               fill="url(#confiaBodyPremium)"
               stroke="#A75D4B"
-              strokeWidth="3.2"
+              strokeOpacity="0.72"
+              strokeWidth="1.8"
               strokeLinejoin="round"
+            />
+
+            {/* Sombra de volume integrada à silhueta: dá profundidade sem raster ou filtros. */}
+            <path
+              d="M110 61 C78 61 59 79 57 109 C54 132 62 154 77 168 C85 177 96 181 110 182 C124 181 135 177 143 168 C158 154 166 132 163 109 C161 79 142 61 110 61 Z"
+              fill="url(#confiaFormShadow)"
+              opacity="0.78"
+            />
+
+            {/* Reflexo acetinado, mais discreto do que um brilho de cartoon. */}
+            <path
+              d="M78 78 C67 91 64 108 68 124 C70 132 73 137 77 141"
+              fill="none"
+              stroke="#FFF9F2"
+              strokeOpacity="0.42"
+              strokeWidth="2.2"
+              strokeLinecap="round"
             />
 
             {/* luz no rosto */}
@@ -990,6 +1022,9 @@ function ConfiaCreature({
                 Z
               "
               fill="url(#confiaBellyPremium)"
+              stroke="#FFF9F3"
+              strokeOpacity="0.38"
+              strokeWidth="1.1"
               opacity="0.94"
             />
 
@@ -1141,6 +1176,24 @@ function ConfiaCreature({
               fill="url(#confiaEyePremium)"
             />
 
+            {/* Película vítrea discreta: brilho e profundidade sem aumentar o peso. */}
+            <ellipse
+              cx="87"
+              cy={eyeY}
+              rx={(state === "curious" ? 8 : 7.5) * evolutionEyeScale}
+              ry={eyeRY * evolutionEyeScale}
+              fill="url(#confiaEyeGlass)"
+              opacity="0.62"
+            />
+            <ellipse
+              cx="133"
+              cy={eyeY}
+              rx={(state === "curious" ? 8 : 7.5) * evolutionEyeScale}
+              ry={eyeRY * evolutionEyeScale}
+              fill="url(#confiaEyeGlass)"
+              opacity="0.62"
+            />
+
             {/* reflexo principal */}
             <circle
               cx="84.5"
@@ -1198,19 +1251,19 @@ function ConfiaCreature({
             <ellipse
               cx="70"
               cy="117"
-              rx="10"
-              ry="5.5"
-              fill="#D87570"
-              opacity={cheekOpacity}
+              rx="8.5"
+              ry="4"
+              fill="#C87870"
+              opacity={cheekOpacity * 0.48}
             />
 
             <ellipse
               cx="150"
               cy="117"
-              rx="10"
-              ry="5.5"
-              fill="#D87570"
-              opacity={cheekOpacity}
+              rx="8.5"
+              ry="4"
+              fill="#C87870"
+              opacity={cheekOpacity * 0.48}
             />
 
             {/* ===============================================

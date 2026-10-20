@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { after, before, describe, it } from "node:test";
 import { initializeTestEnvironment, assertFails, assertSucceeds, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { doc, setDoc, updateDoc, getDoc, Timestamp } from "firebase/firestore";
+import { doc, setDoc, updateDoc, getDoc, Timestamp, runTransaction } from "firebase/firestore";
 
 let env: RulesTestEnvironment;
 const rules = readFileSync("firestore.rules", "utf8");
@@ -155,6 +155,82 @@ describe("Firestore security rules", () => {
       createdAt: Timestamp.fromMillis(1_700_000_000_000),
     }));
   });
+  it("allows a listening request to be accepted only with its private chat in the same transaction", async () => {
+    const now = Date.now();
+    const volunteerDb = db("bob");
+    await assertSucceeds(setDoc(doc(db("bob"), "listeningProfiles/bob"), {
+      ownerId: "bob", active: true, themes: ["anxiety"], updatedAt: Timestamp.fromMillis(now),
+    }));
+    await assertSucceeds(setDoc(doc(db("alice"), "listeningRequests/listen-test-1"), {
+      requesterId: "alice", theme: "anxiety", note: "Need someone to listen", status: "waiting",
+      acceptedBy: null, createdAt: Timestamp.fromMillis(now), expiresAt: Timestamp.fromMillis(now + 600_000),
+    }));
+
+    await assertSucceeds(runTransaction(volunteerDb, async tx => {
+      const requestRef = doc(volunteerDb, "listeningRequests/listen-test-1");
+      const requestSnap = await tx.get(requestRef);
+      if (!requestSnap.exists()) throw new Error("request missing");
+      tx.update(requestRef, { status: "matched", acceptedBy: "bob", matchedAt: Timestamp.fromMillis(now + 1) });
+      tx.set(doc(volunteerDb, "chats/listen_listen-test-1"), {
+        participants: ["alice", "bob"], authorId: "alice", postId: "listen_listen-test-1",
+        listeningRequestId: "listen-test-1", listeningTheme: "anxiety",
+        createdAt: Timestamp.fromMillis(now + 1), lastMessage: "",
+        lastMessageAt: Timestamp.fromMillis(now + 1), unreadBy: [],
+      });
+    }));
+  });
+
+  it("allows a volunteer to accept multiple simultaneous listening conversations", async () => {
+    const now = Date.now();
+    const volunteerDb = db("bob");
+    await assertSucceeds(setDoc(doc(db("bob"), "listeningProfiles/bob"), {
+      ownerId: "bob", active: true, themes: ["anxiety", "stress"], updatedAt: Timestamp.fromMillis(now),
+    }));
+    for (const [requestId, requesterId, theme] of [
+      ["listen-multi-1", "alice", "anxiety"],
+      ["listen-multi-2", "carol", "stress"],
+    ] as const) {
+      await assertSucceeds(setDoc(doc(db(requesterId), `listeningRequests/${requestId}`), {
+        requesterId, theme, note: "Need someone to listen", status: "waiting",
+        acceptedBy: null, createdAt: Timestamp.fromMillis(now), expiresAt: Timestamp.fromMillis(now + 600_000),
+      }));
+      await assertSucceeds(runTransaction(volunteerDb, async tx => {
+        const requestRef = doc(volunteerDb, `listeningRequests/${requestId}`);
+        const snap = await tx.get(requestRef);
+        if (!snap.exists()) throw new Error("request missing");
+        tx.update(requestRef, { status: "matched", acceptedBy: "bob", matchedAt: Timestamp.fromMillis(now + 1) });
+        const chatId = `listen_${requestId}`;
+        tx.set(doc(volunteerDb, `chats/${chatId}`), {
+          participants: [requesterId, "bob"].sort(), authorId: requesterId, postId: chatId,
+          listeningRequestId: requestId, listeningTheme: theme,
+          createdAt: Timestamp.fromMillis(now + 1), lastMessage: "",
+          lastMessageAt: Timestamp.fromMillis(now + 1), unreadBy: [],
+        });
+      }));
+    }
+    const volunteerProfile = await getDoc(doc(db("bob"), "listeningProfiles/bob"));
+    if (!volunteerProfile.exists() || volunteerProfile.data().active !== true) {
+      throw new Error("volunteer should remain available for additional conversations");
+    }
+    const firstChat = await getDoc(doc(db("bob"), "chats/listen_listen-multi-1"));
+    const secondChat = await getDoc(doc(db("bob"), "chats/listen_listen-multi-2"));
+    if (!firstChat.exists() || !secondChat.exists()) throw new Error("both listening chats should exist");
+  });
+
+  it("rejects claiming a listening request without creating its chat atomically", async () => {
+    const now = Date.now();
+    await assertSucceeds(setDoc(doc(db("bob"), "listeningProfiles/bob"), {
+      ownerId: "bob", active: true, themes: ["anxiety"], updatedAt: Timestamp.fromMillis(now),
+    }));
+    await assertSucceeds(setDoc(doc(db("alice"), "listeningRequests/listen-test-2"), {
+      requesterId: "alice", theme: "anxiety", note: "Need someone to listen", status: "waiting",
+      acceptedBy: null, createdAt: Timestamp.fromMillis(now), expiresAt: Timestamp.fromMillis(now + 600_000),
+    }));
+    await assertFails(updateDoc(doc(db("bob"), "listeningRequests/listen-test-2"), {
+      status: "matched", acceptedBy: "bob", matchedAt: Timestamp.fromMillis(now + 1),
+    }));
+  });
+
   it("keeps Experience Matching preferences private", async () => {
     await assertSucceeds(setDoc(doc(db("bob"), "communityMatchProfiles/bob"), {
       ownerId: "bob",

@@ -1,6 +1,6 @@
 import { chromium } from '@playwright/test';
 import fs from 'node:fs';
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true, ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] } : {})});
 const runs=[];
 for(let i=0;i<3;i++){
  const context=await browser.newContext({viewport:{width:393,height:851}});

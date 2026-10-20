@@ -4,7 +4,7 @@ import { Check, Plus, Trash2, Heart, Award, Smile, Coffee, Users, Sparkles, Arro
 import { Objective } from '../types';
 import { useTranslation } from "react-i18next";
 import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
-import { GOAL_JOURNEYS_UPDATED_EVENT, readGoalJourney, recordGoalAttempt, summarizeGoalJourney, updateGoalJourney, type GoalBlocker, type GoalLevel } from "../data/personal/goalJourney";
+import { GOAL_JOURNEYS_UPDATED_EVENT, readGoalJourney, recordGoalAttempt, summarizeGoalJourney, updateGoalJourney, type GoalBlocker, type GoalJourney, type GoalLevel } from "../data/personal/goalJourney";
 interface ObjectivosListProps {
   objectives: Objective[];
   onToggleComplete: (id: string) => void;
@@ -18,7 +18,7 @@ export const ObjectivosList = React.memo(function ObjectivosList({
   onToggleComplete,
   onAddCustomObjective,
   onDeleteObjective
-}) {
+}: ObjectivosListProps) {
 const { t, i18n } = useTranslation();
   const [newText, setNewText] = useState('');
   const [newCategory, setNewCategory] = useState<'corporeo' | 'mental' | 'social' | 'nutricao'>('mental');
@@ -55,7 +55,7 @@ const { t, i18n } = useTranslation();
 
   const journeys = useMemo(() => {
     void journeyRevision;
-    return new Map(objectives.map(objective => [objective.id, readGoalJourney(objective.id)]));
+    return new Map<string, GoalJourney | undefined>(objectives.map(objective => [objective.id, readGoalJourney(objective.id)]));
   }, [objectives, journeyRevision]);
 
   const blockerLabels: Record<GoalBlocker, string> = {
@@ -425,15 +425,79 @@ const { t, i18n } = useTranslation();
           </div>
 
           <div className="absolute inset-0 overflow-hidden">
-            <div className="relative h-full overflow-hidden bg-gradient-to-b from-[#DDE8EA] via-[#D4DFE1] to-[#B9A99D]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(255,255,255,.95),transparent_42%)]" />
-              <div className="absolute left-[7%] top-5 text-3xl opacity-70">☁️</div>
-              <div className="absolute right-[9%] top-12 text-2xl opacity-55">☁️</div>
+            <div className="relative h-full overflow-hidden bg-gradient-to-b from-[#79C9F5] via-[#B5E2F8] to-[#E6F2F6]">
+              {/* Céu azul-claro com luz solar suave e nuvens brancas em camadas. */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_48%_8%,rgba(255,255,255,.72),transparent_46%)]" />
+              <div className="absolute inset-x-0 top-0 h-[42%] bg-gradient-to-b from-[#66BDF0]/35 via-[#A9DDF7]/15 to-transparent" />
+              <div className="absolute left-[5%] top-5 h-7 w-20 rounded-full bg-white/70 blur-[1px] before:absolute before:-left-1 before:bottom-1 before:h-7 before:w-9 before:rounded-full before:bg-white/75 after:absolute after:left-7 after:-top-3 after:h-9 after:w-10 after:rounded-full after:bg-white/80" />
+              <div className="absolute right-[8%] top-12 h-6 w-16 rounded-full bg-white/65 blur-[1px] before:absolute before:-left-2 before:bottom-0 before:h-6 before:w-8 before:rounded-full before:bg-white/70 after:absolute after:left-6 after:-top-3 after:h-8 after:w-9 after:rounded-full after:bg-white/75" />
+              <div className="absolute left-[38%] top-[14%] h-5 w-14 rounded-full bg-white/45 blur-[2px] before:absolute before:-left-2 before:bottom-0 before:h-5 before:w-7 before:rounded-full before:bg-white/50 after:absolute after:left-5 after:-top-2 after:h-6 after:w-8 after:rounded-full after:bg-white/50" />
+              <div className="absolute right-[24%] top-[4%] h-4 w-12 rounded-full bg-white/35 blur-[2px] before:absolute before:-left-1 before:bottom-0 before:h-4 before:w-6 before:rounded-full before:bg-white/40 after:absolute after:left-5 after:-top-2 after:h-5 after:w-7 after:rounded-full after:bg-white/40" />
               <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                <path d="M0 100 L0 86 C8 84 13 78 18 80 C20 80 21 79 22 79 C26 78 30 69 35 65 C39 62 44 57 49 49 C54 46 58 40 64 34 C69 31 73 24 78 20 C81 18 84 24 88 29 C93 37 97 42 100 47 L100 100 Z" fill="#B79F91" />
-                <path d="M0 100 L0 92 C9 89 15 85 22 83 C27 80 31 75 35 70 C40 67 45 61 49 55 C55 51 59 45 64 40 C70 36 74 29 78 26 C84 25 91 37 100 55 L100 100 Z" fill="#80685D" opacity=".55" />
-                <path d="M22 79 C26 78 30 69 35 65 C39 62 44 57 49 49 C54 46 58 40 64 34 C69 31 73 24 78 20" fill="none" stroke="#F8F3EE" strokeWidth="1.2" strokeDasharray="1.2 1.8" opacity=".9" vectorEffect="non-scaling-stroke" />
-                <path d="M72 25 C74 23 76 21 78 20 C80 20 82 22 84 24" fill="none" stroke="#FFFDF9" strokeWidth="2.2" opacity=".75" vectorEffect="non-scaling-stroke" />
+                <defs>
+                  <linearGradient id="objectiveMountainBase" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#E1C9B6" />
+                    <stop offset="32%" stopColor="#B99A86" />
+                    <stop offset="68%" stopColor="#8D7164" />
+                    <stop offset="100%" stopColor="#594941" />
+                  </linearGradient>
+                  <linearGradient id="objectiveMountainFace" x1="0" y1="0" x2="1" y2="0.3">
+                    <stop offset="0%" stopColor="#D8BDA7" />
+                    <stop offset="24%" stopColor="#B99A84" />
+                    <stop offset="53%" stopColor="#967565" />
+                    <stop offset="78%" stopColor="#755B50" />
+                    <stop offset="100%" stopColor="#4F4039" />
+                  </linearGradient>
+                  <linearGradient id="objectiveMountainLight" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#F4E3D1" stopOpacity=".96" />
+                    <stop offset="55%" stopColor="#D7BBA5" stopOpacity=".58" />
+                    <stop offset="100%" stopColor="#B18E79" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="objectiveMountainShadow" x1="0" y1="0" x2="1" y2="0.15">
+                    <stop offset="0%" stopColor="#755B50" stopOpacity="0" />
+                    <stop offset="45%" stopColor="#604A41" stopOpacity=".34" />
+                    <stop offset="100%" stopColor="#392F2B" stopOpacity=".82" />
+                  </linearGradient>
+                  <linearGradient id="objectiveMountainFoothills" x1="0" y1="0" x2="0.2" y2="1">
+                    <stop offset="0%" stopColor="#C5AA97" />
+                    <stop offset="100%" stopColor="#80685D" />
+                  </linearGradient>
+                </defs>
+                <path d="M0 100 L0 86 C8 84 13 78 18 80 C20 80 21 79 22 79 C26 78 30 69 35 65 C39 62 44 57 49 49 C54 46 58 40 64 34 C69 31 73 24 78 20 C81 18 84 24 88 29 C93 37 97 42 100 47 L100 100 Z" fill="url(#objectiveMountainBase)" />
+                <path d="M0 100 L0 92 C9 89 15 85 22 83 C27 80 31 75 35 70 C40 67 45 61 49 55 C55 51 59 45 64 40 C70 36 74 29 78 26 C84 25 91 37 100 55 L100 100 Z" fill="url(#objectiveMountainFace)" />
+                {/* Camadas de relevo adicionais, do cume até à base, com luz e sombra subtis. */}
+                <path d="M0 88 L11 84 L18 80 L22 79 L27 73 L32 70 L35 65 L39 62 L43 56 L49 49 L46 60 L41 67 L37 73 L31 78 L25 82 L15 88 L0 94 Z" fill="#E7CFBC" opacity=".48" />
+                <path d="M5 96 L18 89 L28 82 L36 75 L43 66 L48 59 L54 52 L59 44 L64 34 L68 31 L73 24 L78 20 L75 29 L70 37 L66 45 L60 53 L56 61 L49 68 L44 76 L36 82 L25 89 L13 96 Z" fill="#B8957E" opacity=".38" />
+                <path d="M0 86 C8 84 13 78 18 80 C20 80 21 79 22 79 C26 78 30 69 35 65 L49 49 L43 68 L32 81 L18 89 L0 94 Z" fill="url(#objectiveMountainLight)" />
+                <path d="M35 65 L49 49 L64 34 L78 20 L84 25 L73 33 L65 45 L53 57 L46 71 L35 77 L40 66 Z" fill="#F0D9C4" opacity=".42" />
+                <path d="M17 87 L27 80 L34 73 L39 67 L45 61 L49 54 L54 48 L59 42 L64 35 L68 32 L73 25 L78 21 L81 24 L75 32 L70 40 L64 47 L60 55 L54 62 L49 69 L43 76 L35 83 L25 89 Z" fill="#E9D0BB" opacity=".32" />
+                <path d="M49 49 L54 46 L58 40 L64 34 L69 31 L73 24 L78 20 C81 18 84 24 88 29 L81 27 L76 30 L69 39 L61 43 L57 54 L50 62 L46 71 L41 74 L45 62 Z" fill="url(#objectiveMountainShadow)" />
+                <path d="M42 75 L49 67 L55 59 L60 52 L66 44 L72 35 L78 27 L84 25 L88 29 L81 30 L75 38 L70 46 L64 54 L59 62 L53 69 L47 78 L38 84 Z" fill="#5B463D" opacity=".22" />
+                <path d="M64 34 L69 31 L73 24 L78 20 C81 18 84 24 88 29 C84 26 81 24 78 25 L72 32 L68 39 L61 44 Z" fill="#F5E5D6" opacity=".72" />
+                <path d="M22 79 L31 73 L35 65 L39 62 L44 57 L49 49 L54 46 L58 40 L64 34 L69 31 L73 24 L78 20" fill="none" stroke="#F8EEE4" strokeWidth=".55" opacity=".82" vectorEffect="non-scaling-stroke" />
+                <path d="M0 91 L10 87 L18 84 L27 79 L33 74 L40 68 L45 62 M30 92 L39 85 L47 77 L53 70 L60 63 L67 53 M58 87 L66 80 L73 73 L82 68 L91 65" fill="none" stroke="#E8D1BE" strokeWidth=".65" opacity=".58" vectorEffect="non-scaling-stroke" />
+                <path d="M2 98 L15 92 L24 86 L34 80 L41 73 L48 65 L55 58 M49 96 L59 88 L68 82 L76 77 L86 73 L97 72" fill="none" stroke="#4A382F" strokeWidth=".7" opacity=".34" vectorEffect="non-scaling-stroke" />
+                <path d="M0 100 L0 92 C9 89 15 85 22 83 C27 80 31 75 35 70 C40 67 45 61 49 55 C55 51 59 45 64 40 C70 36 74 29 78 26 C84 25 91 37 100 55 L100 100 Z" fill="url(#objectiveMountainShadow)" opacity=".52" />
+                <path d="M22 79 C26 78 30 69 35 65 C39 62 44 57 49 49 C54 46 58 40 64 34 C69 31 73 24 78 20" fill="none" stroke="#F8F3EE" strokeWidth="1.2" strokeDasharray="1.2 1.8" opacity=".72" vectorEffect="non-scaling-stroke" />
+                <path d="M72 25 C74 23 76 21 78 20 C80 20 82 22 84 24" fill="none" stroke="#FFFDF9" strokeWidth="2.2" opacity=".78" vectorEffect="non-scaling-stroke" />
+                <path d="M4 95 C21 87 31 82 40 73 M53 61 C62 52 70 43 77 35 M57 79 C72 68 84 64 96 69" fill="none" stroke="#493831" strokeWidth=".45" opacity=".4" vectorEffect="non-scaling-stroke" />
+                {/* Segunda duplicação de estratos: microfacetas e veios contínuos até ao solo. */}
+                <path d="M8 87 L17 83 L23 78 L28 73 L32 69 L36 64 L40 61 L44 55 L48 51 L46 58 L42 64 L38 69 L34 75 L27 80 L19 85 L8 91 Z" fill="#F0DCCB" opacity=".34" />
+                <path d="M13 96 L23 90 L31 84 L38 78 L43 72 L48 66 L53 60 L58 54 L62 47 L66 41 L70 35 L75 29 L78 23 L80 27 L75 34 L71 41 L67 48 L62 55 L57 62 L52 69 L46 76 L39 82 L31 88 L22 94 Z" fill="#9D7A66" opacity=".31" />
+                <path d="M0 97 L10 92 L18 89 L25 85 L31 80 L36 76 L42 69 L47 64 L51 59 L55 53 L59 48 L64 42 L68 36 L72 31 L77 25 L80 27 L74 35 L69 42 L64 49 L60 56 L55 63 L49 70 L44 77 L37 83 L29 89 L20 94 L8 100 Z" fill="#D9BBA4" opacity=".26" />
+                <path d="M25 81 L32 76 L37 70 L42 65 L46 59 L51 54 L55 48 L60 43 L64 37 L69 32 L73 26 L77 22 L79 24 L73 31 L68 38 L63 45 L58 51 L54 58 L48 64 L44 71 L38 77 L31 83 Z" fill="#F6E4D4" opacity=".27" />
+                <path d="M36 83 L43 76 L48 70 L53 64 L58 58 L63 51 L68 44 L73 37 L78 31 L83 29 L87 33 L80 36 L75 43 L70 50 L65 57 L60 64 L55 71 L49 77 L42 84 Z" fill="#4A3932" opacity=".18" />
+                <path d="M0 90 L8 88 L16 84 L22 80 L28 76 L32 71 L36 67 L41 62 L45 56" fill="none" stroke="#F7E9DC" strokeWidth=".5" opacity=".62" vectorEffect="non-scaling-stroke" />
+                <path d="M10 99 L20 94 L28 89 L36 84 L43 78 L49 72 L55 65 L61 59 L66 52 L71 45 L76 39" fill="none" stroke="#5A443A" strokeWidth=".65" opacity=".34" vectorEffect="non-scaling-stroke" />
+                <path d="M31 96 L39 90 L47 84 L53 78 L59 72 L65 67 L72 62 L79 59 L87 57 L95 60" fill="none" stroke="#E7CFBC" strokeWidth=".55" opacity=".46" vectorEffect="non-scaling-stroke" />
+                <path d="M4 93 L14 89 L22 85 L29 80 L35 74 L41 68 L46 62 L50 56 L55 51" fill="none" stroke="#765B4E" strokeWidth=".7" opacity=".42" vectorEffect="non-scaling-stroke" />
+                <path d="M44 93 L51 87 L58 82 L65 77 L72 73 L80 70 L88 69 L98 73" fill="none" stroke="#D5B49B" strokeWidth=".55" opacity=".45" vectorEffect="non-scaling-stroke" />
+                <path d="M61 89 L67 83 L73 78 L80 75 L86 74 L93 77 L100 82 L100 91 L91 85 L84 82 L77 83 L70 88 Z" fill="#6A5146" opacity=".24" />
+                <path d="M0 100 L0 96 L10 92 L18 89 L25 85 L31 80 L36 76 L42 69 L47 64 L51 59 L55 53 L59 48 L64 42 L68 36 L72 31 L77 25 L80 27 L74 35 L69 42 L64 49 L60 56 L55 63 L49 70 L44 77 L37 83 L29 89 L20 94 L8 100 Z" fill="url(#objectiveMountainShadow)" opacity=".16" />
+                <path d="M18 85 L25 81 L31 76 L37 71 L42 65 L47 59 L51 54 L56 48 L61 43 L66 37 L71 32 L75 27" fill="none" stroke="#FFF8F1" strokeWidth=".42" opacity=".55" vectorEffect="non-scaling-stroke" />
+                <path d="M6 97 L15 93 L24 89 L32 84 L39 79 L45 73 L51 67 L57 61 L63 54 L68 47 L74 40 L79 34 L85 32" fill="none" stroke="#392E29" strokeWidth=".48" opacity=".28" vectorEffect="non-scaling-stroke" />
+                <path d="M0 84 L8 82 L15 79 L20 76 L24 72 L28 69 L32 64" fill="none" stroke="#EBD6C4" strokeWidth=".55" opacity=".48" vectorEffect="non-scaling-stroke" />
+                <path d="M21 100 L30 95 L38 90 L46 84 L53 78 L60 72 L67 67 L74 64 L82 62 L91 65" fill="none" stroke="#4A3932" strokeWidth=".55" opacity=".3" vectorEffect="non-scaling-stroke" />
               </svg>
               {[
                 {level:1,x:22,y:79},{level:2,x:35,y:65},{level:3,x:49,y:49},{level:4,x:64,y:34},{level:5,x:78,y:20}

@@ -13,12 +13,13 @@ import { useTranslation } from "react-i18next";
 
 
 
-import { initLanguage, setLanguage } from "./i18n/language";
+import { setLanguage } from "./i18n/language";
 import { emitCompanionInteraction } from "./data/reactive/companionBrain/companionInteractionEvents";
 
 const HomeProgressSummary = lazy(() => import("./components/HomeProgressSummary"));
 const MemoHomeProgressSummary = memo(HomeProgressSummary);
 import { useDailyOpenState } from "./hooks/useDailyOpenState";
+import { useObjectiveDaySync } from "./hooks/useObjectiveDaySync";
 import { getLocalCalendarDate } from "./utils/date";
 
 const PersonalMap = lazy(() => import("./components/PersonalMap"));
@@ -38,20 +39,19 @@ const ProgressoDashboard = lazy(() => import("./components/ProgressoDashboard").
 const StopMode = lazy(() => import("./components/StopMode").then(m => ({ default: m.StopMode })));
 const CommunityChat = lazy(() => import("./components/CommunityChat").then(m => ({ default: m.CommunityChat })));
 const TriageModal = lazy(() => import("./components/TriageModal").then(m => ({ default: m.TriageModal })));
+const ListeningSupportModal = lazy(() => import("./components/ListeningSupportModal").then(m => ({ default: m.ListeningSupportModal })));
 const HorizonExperience = lazy(() => import("./components/HorizonExperience"));
 const AbracoTimer = lazy(() => import("./components/AbracoTimer").then(m => ({ default: m.AbracoTimer })));
 
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
-import { getDailyObjectives, INITIAL_POSTS } from './data/initialData';
+import { INITIAL_POSTS } from './data/initialPosts';
 
 import type { ReactiveResult } from "./data/reactive/reactiveTypes";
 import type { PersonalInsight } from "./data/personal/personalInsights";
 import {
   recordReactiveResponse,
 } from "./data/reactive/reactiveHistoryStorage";
-import {
-  collectReactiveRecentMemory,
-} from "./data/reactive/reactiveRecentMemory";
+type ReactiveRecentMemorySnapshot = ReturnType<typeof import("./data/reactive/reactiveRecentMemory").collectReactiveRecentMemory>;
 
 // Component imports
 
@@ -118,9 +118,6 @@ const changeAppLanguage = (lang: "pt" | "en" | "es" | "fr") => {
     setLanguage(lang);
 };
 
-useEffect(() => {
-    initLanguage();
-}, []);
 useEffect(() => {
   const run = () => {
     void import("./data/personal").then(({ syncPersonalEventsFromLegacySources }) => {
@@ -195,7 +192,6 @@ useEffect(() => {
 
 const [objectives, setObjectives] = useState<Objective[]>(() => {
   const today = getLocalCalendarDate();
-  const dailyObjectives = getDailyObjectives(new Date());
   const parsed = readStoredJson<{ date?: string; items?: Objective[] } | Objective[] | null>(
     STORAGE_KEYS.OBJECTIVES,
     null
@@ -205,28 +201,24 @@ const [objectives, setObjectives] = useState<Objective[]>(() => {
     return parsed.items.slice(0, 5).map(objective => ({ ...objective }));
   }
 
-  return dailyObjectives;
+  // The daily objective library is loaded after the first render.
+  return [];
 });
 
-const objectiveDayRef = useRef(getLocalCalendarDate());
-
 useEffect(() => {
-  const syncObjectiveDay = () => {
-    const today = getLocalCalendarDate();
-    if (today === objectiveDayRef.current) return;
-
-    objectiveDayRef.current = today;
-    setObjectives(getDailyObjectives(new Date()));
-  };
-
-  const intervalId = window.setInterval(syncObjectiveDay, 30_000);
-  window.addEventListener("visibilitychange", syncObjectiveDay);
-
-  return () => {
-    window.clearInterval(intervalId);
-    window.removeEventListener("visibilitychange", syncObjectiveDay);
-  };
+  let cancelled = false;
+  void import("./data/initialData")
+    .then(({ getDailyObjectives }) => {
+      if (cancelled) return;
+      setObjectives(current => current.length ? current : getDailyObjectives(new Date()));
+    })
+    .catch(() => {
+      // The rest of the app remains usable if optional starter content fails to load.
+    });
+  return () => { cancelled = true; };
 }, []);
+
+useObjectiveDaySync(setObjectives);
  const completedObjectivesCount = objectives.filter(o => o.completed).length;
 
   const [ratings, setRatings] = useState<DailyRating[]>(() => {
@@ -239,22 +231,36 @@ useEffect(() => {
   useEffect(() => {
     let cancelled = false;
     let unsubscribe = () => {};
+    let idleId: number | undefined;
+    let timerId: number | undefined;
+    const cancelScheduledWork = () => {
+      if (idleId !== undefined && typeof (window as any).cancelIdleCallback === "function") {
+        (window as any).cancelIdleCallback(idleId);
+      }
+      if (timerId !== undefined) window.clearTimeout(timerId);
+    };
     void import("./data/personal").then(({ PERSONAL_EVENTS_UPDATED_EVENT, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle }) => {
       if (cancelled) return;
       const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
       window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
-      const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
-      setPersonalDiscovery(insights
-        .filter(insight => insight.status === "consistent" || insight.status === "possible")
-        .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")
-        .sort((a, b) => {
-          const confidence = { high: 3, moderate: 2, low: 1 };
-          const actionability = { high: 3, medium: 2, low: 1 };
-          return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
-        })[0]);
       unsubscribe = () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+      const calculateDiscovery = () => {
+        if (cancelled) return;
+        const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
+        setPersonalDiscovery(insights
+          .filter(insight => insight.status === "consistent" || insight.status === "possible")
+          .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")
+          .sort((a, b) => {
+            const confidence = { high: 3, moderate: 2, low: 1 };
+            const actionability = { high: 3, medium: 2, low: 1 };
+            return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
+          })[0]);
+      };
+      const idle = (window as any).requestIdleCallback;
+      if (typeof idle === "function") idleId = idle(calculateDiscovery, { timeout: 500 });
+      else timerId = window.setTimeout(calculateDiscovery, 50);
     }).catch(() => { if (!cancelled) setPersonalDiscovery(undefined); });
-    return () => { cancelled = true; unsubscribe(); };
+    return () => { cancelled = true; cancelScheduledWork(); unsubscribe(); };
   }, [ratings, personalEventRevision]);
 
   const [posts, setPosts] = useState<SharePost[]>(() =>
@@ -263,7 +269,7 @@ useEffect(() => {
 
   const [currentTab, setCurrentTab] = useState<number>(0);
   useEffect(()=>recordPersonalScreenView(screenName(currentTab,homeScreen)),[currentTab,homeScreen]);
-const preloadTab = (tab: number) => {
+const preloadTab = useCallback((tab: number) => {
   const preload = (loader: () => Promise<unknown>, label: string) => {
     void loader().catch((error) => {
       // Prefetch é apenas uma otimização: uma falha de chunk nunca pode
@@ -286,7 +292,7 @@ const preloadTab = (tab: number) => {
     preload(() => import("./components/CommunityChat"), "community-chat");
     return;
   }
-};
+}, []);
 
 const changeTab = (tab:number) => {
   // Primeiro mudamos o separador: a interação do utilizador nunca fica
@@ -302,36 +308,12 @@ const changeTab = (tab:number) => {
   }
 };
 
-useEffect(() => {
-  // Prefetch discreto depois da primeira pintura. Não bloqueia o caminho inicial.
-  // A Comunidade fica fora deste primeiro prefetch porque Chat/Firestore são
-  // recursos pesados e devem continuar a carregar sem competir com Home/Horizonte/Objetivos.
-  const runPrefetch = () => {
-    preloadTab(1);
-    preloadTab(2);
-  };
-  const idle = (window as any).requestIdleCallback;
-  if (typeof idle === "function") {
-    const id = idle(runPrefetch, { timeout: 2500 });
-    return () => (window as any).cancelIdleCallback?.(id);
-  }
-  const timer = window.setTimeout(runPrefetch, 1800);
-  return () => window.clearTimeout(timer);
-}, []);
-
-useEffect(() => {
-  // Aquecimento tardio da Comunidade: dá tempo para a app estabilizar primeiro.
-  // Não altera listeners, autenticação, mensagens ou regras do chat.
-  const warmCommunity = () => preloadTab(4);
-  const idle = (window as any).requestIdleCallback;
-  if (typeof idle === "function") {
-    const timer = window.setTimeout(() => idle(warmCommunity, { timeout: 4000 }), 8000);
-    return () => window.clearTimeout(timer);
-  }
-  const timer = window.setTimeout(warmCommunity, 10000);
-  return () => window.clearTimeout(timer);
-}, []);
+// Os separadores são pré-carregados quando o utilizador demonstra intenção
+// (foco/ponteiro na navegação) e novamente após o clique. Evita descarregar
+// código de funcionalidades que a pessoa talvez nunca abra.
   const [triageOpen, setTriageOpen] = useState(false);
+  const [listeningSupportOpen, setListeningSupportOpen] = useState(false);
+  const [listeningSupportInitialView, setListeningSupportInitialView] = useState<"talk" | "listen">("talk");
   const [levelUpOpen, setLevelUpOpen] = useState(false);
 const [avatarCelebrating, setAvatarCelebrating] = useState(false);
 const [avatarMemoryMessage, setAvatarMemoryMessage] = useState("");
@@ -409,6 +391,37 @@ const [openPendingChatOnCommunityEntry, setOpenPendingChatOnCommunityEntry] =
     if(target.kind==="habit"){const destination=habitDestination(target.action);setOpenHabitSupport(false);setHabitEntry(old=>({page:destination.page,key:old.key+1}));setCurrentTab(destination.tab);
       setHomeScreen("home");
       requestAnimationFrame(() => document.getElementById("home-habits")?.scrollIntoView({block:"start"}));return;}
+    if(target.kind==="listening"){
+      setCurrentTab(0);setHomeScreen("home");
+      if(target.mode==="request"){setListeningSupportInitialView("listen");setListeningSupportOpen(true);return;}
+      setListeningSupportOpen(false);
+      let handled=false;
+      let stop=()=>{};
+      void Promise.all([import("./firebaseAuth"),import("./firebaseFirestore"),import("firebase/firestore")]).then(([authModule,firestoreModule,firestore])=>{
+        if(cancelled)return;
+        stop=authModule.auth.onAuthStateChanged(user=>{if(!user||cancelled||handled)return;handled=true;void (async()=>{
+          try{
+            const chatId="listen_"+target.requestId;
+            const chat=await firestore.getDoc(firestore.doc(firestoreModule.db,"chats",chatId));
+            if(!chat.exists())throw Error("unavailable");
+            const data=chat.data();
+            const participants:Array<string>=Array.isArray(data.participants)?data.participants:[];
+            if(!participants.includes(user.uid)||data.listeningRequestId!==target.requestId||data.postId!==chatId)throw Error("unavailable");
+            const requesterId=String(data.authorId||"");
+            const volunteerId=participants.find(id=>id!==requesterId)||"";
+            const post:SharePost={
+              id:chatId,authorId:requesterId,userName:t("listeningSupport.memberName"),
+              feeling:"💬",topic:String(data.listeningTheme||"other"),message:t("listeningSupport.chatIntro"),
+              timestamp:t("justNow"),createdAtMs:Date.now(),yellowLikes:0,greenLikes:0,redLikes:0,
+              yellowLikedBy:[],greenLikedBy:[],redLikedBy:volunteerId?[volunteerId]:[]
+            };
+            if(cancelled)return;
+            setChatIdOverride(chatId);setNoticeMessageId(null);setChatPost(post);
+          }catch{if(!cancelled)setNoticeMessage(t("notifications.unavailable"));}
+        })();});
+      }).catch(()=>{if(!cancelled)setNoticeMessage(t("notifications.unavailable"));});
+      return()=>{cancelled=true;stop();};
+    }
     setCurrentTab(4);setOpenPendingChatOnCommunityEntry(false);
     let handled=false;
     let stop=()=>{};
@@ -507,27 +520,50 @@ const isEarlyLearning =
  * Reutiliza o mesmo modelo de memória do sistema reativo.
  * Não persiste nada e não cria uma segunda fonte de verdade.
  */
-const homeCompanionRelationalMemory = useMemo(() => {
-  if (
-    currentTab !== 0 ||
-    homeScreen !== "home"
-  ) {
-    return null;
+const [homeCompanionRelationalMemory, setHomeCompanionRelationalMemory] =
+  useState<ReactiveRecentMemorySnapshot | null>(null);
+
+useEffect(() => {
+  let cancelled = false;
+  let idleId: number | undefined;
+  let timerId: number | undefined;
+
+  if (currentTab !== 0 || homeScreen !== "home") {
+    setHomeCompanionRelationalMemory(null);
+    return;
   }
 
-  try {
-    return collectReactiveRecentMemory();
-  } catch {
-    return null;
+  // A memória contextual é complementar: não deve bloquear a primeira pintura
+  // da Home nem a resposta imediata ao navegar entre separadores.
+  setHomeCompanionRelationalMemory(null);
+  const calculate = () => {
+    void import("./data/reactive/reactiveRecentMemory")
+      .then(({ collectReactiveRecentMemory }) => {
+        if (cancelled) return;
+        try {
+          setHomeCompanionRelationalMemory(collectReactiveRecentMemory());
+        } catch {
+          setHomeCompanionRelationalMemory(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setHomeCompanionRelationalMemory(null);
+      });
+  };
+
+  const requestIdle = (window as any).requestIdleCallback;
+  if (typeof requestIdle === "function") {
+    idleId = requestIdle(calculate, { timeout: 500 });
+  } else {
+    timerId = window.setTimeout(calculate, 50);
   }
-}, [
-  currentTab,
-  homeScreen,
-  ratings,
-  objectives,
-  weeklyGoal,
-  avatar.xp,
-]);
+
+  return () => {
+    cancelled = true;
+    if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
+    if (timerId !== undefined) window.clearTimeout(timerId);
+  };
+}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp]);
 
 
 const homeNowMemory = useMemo(() => {
@@ -757,23 +793,45 @@ const [homeReactiveResult, setHomeReactiveResult] =
 
 useEffect(() => {
   let cancelled = false;
+  let idleId: number | undefined;
+  let timerId: number | undefined;
 
   if (currentTab !== 0 || homeScreen !== "home") {
     setHomeReactiveResult(null);
     return () => { cancelled = true; };
   }
 
+  // Primeiro deixa o separador pintar; a análise contextual não deve
+  // competir com a resposta visual ao clique de navegação.
+  const scheduleAnalysis = (analyze: () => void) => {
+    if (cancelled) return;
+    const requestIdle = (window as any).requestIdleCallback;
+    if (typeof requestIdle === "function") {
+      idleId = requestIdle(() => {
+        if (!cancelled) analyze();
+      }, { timeout: 350 });
+    } else {
+      timerId = window.setTimeout(() => {
+        if (!cancelled) analyze();
+      }, 0);
+    }
+  };
+
   import("./data/reactive/reactiveEngine")
     .then(({ analyzeReactiveState }) => {
-      if (!cancelled) {
+      scheduleAnalysis(() => {
         setHomeReactiveResult(analyzeReactiveState({ source: "general" }));
-      }
+      });
     })
     .catch(() => {
       if (!cancelled) setHomeReactiveResult(null);
     });
 
-  return () => { cancelled = true; };
+  return () => {
+    cancelled = true;
+    if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
+    if (timerId !== undefined) window.clearTimeout(timerId);
+  };
 }, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp]);
 
 // Uma única observação contextual para o cartão de chegada. A prioridade é
@@ -1336,8 +1394,10 @@ const handleHomeNowAction = () => {
   // - respostas provocadas explicitamente pelo utilizador
   //   continuam a ser registadas em handleSaveRatings.
   useEffect(() => {
+    let cancelled = false;
+    let idleId: number | undefined;
+    let timerId: number | undefined;
     if (currentTab !== 0 || homeScreen !== "home") return;
-
     if (ratings.length === 0) {
       setReactiveMessageKey(null);
       return;
@@ -1345,13 +1405,27 @@ const handleHomeNowAction = () => {
 
     import("./data/reactive/reactiveEngine")
       .then(({ analyzeReactiveState }) => {
-        const reactiveResult = analyzeReactiveState({ source: "mood" });
-        if (reactiveResult?.response?.translationKey) {
-          setReactiveMessageKey(reactiveResult.response.translationKey);
+        const run = () => {
+          if (cancelled) return;
+          const reactiveResult = analyzeReactiveState({ source: "mood" });
+          if (reactiveResult?.response?.translationKey) {
+            setReactiveMessageKey(reactiveResult.response.translationKey);
+          }
+        };
+        const requestIdle = (window as any).requestIdleCallback;
+        if (typeof requestIdle === "function") {
+          idleId = requestIdle(run, { timeout: 350 });
+        } else {
+          timerId = window.setTimeout(run, 0);
         }
       })
-      .catch(() => setReactiveMessageKey(null));
+      .catch(() => { if (!cancelled) setReactiveMessageKey(null); });
 
+    return () => {
+      cancelled = true;
+      if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
+      if (timerId !== undefined) window.clearTimeout(timerId);
+    };
   }, [currentTab, homeScreen, ratings]);
 
   /**
@@ -2280,7 +2354,11 @@ const handleMainNavigation = useCallback((index: number) => {
   // Uma conversa por ler nunca deve abrir um modal automaticamente por cima do feed;
   // continua assinalada no ícone e pode ser aberta pelo utilizador.
   setOpenPendingChatOnCommunityEntry(false);
-  setCurrentTab(index === 3 ? 0 : index);
+  const targetTab = index === 3 ? 0 : index;
+  setCurrentTab(targetTab);
+  // Começa a descarregar o código do separador em paralelo com a navegação.
+  // Não aguardamos pelo import: o clique e a mudança visual nunca ficam bloqueados.
+  preloadTab(targetTab);
 }, []);
 
 return (
@@ -2385,7 +2463,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 ====================================================== */}
 
 
-<LazySection>
+<Suspense fallback={<div role="status" aria-live="polite" className="flex min-h-40 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>}>
 <MemoConfiaCompanionHome
   avatar={avatar}
   avatarCelebrating={avatarCelebrating}
@@ -2408,7 +2486,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
   onCompanionAction={handleCompanionAction}
 />
-</LazySection>
+</Suspense>
 
 
 {/* O teu espaço — superfície deliberadamente simples.
@@ -2697,6 +2775,38 @@ className="flex items-center justify-center w-24 h-24 relative"
     />
   </Suspense>
 </section>
+
+{/* Apoio humano — entrada para a comunidade, acima do SOS */}
+<button
+  type="button"
+  onClick={() => { setListeningSupportInitialView("talk"); setListeningSupportOpen(true); }}
+  aria-label={t("listeningSupport.title")}
+  className="group w-full rounded-[24px] border border-[#C9DCCB] bg-gradient-to-r from-[#F2F8F1] via-white to-[#F4F8F3] px-4 py-3.5 text-left shadow-[0_8px_22px_rgba(73,112,80,0.08)] transition-all duration-200 active:scale-[0.99] active:opacity-95"
+>
+  <div className="flex items-center gap-3">
+    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#D5E5D5] bg-white">
+      <svg viewBox="0 0 64 64" width="42" height="42" fill="none" aria-hidden="true">
+        <circle cx="17" cy="13" r="6" fill="#73977A"/>
+        <circle cx="47" cy="13" r="6" fill="#5D8270"/>
+        <path d="M7 31c0-7 4-11 10-11s10 4 10 11v4H7z" fill="#A8C8A7"/>
+        <path d="M37 31c0-7 4-11 10-11s10 4 10 11v4H37z" fill="#91B6A0"/>
+        <path d="M10 30l10 8 8 7M54 30l-10 8-8 7" stroke="#4D755A" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M12 35l12 9 8-2 8 2 12-9" stroke="#6F9675" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M24 44l5 5c2 2 4 2 6 0l5-5" stroke="#4D755A" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M28 45l-3-3M36 45l3-3" stroke="#DCEBDD" strokeWidth="2.5" strokeLinecap="round"/>
+      </svg>
+    </div>
+    <div className="min-w-0 flex-1">
+      <p className="text-sm font-black text-[#365740] font-display">
+        {t("listeningSupport.title")}
+      </p>
+      <p className="mt-1 text-[11px] font-semibold leading-relaxed text-[#64816A]">
+        {t("listeningSupport.subtitle")}
+      </p>
+    </div>
+    <span aria-hidden="true" className="text-xl font-light text-[#64816A]">→</span>
+  </div>
+</button>
 
 {/* Apoio — acesso SOS discreto e sempre disponível */}
 <button
@@ -3039,6 +3149,17 @@ className="flex items-center justify-center w-24 h-24 relative"
 
       </main>
 
+      {/* Apoio humano em tempo real: pedido por tema e parelha exclusiva */}
+      <Suspense fallback={null}>
+        <ListeningSupportModal
+          isOpen={listeningSupportOpen}
+          initialView={listeningSupportInitialView}
+          onOpen={() => { setListeningSupportInitialView("listen"); setListeningSupportOpen(true); }}
+          onClose={() => setListeningSupportOpen(false)}
+          onOpenMatchedChat={handleOpenMatchedChat}
+        />
+      </Suspense>
+
       {/* Triage / Screening Help Modal */}
       <LazySection>
 <TriageModal
@@ -3124,6 +3245,7 @@ className="flex items-center justify-center w-24 h-24 relative"
         currentTab={currentTab}
         hasUnreadCommunityMessage={Boolean(pendingCommunityChat)}
         onNavigate={handleMainNavigation}
+        onIntent={preloadTab}
       />
     </div>
   );
@@ -3283,6 +3405,8 @@ type EmbraceTabProps = {
 };
 
 const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp }: EmbraceTabProps) {
+  const { t } = useTranslation();
+  const loadingFallback = <div role="status" aria-live="polite" className="flex min-h-24 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>;
   return (
     <motion.div
       key="embrace-tab"
@@ -3290,13 +3414,13 @@ const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp }: EmbraceTabPr
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
     >
-      <div className="confia-surface-panel">
-        <LazySection>
+      <div className="space-y-4">
+        <Suspense fallback={loadingFallback}>
           <HorizonExperience onOpenSky={onOpenSky} />
-        </LazySection>
-        <div className="mt-4">
+        </Suspense>
+        <Suspense fallback={loadingFallback}>
           <AbracoTimer onAddXp={onAddXp} />
-        </div>
+        </Suspense>
       </div>
     </motion.div>
   );
@@ -3326,6 +3450,7 @@ const ObjectivesTab = memo(function ObjectivesTab({
   onShareTrophy,
 }: ObjectivesTabProps) {
   const { t } = useTranslation();
+  const loadingFallback = <div role="status" aria-live="polite" className="flex min-h-24 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>;
 
   return (
     <motion.div
@@ -3348,7 +3473,7 @@ const ObjectivesTab = memo(function ObjectivesTab({
             <div aria-hidden="true" className="h-[3px] w-full bg-gradient-to-r from-[#B85F48]/10 via-[#934A38]/45 to-[#B85F48]/10" />
           </section>
         )}
-        <LazySection>
+        <Suspense fallback={loadingFallback}>
           <ObjectivosList
             objectives={objectives}
             onToggleComplete={onToggleComplete}
@@ -3361,7 +3486,7 @@ const ObjectivesTab = memo(function ObjectivesTab({
             onCompleteDay={onCompleteDay}
             onShareTrophy={onShareTrophy}
           />
-        </LazySection>
+        </Suspense>
       </div>
     </motion.div>
   );
@@ -3389,6 +3514,7 @@ type CommunityTabProps = {
 };
 
 const CommunityTab = memo(function CommunityTab(props: CommunityTabProps) {
+  const { t } = useTranslation();
   return (
     <motion.div
       key="community-tab"
@@ -3397,7 +3523,7 @@ const CommunityTab = memo(function CommunityTab(props: CommunityTabProps) {
       exit={{ opacity: 0, y: -10 }}
       className="w-full min-w-0 overflow-x-clip"
     >
-      <LazySection>
+      <Suspense fallback={<div role="status" aria-live="polite" className="flex min-h-24 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>}>
         <PartilhaFeed
           posts={props.posts}
           onAddPost={props.onAddPost}
@@ -3409,7 +3535,7 @@ const CommunityTab = memo(function CommunityTab(props: CommunityTabProps) {
           onReportPost={props.onReportPost}
           onBlockUser={props.onBlockUser}
         />
-      </LazySection>
+      </Suspense>
     </motion.div>
   );
 });

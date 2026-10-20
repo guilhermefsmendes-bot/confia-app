@@ -34,6 +34,7 @@ export default function ExperienceMatchingPanel({ posts, profile, requests, bloc
   const uid = auth.currentUser?.uid;
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [joinError, setJoinError] = useState(false);
   const [circles, setCircles] = useState<ExperienceMatchCircle[]>([]);
 
   useEffect(() => subscribeExperienceMatchCircles(setCircles), []);
@@ -186,13 +187,14 @@ export default function ExperienceMatchingPanel({ posts, profile, requests, bloc
         <div className="rounded-2xl border border-[#D9D5E8] bg-[#F8F7FC] p-4">
           <h4 className="flex items-center gap-2 text-xs font-black text-[#51496B]"><Users size={17}/>{t("experienceMatching.groupsTitle")}</h4>
           <p className="mt-1 text-[9px] leading-4 text-[#756E88]">{t("experienceMatching.groupsText")}</p>
+          {joinError && <p role="alert" className="mt-2 rounded-xl bg-[#FFF0ED] p-3 text-[10px] leading-4 text-[#934A38]">{t("experienceMatching.joinError")}</p>}
           <div className="mt-3 space-y-2">
             {profile.activeTags.map(tag => {
               const circle = circles.find(c => c.experienceTag === tag);
               return <div key={tag} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3">
                 <div><b className="block text-[10px] text-[#51496B]">{t("experienceMatching.experiences." + tag)}</b><span className="text-[9px] text-[#8B849A]">{circle ? t("experienceMatching.groupMembers", { count: circle.participants.length }) : t("experienceMatching.groupWaiting")}</span></div>
                 {circle ? <div className="flex gap-1"><button type="button" onClick={()=>onOpenMatchedChat({ ...posts.find(p=>p.experienceTag===tag)!, id: circle.id, authorId: circle.participants[0], userName: t("experienceMatching.groupName"), feeling: "🫂", topic: "", message: t("experienceMatching.groupContext", { experience: t("experienceMatching.experiences."+tag) }) } as SharePost, circle.id)} className="rounded-xl bg-[#51496B] px-3 py-2 text-[9px] font-black text-white">{t("experienceMatching.openGroup")}</button><button type="button" onClick={()=>leaveExperienceMatchCircle(circle.id)} className="rounded-xl px-2 text-[9px] font-bold text-[#8B849A]">{t("experienceMatching.leaveGroup")}</button></div>
-                : <button type="button" disabled={busyId===tag} onClick={async()=>{setBusyId(tag);try{await joinExperienceMatchCircle(tag)}finally{setBusyId(null)}}} className="rounded-xl bg-[#6A617F] px-3 py-2 text-[9px] font-black text-white">{t("experienceMatching.joinGroup")}</button>}
+                : <button type="button" disabled={busyId===tag} onClick={async()=>{setBusyId(tag);setJoinError(false);try{const circleId=await joinExperienceMatchCircle(tag);onOpenMatchedChat({ ...posts.find(p=>p.experienceTag===tag)!, id: circleId, authorId: uid || "", userName: t("experienceMatching.groupName"), feeling: "🫂", topic: "", message: t("experienceMatching.groupContext", { experience: t("experienceMatching.experiences."+tag) }) } as SharePost, circleId)}catch(error){console.error("[Experience Matching] Failed to join circle:", error);setJoinError(true)}finally{setBusyId(null)}}} className="rounded-xl bg-[#6A617F] px-3 py-2 text-[9px] font-black text-white">{t("experienceMatching.joinGroup")}</button>}
               </div>;
             })}
           </div>

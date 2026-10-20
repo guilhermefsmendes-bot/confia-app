@@ -48,6 +48,55 @@ export function readPersonalAnalytics(): Array<{ event: PersonalAnalyticsEvent; 
   }
 }
 
-// Same bounded local diagnostics as existing events; no external tracking or new SDK.
-let previousScreen="";
-export function recordPersonalScreenView(screen:string){if(screen===previousScreen)return;previousScreen=screen;recordPersonalAnalytics("screen_view",screen);}
+// Screen views are frequent during navigation. Queue them in memory and persist
+// them together when the browser is idle, instead of synchronously parsing and
+// rewriting the analytics history on every tab click.
+let previousScreen = "";
+let pendingScreenViews: string[] = [];
+let screenFlushScheduled = false;
+let screenIdleId: number | undefined;
+let screenTimerId: number | undefined;
+
+function flushScreenViews(): void {
+  screenFlushScheduled = false;
+  screenIdleId = undefined;
+  screenTimerId = undefined;
+  if (pendingScreenViews.length === 0 || typeof window === "undefined") return;
+
+  const batch = pendingScreenViews;
+  pendingScreenViews = [];
+  try {
+    const raw = window.localStorage.getItem(KEY);
+    const history = raw ? JSON.parse(raw) : [];
+    const next = Array.isArray(history) ? history : [];
+    const timestamp = new Date().toISOString();
+    for (const screen of batch) {
+      next.push({ event: "screen_view", timestamp, screen });
+    }
+    window.localStorage.setItem(KEY, JSON.stringify(next.slice(-MAX)));
+  } catch {
+    // Analytics is optional and must never block navigation or app behavior.
+  }
+}
+
+function scheduleScreenFlush(): void {
+  if (screenFlushScheduled || typeof window === "undefined") return;
+  screenFlushScheduled = true;
+  const requestIdle = (window as any).requestIdleCallback;
+  if (typeof requestIdle === "function") {
+    screenIdleId = requestIdle(flushScreenViews, { timeout: 1000 });
+  } else {
+    screenTimerId = window.setTimeout(flushScreenViews, 0);
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", flushScreenViews);
+}
+
+export function recordPersonalScreenView(screen: string): void {
+  if (screen === previousScreen) return;
+  previousScreen = screen;
+  pendingScreenViews.push(screen);
+  scheduleScreenFlush();
+}

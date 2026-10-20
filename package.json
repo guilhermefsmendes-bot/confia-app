@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "node --import tsx --test src/data/personal/__tests__/*.test.ts src/data/reactive/__tests__/*.test.ts src/utils/__tests__/*.test.ts",
+    "test": "node --import tsx --test src/data/personal/__tests__/*.test.ts src/data/reactive/__tests__/*.test.ts src/utils/__tests__/*.test.ts src/i18n/language.test.ts",
     "security:audit": "npm audit --omit=dev --audit-level=high",
     "test:rules": "firebase emulators:exec --only firestore 'node --import tsx --test src/data/community/__tests__/firestore.rules.test.ts'",
     "test:e2e": "playwright test",
@@ -18,7 +18,8 @@
     "test:habits:e2e": "playwright test tests/e2e/habits.spec.ts --workers=1",
     "test:zen": "node --import tsx --test src/data/zen/zen.test.ts src/notifications/permission.test.ts",
     "test:zen:e2e": "playwright test --config playwright.zen.config.ts",
-    "test:companion": "node --import tsx --test src/data/reactive/__tests__/companionDaily.test.ts src/data/reactive/companionBrain/__tests__/*.test.ts"
+    "test:companion": "node --import tsx --test src/data/reactive/__tests__/companionDaily.test.ts src/data/reactive/companionBrain/__tests__/*.test.ts",
+    "test:i18n": "node --import tsx --test src/i18n/language.test.ts"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",
@@ -49,5 +50,8 @@
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^8.3.0"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.3"
   }
 }

@@ -12,5 +12,5 @@ test("renders the primary navigation on mobile and desktop", async ({ page }) =>
   await page.goto("/");
   const navigation = page.locator("footer[aria-label]");
   await expect(navigation).toBeVisible({ timeout: 15_000 });
-  await expect(navigation.getByRole("button")).toHaveCount(5);
+  await expect(navigation.getByRole("button")).toHaveCount(4);
 });

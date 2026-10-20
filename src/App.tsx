@@ -283,7 +283,10 @@ useEffect(() => {
       else timerId = window.setTimeout(calculateDiscovery, 50);
     }).catch(() => { if (!cancelled) setPersonalDiscovery(undefined); });
     return () => { cancelled = true; cancelScheduledWork(); unsubscribe(); };
-  }, [ratings, personalEventRevision]);
+  // A análise depende dos eventos pessoais, não das avaliações diárias.
+  // Manter ratings nesta lista repetia uma análise potencialmente dispendiosa
+  // e recriava o listener sempre que uma avaliação mudava.
+  }, [personalEventRevision]);
 
   const [posts, setPosts] = useState<SharePost[]>(() =>
     readStoredJson<SharePost[]>(STORAGE_KEYS.POSTS, INITIAL_POSTS)

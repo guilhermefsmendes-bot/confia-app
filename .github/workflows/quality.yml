@@ -26,7 +26,8 @@ jobs:
           java-version: '21'
       - run: npm install --global firebase-tools@15.28.1
       - run: npm run test:rules
-      - run: npm run security:audit
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      # Run the audit last so known dependency advisories do not skip build and E2E validation.
+      - run: npm run security:audit

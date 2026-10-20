@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 test("primary tabs remain responsive and do not keep the loading fallback visible", async ({ page }) => {
   const runtimeErrors: string[] = [];
   page.on("pageerror", error => runtimeErrors.push(error.message));
+  await page.addInitScript(() => localStorage.setItem("confia_language", "pt"));
   await page.goto("/");
 
   const navigation = page.locator('footer[aria-label]');

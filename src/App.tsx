@@ -641,7 +641,7 @@ useEffect(() => {
     if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
     if (timerId !== undefined) window.clearTimeout(timerId);
   };
-}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp]);
+}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp, personalEventRevision]);
 
 
 const homeNowMemory = useMemo(() => {

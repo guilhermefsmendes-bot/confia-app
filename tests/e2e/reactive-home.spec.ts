@@ -34,17 +34,16 @@ test("reactive home: immediate support opens the real support flow", async ({ pa
   await page.goto("/");
 
   const action = page.getByRole("button", {
-    name: "Abrir apoio imediato",
-    exact: true,
+    name: /Escolher um apoio agora/,
   });
   await expect(action).toBeVisible();
   await action.click();
 
   await expect(
-    page.getByRole("heading", { name: "Apoio imediato", exact: true }),
+    page.getByRole("heading", { name: "Menu de Apoio Natural", exact: true }),
   ).toBeVisible();
 
-  await page.getByRole("button", { name: /Voltar/ }).click();
+  await page.getByRole("button", { name: "Cancelar", exact: true }).click();
   await expect(page.getByTestId("challenge-clock")).toBeVisible();
 });
 
@@ -62,28 +61,25 @@ test("reactive home: combines today's lifestyle records into one contextual obse
       String(now.getMonth() + 1).padStart(2, "0"),
       String(now.getDate()).padStart(2, "0"),
     ].join("-");
-    const events = [
+    const records = [
       {
         id: "nutrition-today",
-        type: "nutrition",
-        source: "nutrition",
-        timestamp: now.toISOString(),
-        localDate: day,
-        schemaVersion: 1,
-        metadata: { water: 5, coffee: 1 },
+        kind: "nutrition",
+        date: day,
+        updatedAt: now.toISOString(),
+        timezone: "UTC",
+        data: { water: 5, coffee: 1 },
       },
       {
         id: "exercise-today",
-        type: "exercise",
-        source: "exercise",
-        timestamp: now.toISOString(),
-        localDate: day,
-        schemaVersion: 1,
-        value: 30,
-        metadata: { activity: "walk", intensity: "moderate", period: "morning" },
+        kind: "exercise",
+        date: day,
+        updatedAt: now.toISOString(),
+        timezone: "UTC",
+        data: { activity: "walk", minutes: 30, intensity: "moderate", period: "morning" },
       },
     ];
-    localStorage.setItem("confia_personal_events_v1", JSON.stringify(events));
+    localStorage.setItem("confia_habits_v1:guest", JSON.stringify({ version: 1, records, pending: {} }));
   });
 
   await page.goto("/");

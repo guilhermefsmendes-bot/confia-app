@@ -2,8 +2,8 @@ import {test,expect} from '@playwright/test';
 for(const [lang,hug,sky] of [['pt','Abraço','O teu céu'],['en','Hug','Your sky'],['es','Abrazo','Tu cielo'],['fr','Câlin','Ton ciel']])test('four tabs and sky in embrace: '+lang,async({page})=>{
  await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());await page.addInitScript(l=>{localStorage.setItem('confia_language',l);const d=new Date(),date=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');localStorage.setItem('confia_daily_checkin',JSON.stringify({date,mood:5,need:'focus',completed:true}));},lang);await page.goto('/');
  const nav=page.locator('footer');await expect(nav.getByRole('button')).toHaveCount(4);await expect(page.getByTestId('challenge-clock')).toBeVisible();
- await expect(nav.getByRole('button',{name:/^(Hábitos|Habits|Habitudes)$/})).toHaveCount(0);await expect(page.getByRole('button',{name:sky,exact:true})).toHaveCount(0);
- await nav.getByRole('button').nth(1).click();const button=page.getByRole('button',{name:sky,exact:true});await expect(button).toBeVisible();await button.click();await expect(page.locator('footer button[aria-current="page"]')).toHaveText(hug);await expect(page.getByTestId('challenge-clock')).toHaveCount(0);
+ await expect(nav.getByRole('button',{name:/^(Hábitos|Habits|Habitudes)$/})).toHaveCount(0);await expect(page.getByRole('button',{name:/^(Céu|Sky|Cielo|Ciel)\b/})).toHaveCount(0);
+ await nav.getByRole('button').nth(1).click();const button=page.getByRole('button',{name:/^(Céu|Sky|Cielo|Ciel)\b/});await expect(button).toBeVisible();await button.click();await expect(page.locator('footer button[aria-current="page"]')).toHaveText(hug);await expect(page.getByTestId('challenge-clock')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await nav.getByRole('button').first().click();await expect(page.getByTestId('challenge-clock')).toBeVisible();
 });

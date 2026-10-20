@@ -31,3 +31,16 @@ jobs:
       - run: npm run test:e2e
       # Run the audit last so known dependency advisories do not skip build and E2E validation.
       - run: npm run security:audit
+
+
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Keep the dependency audit independent from E2E so a UI test failure cannot skip it.
+      - run: npm audit --audit-level=high

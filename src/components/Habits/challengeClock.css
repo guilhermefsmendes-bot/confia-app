@@ -10,6 +10,7 @@
   place-items: center;
   width: min(100%, 23rem);
   aspect-ratio: 1 / 1;
+  min-height: 0;
   margin-inline: auto;
   border-radius: 50%;
   container-type: inline-size;
@@ -163,6 +164,7 @@
 @media (max-width: 600px) {
   .challenge-clock {
     width: min(50vw, 11.5rem);
+    height: min(50vw, 11.5rem);
   }
 }
 

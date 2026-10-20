@@ -79,17 +79,15 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
         <h2 className="mt-3 text-base font-black">{t("habitHub.sleep.title")}</h2>
       </button>
 
-      {!embedded && <>
-        <details open={expanded} onToggle={e=>setExpanded(e.currentTarget.open)} className="rounded-2xl border border-[#E8DDD7] bg-white p-4">
-          <summary className="min-h-11 cursor-pointer font-semibold">{t("homeDaily.more")}</summary>
-          {expanded && <Suspense fallback={<p>{t("loading")}</p>}><div className="space-y-4 pt-3">
-        <LifestyleReview records={records} date={today} today={today} compact/>
-        <HabitInsights events={events} today={today}/>
-        <WellbeingPlans records={records} today={today} run={run} events={events}/>
-          </div></Suspense>}
-        </details>
-        <button className={buttonClass+" w-full"} type="button" onClick={()=>go("support")}>{t("habitHub.support")}</button>
-      </>}
+      <details open={expanded} onToggle={e=>setExpanded(e.currentTarget.open)} className="rounded-2xl border border-[#E8DDD7] bg-white p-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{t("homeDaily.more")}</summary>
+        {expanded && <Suspense fallback={<p>{t("loading")}</p>}><div className="space-y-4 pt-3">
+          <LifestyleReview records={records} date={today} today={today} compact/>
+          <HabitInsights events={events} today={today}/>
+          <WellbeingPlans records={records} today={today} run={run} events={events}/>
+        </div></Suspense>}
+      </details>
+      {!embedded && <button className={buttonClass+" w-full"} type="button" onClick={()=>go("support")}>{t("habitHub.support")}</button>}
     </> : <Panel title={t("habitHub.pages."+page)} onBack={back}><Suspense fallback={<p role="status">{t("loading")}</p>}>
       {page==="setup" && <HabitSetup habits={habits} primaryId={primary?.id} run={run} onDone={back}/>}
       {page==="history" && primary && <HabitHistory habit={primary} records={records} today={today}/>}

@@ -19,6 +19,7 @@ import { emitCompanionInteraction } from "./data/reactive/companionBrain/compani
 const HomeProgressSummary = lazy(() => import("./components/HomeProgressSummary"));
 const MemoHomeProgressSummary = memo(HomeProgressSummary);
 import { useDailyOpenState } from "./hooks/useDailyOpenState";
+import { useObjectiveDaySync } from "./hooks/useObjectiveDaySync";
 import { getLocalCalendarDate } from "./utils/date";
 
 const PersonalMap = lazy(() => import("./components/PersonalMap"));
@@ -220,27 +221,7 @@ useEffect(() => {
   return () => { cancelled = true; };
 }, []);
 
-const objectiveDayRef = useRef(getLocalCalendarDate());
-
-useEffect(() => {
-  const syncObjectiveDay = () => {
-    const today = getLocalCalendarDate();
-    if (today === objectiveDayRef.current) return;
-
-    objectiveDayRef.current = today;
-    void import("./data/initialData")
-      .then(({ getDailyObjectives }) => setObjectives(getDailyObjectives(new Date())))
-      .catch(() => {});
-  };
-
-  const intervalId = window.setInterval(syncObjectiveDay, 30_000);
-  window.addEventListener("visibilitychange", syncObjectiveDay);
-
-  return () => {
-    window.clearInterval(intervalId);
-    window.removeEventListener("visibilitychange", syncObjectiveDay);
-  };
-}, []);
+useObjectiveDaySync(setObjectives);
  const completedObjectivesCount = objectives.filter(o => o.completed).length;
 
   const [ratings, setRatings] = useState<DailyRating[]>(() => {

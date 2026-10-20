@@ -606,13 +606,12 @@ useEffect(() => {
   let timerId: number | undefined;
 
   if (currentTab !== 0 || homeScreen !== "home") {
-    setHomeCompanionRelationalMemory(null);
+    // Conserva o último snapshot enquanto a Home está oculta. Ao regressar,
+    // mostramos já o contexto disponível e atualizamo-lo em segundo plano.
     return;
   }
 
-  // A memória contextual é complementar: não deve bloquear a primeira pintura
-  // da Home nem a resposta imediata ao navegar entre separadores.
-  setHomeCompanionRelationalMemory(null);
+  // A memória contextual é complementar: a atualização não bloqueia a Home.
   const calculate = () => {
     void import("./data/reactive/reactiveRecentMemory")
       .then(({ collectReactiveRecentMemory }) => {
@@ -874,7 +873,8 @@ useEffect(() => {
   let timerId: number | undefined;
 
   if (currentTab !== 0 || homeScreen !== "home") {
-    setHomeReactiveResult(null);
+    // Mantém o último resultado válido enquanto a Home está oculta; será
+    // recalculado em idle ao regressar, sem um estado vazio intermédio.
     return () => { cancelled = true; };
   }
 

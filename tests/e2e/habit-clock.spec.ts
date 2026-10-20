@@ -3,6 +3,9 @@ async function prepare(page:Page,days=0,lang="pt") {
   await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());
   await page.addInitScript(({days,lang})=>{
     localStorage.setItem("confia_language",lang);
+    const now=new Date();
+    const date=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
+    localStorage.setItem("confia_daily_checkin",JSON.stringify({date,mood:5,need:"focus",completed:true}));
     if(!days)return;
     const fmt=(d:Date)=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
     const today=fmt(new Date());

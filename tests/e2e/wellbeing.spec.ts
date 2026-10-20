@@ -1,7 +1,7 @@
 import { test,expect,type Page } from '@playwright/test';
 async function open(page:Page,lang='pt') {
  await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());
- await page.addInitScript(l=>localStorage.setItem('confia_language',l),lang);await page.goto('/');
+ await page.addInitScript(l=>{localStorage.setItem('confia_language',l);const d=new Date(),date=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');localStorage.setItem('confia_daily_checkin',JSON.stringify({date,mood:5,need:'focus',completed:true}));},lang);await page.goto('/');
   await page.getByTestId("challenge-clock").waitFor();
   await page.locator("#home-habits details").filter({has:page.locator("summary",{hasText:/O meu dia|My day|Mi día|Ma journée/})}).locator("summary").first().click();
 }
@@ -26,6 +26,7 @@ test('detailed foods: multiple fruits, timed coffee, drinks, edits and offline p
  await category(/Café Adicionar/);await page.getByRole('button',{name:'Café de filtro',exact:true}).click();await page.getByLabel('Quantidade exata').fill('3');await page.getByLabel('Período do dia (opcional)').selectOption('afternoon');await page.getByText('Mais detalhes (opcional)',{exact:true}).click();await page.getByLabel('Hora aproximada').fill('17:30');await page.getByLabel('Intensidade percebida').selectOption('strong');await save();
  await category(/Refrigerantes e sumos Adicionar/);await page.getByRole('button',{name:'Coca-Cola',exact:true}).click();await page.getByLabel('Unidade',{exact:true}).selectOption('can');await page.getByLabel('ml por recipiente').fill('330');await save();
  await category(/Água Adicionar/);await page.getByLabel('Unidade',{exact:true}).selectOption('ml');await page.getByLabel('Quantidade exata').fill('1500');await context.setOffline(true);await save();
+ await page.getByText('Ver os registos detalhados',{exact:true}).click();
  const apple=page.locator('li').filter({hasText:/maçã/i});await apple.getByRole('button',{name:'Editar',exact:true}).click();await page.getByLabel('Quantidade exata').fill('4');await save();
  await expect(apple).toContainText('4 maçãs');await expect(page.getByText('17:30',{exact:true})).toBeVisible();
  await expect(page.getByRole('heading',{name:'Algo a observar',exact:true})).toBeVisible();await expect(page.getByText(/Registaste cafeína à tarde/)).toBeVisible();
@@ -34,7 +35,7 @@ test('detailed foods: multiple fruits, timed coffee, drinks, edits and offline p
  expect(snapshot.records.find((r:any)=>r.kind==='nutrition').data).toMatchObject({fruit:5,coffee:3,water:6,soda:1});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:'/tmp/confia-detailed-nutrition.png',fullPage:true});
- await context.setOffline(false);await page.getByRole('button',{name:'Concluir e ver o meu dia',exact:true}).click();
+ await context.setOffline(false);await page.getByRole('button',{name:/Voltar/}).click();
  await page.getByRole('button',{name:/Exercício/}).click();await page.getByRole('button',{name:'30 min',exact:true}).click();await page.getByLabel('Período do dia (opcional)').selectOption('evening');await page.getByRole('button',{name:'Guardar registo',exact:true}).click();
  await expect(page.getByText('Registaste 30 minutos de movimento.',{exact:false})).toBeVisible();
   await page.reload();await page.getByTestId("challenge-clock").waitFor();

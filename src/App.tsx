@@ -250,9 +250,28 @@ useEffect(() => {
   const [personalEventRevision, setPersonalEventRevision] = useState(0);
   const [personalDiscovery, setPersonalDiscovery] = useState<PersonalInsight | undefined>(undefined);
 
+  // O listener mantém-se montado durante a sessão; não é recriado a cada avaliação.
   useEffect(() => {
     let cancelled = false;
     let unsubscribe = () => {};
+    void import("./data/personal")
+      .then(({ PERSONAL_EVENTS_UPDATED_EVENT }) => {
+        if (cancelled) return;
+        const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
+        window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+        unsubscribe = () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
+
+  // As avaliações e os eventos pessoais podem alterar as descobertas. Calculamos
+  // novamente quando mudam, mas sem voltar a registar o listener global.
+  useEffect(() => {
+    let cancelled = false;
     let idleId: number | undefined;
     let timerId: number | undefined;
     const cancelScheduledWork = () => {
@@ -261,28 +280,32 @@ useEffect(() => {
       }
       if (timerId !== undefined) window.clearTimeout(timerId);
     };
-    void import("./data/personal").then(({ PERSONAL_EVENTS_UPDATED_EVENT, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle }) => {
-      if (cancelled) return;
-      const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
-      window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
-      unsubscribe = () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
-      const calculateDiscovery = () => {
+
+    void import("./data/personal")
+      .then(({ readPersonalEvents, buildPersonalInsights, applyInsightLifecycle }) => {
         if (cancelled) return;
-        const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
-        setPersonalDiscovery(insights
-          .filter(insight => insight.status === "consistent" || insight.status === "possible")
-          .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")
-          .sort((a, b) => {
-            const confidence = { high: 3, moderate: 2, low: 1 };
-            const actionability = { high: 3, medium: 2, low: 1 };
-            return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
-          })[0]);
-      };
-      const idle = (window as any).requestIdleCallback;
-      if (typeof idle === "function") idleId = idle(calculateDiscovery, { timeout: 500 });
-      else timerId = window.setTimeout(calculateDiscovery, 50);
-    }).catch(() => { if (!cancelled) setPersonalDiscovery(undefined); });
-    return () => { cancelled = true; cancelScheduledWork(); unsubscribe(); };
+        const calculateDiscovery = () => {
+          if (cancelled) return;
+          const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
+          setPersonalDiscovery(insights
+            .filter(insight => insight.status === "consistent" || insight.status === "possible")
+            .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")
+            .sort((a, b) => {
+              const confidence = { high: 3, moderate: 2, low: 1 };
+              const actionability = { high: 3, medium: 2, low: 1 };
+              return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
+            })[0]);
+        };
+        const idle = (window as any).requestIdleCallback;
+        if (typeof idle === "function") idleId = idle(calculateDiscovery, { timeout: 500 });
+        else timerId = window.setTimeout(calculateDiscovery, 50);
+      })
+      .catch(() => { if (!cancelled) setPersonalDiscovery(undefined); });
+
+    return () => {
+      cancelled = true;
+      cancelScheduledWork();
+    };
   }, [ratings, personalEventRevision]);
 
   const [posts, setPosts] = useState<SharePost[]>(() =>
@@ -299,6 +322,14 @@ const preloadTab = useCallback((tab: number) => {
       console.warn(`[Confia] prefetch_failed:${label}`, error);
     });
   };
+  if (tab === 0) {
+    // O painel do companheiro é o conteúdo central do separador inicial.
+    // Aquecê-lo também evita uma nova espera ao regressar ao início.
+    preload(() => import("./components/Companheiro/ConfiaCompanionHome"), "companion-home");
+    preload(() => import("./components/Habits/HabitDashboard"), "habit-dashboard");
+    preload(() => import("./components/DailyCheckIn/DailyCheckIn"), "daily-check-in");
+    return;
+  }
   if (tab === 1) {
     preload(() => import("./components/HorizonExperience"), "horizon");
     preload(() => import("./components/AbracoTimer"), "abraco");
@@ -316,19 +347,45 @@ const preloadTab = useCallback((tab: number) => {
   }
 }, []);
 
-const changeTab = (tab:number) => {
-  // Primeiro mudamos o separador: a interação do utilizador nunca fica
-  // à espera do carregamento de um chunk. O preload continua em background.
+// Aquece os módulos dos separadores principais depois da primeira pintura.
+// Em telemóveis, foco/hover não é fiável; esperar pelo clique deixa o fallback
+// «A carregar» visível durante a transferência do primeiro chunk de cada área.
+// O preload corre em idle e nunca bloqueia a navegação nem a renderização inicial.
+useEffect(() => {
+  let cancelled = false;
+  let idleId: number | undefined;
+  let timerId: number | undefined;
+
+  const warmPrimaryTabs = () => {
+    if (cancelled) return;
+    preloadTab(0);
+    preloadTab(1);
+    preloadTab(2);
+    preloadTab(4);
+  };
+
+  const requestIdle = (window as any).requestIdleCallback;
+  if (typeof requestIdle === "function") {
+    idleId = requestIdle(warmPrimaryTabs, { timeout: 250 });
+  } else {
+    timerId = window.setTimeout(warmPrimaryTabs, 250);
+  }
+
+  return () => {
+    cancelled = true;
+    if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
+    if (timerId !== undefined) window.clearTimeout(timerId);
+  };
+}, [preloadTab]);
+
+const changeTab = useCallback((tab: number) => {
+  // Inicia o download do código antes do novo separador renderizar.
+  // import() é assíncrono: a navegação não fica bloqueada e o React.lazy
+  // reutiliza o mesmo módulo quando começa a renderização.
+  preloadTab(tab);
   setHomeScreen("home");
   setCurrentTab(tab);
-  const run = () => preloadTab(tab);
-  const idle = (window as any).requestIdleCallback;
-  if (typeof idle === "function") {
-    idle(run, { timeout: 1200 });
-  } else {
-    window.setTimeout(run, 0);
-  }
-};
+}, [preloadTab]);
 
 // Os separadores são pré-carregados quando o utilizador demonstra intenção
 // (foco/ponteiro na navegação) e novamente após o clique. Evita descarregar
@@ -551,13 +608,12 @@ useEffect(() => {
   let timerId: number | undefined;
 
   if (currentTab !== 0 || homeScreen !== "home") {
-    setHomeCompanionRelationalMemory(null);
+    // Conserva o último snapshot enquanto a Home está oculta. Ao regressar,
+    // mostramos já o contexto disponível e atualizamo-lo em segundo plano.
     return;
   }
 
-  // A memória contextual é complementar: não deve bloquear a primeira pintura
-  // da Home nem a resposta imediata ao navegar entre separadores.
-  setHomeCompanionRelationalMemory(null);
+  // A memória contextual é complementar: a atualização não bloqueia a Home.
   const calculate = () => {
     void import("./data/reactive/reactiveRecentMemory")
       .then(({ collectReactiveRecentMemory }) => {
@@ -585,7 +641,7 @@ useEffect(() => {
     if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
     if (timerId !== undefined) window.clearTimeout(timerId);
   };
-}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp]);
+}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp, personalEventRevision]);
 
 
 const homeNowMemory = useMemo(() => {
@@ -819,7 +875,8 @@ useEffect(() => {
   let timerId: number | undefined;
 
   if (currentTab !== 0 || homeScreen !== "home") {
-    setHomeReactiveResult(null);
+    // Mantém o último resultado válido enquanto a Home está oculta; será
+    // recalculado em idle ao regressar, sem um estado vazio intermédio.
     return () => { cancelled = true; };
   }
 

@@ -10,6 +10,7 @@
   place-items: center;
   width: min(100%, 23rem);
   aspect-ratio: 1 / 1;
+  min-height: 0;
   margin-inline: auto;
   border-radius: 50%;
   container-type: inline-size;
@@ -163,7 +164,13 @@
 @media (max-width: 600px) {
   .challenge-clock {
     width: min(50vw, 11.5rem);
+    height: min(50vw, 11.5rem);
   }
+  /* Rem-based minimums must not force the contents outside a compact clock
+     when the user increases the browser's default text size. */
+  .challenge-clock-number { font-size: clamp(1.8rem, 22cqw, 5.1rem); }
+  .challenge-clock-number-long { font-size: clamp(1.5rem, 17cqw, 4rem); }
+  .challenge-clock-time { font-size: clamp(.65rem, 5.1cqw, 1.2rem); }
 }
 
 .wellbeing-plan-progress { appearance:none; border:0; border-radius:999px; overflow:hidden; background:#e1e7d9; }

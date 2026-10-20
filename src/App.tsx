@@ -326,6 +326,8 @@ const preloadTab = useCallback((tab: number) => {
     // O painel do companheiro é o conteúdo central do separador inicial.
     // Aquecê-lo também evita uma nova espera ao regressar ao início.
     preload(() => import("./components/Companheiro/ConfiaCompanionHome"), "companion-home");
+    preload(() => import("./components/Habits/HabitDashboard"), "habit-dashboard");
+    preload(() => import("./components/DailyCheckIn/DailyCheckIn"), "daily-check-in");
     return;
   }
   if (tab === 1) {

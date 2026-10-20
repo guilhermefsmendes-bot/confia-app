@@ -5,6 +5,9 @@ test("reactive home: immediate support opens the real support flow", async ({ pa
 
   await page.addInitScript(() => {
     localStorage.setItem("confia_language", "pt");
+    const checkInNow = new Date();
+    const checkInDate = [checkInNow.getFullYear(), String(checkInNow.getMonth() + 1).padStart(2, "0"), String(checkInNow.getDate()).padStart(2, "0")].join("-");
+    localStorage.setItem("confia_daily_checkin", JSON.stringify({ date: checkInDate, mood: 5, need: "focus", completed: true }));
     const now = new Date();
     const yesterday = new Date(now.getTime() - 86400000);
     const episodes = [
@@ -50,6 +53,9 @@ test("reactive home: combines today's lifestyle records into one contextual obse
 
   await page.addInitScript(() => {
     localStorage.setItem("confia_language", "pt");
+    const checkInNow = new Date();
+    const checkInDate = [checkInNow.getFullYear(), String(checkInNow.getMonth() + 1).padStart(2, "0"), String(checkInNow.getDate()).padStart(2, "0")].join("-");
+    localStorage.setItem("confia_daily_checkin", JSON.stringify({ date: checkInDate, mood: 5, need: "focus", completed: true }));
     const now = new Date();
     const day = [
       now.getFullYear(),

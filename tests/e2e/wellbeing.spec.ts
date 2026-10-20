@@ -1,7 +1,7 @@
 import { test,expect,type Page } from '@playwright/test';
 async function open(page:Page,lang='pt') {
  await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());
- await page.addInitScript(l=>localStorage.setItem('confia_language',l),lang);await page.goto('/');
+ await page.addInitScript(l=>{localStorage.setItem('confia_language',l);const d=new Date(),date=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');localStorage.setItem('confia_daily_checkin',JSON.stringify({date,mood:5,need:'focus',completed:true}));},lang);await page.goto('/');
   await page.getByTestId("challenge-clock").waitFor();
   await page.locator("#home-habits details").filter({has:page.locator("summary",{hasText:/O meu dia|My day|Mi día|Ma journée/})}).locator("summary").first().click();
 }

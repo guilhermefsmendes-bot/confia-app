@@ -316,6 +316,36 @@ const preloadTab = useCallback((tab: number) => {
   }
 }, []);
 
+// Aquece os módulos dos separadores principais depois da primeira pintura.
+// Em telemóveis, foco/hover não é fiável; esperar pelo clique deixa o fallback
+// «A carregar» visível durante a transferência do primeiro chunk de cada área.
+// O preload corre em idle e nunca bloqueia a navegação nem a renderização inicial.
+useEffect(() => {
+  let cancelled = false;
+  let idleId: number | undefined;
+  let timerId: number | undefined;
+
+  const warmPrimaryTabs = () => {
+    if (cancelled) return;
+    preloadTab(1);
+    preloadTab(2);
+    preloadTab(4);
+  };
+
+  const requestIdle = (window as any).requestIdleCallback;
+  if (typeof requestIdle === "function") {
+    idleId = requestIdle(warmPrimaryTabs, { timeout: 900 });
+  } else {
+    timerId = window.setTimeout(warmPrimaryTabs, 900);
+  }
+
+  return () => {
+    cancelled = true;
+    if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
+    if (timerId !== undefined) window.clearTimeout(timerId);
+  };
+}, [preloadTab]);
+
 const changeTab = (tab:number) => {
   // Primeiro mudamos o separador: a interação do utilizador nunca fica
   // à espera do carregamento de um chunk. O preload continua em background.

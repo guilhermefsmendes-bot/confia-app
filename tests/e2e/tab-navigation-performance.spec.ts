@@ -3,7 +3,12 @@ import { test, expect } from "@playwright/test";
 test("primary tabs remain responsive and do not keep the loading fallback visible", async ({ page }) => {
   const runtimeErrors: string[] = [];
   page.on("pageerror", error => runtimeErrors.push(error.message));
-  await page.addInitScript(() => localStorage.setItem("confia_language", "pt"));
+  await page.addInitScript(() => {
+    localStorage.setItem("confia_language", "pt");
+    const now = new Date();
+    const date = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
+    localStorage.setItem("confia_daily_checkin", JSON.stringify({ date, mood: 5, need: "focus", completed: true }));
+  });
   await page.goto("/");
 
   const navigation = page.locator('footer[aria-label]');

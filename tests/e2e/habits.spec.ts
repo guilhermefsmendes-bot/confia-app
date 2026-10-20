@@ -1,7 +1,12 @@
 import { test,expect,type Page } from "@playwright/test";
 async function openHabits(page:Page,lang="pt",label="Hábitos") {
   await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,route=>route.abort());
-  await page.addInitScript(l=>localStorage.setItem("confia_language",l),lang);
+  await page.addInitScript(l=>{
+    localStorage.setItem("confia_language",l);
+    const now=new Date();
+    const date=[now.getFullYear(),String(now.getMonth()+1).padStart(2,"0"),String(now.getDate()).padStart(2,"0")].join("-");
+    localStorage.setItem("confia_daily_checkin",JSON.stringify({date,mood:5,need:"focus",completed:true}));
+  },lang);
   await page.goto("/");
   await page.getByTestId("challenge-clock").waitFor();
   await expect(page.getByTestId("challenge-clock")).toBeVisible();

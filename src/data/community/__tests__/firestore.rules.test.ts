@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { after, before, describe, it } from "node:test";
 import { initializeTestEnvironment, assertFails, assertSucceeds, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { doc, setDoc, updateDoc, getDoc, Timestamp, runTransaction } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc, getDoc, getDocs, query, where, orderBy, Timestamp, runTransaction } from "firebase/firestore";
 
 let env: RulesTestEnvironment;
 const rules = readFileSync("firestore.rules", "utf8");
@@ -155,6 +155,28 @@ describe("Firestore security rules", () => {
       createdAt: Timestamp.fromMillis(1_700_000_000_000),
     }));
   });
+  it("allows an active listener to query waiting requests for an opted-in theme", async () => {
+    const now = Date.now();
+    await assertSucceeds(setDoc(doc(db("bob"), "listeningProfiles/bob"), {
+      ownerId: "bob", active: true, themes: ["loneliness"], updatedAt: Timestamp.fromMillis(now),
+    }));
+    await assertSucceeds(setDoc(doc(db("alice"), "listeningRequests/listen-inbox-query"), {
+      requesterId: "alice", theme: "loneliness", note: "Need someone to listen", status: "waiting",
+      acceptedBy: null, createdAt: Timestamp.fromMillis(now), expiresAt: Timestamp.fromMillis(now + 600_000),
+    }));
+
+    const inboxQuery = query(
+      collection(db("bob"), "listeningRequests"),
+      where("status", "==", "waiting"),
+      where("theme", "==", "loneliness"),
+      orderBy("createdAt", "desc"),
+    );
+    const snapshot = await assertSucceeds(getDocs(inboxQuery));
+    if (!snapshot.docs.some(item => item.id === "listen-inbox-query")) {
+      throw new Error("the opted-in listener should receive the waiting request");
+    }
+  });
+
   it("allows a listening request to be accepted only with its private chat in the same transaction", async () => {
     const now = Date.now();
     const volunteerDb = db("bob");

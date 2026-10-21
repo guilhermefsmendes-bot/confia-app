@@ -32,6 +32,7 @@ export function ListeningSupportModal({ isOpen, initialView = "talk", onOpen, on
   const [submitting, setSubmitting] = useState(false);
   const [busyRequest, setBusyRequest] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [subscriptionErrors, setSubscriptionErrors] = useState<string[]>([]);
   const [now, setNow] = useState(Date.now());
   const [localPendingRequest, setLocalPendingRequest] = useState<{ id: string; theme: ListeningTheme; expiresAtMs: number } | null>(null);
   const [noMatchNotice, setNoMatchNotice] = useState(false);
@@ -45,7 +46,14 @@ export function ListeningSupportModal({ isOpen, initialView = "talk", onOpen, on
     setSelectedThemes(next.themes);
     setAvailable(next.active);
   }), []);
-  useEffect(() => subscribeListeningRequests(profile, setRequests), [profile.active, profile.themes.join("|")]);
+  useEffect(() => {
+    setSubscriptionErrors([]);
+    return subscribeListeningRequests(profile, setRequests, (channel, subscriptionError) => {
+      setSubscriptionErrors(current => subscriptionError
+        ? (current.includes(channel) ? current : [...current, channel])
+        : current.filter(item => item !== channel));
+    });
+  }, [profile.active, profile.themes.join("|")]);
   useEffect(() => { if (isOpen) setView(initialView); }, [isOpen, initialView]);
 
   const uid = auth.currentUser?.uid;
@@ -155,6 +163,7 @@ export function ListeningSupportModal({ isOpen, initialView = "talk", onOpen, on
           </div>
 
           {error && <p role="alert" className="mb-3 rounded-xl border border-[#E8C7BD] bg-[#FFF1EC] p-3 text-xs leading-5 text-[#934A38]">{error}</p>}
+          {subscriptionErrors.length > 0 && <p role="alert" className="mb-3 rounded-xl border border-[#E8C7BD] bg-[#FFF1EC] p-3 text-xs leading-5 text-[#934A38]">{t("listeningSupport.errors.connection")}</p>}
 
           {view === "talk" ? (
             <section className="space-y-4">

@@ -19,7 +19,10 @@
   "listeningSupport": {
     "title": "Quiero desahogarme",
     "subtitle": "Encuentra a alguien de la comunidad disponible para escucharte.",
-    "tabs": { "talk": "Necesito hablar", "listen": "Puedo escuchar" },
+    "tabs": {
+      "talk": "Necesito hablar",
+      "listen": "Puedo escuchar"
+    },
     "chooseTheme": "¿Sobre qué necesitas hablar?",
     "chooseThemeText": "Elige el tema que más se acerque a lo que estás viviendo. No tienes que contarlo todo.",
     "themes": {
@@ -67,7 +70,8 @@
       "save": "No se pudo guardar la disponibilidad. Inténtalo de nuevo.",
       "request": "No se pudo enviar la solicitud. Comprueba la conexión e inténtalo de nuevo.",
       "accept": "Otra persona puede haber aceptado la solicitud o puede haber caducado. Actualiza e inténtalo con otra.",
-      "cancel": "No se pudo cancelar la solicitud. Inténtalo de nuevo."
+      "cancel": "No se pudo cancelar la solicitud. Inténtalo de nuevo.",
+      "connection": "No se pudieron actualizar las solicitudes para escuchar. Comprueba la conexión y las reglas de acceso del servicio."
     }
   },
   "wellbeingDescription": "Elige una actividad para cuidar tu bienestar.",

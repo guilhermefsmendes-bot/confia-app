@@ -103,13 +103,38 @@ export function subscribeListeningRequests(
       snap => { assigned = snap.docs.map(mapRequest); onSubscriptionState?.("assigned", null); emit(); },
       error => { console.error("[ListeningSupport] active conversations:", error); onSubscriptionState?.("assigned", error); }
     ));
-    const themes = profile.active ? profile.themes : [];
+    const themes = profile.active ? [...new Set(profile.themes.filter(validTheme))] : [];
     if (themes.length) {
-      stops.push(onSnapshot(
-        query(collection(db, "listeningRequests"), where("status", "==", "waiting"), where("theme", "in", themes), orderBy("createdAt", "desc"), limit(30)),
-        snap => { incoming = snap.docs.map(mapRequest).filter(r => r.requesterId !== user.uid && r.expiresAtMs > Date.now()); onSubscriptionState?.("incoming", null); emit(); },
-        error => { console.error("[ListeningSupport] incoming requests:", error); onSubscriptionState?.("incoming", error); }
-      ));
+      // Use one equality query per opted-in theme instead of a single "in"
+      // query. Firestore rules can validate each fixed theme against the
+      // listener's stored profile; they cannot reliably prove that a client-
+      // supplied "in" array matches that profile's dynamic themes list.
+      const incomingByTheme = new Map<string, ListeningRequest[]>();
+      const publishIncoming = () => {
+        incoming = [...incomingByTheme.values()].flat()
+          .filter(r => r.requesterId !== user.uid && r.expiresAtMs > Date.now());
+        onSubscriptionState?.("incoming", null);
+        emit();
+      };
+      for (const selectedTheme of themes) {
+        stops.push(onSnapshot(
+          query(
+            collection(db, "listeningRequests"),
+            where("status", "==", "waiting"),
+            where("theme", "==", selectedTheme),
+            orderBy("createdAt", "desc"),
+            limit(30)
+          ),
+          snap => {
+            incomingByTheme.set(selectedTheme, snap.docs.map(mapRequest));
+            publishIncoming();
+          },
+          error => {
+            console.error("[ListeningSupport] incoming requests for theme:", selectedTheme, error);
+            onSubscriptionState?.("incoming", error);
+          }
+        ));
+      }
     } else incoming = [];
     emit();
   });

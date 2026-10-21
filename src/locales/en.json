@@ -19,7 +19,10 @@
   "listeningSupport": {
     "title": "I want to talk",
     "subtitle": "Find someone in the community who is available to listen.",
-    "tabs": { "talk": "I need to talk", "listen": "I can listen" },
+    "tabs": {
+      "talk": "I need to talk",
+      "listen": "I can listen"
+    },
     "chooseTheme": "What would you like to talk about?",
     "chooseThemeText": "Choose the topic closest to what you're experiencing. You don't have to share everything.",
     "themes": {
@@ -67,7 +70,8 @@
       "save": "Couldn't save your availability. Please try again.",
       "request": "Couldn't send your request. Check your connection and try again.",
       "accept": "Someone else may have accepted this request, or it may have expired. Refresh and try another.",
-      "cancel": "Couldn't cancel the request. Please try again."
+      "cancel": "Couldn't cancel the request. Please try again.",
+      "connection": "Listening requests couldn't be updated. Check the connection and the service's access rules."
     }
   },
   "wellbeingDescription": "Choose an activity to take care of your wellbeing.",

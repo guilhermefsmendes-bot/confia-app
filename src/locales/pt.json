@@ -16,7 +16,10 @@
   "listeningSupport": {
     "title": "Quero desabafar",
     "subtitle": "Encontra alguém da comunidade disponível para te ouvir.",
-    "tabs": { "talk": "Preciso de falar", "listen": "Estou disponível para ouvir" },
+    "tabs": {
+      "talk": "Preciso de falar",
+      "listen": "Estou disponível para ouvir"
+    },
     "chooseTheme": "Sobre o que precisas de falar?",
     "chooseThemeText": "Escolhe o tema que melhor se aproxima do que estás a viver. Não precisas de contar tudo.",
     "themes": {
@@ -64,7 +67,8 @@
       "save": "Não foi possível guardar a disponibilidade. Tenta novamente.",
       "request": "Não foi possível enviar o pedido. Verifica a ligação e tenta novamente.",
       "accept": "Este pedido já pode ter sido aceite por outra pessoa ou expirado. Atualiza a lista e tenta outro.",
-      "cancel": "Não foi possível cancelar o pedido. Tenta novamente."
+      "cancel": "Não foi possível cancelar o pedido. Tenta novamente.",
+      "connection": "Não foi possível atualizar os pedidos de escuta. Verifica a ligação e as regras de acesso do serviço."
     }
   },
   "wellbeingDescription": "Escolhe uma atividade para cuidares do teu bem-estar.",

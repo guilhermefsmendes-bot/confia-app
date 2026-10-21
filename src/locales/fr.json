@@ -20,7 +20,10 @@
   "listeningSupport": {
     "title": "J’ai besoin de parler",
     "subtitle": "Trouve une personne de la communauté disponible pour t’écouter.",
-    "tabs": { "talk": "J’ai besoin de parler", "listen": "Je peux écouter" },
+    "tabs": {
+      "talk": "J’ai besoin de parler",
+      "listen": "Je peux écouter"
+    },
     "chooseTheme": "De quoi as-tu besoin de parler ?",
     "chooseThemeText": "Choisis le sujet qui correspond le mieux à ce que tu vis. Tu n’as pas besoin de tout raconter.",
     "themes": {
@@ -68,7 +71,8 @@
       "save": "Impossible d’enregistrer ta disponibilité. Réessaie.",
       "request": "Impossible d’envoyer la demande. Vérifie ta connexion et réessaie.",
       "accept": "Une autre personne a peut-être accepté la demande ou elle a expiré. Actualise et essaie une autre demande.",
-      "cancel": "Impossible d’annuler la demande. Réessaie."
+      "cancel": "Impossible d’annuler la demande. Réessaie.",
+      "connection": "Impossible d’actualiser les demandes d’écoute. Vérifie la connexion et les règles d’accès du service."
     }
   },
   "wellbeingDescription": "Choisis une activité pour prendre soin de ton bien-être.",

@@ -79,7 +79,8 @@ function mapRequest(snap: any): ListeningRequest {
 
 export function subscribeListeningRequests(
   profile: ListeningProfile,
-  cb: (requests: ListeningRequest[]) => void
+  cb: (requests: ListeningRequest[]) => void,
+  onSubscriptionState?: (channel: string, error: Error | null) => void
 ) {
   let stops: Array<() => void> = [];
   let outgoing: ListeningRequest[] = [];
@@ -94,20 +95,20 @@ export function subscribeListeningRequests(
     if (!user) return;
     stops.push(onSnapshot(
       query(collection(db, "listeningRequests"), where("requesterId", "==", user.uid), limit(10)),
-      snap => { outgoing = snap.docs.map(mapRequest); emit(); },
-      error => console.error("[ListeningSupport] outgoing requests:", error)
+      snap => { outgoing = snap.docs.map(mapRequest); onSubscriptionState?.("outgoing", null); emit(); },
+      error => { console.error("[ListeningSupport] outgoing requests:", error); onSubscriptionState?.("outgoing", error); }
     ));
     stops.push(onSnapshot(
       query(collection(db, "listeningRequests"), where("acceptedBy", "==", user.uid), where("status", "==", "matched"), limit(30)),
-      snap => { assigned = snap.docs.map(mapRequest); emit(); },
-      error => console.error("[ListeningSupport] active conversations:", error)
+      snap => { assigned = snap.docs.map(mapRequest); onSubscriptionState?.("assigned", null); emit(); },
+      error => { console.error("[ListeningSupport] active conversations:", error); onSubscriptionState?.("assigned", error); }
     ));
     const themes = profile.active ? profile.themes : [];
     if (themes.length) {
       stops.push(onSnapshot(
         query(collection(db, "listeningRequests"), where("status", "==", "waiting"), where("theme", "in", themes), orderBy("createdAt", "desc"), limit(30)),
-        snap => { incoming = snap.docs.map(mapRequest).filter(r => r.requesterId !== user.uid && r.expiresAtMs > Date.now()); emit(); },
-        error => console.error("[ListeningSupport] incoming requests:", error)
+        snap => { incoming = snap.docs.map(mapRequest).filter(r => r.requesterId !== user.uid && r.expiresAtMs > Date.now()); onSubscriptionState?.("incoming", null); emit(); },
+        error => { console.error("[ListeningSupport] incoming requests:", error); onSubscriptionState?.("incoming", error); }
       ));
     } else incoming = [];
     emit();

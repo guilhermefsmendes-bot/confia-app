@@ -15,11 +15,12 @@ interface Props {
   onOpen: () => void;
   onClose: () => void;
   onOpenMatchedChat: (post: SharePost, chatId: string) => void;
+  onIncomingRequestsChange?: (count: number) => void;
 }
 const THEME_KEYS: ListeningTheme[] = ["anxiety", "depression", "loneliness", "stress", "relationships", "grief", "selfEsteem", "other"];
 const initialProfile: ListeningProfile = { active: false, themes: [] };
 
-export function ListeningSupportModal({ isOpen, initialView = "talk", onOpen, onClose, onOpenMatchedChat }: Props) {
+export function ListeningSupportModal({ isOpen, initialView = "talk", onOpen, onClose, onOpenMatchedChat, onIncomingRequestsChange }: Props) {
   const { t } = useTranslation();
   const [profile, setProfile] = useState<ListeningProfile>(initialProfile);
   const [selectedThemes, setSelectedThemes] = useState<ListeningTheme[]>([]);
@@ -38,9 +39,20 @@ export function ListeningSupportModal({ isOpen, initialView = "talk", onOpen, on
   const [noMatchNotice, setNoMatchNotice] = useState(false);
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 15000);
+    // Só atualiza o relógio quando o modal está aberto ou há pedidos a expirar.
+    // O intervalo não é recriado a cada tick; quando o último pedido expira
+    // com o modal fechado, termina sozinho até chegar uma nova atualização.
+    const hasUnexpiredRequest = (at: number) => requests.some(
+      request => request.status === "waiting" && request.expiresAtMs > at
+    );
+    if (!isOpen && !hasUnexpiredRequest(Date.now())) return;
+    const timer = window.setInterval(() => {
+      const at = Date.now();
+      setNow(at);
+      if (!isOpen && !hasUnexpiredRequest(at)) window.clearInterval(timer);
+    }, 15000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [isOpen, requests]);
   useEffect(() => subscribeListeningProfile(next => {
     setProfile(next);
     setSelectedThemes(next.themes);
@@ -66,6 +78,12 @@ export function ListeningSupportModal({ isOpen, initialView = "talk", onOpen, on
   } : undefined);
   const incoming = requests.filter(r => r.requesterId !== uid && r.status === "waiting" && r.expiresAtMs > now);
   const activeConversations = requests.filter(r => r.requesterId !== uid && r.acceptedBy === uid && r.status === "matched");
+
+  // Mantém o botão de entrada atualizado mesmo quando o modal está fechado.
+  useEffect(() => {
+    onIncomingRequestsChange?.(incoming.length);
+  }, [incoming.length, onIncomingRequestsChange]);
+  useEffect(() => () => onIncomingRequestsChange?.(0), [onIncomingRequestsChange]);
   useEffect(() => {
     if (!localPendingRequest) return;
     const latest = requests.find(r => r.id === localPendingRequest.id);

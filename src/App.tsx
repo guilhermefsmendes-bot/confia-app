@@ -335,6 +335,7 @@ const changeTab = (tab:number) => {
 // código de funcionalidades que a pessoa talvez nunca abra.
   const [triageOpen, setTriageOpen] = useState(false);
   const [listeningSupportOpen, setListeningSupportOpen] = useState(false);
+  const [incomingListeningRequestCount, setIncomingListeningRequestCount] = useState(0);
   const [listeningSupportInitialView, setListeningSupportInitialView] = useState<"talk" | "listen">("talk");
   const [levelUpOpen, setLevelUpOpen] = useState(false);
 const [avatarCelebrating, setAvatarCelebrating] = useState(false);
@@ -2804,6 +2805,7 @@ className="flex items-center justify-center w-24 h-24 relative"
   onClick={() => { setListeningSupportInitialView("talk"); setListeningSupportOpen(true); }}
   aria-label={t("listeningSupport.title")}
   className="group w-full rounded-[24px] border border-[#C9DCCB] bg-gradient-to-r from-[#F2F8F1] via-white to-[#F4F8F3] px-4 py-3.5 text-left shadow-[0_8px_22px_rgba(73,112,80,0.08)] transition-all duration-200 active:scale-[0.99] active:opacity-95"
+  aria-describedby={incomingListeningRequestCount > 0 ? "listening-support-incoming-alert" : undefined}
 >
   <div className="flex items-center gap-3">
     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#D5E5D5] bg-white">
@@ -2826,7 +2828,15 @@ className="flex items-center justify-center w-24 h-24 relative"
         {t("listeningSupport.subtitle")}
       </p>
     </div>
-    <span aria-hidden="true" className="text-xl font-light text-[#64816A]">→</span>
+    <span className="relative flex shrink-0 items-center gap-2 text-xl font-light text-[#64816A]" aria-hidden={incomingListeningRequestCount === 0 ? "true" : undefined}>
+      {incomingListeningRequestCount > 0 && (
+        <span id="listening-support-incoming-alert" className="inline-flex items-center gap-1 rounded-full bg-[#B42318] px-2 py-1 text-[10px] font-black leading-none text-white shadow-sm" role="status" aria-live="polite">
+          <AlertCircle size={14} strokeWidth={2.5} />
+          {incomingListeningRequestCount > 9 ? "9+" : incomingListeningRequestCount}
+        </span>
+      )}
+      →
+    </span>
   </div>
 </button>
 
@@ -3179,6 +3189,7 @@ className="flex items-center justify-center w-24 h-24 relative"
           onOpen={() => { setListeningSupportInitialView("listen"); setListeningSupportOpen(true); }}
           onClose={() => setListeningSupportOpen(false)}
           onOpenMatchedChat={handleOpenMatchedChat}
+          onIncomingRequestsChange={setIncomingListeningRequestCount}
         />
       </Suspense>
 

@@ -2,6 +2,8 @@ import { clearNativeNotices } from "../notifications/service";
 import { pauseHabitSyncForDeletion, resumeHabitSyncAfterDeletionError } from "../data/habits/sync";
 import {
   collection,
+  doc,
+  getDoc,
   limit,
   getDocs,
   query,
@@ -71,8 +73,23 @@ async function deleteUserDataAndHabits(): Promise<void> {
     collection(db, "chats"),
     where("participants", "array-contains", uid)
   );
+  // When a member closes an SOS chat, they are removed from participants.
+  // Find those closed chats separately so account deletion can still clean them.
+  const closedListeningChatsQuery = query(
+    collection(db, "chats"),
+    where("closedBy", "==", uid)
+  );
 
-  const chatsSnapshot = await getDocs(chatsQuery);
+  const [participantChatsSnapshot, closedListeningChatsSnapshot] = await Promise.all([
+    getDocs(chatsQuery),
+    getDocs(closedListeningChatsQuery),
+  ]);
+  const chatsById = new Map<string, (typeof participantChatsSnapshot.docs)[number]>();
+  participantChatsSnapshot.docs.forEach(chat => chatsById.set(chat.id, chat));
+  closedListeningChatsSnapshot.docs.forEach(chat => {
+    if (typeof chat.data().listeningRequestId === "string") chatsById.set(chat.id, chat);
+  });
+  const chatsSnapshot = { docs: [...chatsById.values()] };
 
   // 4. Procurar denúncias e bloqueios criados pelo utilizador.
   // Estes documentos também contêm identificadores pessoais e devem ser
@@ -86,9 +103,29 @@ async function deleteUserDataAndHabits(): Promise<void> {
     where("blockerId", "==", uid)
   );
 
-  const [reportsSnapshot, blocksSnapshot] = await Promise.all([
+  const ownListeningRequestsQuery = query(
+    collection(db, "listeningRequests"),
+    where("requesterId", "==", uid)
+  );
+  const assignedListeningRequestsQuery = query(
+    collection(db, "listeningRequests"),
+    where("acceptedBy", "==", uid),
+    where("status", "in", ["matched", "closed"])
+  );
+  const listeningProfileRef = doc(db, "listeningProfiles", uid);
+
+  const [
+    reportsSnapshot,
+    blocksSnapshot,
+    ownListeningRequestsSnapshot,
+    assignedListeningRequestsSnapshot,
+    listeningProfileSnapshot,
+  ] = await Promise.all([
     getDocs(reportsQuery),
     getDocs(blocksQuery),
+    getDocs(ownListeningRequestsQuery),
+    getDocs(assignedListeningRequestsQuery),
+    getDoc(listeningProfileRef),
   ]);
 
   // 5–7. Preparar operações e executá-las em lotes seguros.
@@ -127,10 +164,13 @@ async function deleteUserDataAndHabits(): Promise<void> {
 
   reportsSnapshot.forEach(reportDoc => queueDelete(reportDoc.ref));
   blocksSnapshot.forEach(blockDoc => queueDelete(blockDoc.ref));
+  ownListeningRequestsSnapshot.forEach(requestDoc => queueDelete(requestDoc.ref));
+  assignedListeningRequestsSnapshot.forEach(requestDoc => queueDelete(requestDoc.ref));
+  if (listeningProfileSnapshot.exists()) queueDelete(listeningProfileRef);
 
   for (const chatDoc of chatsSnapshot.docs) {
     const data = chatDoc.data();
-    const deletingOwnedChat = data.authorId === uid;
+    const deletingOwnedChat = data.authorId === uid || typeof data.listeningRequestId === "string";
     const messagesSnapshot = await getDocs(collection(db, "chats", chatDoc.id, "messages"));
     messagesSnapshot.forEach(messageDoc => {
       // When removing an owned chat, delete its full message subcollection.
@@ -145,7 +185,7 @@ async function deleteUserDataAndHabits(): Promise<void> {
     // O campo authorId identifica estruturalmente o autor da conversa e as
     // regras não permitem alterá-lo. Se o autor apagar a conta, remover o
     // chat inteiro evita deixar uma conversa sem autor válido.
-    if (remainingParticipants.length === 0 || data.authorId === uid) {
+    if (remainingParticipants.length === 0 || data.authorId === uid || typeof data.listeningRequestId === "string") {
       queueDelete(chatDoc.ref);
       continue;
     }

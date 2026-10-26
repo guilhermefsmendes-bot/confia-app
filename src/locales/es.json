@@ -49,7 +49,7 @@
     "chatClosed": "Esta conversación ha terminado. Ya no es posible enviar mensajes aquí.",
     "endConversation": "Terminar la conversación para ambos",
     "openConversation": "Abrir conversación",
-    "safetyNote": "Este es un espacio de apoyo entre miembros, no un servicio clínico ni de emergencia. Comparte solo lo que quieras y no incluyas datos personales.",
+    "safetyNote": "Este es un espacio de apoyo entre miembros, no un servicio clínico ni de emergencia, y no se garantiza una respuesta. Comparte solo lo que quieras y no incluyas datos identificativos. En peligro inmediato, contacta con los servicios de emergencia locales.",
     "volunteerTitle": "Elige los temas sobre los que te sientes cómodo escuchando",
     "volunteerText": "Recibirás solicitudes solo de los temas seleccionados cuando estés disponible. No tienes que dar consejos ni resolver el problema.",
     "availableToggle": "Estoy disponible para recibir solicitudes",

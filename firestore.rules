@@ -347,7 +347,7 @@ service cloud.firestore {
       allow get, list: if request.auth != null
         && (
           resource.data.requesterId == request.auth.uid
-          || (resource.data.status == 'matched' && resource.data.acceptedBy == request.auth.uid)
+          || (resource.data.status in ['matched','closed'] && resource.data.acceptedBy == request.auth.uid)
           || (
             resource.data.status == 'waiting'
             && get(/databases/$(database)/documents/listeningProfiles/$(request.auth.uid)).data.active == true
@@ -417,7 +417,9 @@ service cloud.firestore {
           )
         );
 
-      allow delete: if request.auth != null && resource.data.requesterId == request.auth.uid;
+      // Either participant may remove the request when deleting their account.
+      allow delete: if request.auth != null
+        && (resource.data.requesterId == request.auth.uid || resource.data.acceptedBy == request.auth.uid);
     }
 
     match /communityMatchProfiles/{userId} {
@@ -565,9 +567,14 @@ service cloud.firestore {
       // ---------------------------------------------------
       // LISTAGEM DE CHATS
       // ---------------------------------------------------
-      // Apenas participantes podem listar/consultar chats.
+      // Participantes podem listar os seus chats. O campo closedBy só pode ser
+      // definido pelo fluxo de encerramento SOS validado abaixo, permitindo ao
+      // autor do encerramento localizar os dados para eliminação da conta.
       allow list: if request.auth != null
-        && request.auth.uid in resource.data.participants;
+        && (
+          request.auth.uid in resource.data.participants
+          || resource.data.closedBy == request.auth.uid
+        );
 
 
       // ---------------------------------------------------
@@ -746,7 +753,14 @@ service cloud.firestore {
       // APAGAR CHAT
       // ---------------------------------------------------
       allow delete: if request.auth != null
-        && request.auth.uid in resource.data.participants;
+        && (
+          request.auth.uid in resource.data.participants
+          || (
+            resource.data.keys().hasAny(['listeningRequestId'])
+            && resource.data.closedBy == request.auth.uid
+            && resource.data.closedAt is timestamp
+          )
+        );
 
 
       // ===================================================
@@ -759,10 +773,14 @@ service cloud.firestore {
         // -------------------------------------------------
         // Apenas participantes da conversa podem ler.
         allow read: if request.auth != null
-          && request.auth.uid in
-            get(
-              /databases/$(database)/documents/chats/$(chatId)
-            ).data.participants;
+          && (
+            request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants
+            || (
+              get(/databases/$(database)/documents/chats/$(chatId)).data.keys().hasAny(['listeningRequestId'])
+              && get(/databases/$(database)/documents/chats/$(chatId)).data.closedBy == request.auth.uid
+              && get(/databases/$(database)/documents/chats/$(chatId)).data.closedAt is timestamp
+            )
+          );
 
 
         // -------------------------------------------------
@@ -799,11 +817,11 @@ service cloud.firestore {
         // Moderadores também podem.
         allow delete: if request.auth != null
           && (
-            (
-              request.auth.uid in
-                get(
-                  /databases/$(database)/documents/chats/$(chatId)
-                ).data.participants
+            request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants
+            || (
+              get(/databases/$(database)/documents/chats/$(chatId)).data.keys().hasAny(['listeningRequestId'])
+              && get(/databases/$(database)/documents/chats/$(chatId)).data.closedBy == request.auth.uid
+              && get(/databases/$(database)/documents/chats/$(chatId)).data.closedAt is timestamp
             )
             || request.auth.token.moderator == true
           );

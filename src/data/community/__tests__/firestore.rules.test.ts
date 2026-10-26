@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { after, before, describe, it } from "node:test";
 import { initializeTestEnvironment, assertFails, assertSucceeds, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { collection, doc, setDoc, updateDoc, getDoc, getDocs, query, where, orderBy, Timestamp, runTransaction } from "firebase/firestore";
+import { collection, doc, setDoc, updateDoc, deleteDoc, getDoc, getDocs, query, where, orderBy, Timestamp, runTransaction } from "firebase/firestore";
 
 let env: RulesTestEnvironment;
 const rules = readFileSync("firestore.rules", "utf8");
@@ -251,6 +251,87 @@ describe("Firestore security rules", () => {
     await assertFails(updateDoc(doc(db("bob"), "listeningRequests/listen-test-2"), {
       status: "matched", acceptedBy: "bob", matchedAt: Timestamp.fromMillis(now + 1),
     }));
+  });
+
+  it("allows a matched listening participant to delete their own request but rejects unrelated users", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "listeningRequests/listen-delete-test"), {
+        requesterId: "alice",
+        theme: "anxiety",
+        note: "Need someone to listen",
+        status: "matched",
+        acceptedBy: "bob",
+        createdAt: Timestamp.fromMillis(1_700_000_000_000),
+        expiresAt: Timestamp.fromMillis(1_700_000_600_000),
+      });
+    });
+
+    await assertFails(deleteDoc(doc(db("mallory"), "listeningRequests/listen-delete-test")));
+    await assertSucceeds(deleteDoc(doc(db("bob"), "listeningRequests/listen-delete-test")));
+  });
+
+  it("allows the requester to delete their own listening request", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "listeningRequests/listen-requester-delete-test"), {
+        requesterId: "alice",
+        theme: "stress",
+        note: "",
+        status: "waiting",
+        acceptedBy: null,
+        createdAt: Timestamp.fromMillis(1_700_000_000_000),
+        expiresAt: Timestamp.fromMillis(1_700_000_600_000),
+      });
+    });
+
+    await assertSucceeds(deleteDoc(doc(db("alice"), "listeningRequests/listen-requester-delete-test")));
+  });
+
+  it("allows an assigned listener to query and delete a closed SOS request and its closed chat data", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      const adminDb = context.firestore();
+      await setDoc(doc(adminDb, "listeningRequests/listen-closed-cleanup"), {
+        requesterId: "alice",
+        theme: "anxiety",
+        note: "test",
+        status: "closed",
+        acceptedBy: "bob",
+        createdAt: Timestamp.fromMillis(1_700_000_000_000),
+        expiresAt: Timestamp.fromMillis(1_700_000_600_000),
+        closedAt: Timestamp.fromMillis(1_700_000_100_000),
+      });
+      await setDoc(doc(adminDb, "chats/listen_listen-closed-cleanup"), {
+        participants: ["alice"],
+        authorId: "alice",
+        postId: "listen_listen-closed-cleanup",
+        listeningRequestId: "listen-closed-cleanup",
+        closedBy: "bob",
+        closedAt: Timestamp.fromMillis(1_700_000_100_000),
+        createdAt: Timestamp.fromMillis(1_700_000_000_000),
+        lastMessage: "",
+        lastMessageAt: null,
+        unreadBy: [],
+      });
+      await setDoc(doc(adminDb, "chats/listen_listen-closed-cleanup/messages/m1"), {
+        senderId: "bob",
+        text: "test message",
+      });
+    });
+
+    const assignedClosedRequests = query(
+      collection(db("bob"), "listeningRequests"),
+      where("acceptedBy", "==", "bob"),
+      where("status", "in", ["matched", "closed"]),
+    );
+    await assertSucceeds(getDocs(assignedClosedRequests));
+
+    const closedChats = query(collection(db("bob"), "chats"), where("closedBy", "==", "bob"));
+    await assertSucceeds(getDocs(closedChats));
+    await assertFails(getDocs(query(collection(db("mallory"), "chats"), where("closedBy", "==", "bob"))));
+
+    await assertSucceeds(getDocs(collection(db("bob"), "chats/listen_listen-closed-cleanup/messages")));
+    await assertSucceeds(deleteDoc(doc(db("bob"), "chats/listen_listen-closed-cleanup/messages/m1")));
+    await assertSucceeds(deleteDoc(doc(db("bob"), "chats/listen_listen-closed-cleanup")));
+    await assertSucceeds(deleteDoc(doc(db("bob"), "listeningRequests/listen-closed-cleanup")));
   });
 
   it("keeps Experience Matching preferences private", async () => {

@@ -50,7 +50,7 @@
     "chatClosed": "Cette conversation est terminée. Il n’est plus possible d’envoyer des messages ici.",
     "endConversation": "Terminer la conversation pour les deux",
     "openConversation": "Ouvrir la conversation",
-    "safetyNote": "Il s’agit d’un soutien entre membres, pas d’un service clinique ou d’urgence. Partage uniquement ce que tu souhaites et n’inclus pas de données personnelles.",
+    "safetyNote": "Il s’agit d’un soutien entre membres, pas d’un service clinique ou d’urgence, et aucune réponse n’est garantie. Partage uniquement ce que tu souhaites et n’inclus pas de données identifiantes. En cas de danger immédiat, contacte les services d’urgence locaux.",
     "volunteerTitle": "Choisis les sujets sur lesquels tu te sens à l’aise pour écouter",
     "volunteerText": "Tu recevras uniquement les demandes des sujets sélectionnés lorsque tu es disponible. Tu n’as pas besoin de donner des conseils ni de résoudre le problème.",
     "availableToggle": "Je suis disponible pour recevoir des demandes d’écoute",

@@ -2977,7 +2977,8 @@
         "protein": "Dieta variada con fuentes de proteínas; sin número universal de porciones",
         "fat": "grasa total <30% de la energía; saturadas <10%",
         "salt": "menos de 5 g de sal/día",
-        "notComparable": "Referencia general, pero este registro no permite una comparación numérica directa"
+        "notComparable": "Referencia general, pero este registro no permite una comparación numérica directa",
+        "exerciseUnclassified": "{{value}} min de intensidad ligera o no indicada no cuentan para esta comparación."
       },
       "status": {
         "ok": "Dentro de la referencia general",
@@ -3898,5 +3899,21 @@
     "evidence": "evidencias",
     "insufficient": "datos insuficientes",
     "guardrail": "CONFIA usa tu propia historia, conserva las contradicciones y no convierte asociaciones en causalidad. Esto no es un diagnóstico clínico."
+  },
+  "habitImpact": {
+    "title": "Motor de Impacto de los Hábitos",
+    "subtitle": "Qué permiten concluir tus registros, qué midió la investigación y qué sigue siendo desconocido en tu caso.",
+    "evidence": "Ver evidencia científica y limitaciones",
+    "evidenceType": "Tipo de evidencia",
+    "population": "Población estudiada",
+    "statistic": "Resultado medido",
+    "certainty": "Grado de certeza",
+    "limitations": "Limitaciones",
+    "openSource": "Consultar fuente original",
+    "units": {
+      "g": "g",
+      "portions": "porciones"
+    },
+    "lastReviewed": "Fuente revisada el"
   }
 }

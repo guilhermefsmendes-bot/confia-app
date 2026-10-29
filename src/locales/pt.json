@@ -2977,7 +2977,8 @@
         "protein": "Alimentação variada com fontes de proteína; sem nº universal de porções",
         "fat": "gordura total <30% da energia; saturadas <10%",
         "salt": "menos de 5 g de sal/dia",
-        "notComparable": "Referência geral, mas este registo não permite uma comparação numérica direta"
+        "notComparable": "Referência geral, mas este registo não permite uma comparação numérica direta",
+        "exerciseUnclassified": "{{value}} min de intensidade ligeira ou não indicada não contam para esta comparação."
       },
       "status": {
         "ok": "Dentro da referência geral",
@@ -3898,5 +3899,118 @@
     "evidence": "evidências",
     "insufficient": "dados insuficientes",
     "guardrail": "A CONFIA usa a tua própria história, conserva contradições e não transforma associações em causalidade. Esta análise não é um diagnóstico clínico."
+  },
+  "habitImpact": {
+    "title": "Motor de Impacto dos Hábitos",
+    "subtitle": "O que os teus registos permitem concluir, o que a investigação mediu e o que ainda não sabemos sobre o teu caso.",
+    "evidence": "Ver dados científicos e limitações",
+    "evidenceType": "Tipo de evidência",
+    "population": "População estudada",
+    "statistic": "Resultado medido",
+    "certainty": "Grau de certeza",
+    "limitations": "Limitações",
+    "openSource": "Consultar fonte original",
+    "cards": {
+      "sleepShort": {
+        "title": "Sono abaixo das 7 horas",
+        "message": "Registaste {{hours}} horas: {{deficit}} horas abaixo do mínimo habitual de 7 horas para adultos e {{differenceFromReference}} horas abaixo de uma referência de 8 horas. Uma meta-análise de 44 estudos quantificou efeitos de uma noite com oportunidade de sono de 2–6 horas: sonolência (SMD 0,986), tempo de reação (SMD 0,512) e lapsos de atenção (SMD 0,489). São diferenças padronizadas de grupos, não percentagens nem uma previsão individual."
+      },
+      "sleepRange": {
+        "title": "Duração do sono registada",
+        "message": "Registaste {{hours}} horas, dentro da referência habitual de 7–9 horas para adultos. A necessidade individual varia; este registo, por si só, não mede a qualidade do sono nem o funcionamento do sistema nervoso."
+      },
+      "sleepLong": {
+        "title": "Sono superior a 9 horas",
+        "message": "Registaste {{hours}} horas. Dormir mais de 9 horas não significa automaticamente um problema: pode ser adequado durante a recuperação de privação de sono ou noutras circunstâncias. A duração isolada não permite concluir a causa."
+      },
+      "exercise": {
+        "title": "Atividade física — últimos 7 dias",
+        "message": "Atividade registada com intensidade moderada: {{moderate}} min (referência mínima: {{moderateTarget}} min/semana). Intensidade vigorosa: {{vigorous}} min (referência mínima: {{vigorousTarget}} min/semana). Outros minutos, de intensidade ligeira ou não indicada: {{unclassified}} min; não os somei às metas moderada/vigorosa porque a intensidade não está confirmada."
+      },
+      "caffeine": {
+        "title": "Cafeína estimada",
+        "message": "Com base nos tipos e quantidades registados, a estimativa é {{mg}} mg de cafeína, cerca de {{percentage}}% da referência de 400 mg/dia da EFSA para a maioria dos adultos saudáveis. É uma estimativa por doses típicas, não uma medição do produto consumido."
+      },
+      "caffeineLate": {
+        "title": "Cafeína registada ao fim do dia",
+        "message": "Foi registada cafeína num horário tardio. A EFSA refere que uma dose única de 100 mg pode afetar o sono em algumas pessoas, sobretudo perto da hora de deitar. Como a Confia pode não conhecer a tua hora de deitar nem a dose exata, não é possível calcular o efeito neste registo."
+      },
+      "produce": {
+        "title": "Fruta e vegetais — comparação com a recomendação",
+        "message": "Registaste {{value}} {{unit}}. A referência da OMS é pelo menos {{reference}} {{unit}} por dia para pessoas com mais de 10 anos. Esta comparação só usa quantidades explicitamente registadas em gramas ou porções; não converte peças individuais em pesos presumidos."
+      },
+      "produceUnquantified": {
+        "title": "Fruta e vegetais sem quantidade comparável",
+        "message": "Registaste fruta ou vegetais, mas a quantidade está em unidades/itens e não em gramas ou porções. Não vou estimar o peso nem afirmar que atingiste ou falhaste a recomendação da OMS."
+      },
+      "water": {
+        "title": "Água registada",
+        "message": "Registaste aproximadamente {{ml}} ml de água. A DGS apresenta 1 500 ml/dia como orientação prática geral, mas as necessidades variam e este registo pode não incluir todos os líquidos. O valor não diagnostica desidratação."
+      },
+      "limits": {
+        "fastFood": {
+          "title": "Refeição registada como fast food",
+          "message": "Registaste {{count}} registo(s) nesta categoria. O registo não identifica o grau de processamento nem os gramas de sal, açúcar, gordura ou energia. Não é cientificamente válido aplicar diretamente a esta refeição os riscos observados em estudos sobre consumo habitual de ultraprocessados."
+        },
+        "sweets": {
+          "title": "Doces registados — dose não quantificada",
+          "message": "Registaste {{count}} registo(s) de doces, mas a Confia não tem os gramas de açúcar livre. A recomendação da OMS é expressa como percentagem da energia diária; não é possível calcular a tua percentagem com estes dados."
+        },
+        "salt": {
+          "title": "Alimentos salgados — sal não quantificado",
+          "message": "Registaste {{count}} registo(s) de alimentos salgados, mas a categoria não mede os gramas de sal consumidos. A recomendação populacional da OMS é inferior a 5 g de sal por dia; este registo não permite calcular a tua ingestão."
+        },
+        "alcohol": {
+          "title": "Álcool registado — dose não quantificada",
+          "message": "Registaste {{count}} registo(s) de álcool. Sem volume da bebida e teor alcoólico, não é possível calcular gramas de etanol ou exposição. A OMS refere que não existe consumo de álcool isento de risco; o risco depende da quantidade, frequência e contexto."
+        },
+        "tobacco": {
+          "title": "Tabaco registado — exposição não quantificada",
+          "message": "Registaste {{count}} registo(s) de tabaco, mas o modelo atual não identifica com precisão o produto nem a dose. Posso assinalar o registo, mas não calcular a exposição ou o risco individual a partir desta categoria."
+        }
+      },
+      "habitLog": {
+        "title": "Registo do teu hábito",
+        "message": "Hábito: “{{habitName}}”. Objetivo definido: “{{goal}}”. Este registo confirma se assinalaste o objetivo, mas não mede automaticamente a dose, a duração ou o efeito fisiológico. Para uma análise quantificada, o objetivo precisa de uma medida observável."
+      },
+      "caffeineUnknown": {
+        "title": "Cafeína não quantificável neste registo",
+        "message": "O tipo ou a dose registada não permite estimar a cafeína com fiabilidade. As quantidades variam muito entre produtos e tamanhos; não vou assumir uma dose padrão como se fosse exata."
+      },
+      "nutrientDetailLimit": {
+        "title": "Composição nutricional não registada",
+        "message": "O registo guarda a categoria e a quantidade, mas não os valores do rótulo nutricional. Por isso, não é possível calcular com rigor as calorias, os gramas de açúcar, sal ou gordura saturada deste consumo."
+      },
+      "waterUnknown": {
+        "title": "Água registada sem volume comparável",
+        "message": "O registo antigo contém uma contagem de água, mas não um volume em ml nem um tamanho de dose. Não vou converter essa contagem em litros sem saber o tamanho do copo/garrafa."
+      },
+      "sleepDetails": {
+        "title": "Qualidade e despertares registados",
+        "message": "Além da duração, classificaste a qualidade do sono como {{quality}}/5 e registaste {{awakenings}} despertares. São auto-relatos úteis para comparar padrões, mas não medem fases do sono nem diagnosticam uma perturbação.",
+        "qualityOnly": "Classificaste a qualidade do sono como {{quality}}/5. É uma avaliação subjetiva; não mede fases do sono nem diagnostica uma perturbação."
+      }
+    },
+    "personal": {
+      "title": "O que aparece no teu histórico",
+      "intro": "Comparação dos teus próprios registos de estado emocional nos dias com e sem a condição indicada.",
+      "sleep": "Sono inferior a 7 horas",
+      "exercise": "Atividade física registada",
+      "caffeine": "Pelo menos 2 unidades de café registadas",
+      "fastFood": "Fast food registada",
+      "pattern": "Nos teus registos, o estado emocional médio foi {{direction}} nos dias da primeira condição ({{exposedMean}}/10; {{exposedDays}} dias) do que nos dias de comparação ({{comparisonMean}}/10; {{comparisonDays}} dias). Diferença observada: {{difference}} pontos.",
+      "direction": {
+        "lower": "mais baixo",
+        "higher": "mais alto",
+        "similar": "sem diferença relevante"
+      },
+      "caution": "Isto é uma associação observada no teu histórico, não prova que o hábito tenha causado a alteração. Podem existir outros fatores e os registos incompletos podem enviesar a comparação.",
+      "insufficient": "Ainda não há dados suficientes para uma comparação pessoal fiável. O motor exige pelo menos 5 dias medidos em cada grupo e uma classificação emocional nesses mesmos dias. Dias com registos em falta não são tratados como zero. Classificações emocionais disponíveis nos últimos 30 dias: {{count}} dias."
+    },
+    "units": {
+      "g": "g",
+      "portions": "porções"
+    },
+    "lastReviewed": "Fonte verificada em"
   }
 }

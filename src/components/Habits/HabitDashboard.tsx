@@ -12,6 +12,7 @@ import { type HabitDefinition,type HabitRecord } from "../../data/habits/types";
 import { recordPersonalAnalytics,recordPersonalScreenView } from "../../data/personal/personalAnalytics";
 import { buttonClass,primaryClass,DayPicker,Panel,useLocalDay,type RunAction } from "./shared";
 import HabitChallengeCard from "./HabitChallengeCard";
+import HabitImpactReaction from "./HabitImpactReaction";
 const HabitInsights=lazy(()=>import("./HabitInsights"));
 const HabitSetup=lazy(()=>import("./HabitSetup"));
 const HabitHistory=lazy(()=>import("./HabitHistory"));
@@ -28,6 +29,7 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
   useEffect(()=>{if(embedded)recordPersonalScreenView(page==="home"?"home":"home_habits_"+page);},[embedded,page]);
   const [message,setMessage]=useState("");const [error,setError]=useState("");
   const [logDate,setLogDate]=useState(today);
+  const [impactDate,setImpactDate]=useState(today);
   useEffect(()=>{startHabitSync();},[]);
   useEffect(()=>{setPage(openSupport?"support":"home");},[openSupport]);
   useEffect(()=>{const update=()=>setEventRevision(n=>n+1);window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT,update);return()=>window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT,update);},[]);
@@ -39,8 +41,8 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
   const events=useMemo(()=>readPersonalEvents(),[revision,eventRevision]);
   const status=getHabitStatus();
   const run:RunAction=(action,success)=>{try{action();setError("");setMessage(success);return true;}catch{setMessage("");setError(t("habitHub.error"));return false;}};
-  const go=(target:string)=>{if(target==="plans"){setPage("home");setExpanded(true);return;}setPage(target);setError("");setMessage("");setLogDate(today);};
-  const back=()=>setPage("home");
+  const go=(target:string)=>{setImpactDate(today);if(target==="plans"){setPage("home");setExpanded(true);return;}setPage(target);setError("");setMessage("");setLogDate(today);};
+  const back=(preserveImpactDate=false)=>{setPage("home");if(!preserveImpactDate)setImpactDate(today);};
   useEffect(()=>{if(page==="home"&&!embedded)document.getElementById("habits-title")?.focus();},[page,embedded]);
   const food=records.find(r=>r.kind==="nutrition" && r.date===today);
   const sleep=records.find(r=>r.kind==="sleep" && r.date===today);
@@ -53,7 +55,7 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
       const after=habitStats(getHabitSnapshot().records,primary.id,today);
       const milestone=[3,7,14,30].includes(after.current) && after.current>before.current;
       const key=!completed?"restart":milestone?"day"+after.current:after.best>before.best && before.best>0?"record":("done"+(after.total%3));
-      setMessage(t("habitHub.encouragement."+key));if(milestone)recordPersonalAnalytics("habit_milestone_reached");back();
+      setMessage(t("habitHub.encouragement."+key));setImpactDate(logDate);if(milestone)recordPersonalAnalytics("habit_milestone_reached");back(true);
     }
   };
   return <div className="mx-auto max-w-2xl space-y-5 pb-6 text-[#332824]">
@@ -65,6 +67,7 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
     {error && <p role="alert" className="rounded-2xl border border-[#D9BD97] bg-[#FFF7E9] p-4 text-sm">{error}</p>}
     {page==="home" ? <>
       <HabitChallengeCard habit={primary} records={records} today={today} onOpen={go}/>
+      <HabitImpactReaction records={records} events={events} date={impactDate}/>
       <div className="flex items-center gap-3 pt-1">
         <span className="h-px flex-1 bg-[#E8DDD7]" />
         <span className="text-[11px] font-black uppercase tracking-[0.16em] text-[#806F63]">{t("habitHub.today")}</span>
@@ -95,9 +98,9 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
       {page==="history" && primary && <HabitHistory habit={primary} records={records} today={today}/>}
       {page==="log" && primary && <div className="space-y-4 rounded-[28px] border border-[#E8DDD7] bg-white p-5"><p className="text-lg font-bold">{primary.data.goal}</p><DayPicker value={logDate} onChange={setLogDate} min={primary.date}/><p className="text-sm leading-6">{t("habitHub.confirmHelp")}</p><button type="button" className={primaryClass+" w-full"} onClick={()=>finishDay(true)}>{t("habitHub.confirm")}</button><button type="button" className={buttonClass+" w-full"} onClick={()=>finishDay(false)}>{t(logDate===today?"habitHub.notToday":"habitHub.notThatDay")}</button></div>}
       {page==="restart" && primary && <div className="space-y-4 rounded-[28px] border border-[#E8DDD7] bg-white p-5"><h3 className="text-lg font-bold">{t("habitHub.restartQuestion")}</h3><p className="text-sm leading-6">{t("habitHub.restartHelp")}</p>{(["once","several","fresh"] as const).map(reason=><button key={reason} className={buttonClass+" w-full"} type="button" onClick={()=>{if(run(()=>restartHabit(primary.id,reason),t("habitHub.encouragement.restart")))back();}}>{t("habitHub.reasons."+reason)}</button>)}</div>}
-      {page==="nutrition" && <NutritionDashboard records={records} today={today} run={run} onDone={back}/>}
-      {page==="exercise" && <ExerciseDashboard records={records} today={today} run={run} onDone={back}/>}
-      {page==="sleep" && <SleepDashboard records={records} today={today} run={run} onDone={back}/>}
+      {page==="nutrition" && <NutritionDashboard records={records} events={events} today={today} run={run} onDone={back}/>}
+      {page==="exercise" && <ExerciseDashboard records={records} events={events} today={today} run={run} onDone={back}/>}
+      {page==="sleep" && <SleepDashboard records={records} events={events} today={today} run={run} onDone={back}/>}
       {page==="support" && <Support onAddXp={onAddXp}/>}
     </Suspense></Panel>}
   </div>;

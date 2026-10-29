@@ -1,4 +1,3 @@
-import {Apple,Footprints,MoonStar} from "lucide-react";
 const LifestyleReview=lazy(()=>import("./LifestyleReview"));
 const WellbeingPlans=lazy(()=>import("./WellbeingPlans"));
 import { lazy,Suspense,useEffect,useMemo,useState,useSyncExternalStore } from "react";
@@ -45,10 +44,6 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
   const go=(target:string)=>{setImpactDate(today);if(target==="plans"){setPage("home");setExpanded(true);return;}setPage(target);setError("");setMessage("");setLogDate(today);};
   const back=(preserveImpactDate=false)=>{setPage("home");if(!preserveImpactDate)setImpactDate(today);};
   useEffect(()=>{if(page==="home"&&!embedded)document.getElementById("habits-title")?.focus();},[page,embedded]);
-  const food=records.find(r=>r.kind==="nutrition" && r.date===today);
-  const sleep=records.find(r=>r.kind==="sleep" && r.date===today);
-  const movement=records.filter((r):r is Extract<typeof r,{kind:"exercise"}>=>r.kind==="exercise" && r.date===today);
-  const foodSummary=food?.kind==="nutrition"?Object.entries(food.data):[];
   const finishDay=(completed:boolean)=>{
     if(!primary)return;
     const before=habitStats(records,primary.id,today);
@@ -70,20 +65,7 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
       <HabitChallengeCard habit={primary} records={records} today={today} onOpen={go}/>
       <HabitClock records={records} events={events} date={impactDate}/>
       <HabitDailyExperience records={records} events={events} today={today} onOpen={go} onSelectDate={setImpactDate}/>
-      <div className="flex items-center gap-3 pt-1">
-        <span className="h-px flex-1 bg-[#E8DDD7]" />
-        <span className="text-[11px] font-black uppercase tracking-[0.16em] text-[#806F63]">{t("habitHub.today")}</span>
-        <span className="h-px flex-1 bg-[#E8DDD7]" />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <button type="button" onClick={()=>go("nutrition")} className={(embedded?"min-h-28 ":"min-h-48 ")+"rounded-[28px] border border-[#BDCEAF] bg-gradient-to-br from-[#E4EEDB] to-[#F7FBF1] p-4 text-left shadow-sm focus-visible:ring-2 focus-visible:ring-[#587044]"}><Apple aria-hidden="true" size={24}/><h2 className="mt-2 text-base font-black">{t("habitHub.nutrition.title")}</h2><p className="mt-2 text-xs leading-5">{foodSummary.length?t("habitHub.nutrition.summary",{count:foodSummary.length}):t("habitHub.nutrition.empty")}</p><span className="mt-3 block text-sm font-bold">{t("habitHub.register")} →</span></button>
-        <button type="button" onClick={()=>go("exercise")} className={(embedded?"min-h-28 ":"min-h-48 ")+"rounded-[28px] border border-[#CFC5DF] bg-gradient-to-br from-[#E9E1F0] to-[#FAF7FC] p-4 text-left shadow-sm focus-visible:ring-2 focus-visible:ring-[#87739F]"}><Footprints aria-hidden="true" size={24}/><h2 className="mt-2 text-base font-black">{t("habitHub.exercise.title")}</h2><p className="mt-2 text-xs leading-5">{movement.length?t("habitHub.minutes",{count:movement.reduce((n,r)=>n+r.data.minutes,0)}):t("habitHub.exercise.empty")}</p><span className="mt-3 block text-sm font-bold">{t("habitHub.register")} →</span></button>
-      </div>
-      <button type="button" onClick={()=>go("sleep")} aria-label={t("habitHub.sleep.title")} className={(embedded?"min-h-28 ":"min-h-36 ")+" w-full rounded-[28px] border border-[#D7D1E6] bg-gradient-to-br from-[#E9E4F3] via-[#F7F4FA] to-[#FFFDF8] p-5 text-left shadow-sm focus-visible:ring-2 focus-visible:ring-[#87739F]"}>
-        <span className="grid h-11 w-11 place-items-center rounded-full bg-white/80"><MoonStar size={24} aria-hidden="true"/></span>
-        <h2 className="mt-3 text-base font-black">{t("habitHub.sleep.title")}</h2>
-      </button>
-
+      {/* Os registos de sono, movimento e alimentação já estão acessíveis no espelho diário. */}
       {!embedded && <>
         <details open={expanded} onToggle={e=>setExpanded(e.currentTarget.open)} className="rounded-2xl border border-[#E8DDD7] bg-white p-4">
           <summary className="min-h-11 cursor-pointer font-semibold">{t("homeDaily.more")}</summary>

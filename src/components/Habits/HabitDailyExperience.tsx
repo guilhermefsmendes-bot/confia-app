@@ -61,7 +61,7 @@ export default function HabitDailyExperience({ records, events, today, message, 
     { key: "exercise", icon: Footprints, label: t("habitDailyExperience.domains.exercise"), value: stats.exercise ? t("habitDailyExperience.minutesValue", { value: stats.exercise }) : t("habitDailyExperience.notRecorded"), action: "exercise" },
   ];
   const dateLabel = (date: string) => new Intl.DateTimeFormat(i18n.language, { day: "2-digit", month: "short" }).format(new Date(date + "T12:00:00"));
-  const chooseDate = (date: string) => { setSelectedDate(date); setSavedMood(null); setView("mirror"); };
+  const chooseDate = (date: string) => { setSelectedDate(date); setView("mirror"); };
   const report = <div className="habit-report-print space-y-3">
     <div><h3 className="text-lg font-black">{t("habitDailyExperience.reportTitle")}</h3><p className="text-xs text-[#6F5D51]">{t("habitDailyExperience.reportSubtitle", { date: dateLabel(today) })}</p></div>
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">

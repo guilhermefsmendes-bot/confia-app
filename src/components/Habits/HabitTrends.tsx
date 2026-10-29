@@ -7,7 +7,8 @@ import { shiftDay } from "../../data/habits/calendar";
 function summarize(records: HabitRecord[], events: PersonalEvent[], today: string, days: number) {
   const start = shiftDay(today, -(days - 1));
   const inWindow = (date: string) => date >= start && date <= today;
-  const measured = records.filter(record => inWindow(record.date) && ["sleep", "exercise", "nutrition", "foodItem", "habitLog"].includes(record.kind));
+  const measured = records.filter(record => inWindow(record.date) && ["sleep", "exercise", "nutrition", "foodItem", "habitLog"].includes(record.kind) &&
+    !(record.kind === "foodItem" && record.data.deleted));
   const sleep = measured.filter((record): record is Extract<HabitRecord, { kind: "sleep" }> => record.kind === "sleep");
   const exercise = measured.filter((record): record is Extract<HabitRecord, { kind: "exercise" }> => record.kind === "exercise");
   const moodByDay = new Map<string, number[]>();

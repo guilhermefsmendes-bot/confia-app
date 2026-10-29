@@ -11,13 +11,17 @@ export default function HabitImpactReaction({ records, events, date }: { records
   const report = useMemo(() => buildHabitImpact(records, events, date), [records, events, date]);
   if (!report.hasData) return null;
   const associations = report.personalAssociations;
+  const orderedCards = [...report.cards].sort((a, b) => {
+    const priority = { attention: 0, information: 1, neutral: 2 } as const;
+    return priority[a.severity] - priority[b.severity];
+  });
   return <section className="space-y-4 rounded-[28px] border border-[#D8CDBB] bg-[#FFFDF7] p-5" aria-labelledby="habit-impact-title">
     <header>
       <h3 id="habit-impact-title" className="text-xl font-black">{t("habitImpact.title")}</h3>
       <p className="mt-1 text-sm leading-6 text-[#6F5D51]">{t("habitImpact.subtitle")}</p>
     </header>
     <div className="space-y-3">
-      {(showAll ? report.cards : report.cards.slice(0, 3)).map(card => {
+      {(showAll ? orderedCards : orderedCards.slice(0, 3)).map(card => {
         const severity = card.severity === "attention" ? "border-[#E8C4A8] bg-[#FFF6EB]" : card.severity === "information" ? "border-[#D9E2CF] bg-white" : "border-[#E8DDD7] bg-white";
         const source = card.sourceId ? getHabitImpactSource(card.sourceId) : undefined;
         const detail = card.detailKey ? getHabitImpactSource(card.detailKey) : undefined;
@@ -40,7 +44,7 @@ export default function HabitImpactReaction({ records, events, date }: { records
         </article>;
       })}
     </div>
-    {report.cards.length > 3 && <button type="button" onClick={() => setShowAll(value => !value)} aria-expanded={showAll} className="min-h-11 rounded-xl border border-[#D9C6B8] bg-white px-4 py-2 text-sm font-bold underline">{showAll ? t("habitImpact.showLess") : t("habitImpact.showMore", { count: report.cards.length - 3 })}</button>}
+    {orderedCards.length > 3 && <button type="button" onClick={() => setShowAll(value => !value)} aria-expanded={showAll} className="min-h-11 rounded-xl border border-[#D9C6B8] bg-white px-4 py-2 text-sm font-bold underline">{showAll ? t("habitImpact.showLess") : t("habitImpact.showMore", { count: orderedCards.length - 3 })}</button>}
     {associations.length > 0 ? <section className="rounded-2xl border border-[#D8D2E5] bg-[#F8F5FC] p-4">
       <h4 className="font-black">{t("habitImpact.personal.title")}</h4>
       <p className="mt-1 text-xs leading-5 text-[#6F5D51]">{t("habitImpact.personal.intro")}</p>

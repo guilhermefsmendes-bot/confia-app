@@ -1,8 +1,7 @@
-const LifestyleReview=lazy(()=>import("./LifestyleReview"));
 const WellbeingPlans=lazy(()=>import("./WellbeingPlans"));
 import { lazy,Suspense,useEffect,useMemo,useState,useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
-import { getHabitSnapshot,getHabitStatus,getHabitRevision,subscribeHabits } from "../../data/habits/store";
+import { getHabitSnapshot,getHabitRevision,subscribeHabits } from "../../data/habits/store";
 import { startHabitSync,syncHabits } from "../../data/habits/sync";
 import { recordHabitDay,restartHabit } from "../../data/habits/actions";
 import { habitStats } from "../../data/habits/statistics";
@@ -10,10 +9,7 @@ import { readPersonalEvents,PERSONAL_EVENTS_UPDATED_EVENT } from "../../data/per
 import { type HabitDefinition,type HabitRecord } from "../../data/habits/types";
 import { recordPersonalAnalytics,recordPersonalScreenView } from "../../data/personal/personalAnalytics";
 import { buttonClass,primaryClass,DayPicker,Panel,useLocalDay,type RunAction } from "./shared";
-import HabitChallengeCard from "./HabitChallengeCard";
-import HabitClock from "./HabitClock";
 import HabitDailyExperience from "./HabitDailyExperience";
-const HabitInsights=lazy(()=>import("./HabitInsights"));
 const HabitSetup=lazy(()=>import("./HabitSetup"));
 const HabitHistory=lazy(()=>import("./HabitHistory"));
 const NutritionDashboard=lazy(()=>import("./NutritionDashboard"));
@@ -29,7 +25,6 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
   useEffect(()=>{if(embedded)recordPersonalScreenView(page==="home"?"home":"home_habits_"+page);},[embedded,page]);
   const [message,setMessage]=useState("");const [error,setError]=useState("");
   const [logDate,setLogDate]=useState(today);
-  const [impactDate,setImpactDate]=useState(today);
   useEffect(()=>{startHabitSync();},[]);
   useEffect(()=>{setPage(openSupport?"support":"home");},[openSupport]);
   useEffect(()=>{const update=()=>setEventRevision(n=>n+1);window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT,update);return()=>window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT,update);},[]);
@@ -39,10 +34,9 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
   const primary=habits.find(r=>settings?.kind==="settings" && r.id===settings.data.primaryId)??habits[0];
   useEffect(()=>{if(navigationKey>0&&!openSupport){setPage(initialPage==="plans"?"home":initialPage==="log"&&!primary?"setup":initialPage);if(initialPage==="plans")setExpanded(true);}},[initialPage,navigationKey]);
   const events=useMemo(()=>readPersonalEvents(),[revision,eventRevision]);
-  const status=getHabitStatus();
   const run:RunAction=(action,success)=>{try{action();setError("");setMessage(success);return true;}catch{setMessage("");setError(t("habitHub.error"));return false;}};
-  const go=(target:string)=>{setImpactDate(today);if(target==="plans"){setPage("home");setExpanded(true);return;}setPage(target);setError("");setMessage("");setLogDate(today);};
-  const back=(preserveImpactDate=false)=>{setPage("home");if(!preserveImpactDate)setImpactDate(today);};
+  const go=(target:string)=>{if(target==="plans"){setPage("home");setExpanded(true);return;}setPage(target);setError("");setMessage("");setLogDate(today);};
+  const back=()=>{setPage("home");};
   useEffect(()=>{if(page==="home"&&!embedded)document.getElementById("habits-title")?.focus();},[page,embedded]);
   const finishDay=(completed:boolean)=>{
     if(!primary)return;
@@ -51,27 +45,21 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
       const after=habitStats(getHabitSnapshot().records,primary.id,today);
       const milestone=[3,7,14,30].includes(after.current) && after.current>before.current;
       const key=!completed?"restart":milestone?"day"+after.current:after.best>before.best && before.best>0?"record":("done"+(after.total%3));
-      setMessage(t("habitHub.encouragement."+key));setImpactDate(logDate);if(milestone)recordPersonalAnalytics("habit_milestone_reached");back(true);
+      setMessage(t("habitHub.encouragement."+key));if(milestone)recordPersonalAnalytics("habit_milestone_reached");back();
     }
   };
   return <div className="mx-auto max-w-2xl space-y-5 pb-6 text-[#332824]">
     <header className={page==="home"?"text-center":""}>
       <h1 id="habits-title" tabIndex={-1} className={page==="home"?"sr-only":"font-display text-3xl font-black outline-none"}>{t("habitHub.title")}</h1>
-      {!embedded && <p className="text-sm leading-6 text-[#6F5D51]">{t("habitHub.clock.intro1")}<br/>{t("habitHub.clock.intro2")}</p>}
     </header>
-    {message && <p role="status" className="rounded-2xl border border-[#BFCDAF] bg-[#F1F7E8] p-4 text-sm leading-6">{message}</p>}
-    {error && <p role="alert" className="rounded-2xl border border-[#D9BD97] bg-[#FFF7E9] p-4 text-sm">{error}</p>}
+    {page!=="home" && message && <p role="status" className="rounded-2xl border border-[#BFCDAF] bg-[#F1F7E8] p-4 text-sm leading-6">{message}</p>}
+    {page!=="home" && error && <p role="alert" className="rounded-2xl border border-[#D9BD97] bg-[#FFF7E9] p-4 text-sm">{error}</p>}
     {page==="home" ? <>
-      <HabitChallengeCard habit={primary} records={records} today={today} onOpen={go}/>
-      <HabitClock records={records} events={events} date={impactDate}/>
-      <HabitDailyExperience records={records} events={events} today={today} onOpen={go} onSelectDate={setImpactDate}/>
-      {/* Os registos de sono, movimento e alimentação já estão acessíveis no espelho diário. */}
+      <HabitDailyExperience records={records} events={events} today={today} habit={primary} message={message} error={error} onOpen={go}/>
       {!embedded && <>
         <details open={expanded} onToggle={e=>setExpanded(e.currentTarget.open)} className="rounded-2xl border border-[#E8DDD7] bg-white p-4">
           <summary className="min-h-11 cursor-pointer font-semibold">{t("homeDaily.more")}</summary>
           {expanded && <Suspense fallback={<p>{t("loading")}</p>}><div className="space-y-4 pt-3">
-        <LifestyleReview records={records} date={today} today={today} compact/>
-        <HabitInsights events={events} today={today}/>
         <WellbeingPlans records={records} today={today} run={run} events={events}/>
           </div></Suspense>}
         </details>

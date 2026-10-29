@@ -4014,6 +4014,38 @@
       "g": "g",
       "portions": "portions"
     },
-    "lastReviewed": "Source checked on"
+    "lastReviewed": "Source checked on",
+    "showMore": "Show {{count}} more observations",
+    "showLess": "Show less"
+  },
+  "habitClock": {
+    "title": "Biological Clock",
+    "symbolAlt": "Clock and human figure symbol coloured according to recorded habits",
+    "tones": {
+      "favourable": "Records are mostly favourable",
+      "mixed": "Mixed records or an intermediate balance",
+      "unfavourable": "More potentially unfavourable records",
+      "unknown": "Not enough data yet"
+    },
+    "coverage": "Based on {{count}} of 3 recorded areas",
+    "noData": "Log sleep, movement or food to get started. Missing records are not counted as negative habits.",
+    "disclaimer": "A visual summary of your records, not a medical assessment of your body.",
+    "scaleAlt": "Visual scale gradually changing from orange to green"
+  },
+  "habitTrends": {
+    "title": "Your progress",
+    "subtitle": "Recent record summary. Days without records are not treated as zero.",
+    "period": "Last {{days}} days",
+    "daysWithRecords": "{{count}} days with habit records",
+    "sleep": "Average sleep",
+    "hours": "h/night",
+    "measuredDays": "{{count}} measured days",
+    "exercise": "Recorded movement",
+    "minutes": "min",
+    "activeDays": "{{count}} active days",
+    "mood": "Average mood rating",
+    "disclaimer": "Averages describe available records only; they do not show that a habit caused an emotional change.",
+    "comparison": "Compared with previous period: {{value}}",
+    "noComparison": "Not enough data to compare with the previous period"
   }
 }

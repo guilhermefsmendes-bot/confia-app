@@ -3917,6 +3917,38 @@
       "g": "g",
       "portions": "portions"
     },
-    "lastReviewed": "Source vérifiée le"
+    "lastReviewed": "Source vérifiée le",
+    "showMore": "Afficher {{count}} observations de plus",
+    "showLess": "Afficher moins"
+  },
+  "habitClock": {
+    "title": "Horloge biologique",
+    "symbolAlt": "Symbole d’horloge et de silhouette humaine coloré selon les habitudes enregistrées",
+    "tones": {
+      "favourable": "Les données sont plutôt favorables",
+      "mixed": "Données mixtes ou équilibre intermédiaire",
+      "unfavourable": "Davantage de données potentiellement défavorables",
+      "unknown": "Pas encore assez de données"
+    },
+    "coverage": "Basé sur {{count}} domaines enregistrés sur 3",
+    "noData": "Enregistrez le sommeil, le mouvement ou l’alimentation pour commencer. L’absence de données ne compte pas comme une mauvaise habitude.",
+    "disclaimer": "Résumé visuel des données, pas une évaluation médicale du corps.",
+    "scaleAlt": "Échelle progressive de l’orange au vert"
+  },
+  "habitTrends": {
+    "title": "Votre évolution",
+    "subtitle": "Résumé des données récentes. Les jours sans données ne sont pas considérés comme zéro.",
+    "period": "Les {{days}} derniers jours",
+    "daysWithRecords": "{{count}} jours avec des données d’habitudes",
+    "sleep": "Sommeil moyen",
+    "hours": "h/nuit",
+    "measuredDays": "{{count}} jours mesurés",
+    "exercise": "Mouvement enregistré",
+    "minutes": "min",
+    "activeDays": "{{count}} jours actifs",
+    "mood": "Évaluation émotionnelle moyenne",
+    "disclaimer": "Les moyennes décrivent uniquement les données disponibles et ne prouvent pas qu’une habitude a causé un changement émotionnel.",
+    "comparison": "Comparaison avec la période précédente : {{value}}",
+    "noComparison": "Données insuffisantes pour comparer avec la période précédente"
   }
 }

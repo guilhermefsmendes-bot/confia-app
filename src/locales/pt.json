@@ -4014,6 +4014,38 @@
       "g": "g",
       "portions": "porções"
     },
-    "lastReviewed": "Fonte verificada em"
+    "lastReviewed": "Fonte verificada em",
+    "showMore": "Ver mais {{count}} observações",
+    "showLess": "Mostrar menos"
+  },
+  "habitClock": {
+    "title": "Relógio Biológico",
+    "symbolAlt": "Símbolo de relógio com figura humana, colorido de acordo com os hábitos registados",
+    "tones": {
+      "favourable": "Registos predominantemente favoráveis",
+      "mixed": "Registos mistos ou equilíbrio intermédio",
+      "unfavourable": "Mais registos potencialmente desfavoráveis",
+      "unknown": "Ainda sem dados suficientes"
+    },
+    "coverage": "Com base em {{count}} de 3 áreas registadas",
+    "noData": "Regista sono, movimento ou alimentação para começar. A ausência de registos não conta como hábito negativo.",
+    "disclaimer": "É um resumo visual dos registos, não uma avaliação médica do corpo.",
+    "scaleAlt": "Escala visual gradual de laranja a verde"
+  },
+  "habitTrends": {
+    "title": "A tua evolução",
+    "subtitle": "Resumo dos registos recentes. Os espaços sem registos não são tratados como zero.",
+    "period": "Últimos {{days}} dias",
+    "daysWithRecords": "{{count}} dias com registos de hábitos",
+    "sleep": "Sono médio",
+    "hours": "h/noite",
+    "measuredDays": "{{count}} dias medidos",
+    "exercise": "Movimento registado",
+    "minutes": "min",
+    "activeDays": "{{count}} dias com atividade",
+    "mood": "Avaliação emocional média",
+    "disclaimer": "As médias descrevem apenas os registos disponíveis; não demonstram que um hábito tenha causado uma alteração emocional.",
+    "comparison": "Comparação com o período anterior: {{value}}",
+    "noComparison": "Sem dados suficientes para comparar com o período anterior"
   }
 }

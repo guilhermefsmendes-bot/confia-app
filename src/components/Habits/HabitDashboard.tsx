@@ -13,6 +13,8 @@ import { recordPersonalAnalytics,recordPersonalScreenView } from "../../data/per
 import { buttonClass,primaryClass,DayPicker,Panel,useLocalDay,type RunAction } from "./shared";
 import HabitChallengeCard from "./HabitChallengeCard";
 import HabitImpactReaction from "./HabitImpactReaction";
+import HabitClock from "./HabitClock";
+import HabitTrends from "./HabitTrends";
 const HabitInsights=lazy(()=>import("./HabitInsights"));
 const HabitSetup=lazy(()=>import("./HabitSetup"));
 const HabitHistory=lazy(()=>import("./HabitHistory"));
@@ -67,7 +69,9 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
     {error && <p role="alert" className="rounded-2xl border border-[#D9BD97] bg-[#FFF7E9] p-4 text-sm">{error}</p>}
     {page==="home" ? <>
       <HabitChallengeCard habit={primary} records={records} today={today} onOpen={go}/>
+      <HabitClock records={records} date={impactDate}/>
       <HabitImpactReaction records={records} events={events} date={impactDate}/>
+      <HabitTrends records={records} events={events} today={today}/>
       <div className="flex items-center gap-3 pt-1">
         <span className="h-px flex-1 bg-[#E8DDD7]" />
         <span className="text-[11px] font-black uppercase tracking-[0.16em] text-[#806F63]">{t("habitHub.today")}</span>

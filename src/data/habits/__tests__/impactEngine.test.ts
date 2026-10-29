@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { buildHabitImpact } from "../impactEngine";
+import { getHabitClockState } from "../../../components/Habits/HabitClock";
 import { weeklyExercise } from "../../reactive/scientificGuidance";
 import { shiftDay } from "../calendar";
 import { makePersonalEvent, type PersonalEvent } from "../../personal/personalEvent";
@@ -74,6 +75,23 @@ describe("Habit Impact Engine", () => {
     assert.equal(week.moderateMinutes, 30);
     assert.equal(week.vigorousMinutes, 20);
     assert.equal(week.unclassifiedMinutes, 25);
+  });
+
+  it("keeps the biological clock neutral when no habit records exist", () => {
+    const state = getHabitClockState([], "2026-10-29");
+    assert.equal(state.hasData, false);
+    assert.equal(state.tone, "unknown");
+  });
+
+  it("moves the biological clock toward orange or lettuce green from recorded domains", () => {
+    const shortSleep = getHabitClockState([record("short", "sleep", "2026-10-29", 5)], "2026-10-29");
+    assert.equal(shortSleep.tone, "mixed");
+    const balanced = getHabitClockState([
+      record("sleep", "sleep", "2026-10-29", 8),
+      { id: "walk", kind: "exercise", date: "2026-10-29", updatedAt: "2026-10-29T10:00:00Z", timezone: "UTC", data: { activity: "walk", minutes: 30, intensity: "moderate" } },
+    ], "2026-10-29");
+    assert.equal(balanced.tone, "favourable");
+    assert.equal(balanced.domains, 2);
   });
 
   it("does not treat missing sleep logs as adequate sleep or zero exposure", () => {

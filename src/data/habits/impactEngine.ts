@@ -246,13 +246,9 @@ export function buildHabitImpact(records: HabitRecord[], events: PersonalEvent[]
   }
 
   const personal = buildPersonalAssociations(records, events, date);
-  const relevant = new Set<PersonalHabitAssociation["habit"]>();
-  if (sleep) relevant.add("sleep");
-  if (exercise.length) relevant.add("exercise");
-  if (categoryWasMeasured(records, date, "coffee") || categoryWasMeasured(records, date, "tea") || categoryWasMeasured(records, date, "energy") ||
-      dayFoodItems(records, date).some(item => item.data.category === "soda" && item.data.caffeine === "yes")) relevant.add("caffeine");
-  if (categoryWasMeasured(records, date, "fastFood") && categoryValue(records, date, "fastFood") > 0) relevant.add("fastFood");
-  const personalAssociations = personal.associations.filter(item => relevant.has(item.habit));
+  // Personal patterns are historical insights, so keep them visible when enough
+  // measured days exist even if that habit was not logged on the selected day.
+  const personalAssociations = personal.associations;
   const sourceCount = new Set(cards.map(card => card.sourceId).filter(Boolean)).size;
   return { date, hasData, cards, personalAssociations, moodDaysAvailable: personal.moodDays, sourceCount };
 }

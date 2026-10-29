@@ -66,7 +66,11 @@ As fontes completas, estatísticas, populações e limitações estão em `src/d
 - Criado o motor de cálculo de reações para sono, cafeína estimada, exercício semanal, fruta/vegetais, água e categorias em que os dados atuais não permitem quantificação médica.
 - Criado o componente de reação com evidência expandível e ligações às fontes originais.
 - Integrado o componente na página principal de hábitos e nos painéis de sono, alimentação e exercício.
-- Criados testes unitários para sono, ausência de registos e limiar mínimo para associações pessoais.
+- Adicionado o Relógio Biológico visual, com graduação de laranja a verde, baseado apenas em registos explícitos e com intensidade reduzida quando há poucos domínios observados.
+- Adicionado resumo dos últimos 7 e 30 dias com comparação numérica face aos períodos anteriores, sem classificar automaticamente uma variação como boa ou má.
+- O painel de reações mostra primeiro até três observações e permite expandir o restante; padrões pessoais suficientes ficam acessíveis mesmo quando o hábito não foi registado no dia selecionado.
+- Corrigidas dependências transitivas vulneráveis com overrides restritos para `@grpc/grpc-js` e `re2js`, sem downgrade major do Firebase.
+- Criados testes unitários para sono, ausência de registos, relógio visual e limiar mínimo para associações pessoais.
 
 ## Limitações antes de lançamento
 

@@ -4099,6 +4099,7 @@
     "printReport": "Print / save as PDF",
     "moodCheckinTitle": "Quick mood check-in",
     "moodScaleLabel": "How are you feeling now? 1 = very low · 10 = very good",
-    "moodSaved": "Entry saved: {{value}}/10. Thanks for taking a moment."
+    "moodSaved": "Entry saved: {{value}}/10. Thanks for taking a moment.",
+    "progressMilestone": "Over the last 30 days, you logged entries on at least {{count}} days. That helps build a fuller picture of yourself — breaks along the way are okay."
   }
 }

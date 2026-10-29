@@ -42,6 +42,7 @@ export default function HabitDailyExperience({ records, events, today, onOpen, o
   const moodWeek = average(week.filter(x => x.date !== selectedDate).map(x => x.stats.mood).filter((v): v is number => v !== undefined));
   const observedDays = week.filter(x => x.stats.hasAny).length;
   const activeDates = monthStats.filter(x => x.hasAny).length;
+  const progressMilestone = [30, 14, 7, 3].find(target => activeDates >= target) ?? 0;
   const sleepAverage = average(monthStats.map(x => x.sleep).filter((v): v is number => v !== undefined));
   const previousSleepAverage = average(previousMonthStats.map(x => x.sleep).filter((v): v is number => v !== undefined));
   const moodAverage = average(monthStats.map(x => x.mood).filter((v): v is number => v !== undefined));
@@ -78,6 +79,7 @@ export default function HabitDailyExperience({ records, events, today, onOpen, o
     <header className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white text-[#5B7652]"><Leaf size={22}/></span><div className="flex-1"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#68805B]">{t("habitDailyExperience.eyebrow")}</p><h2 className="text-lg font-black">{t("habitDailyExperience.title")}</h2><p className="mt-1 text-xs leading-5 text-[#6F5D51]">{t("habitDailyExperience.subtitle")}</p></div></header>
     <nav className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-[#EEE9DF] p-1" aria-label={t("habitDailyExperience.views")}>{(["mirror","calendar","report"] as const).map(key=><button key={key} type="button" onClick={()=>setView(key)} aria-pressed={view===key} className={view===key?"min-h-10 rounded-xl bg-white px-2 text-xs font-black shadow-sm":"min-h-10 rounded-xl px-2 text-xs font-bold text-[#6F5D51]"}>{t("habitDailyExperience.tabs."+key)}</button>)}</nav>
     {view === "mirror" && <div className="mt-4 space-y-3">
+      {progressMilestone > 0 && <p className="rounded-2xl border border-[#D7E2CB] bg-[#F0F6E9] p-3 text-xs font-bold leading-5 text-[#3F6240]">{t("habitDailyExperience.progressMilestone", { count: progressMilestone })}</p>}
       <div className="rounded-2xl border border-[#E8DDD7] bg-white p-4"><p className="text-xs font-bold text-[#6F5D51]">{t("habitDailyExperience.selectedDay", { date: dateLabel(selectedDate) })}</p><p className="mt-1 text-sm font-black">{stats.hasAny ? t("habitDailyExperience.mirror.hasRecords", { count: stats.domains.length + (stats.habits ? 1 : 0) }) : t("habitDailyExperience.mirror.empty")}</p>
         <div className="mt-3 grid grid-cols-2 gap-2">{domains.map(item=>{const Icon=item.icon;return <button key={item.key} type="button" onClick={()=>onOpen(item.action)} className="flex min-h-[82px] items-start gap-2 rounded-xl bg-[#F8F6F1] p-3 text-left"><Icon size={17} className="mt-0.5 shrink-0 text-[#68805B]"/><span><span className="block text-xs font-black">{item.label}</span><span className="mt-1 block text-xs text-[#6F5D51]">{item.value}</span></span></button>})}</div>
       </div>

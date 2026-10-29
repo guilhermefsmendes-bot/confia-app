@@ -4209,6 +4209,7 @@
     "printReport": "Imprimer / enregistrer en PDF",
     "moodCheckinTitle": "Évaluation rapide de l’humeur",
     "moodScaleLabel": "Comment te sens-tu maintenant ? 1 = très mal · 10 = très bien",
-    "moodSaved": "Relevé enregistré : {{value}}/10. Merci de prendre un instant pour toi."
+    "moodSaved": "Relevé enregistré : {{value}}/10. Merci de prendre un instant pour toi.",
+    "progressMilestone": "Au cours des 30 derniers jours, tu as enregistré des données pendant au moins {{count}} jours. Cela aide à mieux te connaître ; les pauses font aussi partie du parcours."
   }
 }

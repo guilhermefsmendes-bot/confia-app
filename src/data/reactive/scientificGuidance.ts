@@ -40,11 +40,12 @@ export function estimateDailyCaffeine(records:HabitRecord[],date:string){
 export function weeklyExercise(records:HabitRecord[],now:Date){
  const today=localDay(now),since=shiftDay(today,-6),sessions=records.filter((r):r is Extract<HabitRecord,{kind:"exercise"}> =>r.kind==="exercise"&&r.date>=since&&r.date<=today);
  const activeDays=new Set(sessions.filter(r=>r.data.minutes>0).map(r=>r.date));
- const moderateMinutes=sessions.filter(r=>r.data.minutes>0&&(r.data.intensity==="moderate"||r.data.intensity==="light"||!r.data.intensity)).reduce((n,r)=>n+r.data.minutes,0);
+ const moderateMinutes=sessions.filter(r=>r.data.minutes>0&&r.data.intensity==="moderate").reduce((n,r)=>n+r.data.minutes,0);
  const vigorousMinutes=sessions.filter(r=>r.data.minutes>0&&r.data.intensity==="intense").reduce((n,r)=>n+r.data.minutes,0);
+ const unclassifiedMinutes=sessions.filter(r=>r.data.minutes>0&&(!r.data.intensity||r.data.intensity==="light")).reduce((n,r)=>n+r.data.minutes,0);
  const strengthDays=new Set(sessions.filter(r=>r.data.minutes>0&&r.data.activity==="gym").map(r=>r.date)).size;
  const byType=Object.fromEntries((['walk','run','bike','swim','gym','dance','sport','hiit','stretch','yoga','other'] as ActivityType[]).map(type=>[type,{minutes:sessions.filter(r=>r.data.activity===type).reduce((n,r)=>n+r.data.minutes,0),days:new Set(sessions.filter(r=>r.data.activity===type&&r.data.minutes>0).map(r=>r.date)).size}]));
- return {moderateMinutes,vigorousMinutes,activeDays:activeDays.size,strengthDays,loggedDays:new Set(sessions.map(r=>r.date)).size,byType};
+ return {moderateMinutes,vigorousMinutes,unclassifiedMinutes,activeDays:activeDays.size,strengthDays,loggedDays:new Set(sessions.map(r=>r.date)).size,byType};
 }
 export function fruitVegetableRegistrations(records:HabitRecord[],date:string){const items=dayFoodItems(records,date).filter(r=>r.data.category==="fruit"||r.data.category==="vegetables");const portions=items.reduce((n,r)=>n+(r.data.unit==="portion"?r.data.quantity:0),0);const grams=items.reduce((n,r)=>n+(r.data.unit==="g"?r.data.quantity:0),0);return {explicitPortions:portions,grams,registrations:items.length};}
 

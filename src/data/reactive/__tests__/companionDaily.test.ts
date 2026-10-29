@@ -283,15 +283,16 @@ test("scientific guidance flags a high estimated caffeine intake and keeps it ev
   assert.equal(candidate?.translationValues?.mg, 450);
   assert.equal(candidate?.metadata?.mode, "insight");
 });
-test("scientific guidance uses only explicitly logged exercise days", () => {
+test("scientific guidance does not count exercise without an intensity as moderate activity", () => {
   const records = [
     rec("e1", "exercise", "2026-09-23", { activity: "walk", minutes: 30 }),
     rec("e2", "exercise", "2026-09-25", { activity: "walk", minutes: 30 }),
     rec("e3", "exercise", "2026-09-28", { activity: "walk", minutes: 30 }),
   ];
   const candidate = dailyCandidates(records, [], now).find(
-    (c) => c.metadata?.family === "activityGuidance",
+    (c) => c.metadata?.family === "activityIntensityGuidance",
   );
   assert.ok(candidate);
   assert.equal(candidate?.translationValues?.minutes, 90);
+  assert.equal(candidate?.translationValues?.moderateMinutes, 0);
 });

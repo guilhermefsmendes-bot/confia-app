@@ -9,11 +9,11 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "node --import tsx --test src/data/personal/__tests__/*.test.ts src/data/reactive/__tests__/*.test.ts src/utils/__tests__/*.test.ts",
+    "test": "node --import tsx --test src/data/personal/__tests__/*.test.ts src/data/reactive/__tests__/*.test.ts src/utils/__tests__/*.test.ts src/data/habits/__tests__/impactEngine.test.ts",
     "security:audit": "npm audit --omit=dev --audit-level=high",
     "test:rules": "firebase emulators:exec --only firestore 'node --import tsx --test src/data/community/__tests__/firestore.rules.test.ts'",
     "test:e2e": "playwright test",
-    "test:habits": "node --import tsx --test src/data/habits/__tests__/habits.test.ts src/data/habits/__tests__/storage.test.ts src/data/habits/__tests__/wellbeing.test.ts",
+    "test:habits": "node --import tsx --test src/data/habits/__tests__/habits.test.ts src/data/habits/__tests__/storage.test.ts src/data/habits/__tests__/wellbeing.test.ts src/data/habits/__tests__/impactEngine.test.ts",
     "test:habits:rules": "firebase emulators:exec --only firestore --project demo-confia-habits 'node --import tsx --test src/data/habits/__tests__/habits.rules.test.ts'",
     "test:habits:e2e": "playwright test tests/e2e/habits.spec.ts --workers=1",
     "test:zen": "node --import tsx --test src/data/zen/zen.test.ts src/notifications/permission.test.ts",
@@ -49,5 +49,9 @@
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^8.3.0"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.13.6",
+    "re2js": "^2.8.7"
   }
 }

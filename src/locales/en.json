@@ -2872,7 +2872,7 @@
   "habitHub": {
     "title": "Habits",
     "subtitle": "Small choices, at your pace. Getting to know yourself, day by day.",
-    "challenge": "My challenge",
+    "challenge": "I have avoided this habit for",
     "day": "DAY {{count}}",
     "countdown": "until the end of today",
     "streak": "{{count}} consecutive days",
@@ -2977,7 +2977,8 @@
         "protein": "Varied diet with protein sources; no universal number of portions",
         "fat": "total fat <30% of energy; saturated fat <10%",
         "salt": "less than 5 g salt/day",
-        "notComparable": "General reference, but this record does not allow a direct numerical comparison"
+        "notComparable": "General reference, but this record does not allow a direct numerical comparison",
+        "exerciseUnclassified": "{{value}} min of light or unspecified intensity are not counted in this comparison."
       },
       "status": {
         "ok": "Within the general reference",
@@ -3836,7 +3837,10 @@
       "withWindow": "I am comparing your available records from the last {{days}} days.",
       "insufficient": "I do not have enough information to draw a conclusion yet. I am observing, not guessing."
     },
-    "nextStep": "What you can do now"
+    "nextStep": "What you can do now",
+    "activityIntensityGuidance": {
+      "0": "You logged {{minutes}} minutes of activity this week without specifying intensity. You also logged {{moderateMinutes}} moderate and {{vigorousMinutes}} vigorous minutes explicitly. Minutes without intensity cannot be compared directly with the recommendation of 150 moderate or 75 vigorous minutes per week. Adding intensity to future entries will make the comparison more accurate."
+    }
   },
   "companionBrain.actionRegisterMorning": "Log the morning",
   "companionBrain.actionRegisterAfternoon": "Log the afternoon",
@@ -3898,5 +3902,208 @@
     "evidence": "evidence",
     "insufficient": "insufficient data",
     "guardrail": "CONFIA uses your own history, keeps contradictions and does not turn associations into causality. This is not a clinical diagnosis."
+  },
+  "habitImpact": {
+    "title": "Habit Impact Engine",
+    "subtitle": "What your logs support, what research measured, and what is still unknown about your individual case.",
+    "evidence": "View scientific evidence and limitations",
+    "evidenceType": "Evidence type",
+    "population": "Study population",
+    "statistic": "Measured result",
+    "certainty": "Certainty",
+    "limitations": "Limitations",
+    "openSource": "Open original source",
+    "cards": {
+      "sleepShort": {
+        "title": "Sleep below 7 hours",
+        "message": "You logged {{hours}} hours: {{deficit}} hours below the usual 7-hour minimum for adults and {{differenceFromReference}} hours below an 8-hour reference. A meta-analysis of 44 studies quantified effects after one night with a 2–6 hour sleep opportunity: sleepiness (SMD 0.986), reaction time (SMD 0.512), and attentional lapses (SMD 0.489). These are standardised group effects, not percentages or an individual prediction."
+      },
+      "sleepRange": {
+        "title": "Recorded sleep duration",
+        "message": "You logged {{hours}} hours, within the usual 7–9 hour reference for adults. Individual needs vary; this entry alone does not measure sleep quality or nervous-system function."
+      },
+      "sleepLong": {
+        "title": "Sleep above 9 hours",
+        "message": "You logged {{hours}} hours. Sleeping more than 9 hours is not automatically a problem; it can be appropriate during recovery from sleep loss or in other circumstances. Duration alone cannot establish the cause."
+      },
+      "exercise": {
+        "title": "Physical activity — last 7 days",
+        "message": "Logged moderate-intensity activity: {{moderate}} min (minimum reference: {{moderateTarget}} min/week). Vigorous intensity: {{vigorous}} min (minimum reference: {{vigorousTarget}} min/week). Other minutes, light or with intensity unspecified: {{unclassified}} min; these are not added to the moderate/vigorous targets because intensity is unconfirmed."
+      },
+      "caffeine": {
+        "title": "Estimated caffeine",
+        "message": "Based on the types and quantities logged, the estimate is {{mg}} mg of caffeine, about {{percentage}}% of EFSA’s 400 mg/day reference for most healthy adults. This uses typical serving estimates, not a measurement of the product consumed."
+      },
+      "caffeineLate": {
+        "title": "Caffeine logged late in the day",
+        "message": "Caffeine was logged at a late time. EFSA notes that a single 100 mg dose may affect sleep in some people, especially close to bedtime. Confia may not know your bedtime or exact dose, so the effect cannot be calculated for this entry."
+      },
+      "produce": {
+        "title": "Fruit and vegetables — recommendation comparison",
+        "message": "You logged {{value}} {{unit}}. WHO’s reference is at least {{reference}} {{unit}} per day for people older than 10. This comparison uses only quantities explicitly recorded in grams or portions; individual items are not converted into assumed weights."
+      },
+      "produceUnquantified": {
+        "title": "Fruit and vegetables without a comparable quantity",
+        "message": "You logged fruit or vegetables, but the amount is recorded as items rather than grams or portions. I will not estimate the weight or claim you met or missed WHO’s recommendation."
+      },
+      "water": {
+        "title": "Water logged",
+        "message": "You logged approximately {{ml}} ml of water. Portugal’s DGS gives 1,500 ml/day as general practical guidance, but needs vary and this log may not include all fluids. This value does not diagnose dehydration."
+      },
+      "limits": {
+        "fastFood": {
+          "title": "Fast-food meal logged",
+          "message": "You logged {{count}} entry/entries in this category. The log does not identify processing level or grams of salt, sugar, fat, or energy. It is not scientifically valid to apply risks from studies of habitual ultra-processed-food intake directly to this meal."
+        },
+        "sweets": {
+          "title": "Sweets logged — dose not quantified",
+          "message": "You logged {{count}} sweets entry/entries, but Confia does not have grams of free sugar. WHO’s recommendation is expressed as a percentage of daily energy; your percentage cannot be calculated from these data."
+        },
+        "salt": {
+          "title": "Salty foods logged — salt not quantified",
+          "message": "You logged {{count}} entry/entries of salty foods, but this category does not measure grams of salt consumed. WHO’s population recommendation is below 5 g salt/day; this entry cannot calculate your intake."
+        },
+        "alcohol": {
+          "title": "Alcohol logged — dose not quantified",
+          "message": "You logged {{count}} alcohol entry/entries. Without drink volume and alcohol concentration, grams of ethanol or exposure cannot be calculated. WHO states that no alcohol consumption is risk-free; risk depends on amount, frequency, and context."
+        },
+        "tobacco": {
+          "title": "Tobacco logged — exposure not quantified",
+          "message": "You logged {{count}} tobacco entry/entries, but the current model does not precisely identify the product or dose. The entry can be noted, but individual exposure or risk cannot be calculated from this category."
+        }
+      },
+      "habitLog": {
+        "title": "Your habit entry",
+        "message": "Habit: “{{habitName}}”. Your stated goal: “{{goal}}”. This entry records whether you marked the goal as met, but does not automatically measure dose, duration, or physiological effect. Quantified analysis requires an observable measure."
+      },
+      "caffeineUnknown": {
+        "title": "Caffeine cannot be quantified from this entry",
+        "message": "The recorded type or serving does not support a reliable caffeine estimate. Amounts vary substantially across products and sizes, so I will not present a typical dose as if it were exact."
+      },
+      "nutrientDetailLimit": {
+        "title": "Nutritional composition not recorded",
+        "message": "The entry stores a category and quantity, but not the nutrition-label values. Exact calories or grams of sugar, salt, or saturated fat therefore cannot be calculated from this entry."
+      },
+      "waterUnknown": {
+        "title": "Water logged without a comparable volume",
+        "message": "This older entry contains a water count but no volume in ml or serving size. I will not convert the count into litres without knowing the cup or bottle size."
+      },
+      "sleepDetails": {
+        "title": "Recorded sleep quality and awakenings",
+        "message": "Along with duration, you rated sleep quality {{quality}}/5 and recorded {{awakenings}} awakenings. These self-reports help compare patterns, but do not measure sleep stages or diagnose a disorder.",
+        "qualityOnly": "You rated sleep quality {{quality}}/5. This is a subjective rating; it does not measure sleep stages or diagnose a disorder."
+      }
+    },
+    "personal": {
+      "title": "What appears in your history",
+      "intro": "Comparison of your own emotional-state ratings on days with and without the indicated condition.",
+      "sleep": "Less than 7 hours of sleep",
+      "exercise": "Physical activity logged",
+      "caffeine": "At least 2 coffee units logged",
+      "fastFood": "Fast food logged",
+      "pattern": "In your logs, average emotional-state rating was {{direction}} on days with the first condition ({{exposedMean}}/10; {{exposedDays}} days) than on comparison days ({{comparisonMean}}/10; {{comparisonDays}} days). Observed difference: {{difference}} points.",
+      "direction": {
+        "lower": "lower",
+        "higher": "higher",
+        "similar": "not meaningfully different"
+      },
+      "caution": "This is an association in your history, not proof that the habit caused the change. Other factors may be involved, and incomplete logs can bias the comparison.",
+      "insufficient": "There is not enough data for a reliable personal comparison yet. The engine requires at least 5 measured days in each group and an emotional rating on those same days. Missing logs are not treated as zero. Emotional-rating days available in the last 30 days: {{count}}."
+    },
+    "units": {
+      "g": "g",
+      "portions": "portions"
+    },
+    "lastReviewed": "Source checked on",
+    "showMore": "Show {{count}} more observations",
+    "showLess": "Show less",
+    "submenuHint": "Open to explore signals, evidence and your personal patterns.",
+    "minimize": "Minimize",
+    "maximize": "Maximize"
+  },
+  "habitClock": {
+    "title": "Biological Clock",
+    "symbolAlt": "Clock and human figure symbol coloured according to recorded habits",
+    "tones": {
+      "favourable": "Records are mostly favourable",
+      "mixed": "Mixed records or an intermediate balance",
+      "unfavourable": "More potentially unfavourable records",
+      "unknown": "Not enough data yet"
+    },
+    "coverage": "Based on {{count}} of 3 recorded areas",
+    "noData": "Log sleep, movement or food to get started. Missing records are not counted as negative habits.",
+    "disclaimer": "A visual summary of your records, not a medical assessment of your body.",
+    "scaleAlt": "Visual scale gradually changing from orange to green"
+  },
+  "habitTrends": {
+    "title": "Your progress",
+    "subtitle": "Recent record summary. Days without records are not treated as zero.",
+    "period": "Last {{days}} days",
+    "daysWithRecords": "{{count}} days with habit records",
+    "sleep": "Average sleep",
+    "hours": "h/night",
+    "measuredDays": "{{count}} measured days",
+    "exercise": "Recorded movement",
+    "minutes": "min",
+    "activeDays": "{{count}} active days",
+    "mood": "Average mood rating",
+    "disclaimer": "Averages describe available records only; they do not show that a habit caused an emotional change.",
+    "comparison": "Compared with previous period: {{value}}",
+    "noComparison": "Not enough data to compare with the previous period"
+  },
+  "habitDailyExperience": {
+    "title": "Reflected in the lake",
+    "subtitle": "Small entries, a clearer picture over time. No guilt on days off.",
+    "views": "Progress views",
+    "tabs": {
+      "mirror": "Mirror",
+      "calendar": "Calendar",
+      "report": "Report"
+    },
+    "selectedDay": "Entries for {{date}}",
+    "domains": {
+      "sleep": "Sleep",
+      "exercise": "Movement",
+      "nutrition": "Nutrition",
+      "mood": "Mood"
+    },
+    "notRecorded": "Not recorded yet",
+    "sleepValue": "{{value}} h",
+    "minutesValue": "{{value}} min",
+    "entriesValue": "{{value}} entr(y/ies)",
+    "moodValue": "{{value}}/10",
+    "mirror": {
+      "hasRecords": "You have observed {{count}} area(s) of wellbeing today.",
+      "empty": "There are no entries for this day yet. Start with one small observation."
+    },
+    "learningTitle": "A note for you",
+    "learningEmpty": "As you record more days, you can compare sleep and mood with your own usual values.",
+    "sleepCompare": "You recorded {{current}} h of sleep today. The average for other observed days this week is {{average}} h. This is descriptive, not a causal explanation.",
+    "moodCompare": "Your mood rating was {{current}}/10; the average for other rated days this week was {{average}}/10.",
+    "quickCheckin": "Would you like to log {{domain}} now?",
+    "calendarIntro": "Choose a day to review your entries. Dots show observed areas; empty days remain neutral.",
+    "observedDomains": "{{count}} areas observed",
+    "recorded": "Entries",
+    "rest": "No entries",
+    "gardenTitle": "Your presence garden",
+    "gardenText": "You observed your wellbeing on {{count}} of the last 7 days. Each entry builds a fuller picture — no perfect streak required.",
+    "reportTitle": "30-day personal summary",
+    "reportSubtitle": "Summary through {{date}}",
+    "report": {
+      "activeDays": "Days with entries",
+      "sleep": "Average sleep",
+      "exercise": "Movement logged",
+      "mood": "Average mood",
+      "comparison": "Change versus the previous 30 days — sleep: {{sleep}}; movement: {{exercise}}; mood: {{mood}}.",
+      "caution": "This report summarizes recorded data only. Missing days are not treated as zero, and differences do not establish causality."
+    },
+    "daysValue": "{{value}} days",
+    "printReport": "Print / save as PDF",
+    "moodCheckinTitle": "Quick mood check-in",
+    "moodScaleLabel": "How are you feeling now? 1 = very low · 10 = very good",
+    "moodSaved": "Entry saved: {{value}}/10. Thanks for taking a moment.",
+    "progressMilestone": "Over the last 30 days, you logged entries on at least {{count}} days. That helps build a fuller picture of yourself — breaks along the way are okay.",
+    "minimize": "Minimize progress",
+    "maximize": "Maximize progress"
   }
 }

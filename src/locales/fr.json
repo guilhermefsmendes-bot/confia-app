@@ -2872,7 +2872,7 @@
   "habitHub": {
     "title": "Habitudes",
     "subtitle": "De petits choix, à ton rythme. Mieux te connaître, jour après jour.",
-    "challenge": "Mon défi",
+    "challenge": "J’évite cette habitude depuis",
     "day": "JOUR {{count}}",
     "countdown": "avant la fin de la journée",
     "streak": "{{count}} jours consécutifs",
@@ -2977,7 +2977,8 @@
         "protein": "Alimentation variée avec des sources de protéines ; pas de nombre universel de portions",
         "fat": "matières grasses <30 % de l’énergie ; saturées <10 %",
         "salt": "moins de 5 g de sel/jour",
-        "notComparable": "Référence générale, mais ce relevé ne permet pas une comparaison numérique directe"
+        "notComparable": "Référence générale, mais ce relevé ne permet pas une comparaison numérique directe",
+        "exerciseUnclassified": "{{value}} min d’intensité légère ou non précisée ne sont pas comptées dans cette comparaison."
       },
       "status": {
         "ok": "Dans la référence générale",
@@ -3836,7 +3837,10 @@
       "withWindow": "Je compare tes enregistrements disponibles sur les {{days}} derniers jours.",
       "insufficient": "Je n’ai pas encore assez d’informations pour tirer une conclusion. J’observe, je ne devine pas."
     },
-    "nextStep": "Ce que tu peux faire maintenant"
+    "nextStep": "Ce que tu peux faire maintenant",
+    "activityIntensityGuidance": {
+      "0": "Tu as enregistré {{minutes}} minutes d’activité cette semaine sans préciser l’intensité. Tu as également enregistré explicitement {{moderateMinutes}} minutes modérées et {{vigorousMinutes}} minutes soutenues. Les minutes sans intensité ne peuvent pas être comparées directement à la recommandation de 150 minutes modérées ou 75 minutes soutenues par semaine. Préciser l’intensité dans les prochains relevés permettra une comparaison plus exacte."
+    }
   },
   "companionBrain.actionRegisterMorning": "Noter la matinée",
   "companionBrain.actionRegisterAfternoon": "Noter l’après-midi",
@@ -3898,5 +3902,318 @@
     "evidence": "éléments",
     "insufficient": "données insuffisantes",
     "guardrail": "CONFIA utilise ta propre histoire, conserve les contradictions et ne transforme pas les associations en causalité. Ceci n’est pas un diagnostic clinique."
+  },
+  "habitImpact": {
+    "title": "Impact des habitudes",
+    "subtitle": "Ce que tes relevés permettent de conclure, ce que les recherches ont mesuré et ce qui reste inconnu dans ton cas.",
+    "evidence": "Voir les données scientifiques et leurs limites",
+    "evidenceType": "Type de preuve",
+    "population": "Population étudiée",
+    "statistic": "Résultat mesuré",
+    "certainty": "Niveau de certitude",
+    "limitations": "Limites",
+    "openSource": "Consulter la source originale",
+    "lastReviewed": "Source vérifiée le",
+    "showMore": "Afficher {{count}} observations supplémentaires",
+    "showLess": "Afficher moins",
+    "cards": {
+      "sleepShort": {
+        "title": "Sommeil inférieur à 7 heures",
+        "message": "Tu as enregistré {{hours}} heures : {{deficit}} heures de moins que le minimum habituel de 7 heures pour les adultes et {{differenceFromReference}} heures de moins qu’une référence de 8 heures. Une méta-analyse de 44 études a quantifié les effets d’une nuit avec une possibilité de sommeil de 2 à 6 heures : somnolence (SMD 0,986), temps de réaction (SMD 0,512) et lapsus attentionnels (SMD 0,489). Il s’agit de différences standardisées entre groupes, pas de pourcentages ni de prédictions individuelles."
+      },
+      "sleepRange": {
+        "title": "Durée de sommeil enregistrée",
+        "message": "Tu as enregistré {{hours}} heures, dans la référence habituelle de 7 à 9 heures pour les adultes. Les besoins individuels varient ; cette entrée ne mesure à elle seule ni la qualité du sommeil ni le fonctionnement du système nerveux."
+      },
+      "sleepLong": {
+        "title": "Sommeil supérieur à 9 heures",
+        "message": "Tu as enregistré {{hours}} heures. Dormir plus de 9 heures ne signifie pas automatiquement qu’il y a un problème : cela peut être adapté pendant la récupération d’un manque de sommeil ou dans d’autres circonstances. La durée seule ne permet pas d’en déterminer la cause."
+      },
+      "exercise": {
+        "title": "Activité physique — 7 derniers jours",
+        "message": "Activité enregistrée à intensité modérée : {{moderate}} min (référence minimale : {{moderateTarget}} min/semaine). Intensité soutenue : {{vigorous}} min (référence minimale : {{vigorousTarget}} min/semaine). Autres minutes, d’intensité légère ou non précisée : {{unclassified}} min ; elles ne sont pas ajoutées aux objectifs modérés/soutenus car l’intensité n’est pas confirmée."
+      },
+      "caffeine": {
+        "title": "Caféine estimée",
+        "message": "D’après les types et quantités enregistrés, l’estimation est de {{mg}} mg de caféine, soit environ {{percentage}} % de la référence de 400 mg/jour de l’EFSA pour la plupart des adultes en bonne santé. Il s’agit d’une estimation fondée sur des portions typiques, pas d’une mesure du produit consommé."
+      },
+      "caffeineLate": {
+        "title": "Caféine enregistrée en fin de journée",
+        "message": "De la caféine a été enregistrée à une heure tardive. L’EFSA indique qu’une dose unique de 100 mg peut affecter le sommeil chez certaines personnes, surtout près de l’heure du coucher. Confia ne connaît pas forcément ton heure de coucher ni la dose exacte ; l’effet de cette entrée ne peut donc pas être calculé."
+      },
+      "produce": {
+        "title": "Fruits et légumes — comparaison avec la recommandation",
+        "message": "Tu as enregistré {{value}} {{unit}}. La référence de l’OMS est d’au moins {{reference}} {{unit}} par jour pour les personnes de plus de 10 ans. Cette comparaison utilise uniquement les quantités explicitement enregistrées en grammes ou en portions ; les pièces individuelles ne sont pas converties en poids supposés."
+      },
+      "produceUnquantified": {
+        "title": "Fruits et légumes sans quantité comparable",
+        "message": "Tu as enregistré des fruits ou des légumes, mais la quantité est indiquée en unités et non en grammes ou en portions. Je ne vais pas estimer le poids ni affirmer que tu as atteint ou non la recommandation de l’OMS."
+      },
+      "water": {
+        "title": "Eau enregistrée",
+        "message": "Tu as enregistré environ {{ml}} ml d’eau. La DGS portugaise donne 1 500 ml/jour comme repère pratique général, mais les besoins varient et ce relevé peut ne pas inclure tous les liquides. Cette valeur ne permet pas de diagnostiquer une déshydratation."
+      },
+      "limits": {
+        "fastFood": {
+          "title": "Repas de restauration rapide enregistré",
+          "message": "Tu as enregistré {{count}} entrée(s) dans cette catégorie. Le relevé ne précise ni le degré de transformation ni les grammes de sel, de sucre, de matières grasses ou d’énergie. Il n’est pas scientifiquement valide d’appliquer directement à ce repas les risques observés dans les études sur la consommation habituelle d’aliments ultratransformés."
+        },
+        "sweets": {
+          "title": "Confiseries enregistrées — quantité non mesurée",
+          "message": "Tu as enregistré {{count}} entrée(s) de sucreries, mais Confia ne connaît pas les grammes de sucres libres. La recommandation de l’OMS est exprimée en pourcentage de l’énergie quotidienne ; ces données ne permettent pas de calculer ton pourcentage."
+        },
+        "salt": {
+          "title": "Aliments salés — quantité de sel inconnue",
+          "message": "Tu as enregistré {{count}} entrée(s) d’aliments salés, mais cette catégorie ne mesure pas les grammes de sel consommés. La recommandation générale de l’OMS est inférieure à 5 g de sel par jour ; ce relevé ne permet pas de calculer ton apport."
+        },
+        "alcohol": {
+          "title": "Alcool enregistré — quantité non mesurée",
+          "message": "Tu as enregistré {{count}} entrée(s) d’alcool. Sans le volume de la boisson et son degré alcoolique, il est impossible de calculer les grammes d’éthanol ou l’exposition. L’OMS indique qu’aucune consommation d’alcool n’est sans risque ; le risque dépend de la quantité, de la fréquence et du contexte."
+        },
+        "tobacco": {
+          "title": "Tabac enregistré — exposition non mesurée",
+          "message": "Tu as enregistré {{count}} entrée(s) de tabac, mais le modèle actuel n’identifie pas précisément le produit ni la dose. Le relevé peut être signalé, mais cette catégorie ne permet pas de calculer l’exposition ou le risque individuel."
+        }
+      },
+      "habitLog": {
+        "title": "Relevé de ton habitude",
+        "message": "Habitude : « {{habitName}} ». Objectif défini : « {{goal}} ». Ce relevé indique si tu as marqué l’objectif comme atteint, mais ne mesure pas automatiquement la dose, la durée ni l’effet physiologique. Une analyse quantifiée nécessite une mesure observable."
+      },
+      "caffeineUnknown": {
+        "title": "Caféine impossible à quantifier pour ce relevé",
+        "message": "Le type ou la quantité enregistrée ne permet pas d’estimer la caféine de façon fiable. Les quantités varient fortement selon les produits et les formats ; je ne présenterai pas une dose habituelle comme si elle était exacte."
+      },
+      "nutrientDetailLimit": {
+        "title": "Composition nutritionnelle non enregistrée",
+        "message": "Le relevé conserve la catégorie et la quantité, mais pas les valeurs de l’étiquette nutritionnelle. Il est donc impossible de calculer précisément les calories ou les grammes de sucre, de sel ou de graisses saturées de cette consommation."
+      },
+      "waterUnknown": {
+        "title": "Eau enregistrée sans volume comparable",
+        "message": "Cette ancienne entrée contient un nombre de consommations d’eau, mais aucun volume en ml ni taille de portion. Je ne convertirai pas ce nombre en litres sans connaître la taille du verre ou de la bouteille."
+      },
+      "sleepDetails": {
+        "title": "Qualité du sommeil et réveils enregistrés",
+        "message": "En plus de la durée, tu as évalué la qualité du sommeil à {{quality}}/5 et enregistré {{awakenings}} réveils. Ces déclarations aident à comparer les tendances, mais ne mesurent pas les phases du sommeil et ne diagnostiquent pas de trouble.",
+        "qualityOnly": "Tu as évalué la qualité du sommeil à {{quality}}/5. Il s’agit d’une appréciation subjective ; elle ne mesure pas les phases du sommeil et ne diagnostique pas de trouble."
+      }
+    },
+    "personal": {
+      "title": "Ce qui ressort de ton historique",
+      "intro": "Comparaison de tes propres évaluations émotionnelles les jours avec et sans la condition indiquée.",
+      "sleep": "Moins de 7 heures de sommeil",
+      "exercise": "Activité physique enregistrée",
+      "caffeine": "Au moins 2 unités de café enregistrées",
+      "fastFood": "Restauration rapide enregistrée",
+      "pattern": "Dans tes relevés, l’évaluation émotionnelle moyenne était {{direction}} les jours où la première condition était présente ({{exposedMean}}/10 ; {{exposedDays}} jours) que les jours de comparaison ({{comparisonMean}}/10 ; {{comparisonDays}} jours). Différence observée : {{difference}} points.",
+      "direction": {
+        "lower": "plus basse",
+        "higher": "plus élevée",
+        "similar": "sans différence notable"
+      },
+      "caution": "Il s’agit d’une association observée dans ton historique, pas d’une preuve que l’habitude a causé le changement. D’autres facteurs peuvent intervenir et des relevés incomplets peuvent fausser la comparaison.",
+      "insufficient": "Les données sont encore insuffisantes pour une comparaison personnelle fiable. Le moteur exige au moins 5 jours mesurés dans chaque groupe et une évaluation émotionnelle pour ces mêmes jours. Les jours sans relevé ne sont pas considérés comme zéro. Jours avec une évaluation émotionnelle disponible au cours des 30 derniers jours : {{count}}."
+    },
+    "units": {
+      "g": "g",
+      "portions": "portions"
+    },
+    "sources": {
+      "sleepRestriction": {
+        "title": "Effets d’une nuit de restriction du sommeil sur la somnolence et les fonctions cognitives : revue systématique et méta-analyse",
+        "organization": "Sleep Medicine Reviews / PubMed",
+        "evidenceType": "Revue systématique et méta-analyse de 44 études",
+        "population": "Adultes ; possibilité de sommeil limitée à 2–6 heures pendant une nuit",
+        "statistic": "Une nuit de sommeil restreint a augmenté la somnolence subjective (différence moyenne standardisée 0,986) et altéré l’attention soutenue : temps de réaction 0,512 et lapsus attentionnels 0,489.",
+        "certainty": "Données montrant des effets à court terme sur la somnolence et l’attention soutenue ; les effets varient selon le résultat cognitif.",
+        "limitations": "Les différences moyennes standardisées ne sont pas des pourcentages et ne prédisent ni le temps de réaction ni l’état émotionnel d’une personne."
+      },
+      "adultSleep": {
+        "title": "Durée de sommeil recommandée chez l’adulte en bonne santé : déclaration de consensus conjoint",
+        "organization": "American Academy of Sleep Medicine / Sleep Research Society",
+        "evidenceType": "Déclaration de consensus d’experts",
+        "population": "Adultes en bonne santé",
+        "statistic": "Les adultes devraient dormir régulièrement au moins 7 heures par nuit pour favoriser une santé optimale.",
+        "certainty": "Recommandation consensuelle étayée par une revue des résultats de santé.",
+        "limitations": "Les besoins individuels et les besoins ponctuels de récupération varient ; une seule nuit courte ne constitue pas un diagnostic."
+      },
+      "caffeine": {
+        "title": "Caféine",
+        "organization": "Autorité européenne de sécurité des aliments (EFSA)",
+        "evidenceType": "Évaluation scientifique des risques et recommandations publiques",
+        "population": "Adultes en bonne santé ; ne s’applique pas à toutes les situations médicales ni à la grossesse",
+        "statistic": "L’EFSA indique que jusqu’à 400 mg par jour ne soulèvent pas de problème de sécurité pour la plupart des adultes en bonne santé ; une dose unique de 100 mg peut affecter le sommeil chez certaines personnes, surtout à proximité du coucher.",
+        "certainty": "Recommandation officielle à l’échelle de la population ; la sensibilité individuelle varie.",
+        "limitations": "Les quantités de caféine de Confia sont estimées à partir de portions types, et non de mesures en laboratoire ou de l’étiquette du produit."
+      },
+      "physicalActivity": {
+        "title": "Directives de l’OMS sur l’activité physique et la sédentarité : aperçu",
+        "organization": "Organisation mondiale de la Santé (OMS)",
+        "evidenceType": "Recommandation de santé publique fondée sur une revue des données",
+        "population": "Adultes",
+        "statistic": "L’OMS recommande 150 à 300 minutes d’activité aérobie modérée par semaine, ou 75 à 150 minutes d’activité soutenue, ainsi que des exercices de renforcement musculaire au moins 2 jours par semaine.",
+        "certainty": "Recommandation de santé publique ; toute activité vaut mieux que l’absence d’activité.",
+        "limitations": "Les minutes sans intensité précisée ne peuvent pas être comptées de manière fiable comme activité modérée ou soutenue. Les capacités individuelles et le contexte médical comptent."
+      },
+      "fruitVegetables": {
+        "title": "Alimentation saine",
+        "organization": "Organisation mondiale de la Santé (OMS)",
+        "evidenceType": "Recommandation de santé publique",
+        "population": "Personnes de plus de 10 ans",
+        "statistic": "L’OMS recommande au moins 400 g de fruits et légumes par jour aux personnes de plus de 10 ans.",
+        "certainty": "Recommandation nutritionnelle officielle à l’échelle de la population.",
+        "limitations": "Le nombre de pièces ne peut pas être converti précisément en grammes sans connaître le poids ou la taille des portions."
+      },
+      "hydrationPortugal": {
+        "title": "Connaître les aliments — alimentation complète, équilibrée et variée",
+        "organization": "Programme national pour la promotion d’une alimentation saine (DGS), Portugal",
+        "evidenceType": "Recommandations de santé publique",
+        "population": "Population générale ; les besoins varient selon les circonstances",
+        "statistic": "Les recommandations publiques de la DGS suggèrent de boire au moins 1,5 litre d’eau par jour et d’augmenter l’apport en cas de chaleur ou d’exercice.",
+        "certainty": "Conseil pratique général, et non mesure individuelle de l’hydratation.",
+        "limitations": "L’eau enregistrée ne représente pas tous les liquides ; les besoins varient selon la corpulence, l’alimentation, la température, l’activité et l’état de santé."
+      },
+      "ultraProcessedFood": {
+        "title": "Exposition aux aliments ultratransformés et effets indésirables sur la santé : revue générale de méta-analyses épidémiologiques",
+        "organization": "The BMJ / PubMed",
+        "evidenceType": "Revue générale de 45 analyses regroupées, comprenant 9 888 373 participants",
+        "population": "Études de population ; exposition aux aliments ultratransformés",
+        "statistic": "Une exposition plus élevée aux aliments ultratransformés était associée à des symptômes anxieux prévalents (rapport de cotes 1,48 ; IC à 95 % : 1,37–1,59) ; la qualité des données pour ce résultat a été jugée faible.",
+        "certainty": "Association ; la qualité des données est faible pour le résultat lié à l’anxiété.",
+        "limitations": "Un rapport de cotes n’est pas une augmentation en pourcentage du risque d’anxiété individuel. Un relevé générique de restauration rapide ne détermine pas la classification NOVA ni ne quantifie l’exposition."
+      },
+      "freeSugar": {
+        "title": "Alimentation saine",
+        "organization": "Organisation mondiale de la Santé (OMS)",
+        "evidenceType": "Recommandation de santé publique en matière d’alimentation",
+        "population": "Population générale ; les besoins énergétiques varient",
+        "statistic": "L’OMS recommande de limiter les sucres libres à moins de 10 % de l’apport énergétique quotidien, idéalement à 5 % ou moins. Pour un adulte consommant 2 000 kcal/jour, 10 % représentent environ 50 g.",
+        "certainty": "Recommandation officielle à l’échelle de la population.",
+        "limitations": "Confia enregistre actuellement les occasions ou quantités de sucreries, et non les grammes de sucres libres ni l’énergie quotidienne totale nécessaires pour calculer ce pourcentage."
+      },
+      "salt": {
+        "title": "Alimentation saine / réduction du sodium",
+        "organization": "Organisation mondiale de la Santé (OMS)",
+        "evidenceType": "Recommandation de santé publique en matière d’alimentation",
+        "population": "Adultes",
+        "statistic": "L’OMS recommande moins de 2 000 mg de sodium par jour, soit moins de 5 g de sel. Un apport élevé en sodium est associé à une hausse de la pression artérielle et à un risque cardiovasculaire accru.",
+        "certainty": "Recommandation officielle de santé publique.",
+        "limitations": "La catégorie actuelle de Confia enregistre des aliments salés ou des occasions, et non la teneur en sodium de chaque produit ni l’apport quotidien total en sel."
+      },
+      "tobacco": {
+        "title": "Tabac et nicotine",
+        "organization": "Organisation mondiale de la Santé (OMS)",
+        "evidenceType": "Fiche d’information de santé publique",
+        "population": "Personnes qui consomment du tabac et personnes exposées à la fumée secondaire",
+        "statistic": "L’OMS indique que le tabac provoque plus de 7 millions de décès par an et que toutes les formes de consommation sont nocives ; aucun niveau d’exposition n’est sans danger.",
+        "certainty": "Données établies à l’échelle de la population concernant les dommages.",
+        "limitations": "Un décompte générique ne précise ni le produit, ni la teneur en nicotine, ni la quantité ou la durée ; il ne permet pas d’estimer l’exposition ou le risque individuel."
+      },
+      "gamingDisorder": {
+        "title": "Trouble du jeu vidéo",
+        "organization": "Organisation mondiale de la Santé (OMS), CIM-11",
+        "evidenceType": "Classification internationale des maladies et revue d’experts",
+        "population": "Personnes dont la pratique du jeu entraîne une altération importante du fonctionnement",
+        "statistic": "L’OMS définit le trouble du jeu vidéo par une perte de contrôle, la priorité accordée au jeu sur d’autres activités et sa poursuite malgré des conséquences négatives ; le comportement doit entraîner une altération importante et persiste généralement au moins 12 mois.",
+        "certainty": "Classification clinique ; ce n’est pas un seuil de durée de jeu ordinaire.",
+        "limitations": "Jouer ou effectuer une seule session n’implique pas un trouble. Le relevé d’habitudes actuel de Confia ne mesure ni les heures, ni la perte de contrôle, ni l’altération du fonctionnement."
+      },
+      "alcohol": {
+        "title": "Alcool",
+        "organization": "Organisation mondiale de la Santé (OMS)",
+        "evidenceType": "Fiche d’information de santé publique",
+        "population": "Population générale ; le risque dépend de la quantité et du contexte",
+        "statistic": "L’OMS indique qu’aucune forme de consommation d’alcool n’est sans risque ; le risque dépend de la quantité, de la fréquence et des facteurs personnels.",
+        "certainty": "Recommandation de santé publique.",
+        "limitations": "L’entrée actuelle n’enregistre pas de manière fiable le volume de la boisson ni sa teneur en alcool ; les grammes d’éthanol ne peuvent donc pas être calculés."
+      }
+    },
+    "submenuHint": "Ouvre pour explorer les signaux, les preuves et tes tendances personnelles.",
+    "minimize": "Réduire",
+    "maximize": "Agrandir"
+  },
+  "habitClock": {
+    "title": "Horloge biologique",
+    "symbolAlt": "Symbole d’horloge et de silhouette humaine coloré selon les habitudes enregistrées",
+    "tones": {
+      "favourable": "Les données sont plutôt favorables",
+      "mixed": "Données mixtes ou équilibre intermédiaire",
+      "unfavourable": "Davantage de données potentiellement défavorables",
+      "unknown": "Pas encore assez de données"
+    },
+    "coverage": "Basé sur {{count}} domaines enregistrés sur 3",
+    "noData": "Enregistrez le sommeil, le mouvement ou l’alimentation pour commencer. L’absence de données ne compte pas comme une mauvaise habitude.",
+    "disclaimer": "Résumé visuel des données, pas une évaluation médicale du corps.",
+    "scaleAlt": "Échelle progressive de l’orange au vert"
+  },
+  "habitTrends": {
+    "title": "Votre évolution",
+    "subtitle": "Résumé des données récentes. Les jours sans données ne sont pas considérés comme zéro.",
+    "period": "Les {{days}} derniers jours",
+    "daysWithRecords": "{{count}} jours avec des données d’habitudes",
+    "sleep": "Sommeil moyen",
+    "hours": "h/nuit",
+    "measuredDays": "{{count}} jours mesurés",
+    "exercise": "Mouvement enregistré",
+    "minutes": "min",
+    "activeDays": "{{count}} jours actifs",
+    "mood": "Évaluation émotionnelle moyenne",
+    "disclaimer": "Les moyennes décrivent uniquement les données disponibles et ne prouvent pas qu’une habitude a causé un changement émotionnel.",
+    "comparison": "Comparaison avec la période précédente : {{value}}",
+    "noComparison": "Données insuffisantes pour comparer avec la période précédente"
+  },
+  "habitDailyExperience": {
+    "title": "Le reflet du lac",
+    "subtitle": "De petits relevés pour mieux voir les tendances au fil du temps. Sans culpabilité les jours de pause.",
+    "views": "Vues de ta progression",
+    "tabs": {
+      "mirror": "Miroir",
+      "calendar": "Calendrier",
+      "report": "Rapport"
+    },
+    "selectedDay": "Relevés du {{date}}",
+    "domains": {
+      "sleep": "Sommeil",
+      "exercise": "Mouvement",
+      "nutrition": "Alimentation",
+      "mood": "Humeur"
+    },
+    "notRecorded": "Pas encore de relevé",
+    "sleepValue": "{{value}} h",
+    "minutesValue": "{{value}} min",
+    "entriesValue": "{{value}} relevé(s)",
+    "moodValue": "{{value}}/10",
+    "mirror": {
+      "hasRecords": "Aujourd’hui, tu as observé {{count}} domaine(s) de ton bien-être.",
+      "empty": "Aucun relevé pour cette journée. Tu peux commencer par une petite observation."
+    },
+    "learningTitle": "Une observation pour toi",
+    "learningEmpty": "Avec davantage de relevés, tu pourras comparer ton sommeil et ton humeur à tes propres valeurs habituelles.",
+    "sleepCompare": "Tu as enregistré {{current}} h de sommeil aujourd’hui. La moyenne des autres jours observés cette semaine est de {{average}} h. C’est une comparaison descriptive, pas une explication causale.",
+    "moodCompare": "Ton évaluation de l’humeur était de {{current}}/10 ; la moyenne des autres jours évalués cette semaine était de {{average}}/10.",
+    "quickCheckin": "Veux-tu enregistrer {{domain}} maintenant ?",
+    "calendarIntro": "Choisis un jour pour consulter tes relevés. Les points indiquent les domaines observés ; les jours vides restent neutres.",
+    "observedDomains": "{{count}} domaines observés",
+    "recorded": "Relevés",
+    "rest": "Aucun relevé",
+    "gardenTitle": "Ton jardin de présence",
+    "gardenText": "Tu as observé ton bien-être pendant {{count}} des 7 derniers jours. Chaque relevé complète le tableau — aucune série parfaite n’est nécessaire.",
+    "reportTitle": "Résumé personnel sur 30 jours",
+    "reportSubtitle": "Résumé jusqu’au {{date}}",
+    "report": {
+      "activeDays": "Jours avec relevés",
+      "sleep": "Sommeil moyen",
+      "exercise": "Mouvement enregistré",
+      "mood": "Humeur moyenne",
+      "comparison": "Évolution par rapport aux 30 jours précédents — sommeil : {{sleep}} ; mouvement : {{exercise}} ; humeur : {{mood}}.",
+      "caution": "Ce rapport résume uniquement les données enregistrées. Les jours sans relevé ne sont pas considérés comme zéro et les différences ne démontrent pas de causalité."
+    },
+    "daysValue": "{{value}} jours",
+    "printReport": "Imprimer / enregistrer en PDF",
+    "moodCheckinTitle": "Évaluation rapide de l’humeur",
+    "moodScaleLabel": "Comment te sens-tu maintenant ? 1 = très mal · 10 = très bien",
+    "moodSaved": "Relevé enregistré : {{value}}/10. Merci de prendre un instant pour toi.",
+    "progressMilestone": "Au cours des 30 derniers jours, tu as enregistré des données pendant au moins {{count}} jours. Cela aide à mieux te connaître ; les pauses font aussi partie du parcours.",
+    "minimize": "Réduire l’évolution",
+    "maximize": "Développer l’évolution"
   }
 }

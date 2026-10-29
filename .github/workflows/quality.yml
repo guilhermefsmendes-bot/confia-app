@@ -20,6 +20,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - run: npm run test:habits
       - run: npm install --global firebase-tools@15.28.1
       - run: npm run test:rules
       - run: npm run security:audit

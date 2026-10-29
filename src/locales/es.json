@@ -2872,7 +2872,7 @@
   "habitHub": {
     "title": "Hábitos",
     "subtitle": "Pequeñas decisiones, a tu ritmo. Conócete un poco más cada día.",
-    "challenge": "Mi reto",
+    "challenge": "Evito este hábito desde hace",
     "day": "DÍA {{count}}",
     "countdown": "para terminar el día de hoy",
     "streak": "{{count}} días consecutivos",
@@ -4159,8 +4159,8 @@
     "noComparison": "No hay datos suficientes para comparar con el período anterior"
   },
   "habitDailyExperience": {
-    "eyebrow": "Tu recorrido",
-    "title": "Tu espejo diario",
+    "eyebrow": "Tu evolución",
+    "title": "Reflejado en el lago",
     "subtitle": "Pequeños registros, una visión más clara con el tiempo. Sin culpa en los días de pausa.",
     "views": "Vistas de tu progreso",
     "tabs": {
@@ -4210,6 +4210,8 @@
     "moodCheckinTitle": "Registro rápido del estado de ánimo",
     "moodScaleLabel": "¿Cómo te sientes ahora? 1 = muy mal · 10 = muy bien",
     "moodSaved": "Registro guardado: {{value}}/10. Gracias por dedicarte un momento.",
-    "progressMilestone": "En los últimos 30 días, registraste datos en al menos {{count}} días. Eso ayuda a construir una visión más completa de ti; las pausas también forman parte del proceso."
+    "progressMilestone": "En los últimos 30 días, registraste datos en al menos {{count}} días. Eso ayuda a construir una visión más completa de ti; las pausas también forman parte del proceso.",
+    "minimize": "Minimizar evolución",
+    "maximize": "Ampliar evolución"
   }
 }

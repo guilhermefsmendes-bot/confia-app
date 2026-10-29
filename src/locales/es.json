@@ -4126,7 +4126,10 @@
         "certainty": "Orientación de salud pública.",
         "limitations": "La entrada actual no registra de forma fiable el volumen de la bebida ni la concentración de alcohol, por lo que no se pueden calcular los gramos de etanol."
       }
-    }
+    },
+    "submenuHint": "Abre para explorar señales, evidencias y tus patrones personales.",
+    "minimize": "Minimizar",
+    "maximize": "Ampliar"
   },
   "habitClock": {
     "title": "Reloj biológico",

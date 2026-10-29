@@ -4016,7 +4016,10 @@
     },
     "lastReviewed": "Fonte verificada em",
     "showMore": "Ver mais {{count}} observações",
-    "showLess": "Mostrar menos"
+    "showLess": "Mostrar menos",
+    "submenuHint": "Abre para explorar os sinais, as evidências e os teus padrões pessoais.",
+    "minimize": "Minimizar",
+    "maximize": "Maximizar"
   },
   "habitClock": {
     "title": "Relógio Biológico",

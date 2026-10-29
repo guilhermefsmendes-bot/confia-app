@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { HabitRecord } from "../../data/habits/types";
 import type { PersonalEvent } from "../../data/personal/personalEvent";
@@ -8,6 +9,7 @@ import { buildHabitImpact, getHabitImpactSource } from "../../data/habits/impact
 export default function HabitImpactReaction({ records, events, date }: { records: HabitRecord[]; events: PersonalEvent[]; date: string }) {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const report = useMemo(() => buildHabitImpact(records, events, date), [records, events, date]);
   if (!report.hasData) return null;
   const associations = report.personalAssociations;
@@ -15,11 +17,14 @@ export default function HabitImpactReaction({ records, events, date }: { records
     const priority = { attention: 0, information: 1, neutral: 2 } as const;
     return priority[a.severity] - priority[b.severity];
   });
-  return <section className="space-y-4 rounded-[28px] border border-[#D8CDBB] bg-[#FFFDF7] p-5" aria-labelledby="habit-impact-title">
-    <header>
-      <h3 id="habit-impact-title" className="text-xl font-black">{t("habitImpact.title")}</h3>
-      <p className="mt-1 text-sm leading-6 text-[#6F5D51]">{t("habitImpact.subtitle")}</p>
+  return <section className="overflow-hidden rounded-[24px] border border-[#D9E5D4] bg-gradient-to-br from-white via-[#FBFDF8] to-[#EEF5E9] shadow-[0_8px_24px_rgba(54,82,47,0.07)]" aria-labelledby="habit-impact-title">
+    <header className="flex items-start gap-3 p-4 sm:p-5">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#DDEBD5] to-[#F2F7EE] text-[#41613C] shadow-sm"><Sparkles size={20}/></span>
+      <div className="min-w-0 flex-1"><h3 id="habit-impact-title" className="text-base font-black text-[#304D2F] sm:text-lg">{t("habitImpact.title")}</h3>
+      <p className="mt-1 text-sm leading-6 text-[#667761]">{t("habitImpact.subtitle")}</p></div>
+      <button type="button" onClick={() => setExpanded(value => !value)} aria-expanded={expanded} aria-controls="habit-impact-content" aria-label={t(expanded ? "habitImpact.minimize" : "habitImpact.maximize")} className="flex min-h-10 shrink-0 items-center gap-1 rounded-full border border-[#D5E2CF] bg-white/90 px-3 text-xs font-bold text-[#41613C] shadow-sm">{expanded ? <ChevronUp size={17}/> : <ChevronDown size={17}/>}<span className="hidden sm:inline">{t(expanded ? "habitImpact.minimize" : "habitImpact.maximize")}</span></button>
     </header>
+    {expanded && <div id="habit-impact-content" className="space-y-4 border-t border-[#E0E9DB] p-4 sm:p-5">
     <div className="space-y-3">
       {(showAll ? orderedCards : orderedCards.slice(0, 3)).map(card => {
         const severity = card.severity === "attention" ? "border-[#E8C4A8] bg-[#FFF6EB]" : card.severity === "information" ? "border-[#D9E2CF] bg-white" : "border-[#E8DDD7] bg-white";
@@ -59,5 +64,6 @@ export default function HabitImpactReaction({ records, events, date }: { records
       </div>)}</div>
       <p className="mt-3 text-xs leading-5 text-[#6F5D51]">{t("habitImpact.personal.caution")}</p>
     </section> : <p className="rounded-2xl bg-white p-4 text-xs leading-5 text-[#6F5D51]">{t("habitImpact.personal.insufficient", { count: report.moodDaysAvailable })}</p>}
+    </div>}
   </section>;
 }

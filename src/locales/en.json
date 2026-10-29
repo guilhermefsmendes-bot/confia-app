@@ -4016,7 +4016,10 @@
     },
     "lastReviewed": "Source checked on",
     "showMore": "Show {{count}} more observations",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "submenuHint": "Open to explore signals, evidence and your personal patterns.",
+    "minimize": "Minimize",
+    "maximize": "Maximize"
   },
   "habitClock": {
     "title": "Biological Clock",

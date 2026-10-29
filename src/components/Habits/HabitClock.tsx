@@ -1,7 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { HabitRecord, FoodType } from "../../data/habits/types";
 import { dayFoodItems, nutritionTotals } from "../../data/habits/nutrition";
+import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import HabitImpactReaction from "./HabitImpactReaction";
+import type { PersonalEvent } from "../../data/personal/personalEvent";
 
 type Tone = "favourable" | "mixed" | "unfavourable" | "unknown";
 export function getHabitClockState(records: HabitRecord[], date: string) {
@@ -54,11 +57,13 @@ function clockColour(score: number) {
   return `hsl(${hue} 72% 43%)`;
 }
 
-export default function HabitClock({ records, date }: { records: HabitRecord[]; date: string }) {
+export default function HabitClock({ records, events, date }: { records: HabitRecord[]; events: PersonalEvent[]; date: string }) {
   const { t } = useTranslation();
   const state = useMemo(() => getHabitClockState(records, date), [records, date]);
+  const [impactExpanded, setImpactExpanded] = useState(false);
   const colour = state.hasData ? clockColour(state.score) : "#9A938D";
-  return <section className="flex items-center gap-4 rounded-[28px] border border-[#E8DDD7] bg-white p-4" aria-labelledby="habit-clock-title">
+  return <section className="overflow-hidden rounded-[30px] border border-[#C8D8C4] bg-gradient-to-br from-[#F8FCF5] via-white to-[#E7F0E3] shadow-[0_12px_32px_rgba(54,82,47,0.10)]" aria-labelledby="habit-clock-title">
+    <div className="flex items-center gap-4 p-4 sm:p-5">
     <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-[#F8F5F0]">
       <svg viewBox="0 0 100 100" role="img" aria-label={t("habitClock.symbolAlt")} className="h-20 w-20">
         <circle cx="50" cy="50" r="43" fill="none" stroke={colour} strokeWidth="4" opacity={state.hasData ? 0.9 : 0.35}/>
@@ -76,6 +81,15 @@ export default function HabitClock({ records, date }: { records: HabitRecord[]; 
         <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${state.score}%`, background: `linear-gradient(90deg, hsl(30 72% 43%), hsl(55 78% 46%), hsl(95 72% 43%))` }} />
       </div>}
       <p className="mt-2 text-[11px] leading-4 text-[#806F63]">{t("habitClock.disclaimer")}</p>
+    </div>
+    </div>
+    <div className="border-t border-[#D8E4D3] bg-white/55 p-3 sm:px-5 sm:py-4">
+      <button type="button" onClick={() => setImpactExpanded(value => !value)} aria-expanded={impactExpanded} aria-controls="habit-impact-submenu" className="flex min-h-12 w-full items-center gap-3 rounded-2xl border border-[#D5E2CF] bg-gradient-to-r from-white/95 to-[#EEF5E9] px-4 py-3 text-left shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#587044]">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#DDEBD5] text-[#41613C]"><Sparkles size={18}/></span>
+        <span className="min-w-0 flex-1"><span className="block text-sm font-black text-[#304D2F]">{t("habitImpact.title")}</span><span className="mt-0.5 block text-xs leading-5 text-[#667761]">{t("habitImpact.submenuHint")}</span></span>
+        <span className="shrink-0 rounded-full border border-[#D5E2CF] bg-white p-1.5 text-[#41613C]">{impactExpanded ? <ChevronUp size={17}/> : <ChevronDown size={17}/>}</span>
+      </button>
+      {impactExpanded && <div id="habit-impact-submenu" className="mt-3 rounded-[24px] border border-[#D9E5D4] bg-gradient-to-br from-white to-[#F7FAF4] p-3 shadow-inner sm:p-4"><HabitImpactReaction records={records} events={events} date={date}/></div>}
     </div>
   </section>;
 }

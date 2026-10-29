@@ -4126,7 +4126,10 @@
         "certainty": "Recommandation de santé publique.",
         "limitations": "L’entrée actuelle n’enregistre pas de manière fiable le volume de la boisson ni sa teneur en alcool ; les grammes d’éthanol ne peuvent donc pas être calculés."
       }
-    }
+    },
+    "submenuHint": "Ouvre pour explorer les signaux, les preuves et tes tendances personnelles.",
+    "minimize": "Réduire",
+    "maximize": "Agrandir"
   },
   "habitClock": {
     "title": "Horloge biologique",

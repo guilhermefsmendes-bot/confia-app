@@ -144,10 +144,15 @@ export function buildHabitImpact(records: HabitRecord[], events: PersonalEvent[]
   const sleep = dayRecords.find((record): record is Extract<HabitRecord, { kind: "sleep" }> => record.kind === "sleep");
   const exercise = dayRecords.filter((record): record is Extract<HabitRecord, { kind: "exercise" }> => record.kind === "exercise");
   const foodItems = dayFoodItems(records, date);
-  const nutrition = dayRecords.some(record => record.kind === "nutrition");
+  const nutritionRecord = dayRecords.find((record): record is Extract<HabitRecord, { kind: "nutrition" }> => record.kind === "nutrition");
+  const effectiveNutrition = nutritionTotals(records, date);
+  const nutrition = Boolean(nutritionRecord && Object.values(effectiveNutrition).some(value => typeof value === "number" && Number.isFinite(value) && value > 0));
   const habitLogs = dayRecords.filter((record): record is Extract<HabitRecord, { kind: "habitLog" }> => record.kind === "habitLog");
-  const hasData = Boolean(sleep || exercise.length || foodItems.length || nutrition || habitLogs.length);
-  if (!hasData) return { date, hasData: false, cards, personalAssociations: [], moodDaysAvailable: 0, sourceCount: 0 };
+  const personal = buildPersonalAssociations(records, events, date);
+  const hasDailyData = Boolean(sleep || exercise.length || foodItems.length || nutrition || habitLogs.length);
+  // Historical associations remain available even when the selected day has no new entry.
+  const hasData = hasDailyData || personal.associations.length > 0;
+  if (!hasDailyData) return { date, hasData, cards, personalAssociations: personal.associations, moodDaysAvailable: personal.moodDays, sourceCount: 0 };
 
   if (sleep) {
     cards.push({ id: "sleep-self-report", titleKey: "habitImpact.cards.sleepDetails.title",
@@ -245,7 +250,6 @@ export function buildHabitImpact(records: HabitRecord[], events: PersonalEvent[]
     }
   }
 
-  const personal = buildPersonalAssociations(records, events, date);
   // Personal patterns are historical insights, so keep them visible when enough
   // measured days exist even if that habit was not logged on the selected day.
   const personalAssociations = personal.associations;

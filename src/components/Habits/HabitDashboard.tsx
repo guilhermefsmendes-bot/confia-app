@@ -15,6 +15,7 @@ import HabitChallengeCard from "./HabitChallengeCard";
 import HabitImpactReaction from "./HabitImpactReaction";
 import HabitClock from "./HabitClock";
 import HabitTrends from "./HabitTrends";
+import HabitDailyExperience from "./HabitDailyExperience";
 const HabitInsights=lazy(()=>import("./HabitInsights"));
 const HabitSetup=lazy(()=>import("./HabitSetup"));
 const HabitHistory=lazy(()=>import("./HabitHistory"));
@@ -70,6 +71,7 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
     {page==="home" ? <>
       <HabitChallengeCard habit={primary} records={records} today={today} onOpen={go}/>
       <HabitClock records={records} date={impactDate}/>
+      <HabitDailyExperience records={records} events={events} today={today} onOpen={go} onSelectDate={setImpactDate}/>
       <HabitImpactReaction records={records} events={events} date={impactDate}/>
       <HabitTrends records={records} events={events} today={today}/>
       <div className="flex items-center gap-3 pt-1">

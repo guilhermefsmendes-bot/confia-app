@@ -4047,5 +4047,58 @@
     "disclaimer": "Averages describe available records only; they do not show that a habit caused an emotional change.",
     "comparison": "Compared with previous period: {{value}}",
     "noComparison": "Not enough data to compare with the previous period"
+  },
+  "habitDailyExperience": {
+    "eyebrow": "Your journey",
+    "title": "Your daily mirror",
+    "subtitle": "Small entries, a clearer picture over time. No guilt on days off.",
+    "views": "Progress views",
+    "tabs": {
+      "mirror": "Mirror",
+      "calendar": "Calendar",
+      "report": "Report"
+    },
+    "selectedDay": "Entries for {{date}}",
+    "domains": {
+      "sleep": "Sleep",
+      "exercise": "Movement",
+      "nutrition": "Nutrition",
+      "mood": "Mood"
+    },
+    "notRecorded": "Not recorded yet",
+    "sleepValue": "{{value}} h",
+    "minutesValue": "{{value}} min",
+    "entriesValue": "{{value}} entr(y/ies)",
+    "moodValue": "{{value}}/10",
+    "mirror": {
+      "hasRecords": "You have observed {{count}} area(s) of wellbeing today.",
+      "empty": "There are no entries for this day yet. Start with one small observation."
+    },
+    "learningTitle": "A note for you",
+    "learningEmpty": "As you record more days, you can compare sleep and mood with your own usual values.",
+    "sleepCompare": "You recorded {{current}} h of sleep today. The average for other observed days this week is {{average}} h. This is descriptive, not a causal explanation.",
+    "moodCompare": "Your mood rating was {{current}}/10; the average for other rated days this week was {{average}}/10.",
+    "quickCheckin": "Would you like to log {{domain}} now?",
+    "calendarIntro": "Choose a day to review your entries. Dots show observed areas; empty days remain neutral.",
+    "observedDomains": "{{count}} areas observed",
+    "recorded": "Entries",
+    "rest": "No entries",
+    "gardenTitle": "Your presence garden",
+    "gardenText": "You observed your wellbeing on {{count}} of the last 7 days. Each entry builds a fuller picture — no perfect streak required.",
+    "reportTitle": "30-day personal summary",
+    "reportSubtitle": "Summary through {{date}}",
+    "report": {
+      "activeDays": "Days with entries",
+      "sleep": "Average sleep",
+      "exercise": "Movement logged",
+      "mood": "Average mood",
+      "comparison": "Change versus the previous 30 days — sleep: {{sleep}}; movement: {{exercise}}; mood: {{mood}}.",
+      "caution": "This report summarizes recorded data only. Missing days are not treated as zero, and differences do not establish causality."
+    },
+    "daysValue": "{{value}} days",
+    "printReport": "Print / save as PDF",
+    "moodCheckinTitle": "Quick mood check-in",
+    "moodScaleLabel": "How are you feeling now? 1 = very low · 10 = very good",
+    "moodSaved": "Entry saved: {{value}}/10. Thanks for taking a moment."
   }
 }

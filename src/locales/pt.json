@@ -4047,5 +4047,58 @@
     "disclaimer": "As médias descrevem apenas os registos disponíveis; não demonstram que um hábito tenha causado uma alteração emocional.",
     "comparison": "Comparação com o período anterior: {{value}}",
     "noComparison": "Sem dados suficientes para comparar com o período anterior"
+  },
+  "habitDailyExperience": {
+    "eyebrow": "O teu percurso",
+    "title": "O teu espelho diário",
+    "subtitle": "Pequenos registos, uma visão mais clara ao longo do tempo. Sem culpa nos dias de pausa.",
+    "views": "Vistas do teu progresso",
+    "tabs": {
+      "mirror": "Espelho",
+      "calendar": "Calendário",
+      "report": "Relatório"
+    },
+    "selectedDay": "Registos de {{date}}",
+    "domains": {
+      "sleep": "Sono",
+      "exercise": "Movimento",
+      "nutrition": "Alimentação",
+      "mood": "Humor"
+    },
+    "notRecorded": "Ainda sem registo",
+    "sleepValue": "{{value}} h",
+    "minutesValue": "{{value}} min",
+    "entriesValue": "{{value}} registo(s)",
+    "moodValue": "{{value}}/10",
+    "mirror": {
+      "hasRecords": "Hoje já observaste {{count}} área(s) do teu bem-estar.",
+      "empty": "Ainda não há registos para este dia. Podes começar por uma pequena observação."
+    },
+    "learningTitle": "Uma observação para ti",
+    "learningEmpty": "À medida que registares mais dias, poderás comparar o teu sono e humor com os teus próprios valores habituais.",
+    "sleepCompare": "Hoje registaste {{current}} h de sono. A média dos outros dias observados desta semana é {{average}} h. É uma comparação descritiva, não uma explicação da causa.",
+    "moodCompare": "A tua avaliação de humor foi {{current}}/10; nos outros dias desta semana com registo, a média foi {{average}}/10.",
+    "quickCheckin": "Queres registar {{domain}} agora?",
+    "calendarIntro": "Escolhe um dia para rever o que registaste. Os pontos mostram áreas observadas; os dias vazios ficam neutros.",
+    "observedDomains": "{{count}} áreas observadas",
+    "recorded": "Registos",
+    "rest": "Sem registos",
+    "gardenTitle": "O teu jardim de presença",
+    "gardenText": "Observaste o teu bem-estar em {{count}} dos últimos 7 dias. Cada registo ajuda a construir uma visão mais completa — não precisas de uma sequência perfeita.",
+    "reportTitle": "Resumo pessoal de 30 dias",
+    "reportSubtitle": "Resumo até {{date}}",
+    "report": {
+      "activeDays": "Dias com registos",
+      "sleep": "Média de sono",
+      "exercise": "Movimento registado",
+      "mood": "Humor médio",
+      "comparison": "Diferença face aos 30 dias anteriores — sono: {{sleep}}; movimento: {{exercise}}; humor: {{mood}}.",
+      "caution": "Este relatório resume apenas os dados registados. Dias sem registos não são tratados como zero e as diferenças não demonstram causalidade."
+    },
+    "daysValue": "{{value}} dias",
+    "printReport": "Imprimir / guardar como PDF",
+    "moodCheckinTitle": "Check-in rápido de humor",
+    "moodScaleLabel": "Como te sentes agora? 1 = muito em baixo · 10 = muito bem",
+    "moodSaved": "Registo guardado: {{value}}/10. Obrigado por parares um momento."
   }
 }

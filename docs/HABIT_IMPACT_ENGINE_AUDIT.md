@@ -77,3 +77,12 @@ As fontes completas, estatísticas, populações e limitações estão em `src/d
 - Executar lint, testes unitários, build Android e testes E2E quando o runtime Node.js estiver disponível.
 - Rever clinicamente o texto e as regras antes de apresentar isto como aconselhamento de saúde.
 - Uma próxima fase poderá enriquecer o registo alimentar com nutrientes e porções estruturadas, se isso for desejado; esta versão não inventa esses dados.
+
+## Follow-up implementation (2026-10-29)
+
+- Completed Spanish and French translations for every `habitImpact` UI key, including message interpolation variables and personal-association copy.
+- Localized the evidence titles, population descriptions, measured statistics, certainty and limitations for all 12 curated sources in Spanish and French; the component uses the localized fields when available and retains English defaults for Portuguese/English source data.
+- Reworked the habit clock's movement contribution to scale by logged minutes and intensity rather than awarding the same full positive score to any non-zero activity. Food contribution now scales by recorded category quantities, and deleted-only detailed food records no longer restore superseded legacy totals into the clock/impact panel.
+- Kept historical personal associations visible on days without a new entry, and excluded deleted-only food totals from the impact engine's `hasData` decision.
+- Added the daily mirror, adaptive one-tap links to missing habit domains, a 7-day observation calendar with neutral unrecorded days and a visual garden, a quick 1–10 mood check-in saved into personal events, and a printable 30-day report. Existing personal-pattern insights and habit challenge progression remain in place.
+- Added tests for locale key parity, interpolation variables, all evidence-source translations, historical insights on empty days, deleted-only food, and duration/quantity-sensitive clock scoring.

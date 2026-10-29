@@ -31,14 +31,14 @@ export default function HabitImpactReaction({ records, events, date }: { records
           {(source || detail) && <details className="mt-3 text-xs leading-5">
             <summary className="min-h-9 cursor-pointer font-bold">{t("habitImpact.evidence")}</summary>
             {[source, detail].filter((item, index, all): item is HabitImpactSource => Boolean(item) && all.findIndex(other => other?.id === item?.id) === index).map(item => <div key={item.id} className="mt-3 border-t border-[#E8DDD7] pt-3">
-              <p className="font-bold">{item.title}</p>
-              <p className="mt-1">{t("habitImpact.evidenceType")}: {item.evidenceType}</p>
-              <p className="mt-1">{t("habitImpact.population")}: {item.population}</p>
-              <p className="mt-1">{t("habitImpact.statistic")}: {item.statistic}</p>
-              <p className="mt-1">{t("habitImpact.certainty")}: {item.certainty}</p>
-              <p className="mt-1">{t("habitImpact.limitations")}: {item.limitations}</p>
+              <p className="font-bold">{t(`habitImpact.sources.${item.id}.title`, { defaultValue: item.title })}</p>
+              <p className="mt-1">{t("habitImpact.evidenceType")}: {t(`habitImpact.sources.${item.id}.evidenceType`, { defaultValue: item.evidenceType })}</p>
+              <p className="mt-1">{t("habitImpact.population")}: {t(`habitImpact.sources.${item.id}.population`, { defaultValue: item.population })}</p>
+              <p className="mt-1">{t("habitImpact.statistic")}: {t(`habitImpact.sources.${item.id}.statistic`, { defaultValue: item.statistic })}</p>
+              <p className="mt-1">{t("habitImpact.certainty")}: {t(`habitImpact.sources.${item.id}.certainty`, { defaultValue: item.certainty })}</p>
+              <p className="mt-1">{t("habitImpact.limitations")}: {t(`habitImpact.sources.${item.id}.limitations`, { defaultValue: item.limitations })}</p>
               <p className="mt-1">{t("habitImpact.lastReviewed")}: {item.checkedOn}</p>
-              <a className="mt-2 inline-block min-h-10 py-2 font-bold underline" href={item.url} target="_blank" rel="noreferrer">{t("habitImpact.openSource")} · {item.organization}</a>
+              <a className="mt-2 inline-block min-h-10 py-2 font-bold underline" href={item.url} target="_blank" rel="noreferrer">{t("habitImpact.openSource")} · {t(`habitImpact.sources.${item.id}.organization`, { defaultValue: item.organization })}</a>
             </div>)}
           </details>}
         </article>;

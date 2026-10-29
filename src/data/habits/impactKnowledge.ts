@@ -79,9 +79,9 @@ export const HABIT_IMPACT_SOURCES: Record<string, HabitImpactSource> = {
   },
   hydrationPortugal: {
     id: "hydrationPortugal",
-    title: "Estilos de vida saudável",
-    organization: "Direção-Geral da Saúde (DGS), Portugal",
-    url: "https://www.dgs.pt/paginas-de-sistema/saude-de-a-a-z/estilos-de-vida-saudavel.aspx",
+    title: "Conheça os Alimentos — Dia Alimentar Completo, Equilibrado e Variado",
+    organization: "Programa Nacional para a Promoção da Alimentação Saudável (DGS), Portugal",
+    url: "https://alimentacaosaudavel.dgs.pt/conheca-os-alimentos/",
     evidenceType: "Public health guidance",
     population: "General public; needs vary by circumstances",
     statistic: "DGS public guidance suggests drinking at least 1.5 litres of water per day and increasing intake in heat or with exercise.",

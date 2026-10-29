@@ -1,13 +1,10 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { MoonStar, Footprints, Apple, Sparkles, Printer, ChevronDown, ChevronUp, Waves } from "lucide-react";
+import { MoonStar, Footprints, Apple, Printer, ChevronDown, ChevronUp, Waves } from "lucide-react";
 import type { HabitDefinition, HabitRecord } from "../../data/habits/types";
 import type { PersonalEvent } from "../../data/personal/personalEvent";
 import { shiftDay } from "../../data/habits/calendar";
 import { nutritionTotals } from "../../data/habits/nutrition";
-import { appendPersonalEvents } from "../../data/personal/personalEventStorage";
-import { createPersonalEventId, makePersonalEvent } from "../../data/personal/personalEvent";
-import HabitChallengeCard from "./HabitChallengeCard";
 import HabitImpactReaction from "./HabitImpactReaction";
 import { LifestyleMirror } from "./LifestyleMirror";
 import { collectCompanionData } from "../../data/companionData";
@@ -32,12 +29,11 @@ function dayStats(records: HabitRecord[], events: PersonalEvent[], date: string)
 const average = (values: number[]) => values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : undefined;
 const fmt = (value: number | undefined, digits = 1) => value === undefined ? "—" : new Intl.NumberFormat(undefined, { maximumFractionDigits: digits }).format(value);
 
-export default function HabitDailyExperience({ records, events, today, habit, message, error, onOpen }: Props) {
+export default function HabitDailyExperience({ records, events, today, message, error, onOpen }: Props) {
   const { t, i18n } = useTranslation();
   const [view, setView] = useState<"mirror" | "calendar" | "report">("mirror");
   const [collapsed, setCollapsed] = useState(false);
   const [selectedDate, setSelectedDate] = useState(today);
-  const [savedMood, setSavedMood] = useState<number | null>(null);
   const synergy = useMemo(() => { try { return buildLifestyleSynergyCandidate(records, collectCompanionData(), new Date()); } catch { return undefined; } }, [records, today]);
   const synergyText = synergy?.translationKey ? t(synergy.translationKey, synergy.translationValues) : null;
   useEffect(() => setSelectedDate(today), [today]);
@@ -60,19 +56,12 @@ export default function HabitDailyExperience({ records, events, today, habit, me
   const exerciseMinutes = monthStats.reduce((sum, x) => sum + x.exercise, 0);
   const previousExerciseMinutes = previousMonthStats.reduce((sum, x) => sum + x.exercise, 0);
   const domains = [
-    { key: "sleep", icon: MoonStar, label: t("habitDailyExperience.domains.sleep"), value: stats.sleep === undefined ? t("habitDailyExperience.notRecorded") : t("habitDailyExperience.sleepValue", { value: fmt(stats.sleep) }), action: "sleep", recorded: stats.sleep !== undefined },
-    { key: "exercise", icon: Footprints, label: t("habitDailyExperience.domains.exercise"), value: stats.exercise ? t("habitDailyExperience.minutesValue", { value: stats.exercise }) : t("habitDailyExperience.notRecorded"), action: "exercise", recorded: stats.exercise > 0 },
-    { key: "nutrition", icon: Apple, label: t("habitDailyExperience.domains.nutrition"), value: stats.food ? t("habitDailyExperience.entriesValue", { value: stats.food }) : t("habitDailyExperience.notRecorded"), action: "nutrition", recorded: stats.food > 0 },
-    { key: "mood", icon: Sparkles, label: t("habitDailyExperience.domains.mood"), value: stats.mood === undefined ? t("habitDailyExperience.notRecorded") : t("habitDailyExperience.moodValue", { value: fmt(stats.mood) }), action: "home", recorded: stats.mood !== undefined },
+    { key: "sleep", icon: MoonStar, label: t("habitDailyExperience.domains.sleep"), value: stats.sleep === undefined ? t("habitDailyExperience.notRecorded") : t("habitDailyExperience.sleepValue", { value: fmt(stats.sleep) }), action: "sleep" },
+    { key: "nutrition", icon: Apple, label: t("habitDailyExperience.domains.nutrition"), value: stats.food ? t("habitDailyExperience.entriesValue", { value: stats.food }) : t("habitDailyExperience.notRecorded"), action: "nutrition" },
+    { key: "exercise", icon: Footprints, label: t("habitDailyExperience.domains.exercise"), value: stats.exercise ? t("habitDailyExperience.minutesValue", { value: stats.exercise }) : t("habitDailyExperience.notRecorded"), action: "exercise" },
   ];
-  const firstMissing = domains.find(x => !x.recorded && x.key !== "mood");
   const dateLabel = (date: string) => new Intl.DateTimeFormat(i18n.language, { day: "2-digit", month: "short" }).format(new Date(date + "T12:00:00"));
   const chooseDate = (date: string) => { setSelectedDate(date); setSavedMood(null); setView("mirror"); };
-  const saveMood = (value: number) => {
-    const timestamp = new Date().toISOString();
-    appendPersonalEvents([makePersonalEvent({ id: createPersonalEventId("mood", timestamp), type: "mood", source: "daily_rating", timestamp, localDate: selectedDate, value, metadata: { moment: "evening", source: "habit_quick_checkin" } })]);
-    setSavedMood(value);
-  };
   const report = <div className="habit-report-print space-y-3">
     <div><h3 className="text-lg font-black">{t("habitDailyExperience.reportTitle")}</h3><p className="text-xs text-[#6F5D51]">{t("habitDailyExperience.reportSubtitle", { date: dateLabel(today) })}</p></div>
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -89,15 +78,13 @@ export default function HabitDailyExperience({ records, events, today, habit, me
     <header className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/80 text-[#356D78]"><Waves size={22}/></span><div className="flex-1"><h2 className="text-lg font-black text-[#234E58]">{t("habitDailyExperience.title")}</h2><p className="mt-1 text-xs leading-5 text-[#355F65]">{t("habitDailyExperience.subtitle")}</p></div><button type="button" onClick={()=>setCollapsed(v=>!v)} aria-expanded={!collapsed} aria-label={t(collapsed?"habitDailyExperience.maximize":"habitDailyExperience.minimize")} className="flex min-h-10 shrink-0 items-center gap-1 rounded-full border border-white/90 bg-white/85 px-3 text-xs font-bold text-[#234E58] shadow-md transition hover:bg-white">{collapsed?<ChevronDown size={17}/>:<ChevronUp size={17}/>}<span className="hidden sm:inline">{t(collapsed?"habitDailyExperience.maximize":"habitDailyExperience.minimize")}</span></button></header>
     {message && <p role="status" className="mt-3 rounded-2xl border border-white/90 bg-white/80 p-3 text-sm font-semibold leading-5 text-[#365B36]">{message}</p>}
     {error && <p role="alert" className="mt-3 rounded-2xl border border-[#D9BD97] bg-[#FFF7E9]/90 p-3 text-sm leading-5 text-[#80603A]">{error}</p>}
-    {!collapsed && <><div className="mt-4 rounded-2xl border border-white/80 bg-white/45 p-2"><HabitChallengeCard habit={habit} records={records} today={today} onOpen={onOpen}/></div><nav className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-white/55 p-1" aria-label={t("habitDailyExperience.views")}>{(["mirror","calendar","report"] as const).map(key=><button key={key} type="button" onClick={()=>setView(key)} aria-pressed={view===key} className={view===key?"min-h-10 rounded-xl bg-white/90 px-2 text-xs font-black shadow-sm":"min-h-10 rounded-xl px-2 text-xs font-bold text-[#355F65]"}>{t("habitDailyExperience.tabs."+key)}</button>)}</nav>
+    {!collapsed && <><nav className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-white/55 p-1" aria-label={t("habitDailyExperience.views")}>{(["mirror","calendar","report"] as const).map(key=><button key={key} type="button" onClick={()=>setView(key)} aria-pressed={view===key} className={view===key?"min-h-10 rounded-xl bg-white/90 px-2 text-xs font-black shadow-sm":"min-h-10 rounded-xl px-2 text-xs font-bold text-[#355F65]"}>{t("habitDailyExperience.tabs."+key)}</button>)}</nav>
     {view === "mirror" && <div className="mt-4 space-y-3">
       {progressMilestone > 0 && <p className="rounded-2xl border border-[#D7E2CB] bg-[#F0F6E9] p-3 text-xs font-bold leading-5 text-[#3F6240]">{t("habitDailyExperience.progressMilestone", { count: progressMilestone })}</p>}
       <div className="habit-lake-glass rounded-2xl border p-4"><p className="text-xs font-bold text-[#355F65]">{t("habitDailyExperience.selectedDay", { date: dateLabel(selectedDate) })}</p><p className="mt-1 text-sm font-black">{stats.hasAny ? t("habitDailyExperience.mirror.hasRecords", { count: stats.domains.length + (stats.habits ? 1 : 0) }) : t("habitDailyExperience.mirror.empty")}</p>
-        <div className="mt-3 grid grid-cols-2 gap-2">{domains.map(item=>{const Icon=item.icon;return <button key={item.key} type="button" onClick={()=>onOpen(item.action)} className="flex min-h-[82px] items-start gap-2 rounded-xl bg-[#F8F6F1] p-3 text-left"><Icon size={17} className="mt-0.5 shrink-0 text-[#68805B]"/><span><span className="block text-xs font-black">{item.label}</span><span className="mt-1 block text-xs text-[#6F5D51]">{item.value}</span></span></button>})}</div>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">{domains.map(item=>{const Icon=item.icon;return <button key={item.key} type="button" onClick={()=>onOpen(item.action)} className="flex min-h-[82px] items-start gap-2 rounded-xl bg-[#F8F6F1] p-3 text-left"><Icon size={17} className="mt-0.5 shrink-0 text-[#68805B]"/><span><span className="block text-xs font-black">{item.label}</span><span className="mt-1 block text-xs text-[#6F5D51]">{item.value}</span></span></button>})}</div>
       </div>
       <div className="habit-lake-glass rounded-2xl p-4"><h3 className="text-sm font-black text-[#234E58]">{t("habitDailyExperience.learningTitle")}</h3>{stats.sleep !== undefined && sleepWeek !== undefined ? <p className="mt-2 text-xs leading-5 text-[#6F5D51]">{t("habitDailyExperience.sleepCompare", { current: fmt(stats.sleep), average: fmt(sleepWeek) })}</p> : <p className="mt-2 text-xs leading-5 text-[#6F5D51]">{t("habitDailyExperience.learningEmpty")}</p>}{stats.mood !== undefined && moodWeek !== undefined && <p className="mt-2 text-xs leading-5 text-[#6F5D51]">{t("habitDailyExperience.moodCompare", { current: fmt(stats.mood), average: fmt(moodWeek) })}</p>}
-        {firstMissing && <button type="button" onClick={()=>onOpen(firstMissing.action)} className="mt-3 min-h-11 rounded-xl bg-[#E4EDD9] px-4 py-2 text-left text-xs font-black text-[#365B36]">{t("habitDailyExperience.quickCheckin", { domain: firstMissing.label })} →</button>}
-        {(stats.mood === undefined || savedMood !== null) && <div className="mt-4 border-t border-[#E8DDD7] pt-3"><p className="text-xs font-black">{t("habitDailyExperience.moodCheckinTitle")}</p>{savedMood===null&&<><p className="mt-1 text-[11px] text-[#6F5D51]">{t("habitDailyExperience.moodScaleLabel")}</p><div className="mt-2 grid grid-cols-5 gap-1 sm:grid-cols-10">{Array.from({length:10},(_,i)=>i+1).map(value=><button key={value} type="button" onClick={()=>saveMood(value)} aria-label={t("habitDailyExperience.moodValue",{value})} className="min-h-9 rounded-lg border border-[#E8DDD7] bg-white text-xs font-black">{value}</button>)}</div></>}{savedMood!==null&&<p role="status" className="mt-2 text-xs font-bold text-[#365B36]">{t("habitDailyExperience.moodSaved",{value:savedMood})}</p>}</div>}
       </div>
       <div className="habit-lake-glass space-y-4 rounded-2xl border p-4">
         <h3 className="text-sm font-black text-[#234E58]">{t("habitImpact.title")}</h3>

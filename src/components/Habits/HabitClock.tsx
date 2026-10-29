@@ -4,6 +4,10 @@ import type { HabitRecord, FoodType } from "../../data/habits/types";
 import { dayFoodItems, nutritionTotals } from "../../data/habits/nutrition";
 import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import HabitImpactReaction from "./HabitImpactReaction";
+import { LifestyleMirror } from "./LifestyleMirror";
+import { collectCompanionData } from "../../data/companionData";
+import { buildLifestyleSynergyCandidate } from "../../data/reactive/companionBrain/lifestyleSynergy";
+import { localDay } from "../../data/habits/calendar";
 import type { PersonalEvent } from "../../data/personal/personalEvent";
 
 type Tone = "favourable" | "mixed" | "unfavourable" | "unknown";
@@ -61,6 +65,9 @@ export default function HabitClock({ records, events, date }: { records: HabitRe
   const { t } = useTranslation();
   const state = useMemo(() => getHabitClockState(records, date), [records, date]);
   const [impactExpanded, setImpactExpanded] = useState(false);
+  const today = localDay(new Date());
+  const synergy = useMemo(() => { try { return buildLifestyleSynergyCandidate(records, collectCompanionData(), new Date()); } catch { return undefined; } }, [records, date]);
+  const synergyText = synergy?.translationKey ? t(synergy.translationKey, synergy.translationValues) : null;
   const colour = state.hasData ? clockColour(state.score) : "#9A938D";
   return <section className="overflow-hidden rounded-[30px] border border-[#C8D8C4] bg-gradient-to-br from-[#F8FCF5] via-white to-[#E7F0E3] shadow-[0_12px_32px_rgba(54,82,47,0.10)]" aria-labelledby="habit-clock-title">
     <div className="flex items-center gap-4 p-4 sm:p-5">
@@ -89,7 +96,7 @@ export default function HabitClock({ records, events, date }: { records: HabitRe
         <span className="min-w-0 flex-1"><span className="block text-sm font-black text-[#304D2F]">{t("habitImpact.title")}</span><span className="mt-0.5 block text-xs leading-5 text-[#667761]">{t("habitImpact.submenuHint")}</span></span>
         <span className="shrink-0 rounded-full border border-[#D5E2CF] bg-white p-1.5 text-[#41613C]">{impactExpanded ? <ChevronUp size={17}/> : <ChevronDown size={17}/>}</span>
       </button>
-      {impactExpanded && <div id="habit-impact-submenu" className="mt-3 rounded-[24px] border border-[#D9E5D4] bg-gradient-to-br from-white to-[#F7FAF4] p-3 shadow-inner sm:p-4"><HabitImpactReaction records={records} events={events} date={date}/></div>}
+      {impactExpanded && <div id="habit-impact-submenu" className="mt-3 space-y-4 rounded-[24px] border border-[#D9E5D4] bg-gradient-to-br from-white to-[#F7FAF4] p-3 shadow-inner sm:p-4"><HabitImpactReaction records={records} events={events} date={date}/><section className="rounded-2xl border border-[#D9E5D4] bg-white/90 p-4"><h3 className="font-black text-[#304D2F]">{t("companionSynergy.analysisTitle")}</h3><p className="mt-2 whitespace-pre-line text-sm leading-6 text-[#52654A]">{synergyText ?? t("companionSynergy.waiting")}</p>{synergy && <p className="mt-3 rounded-xl bg-[#F2F6ED] p-3 text-xs leading-5 text-[#667761]">{t("companionSynergy.hypothesis")}</p>}</section><div><p className="mb-2 text-sm font-black text-[#304D2F]">{t("companionSynergy.eyebrow")}</p><LifestyleMirror records={records} today={today}/></div></div>}
     </div>
   </section>;
 }

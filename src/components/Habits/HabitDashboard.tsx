@@ -9,6 +9,7 @@ import { readPersonalEvents,PERSONAL_EVENTS_UPDATED_EVENT } from "../../data/per
 import { type HabitDefinition,type HabitRecord } from "../../data/habits/types";
 import { recordPersonalAnalytics,recordPersonalScreenView } from "../../data/personal/personalAnalytics";
 import { buttonClass,primaryClass,DayPicker,Panel,useLocalDay,type RunAction } from "./shared";
+import HabitChallengeCard from "./HabitChallengeCard";
 import HabitDailyExperience from "./HabitDailyExperience";
 const HabitSetup=lazy(()=>import("./HabitSetup"));
 const HabitHistory=lazy(()=>import("./HabitHistory"));
@@ -55,6 +56,7 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
     {page!=="home" && message && <p role="status" className="rounded-2xl border border-[#BFCDAF] bg-[#F1F7E8] p-4 text-sm leading-6">{message}</p>}
     {page!=="home" && error && <p role="alert" className="rounded-2xl border border-[#D9BD97] bg-[#FFF7E9] p-4 text-sm">{error}</p>}
     {page==="home" ? <>
+      <HabitChallengeCard habit={primary} records={records} today={today} onOpen={go}/>
       <HabitDailyExperience records={records} events={events} today={today} habit={primary} message={message} error={error} onOpen={go}/>
       {!embedded && <>
         <details open={expanded} onToggle={e=>setExpanded(e.currentTarget.open)} className="rounded-2xl border border-[#E8DDD7] bg-white p-4">

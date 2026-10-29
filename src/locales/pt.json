@@ -3837,7 +3837,10 @@
       "withWindow": "Estou a comparar os teus registos disponíveis nos últimos {{days}} dias.",
       "insufficient": "Ainda tenho pouca informação para tirar uma conclusão. Estou a observar, não a adivinhar."
     },
-    "nextStep": "O que podes fazer agora"
+    "nextStep": "O que podes fazer agora",
+    "activityIntensityGuidance": {
+      "0": "Tens {{minutes}} minutos de atividade registados esta semana sem intensidade indicada. Também tens {{moderateMinutes}} minutos moderados e {{vigorousMinutes}} minutos vigorosos explicitamente registados. Os minutos sem intensidade não podem ser comparados diretamente com a recomendação de 150 minutos moderados ou 75 vigorosos por semana. Indicar a intensidade nos próximos registos permitirá uma comparação mais rigorosa."
+    }
   },
   "companionBrain.actionRegisterMorning": "Registar a manhã",
   "companionBrain.actionRegisterAfternoon": "Registar a tarde",

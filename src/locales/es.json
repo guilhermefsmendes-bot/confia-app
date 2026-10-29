@@ -3837,7 +3837,10 @@
       "withWindow": "Estoy comparando tus registros disponibles de los últimos {{days}} días.",
       "insufficient": "Todavía tengo poca información para sacar una conclusión. Estoy observando, no adivinando."
     },
-    "nextStep": "Qué puedes hacer ahora"
+    "nextStep": "Qué puedes hacer ahora",
+    "activityIntensityGuidance": {
+      "0": "Registraste {{minutes}} minutos de actividad esta semana sin indicar la intensidad. También registraste explícitamente {{moderateMinutes}} minutos moderados y {{vigorousMinutes}} vigorosos. Los minutos sin intensidad no se pueden comparar directamente con la recomendación de 150 minutos moderados o 75 vigorosos por semana. Indicar la intensidad en próximos registros permitirá una comparación más precisa."
+    }
   },
   "companionBrain.actionRegisterMorning": "Registrar la mañana",
   "companionBrain.actionRegisterAfternoon": "Registrar la tarde",

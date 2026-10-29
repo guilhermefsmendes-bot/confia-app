@@ -3837,7 +3837,10 @@
       "withWindow": "I am comparing your available records from the last {{days}} days.",
       "insufficient": "I do not have enough information to draw a conclusion yet. I am observing, not guessing."
     },
-    "nextStep": "What you can do now"
+    "nextStep": "What you can do now",
+    "activityIntensityGuidance": {
+      "0": "You logged {{minutes}} minutes of activity this week without specifying intensity. You also logged {{moderateMinutes}} moderate and {{vigorousMinutes}} vigorous minutes explicitly. Minutes without intensity cannot be compared directly with the recommendation of 150 moderate or 75 vigorous minutes per week. Adding intensity to future entries will make the comparison more accurate."
+    }
   },
   "companionBrain.actionRegisterMorning": "Log the morning",
   "companionBrain.actionRegisterAfternoon": "Log the afternoon",

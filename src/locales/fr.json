@@ -3837,7 +3837,10 @@
       "withWindow": "Je compare tes enregistrements disponibles sur les {{days}} derniers jours.",
       "insufficient": "Je n’ai pas encore assez d’informations pour tirer une conclusion. J’observe, je ne devine pas."
     },
-    "nextStep": "Ce que tu peux faire maintenant"
+    "nextStep": "Ce que tu peux faire maintenant",
+    "activityIntensityGuidance": {
+      "0": "Tu as enregistré {{minutes}} minutes d’activité cette semaine sans préciser l’intensité. Tu as également enregistré explicitement {{moderateMinutes}} minutes modérées et {{vigorousMinutes}} minutes soutenues. Les minutes sans intensité ne peuvent pas être comparées directement à la recommandation de 150 minutes modérées ou 75 minutes soutenues par semaine. Préciser l’intensité dans les prochains relevés permettra une comparaison plus exacte."
+    }
   },
   "companionBrain.actionRegisterMorning": "Noter la matinée",
   "companionBrain.actionRegisterAfternoon": "Noter l’après-midi",

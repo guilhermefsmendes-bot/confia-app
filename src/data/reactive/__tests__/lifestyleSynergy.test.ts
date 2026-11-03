@@ -18,6 +18,9 @@ test("lifestyle synergy connects wellbeing with repeated lifestyle signals witho
   assert.equal(candidate?.metadata?.family,"lifestyleSynergy");
   assert.equal(candidate?.metadata?.group,"food_sleep_movement");
   assert.equal(candidate?.confidence,"strong");
+  assert.equal(candidate?.translationValues?.sweetsDays, 5);
+  assert.equal(candidate?.translationValues?.shortSleepDays, 5);
+  assert.equal(candidate?.translationValues?.exerciseDays, 0);
   assert.match(String(candidate?.translationKey),/food_sleep_movement/);
 });
 

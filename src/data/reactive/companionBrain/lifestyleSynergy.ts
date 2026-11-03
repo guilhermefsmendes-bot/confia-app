@@ -2,13 +2,14 @@ import type { HabitRecord } from "../../habits/types";
 import type { CompanionBrainCandidate } from "./companionBrainTypes";
 import type { CompanionCollectedData } from "../../companionData";
 import { localDay, shiftDay } from "../../habits/calendar";
-import { estimateDailyCaffeine, weeklyExercise, sleepSignal } from "../scientificGuidance";
+import { estimateCaffeineFromFoodItems } from "../scientificGuidance";
 
 /** Cross-domain interpretation layer. Associations are hypotheses, never causality. */
-export function buildLifestyleSynergyCandidate(records: HabitRecord[], companionData: CompanionCollectedData, now = new Date()): CompanionBrainCandidate | undefined {
+export function buildLifestyleSynergyCandidate(records: HabitRecord[], companionData: Pick<CompanionCollectedData, "mood" | "objectives" | "impulse" | "checkIns">, now = new Date()): CompanionBrainCandidate | undefined {
   const today = localDay(now);
   const days = Array.from({ length: 7 }, (_, i) => shiftDay(today, -i));
-  const ratings = companionData.mood.filter((m) => days.includes(m.date));
+  const wantedDays = new Set(days);
+  const ratings = companionData.mood.filter((m) => wantedDays.has(m.date));
   if (ratings.length < 3) return undefined;
   const moodValues = ratings.flatMap((m) => [m.morning, m.afternoon].filter((v): v is number => typeof v === "number"));
   if (moodValues.length < 4) return undefined;
@@ -18,18 +19,43 @@ export function buildLifestyleSynergyCandidate(records: HabitRecord[], companion
   const recentAverage = recentValues.length ? recentValues.reduce((a, b) => a + b, 0) / recentValues.length : moodAverage;
   if (moodAverage > 5.5 && recentAverage > 5.5) return undefined;
 
-  const caffeineDays = days.filter((day) => { const c = estimateDailyCaffeine(records, day); return (c.mg !== undefined && c.mg >= 300) || c.coffeeCount >= 3; }).length;
-  const sweetDays = days.filter((day) => records.some((r) => r.kind === "foodItem" && r.date === day && !r.data.deleted && r.data.category === "sweets" && r.data.quantity > 0)).length;
-  const fastFoodDays = days.filter((day) => records.some((r) => r.kind === "foodItem" && r.date === day && !r.data.deleted && r.data.category === "fastFood" && r.data.quantity > 0)).length;
-  const shortSleepDays = days.filter((day) => { const sleep = sleepSignal(records, day); return Boolean(sleep && sleep.hours < 7); }).length;
-  const exercise = weeklyExercise(records, now);
-  const exerciseRecorded = exercise.loggedDays > 0;
+  // Index only the seven relevant days in a single pass. The former version
+  // filtered/scanned the complete history separately for caffeine, sweets,
+  // fast food, sleep and each exercise statistic on every day.
+  const foodByDay = new Map<string, import("../../habits/catalog").FoodItem[]>();
+  const sleepByDay = new Map<string, number>();
+  const exerciseDays = new Set<string>();
+  let exerciseLoggedDays = 0;
+  for (const record of records) {
+    if (!wantedDays.has(record.date)) continue;
+    if (record.kind === "foodItem" && !record.data.deleted && record.data.quantity > 0) {
+      const items = foodByDay.get(record.date) ?? [];
+      items.push(record.data);
+      foodByDay.set(record.date, items);
+    } else if (record.kind === "sleep" && !sleepByDay.has(record.date)) {
+      sleepByDay.set(record.date, record.data.hours);
+    } else if (record.kind === "exercise") {
+      exerciseLoggedDays += 1;
+      if (record.data.minutes > 0) exerciseDays.add(record.date);
+    }
+  }
+  let caffeineDays = 0, sweetDays = 0, fastFoodDays = 0, shortSleepDays = 0;
+  for (const day of days) {
+    const foods = foodByDay.get(day) ?? [];
+    const caffeine = estimateCaffeineFromFoodItems(foods);
+    if ((caffeine.mg !== undefined && caffeine.mg >= 300) || caffeine.coffeeCount >= 3) caffeineDays += 1;
+    if (foods.some(item => item.category === "sweets")) sweetDays += 1;
+    if (foods.some(item => item.category === "fastFood")) fastFoodDays += 1;
+    const sleep = sleepByDay.get(day);
+    if (sleep !== undefined && sleep < 7) shortSleepDays += 1;
+  }
+  const exerciseRecorded = exerciseLoggedDays > 0;
 
-  const objectiveDays = companionData.objectives.filter((o) => days.includes(o.date) && o.total > 0);
+  const objectiveDays = companionData.objectives.filter((o) => wantedDays.has(o.date) && o.total > 0);
   const objectiveCompletionRate = objectiveDays.length ? objectiveDays.reduce((sum, o) => sum + Math.min(1, Math.max(0, o.completed / o.total)), 0) / objectiveDays.length : undefined;
   const lowObjectiveDays = objectiveDays.filter((o) => o.completed < o.total).length;
-  const impulseDays = new Set(companionData.impulse.filter((e) => days.includes(e.date.slice(0, 10))).map((e) => e.date.slice(0, 10))).size;
-  const lowCheckInDays = companionData.checkIns.filter((c) => days.includes(c.date) && c.mood <= 5).length;
+  const impulseDays = new Set(companionData.impulse.filter((e) => wantedDays.has(e.date.slice(0, 10))).map((e) => e.date.slice(0, 10))).size;
+  const lowCheckInDays = companionData.checkIns.filter((c) => wantedDays.has(c.date) && c.mood <= 5).length;
 
   const lifestyleFlags = [
     caffeineDays >= 2 ? "caffeine" : null,
@@ -65,7 +91,7 @@ export function buildLifestyleSynergyCandidate(records: HabitRecord[], companion
     translationKey: `companionSynergy.${group}.0`,
     translationValues: {
       mood: Number(moodAverage.toFixed(1)), recentMood: Number(recentAverage.toFixed(1)), caffeineDays, sweetsDays: sweetDays,
-      fastFoodDays, shortSleepDays, exerciseDays: exercise.activeDays, evidenceDays: ratings.length,
+      fastFoodDays, shortSleepDays, exerciseDays: exerciseDays.size, evidenceDays: ratings.length,
       objectiveDays: objectiveDays.length, objectiveCompletionRate: objectiveCompletionRate === undefined ? "—" : Math.round(objectiveCompletionRate * 100),
       lowObjectiveDays, impulseDays, lowCheckInDays,
     },

@@ -1,0 +1,382 @@
+{
+  "homeDaily": {
+    "more": "O meu dia: análises e planos"
+  },
+  "habitImpact": {
+    "title": "O que a ciência nos diz",
+    "subtitle": "O que os teus registos permitem concluir, o que a investigação mediu e o que ainda não sabemos sobre o teu caso.",
+    "evidence": "Ver dados científicos e limitações",
+    "evidenceType": "Tipo de evidência",
+    "population": "População estudada",
+    "statistic": "Resultado medido",
+    "certainty": "Grau de certeza",
+    "limitations": "Limitações",
+    "openSource": "Consultar fonte original",
+    "cards": {
+      "sleepShort": {
+        "title": "Sono abaixo das 7 horas",
+        "message": "Registaste {{hours}} horas: {{deficit}} horas abaixo do mínimo habitual de 7 horas para adultos e {{differenceFromReference}} horas abaixo de uma referência de 8 horas. Uma meta-análise de 44 estudos quantificou efeitos de uma noite com oportunidade de sono de 2–6 horas: sonolência (SMD 0,986), tempo de reação (SMD 0,512) e lapsos de atenção (SMD 0,489). São diferenças padronizadas de grupos, não percentagens nem uma previsão individual."
+      },
+      "sleepRange": {
+        "title": "Duração do sono registada",
+        "message": "Registaste {{hours}} horas, dentro da referência habitual de 7–9 horas para adultos. A necessidade individual varia; este registo, por si só, não mede a qualidade do sono nem o funcionamento do sistema nervoso."
+      },
+      "sleepLong": {
+        "title": "Sono superior a 9 horas",
+        "message": "Registaste {{hours}} horas. Dormir mais de 9 horas não significa automaticamente um problema: pode ser adequado durante a recuperação de privação de sono ou noutras circunstâncias. A duração isolada não permite concluir a causa."
+      },
+      "exercise": {
+        "title": "Atividade física — últimos 7 dias",
+        "message": "Hoje registaste {{todayMinutes}} minutos em {{sessions}} sessão(ões). Nos últimos 7 dias: {{moderate}} min de atividade moderada (referência mínima: {{moderateTarget}} min/semana), {{vigorous}} min de atividade vigorosa (referência mínima: {{vigorousTarget}} min/semana), {{strengthDays}} dias de fortalecimento muscular (referência: {{strengthTarget}} dias) e {{unclassified}} min de intensidade ligeira ou não indicada, que não somei às metas."
+      },
+      "caffeine": {
+        "title": "Cafeína estimada",
+        "message": "Com base nos tipos e quantidades registados, a estimativa é {{mg}} mg de cafeína, cerca de {{percentage}}% da referência de 400 mg/dia da EFSA para a maioria dos adultos saudáveis. Nos registos antigos sem detalhe da dose, são usados valores típicos por categoria. É uma estimativa, não uma medição do produto consumido."
+      },
+      "caffeineLate": {
+        "title": "Cafeína registada ao fim do dia",
+        "message": "Foi registada cafeína num horário tardio. A EFSA refere que uma dose única de 100 mg pode afetar o sono em algumas pessoas, sobretudo perto da hora de deitar. Como a Confia pode não conhecer a tua hora de deitar nem a dose exata, não é possível calcular o efeito neste registo."
+      },
+      "produce": {
+        "title": "Fruta e vegetais — comparação com a recomendação",
+        "message": "Registaste {{value}} {{unit}}. A referência da OMS é pelo menos {{reference}} {{unit}} por dia para pessoas com mais de 10 anos. Esta comparação só usa quantidades explicitamente registadas em gramas ou porções; não converte peças individuais em pesos presumidos."
+      },
+      "produceUnquantified": {
+        "title": "Fruta e vegetais sem quantidade comparável",
+        "message": "Registaste fruta ou vegetais, mas a quantidade está em unidades/itens e não em gramas ou porções. Não vou estimar o peso nem afirmar que atingiste ou falhaste a recomendação da OMS."
+      },
+      "water": {
+        "title": "Água registada",
+        "message": "Registaste aproximadamente {{ml}} ml de água. A DGS apresenta 1 500 ml/dia como orientação prática geral, mas as necessidades variam e este registo pode não incluir todos os líquidos. O valor não diagnostica desidratação."
+      },
+      "limits": {
+        "fastFood": {
+          "title": "Fast food registada",
+          "message": "A OMS não define uma quantidade diária específica de fast food. Recomenda uma alimentação variada, com fruta, vegetais, leguminosas e cereais integrais, e limitar alimentos ricos em sal, açúcares livres e gorduras pouco saudáveis. Dá preferência a refeições simples e pouco processadas."
+        },
+        "sweets": {
+          "title": "Doces registados",
+          "message": "A OMS recomenda que os açúcares livres representem menos de 10% da energia diária e, idealmente, menos de 5%. Para uma alimentação de 2 000 kcal, são cerca de 50 g e 25 g por dia, respetivamente. Esta referência inclui os açúcares livres de todos os alimentos e bebidas, não apenas dos doces."
+        },
+        "salt": {
+          "title": "Alimentos salgados registados",
+          "message": "Para adultos, a OMS recomenda consumir menos de 5 g de sal por dia (menos de 2 000 mg de sódio). Consulta os rótulos e limita alimentos muito salgados, dando preferência a alimentos frescos ou pouco processados."
+        },
+        "alcohol": {
+          "title": "Álcool registado",
+          "message": "A OMS indica que não existe um nível de consumo de álcool isento de risco. Do ponto de vista da saúde, quanto menos álcool, menor o risco; não é recomendado estabelecer um consumo diário."
+        },
+        "tobacco": {
+          "title": "Tabaco registado",
+          "message": "A OMS indica que todas as formas de consumo de tabaco são prejudiciais e que não existe um nível seguro de exposição. A recomendação de saúde é evitar o tabaco e a exposição ao fumo."
+        },
+        "cereals": {
+          "title": "Cereais registados",
+          "message": "A OMS recomenda privilegiar cereais integrais em vez de cereais refinados, como parte de uma alimentação variada. Escolhe opções como aveia, pão integral e arroz integral, dando atenção ao teor de fibra e aos açúcares adicionados."
+        },
+        "protein": {
+          "title": "Fontes de proteína registadas",
+          "message": "A OMS recomenda uma alimentação variada. Alterna fontes de proteína, incluindo leguminosas (feijão, grão e lentilhas), frutos secos, peixe e outras opções adequadas às tuas necessidades."
+        },
+        "fats": {
+          "title": "Gorduras registadas",
+          "message": "A OMS recomenda que a gordura total não ultrapasse, em geral, 30% da energia diária, que a gordura saturada fique abaixo de 10% e a gordura trans abaixo de 1%. Privilegia gorduras insaturadas, como azeite, frutos secos e sementes, em vez de gorduras trans e excesso de saturadas."
+        },
+        "soda": {
+          "title": "Refrigerantes registados",
+          "message": "A OMS recomenda que os açúcares livres representem menos de 10% da energia diária e, idealmente, menos de 5%. As bebidas açucaradas contribuem para esse total; privilegia água e bebidas sem açúcar."
+        }
+      },
+      "habitLog": {
+        "title": "Registo do teu hábito",
+        "message": "Hábito: “{{habitName}}”. Objetivo definido: “{{goal}}”. Este registo confirma se assinalaste o objetivo, mas não mede automaticamente a dose, a duração ou o efeito fisiológico. Para uma análise quantificada, o objetivo precisa de uma medida observável."
+      },
+      "caffeineUnknown": {
+        "title": "Cafeína não quantificável neste registo",
+        "message": "O tipo ou a dose registada não permite estimar a cafeína com fiabilidade. As quantidades variam muito entre produtos e tamanhos; não vou assumir uma dose padrão como se fosse exata."
+      },
+      "nutrientDetailLimit": {
+        "title": "Composição nutricional não registada",
+        "message": "O registo guarda a categoria e a quantidade, mas não os valores do rótulo nutricional. Por isso, não é possível calcular com rigor as calorias, os gramas de açúcar, sal ou gordura saturada deste consumo."
+      },
+      "waterUnknown": {
+        "title": "Água registada sem volume comparável",
+        "message": "O registo antigo contém uma contagem de água, mas não um volume em ml nem um tamanho de dose. Não vou converter essa contagem em litros sem saber o tamanho do copo/garrafa."
+      },
+      "sleepDetails": {
+        "title": "Qualidade e despertares registados",
+        "message": "Além da duração, classificaste a qualidade do sono como {{quality}}/5 e registaste {{awakenings}} despertares. São auto-relatos úteis para comparar padrões, mas não medem fases do sono nem diagnosticam uma perturbação.",
+        "qualityOnly": "Classificaste a qualidade do sono como {{quality}}/5. É uma avaliação subjetiva; não mede fases do sono nem diagnostica uma perturbação."
+      }
+    },
+    "personal": {
+      "title": "O que aparece no teu histórico",
+      "intro": "Comparação exploratória dos teus próprios registos emocionais em dias com diferentes níveis de hábitos efetivamente medidos. Não presume consumos ou atividades em falta.",
+      "sleep": "Menos de 7 horas de sono",
+      "exercise": "30 minutos ou mais de exercício nos dias registados",
+      "caffeine": "Pelo menos 200 mg estimados de cafeína",
+      "fastFood": "Fast food registada",
+      "pattern": "Nos teus registos, a avaliação emocional média foi {{direction}} nos dias com {{condition}} ({{exposedMean}}/10; {{exposedDays}} dias) do que nos dias de comparação ({{comparisonMean}}/10; {{comparisonDays}} dias). Diferença observada: {{difference}} pontos.",
+      "direction": {
+        "lower": "mais baixo",
+        "higher": "mais alto",
+        "similar": "sem diferença relevante"
+      },
+      "caution": "Esta é uma associação observada no teu histórico, não prova que o hábito tenha causado a alteração. A comparação de cafeína usa 200 mg e a de exercício usa 30 minutos apenas como divisões analíticas, não como limites clínicos ou recomendações. Para exercício, só entram dias com sessões registadas; dias sem registo nunca são tratados como ausência de atividade. Outros fatores e registos incompletos podem influenciar os resultados.",
+      "insufficient": "Ainda não há dados suficientes para uma comparação pessoal exploratória. São necessários pelo menos 10 dias medidos em cada grupo e uma avaliação emocional nesses mesmos dias. Registos em falta não são tratados como zero. Dias com avaliações emocionais disponíveis nos últimos 30 dias: {{count}}.",
+      "alcohol": "Álcool registado",
+      "tobacco": "Tabaco registado",
+      "sweets": "Doces registados",
+      "salt": "Alimentos salgados registados",
+      "water": "Pelo menos 1 500 ml de água registados",
+      "produce": "Pelo menos 400 g ou 5 porções de fruta e vegetais"
+    },
+    "units": {
+      "g": "g",
+      "portions": "porções"
+    },
+    "lastReviewed": "Fonte verificada em",
+    "showMore": "Ver mais {{count}} observações",
+    "showLess": "Mostrar menos",
+    "submenuHint": "Abre para explorar os sinais, as evidências e os teus padrões pessoais.",
+    "minimize": "Minimizar",
+    "maximize": "Maximizar",
+    "sources": {
+      "sleepRestriction": {
+        "title": "Restrição do sono e função cognitiva: revisão sistemática e meta-análise",
+        "organization": "Sleep Medicine Reviews / PubMed",
+        "evidenceType": "Revisão sistemática e meta-análise de 44 estudos",
+        "population": "Adultos; oportunidade de sono limitada a 2–6 horas durante uma noite",
+        "statistic": "Uma noite de sono restringido aumentou a sonolência subjetiva (diferença média padronizada 0,986) e prejudicou a atenção sustentada: tempo de reação 0,512 e lapsos de atenção 0,489.",
+        "certainty": "Evidência de efeitos de curto prazo na sonolência e atenção sustentada; os efeitos variaram conforme o resultado cognitivo.",
+        "limitations": "As diferenças padronizadas não são percentagens e não preveem o tempo de reação ou estado emocional de uma pessoa."
+      },
+      "adultSleep": {
+        "title": "Duração de sono recomendada para adultos saudáveis: declaração de consenso",
+        "organization": "American Academy of Sleep Medicine / Sleep Research Society",
+        "evidenceType": "Declaração de consenso de especialistas",
+        "population": "Adultos saudáveis",
+        "statistic": "Os adultos devem dormir regularmente 7 ou mais horas por noite para promover uma saúde ótima.",
+        "certainty": "Recomendação de consenso apoiada por revisão de resultados de saúde.",
+        "limitations": "As necessidades individuais e a recuperação ocasional variam; uma única noite curta não constitui um diagnóstico."
+      },
+      "caffeine": {
+        "title": "Cafeína",
+        "organization": "Autoridade Europeia para a Segurança dos Alimentos (EFSA)",
+        "evidenceType": "Avaliação científica de risco e orientação pública",
+        "population": "Adultos saudáveis; não aplicável a todas as condições clínicas ou gravidez",
+        "statistic": "Até 400 mg por dia, distribuídos ao longo do dia, não suscitam preocupações de segurança para a maioria dos adultos saudáveis; uma dose única de 100 mg pode afetar o sono de algumas pessoas, sobretudo perto da hora de deitar.",
+        "certainty": "Orientação oficial para a população; a sensibilidade individual varia.",
+        "limitations": "As quantidades de cafeína da Confia são estimativas baseadas em doses típicas, não medições laboratoriais nem valores de rótulos."
+      },
+      "physicalActivity": {
+        "title": "Orientações da OMS sobre atividade física e comportamento sedentário",
+        "organization": "Organização Mundial da Saúde (OMS)",
+        "evidenceType": "Recomendação de saúde pública baseada em revisão da evidência",
+        "population": "Adultos",
+        "statistic": "A OMS recomenda 150–300 minutos de atividade aeróbica moderada por semana, ou 75–150 minutos de atividade vigorosa, e fortalecimento muscular em pelo menos 2 dias por semana.",
+        "certainty": "Recomendação de saúde pública; qualquer atividade é melhor do que nenhuma.",
+        "limitations": "Minutos sem intensidade registada não podem ser contabilizados com rigor como atividade moderada ou vigorosa. A capacidade e o contexto clínico individuais são importantes."
+      },
+      "fruitVegetables": {
+        "title": "Alimentação saudável",
+        "organization": "Organização Mundial da Saúde (OMS)",
+        "evidenceType": "Recomendação de saúde pública",
+        "population": "Pessoas com mais de 10 anos",
+        "statistic": "A OMS recomenda pelo menos 400 g de fruta e vegetais por dia para pessoas com mais de 10 anos.",
+        "certainty": "Recomendação oficial de alimentação para a população.",
+        "limitations": "O número de peças individuais não pode ser convertido com rigor em gramas sem informação de peso ou porção."
+      },
+      "hydrationPortugal": {
+        "title": "Conheça os Alimentos — Dia Alimentar Completo, Equilibrado e Variado",
+        "organization": "Programa Nacional para a Promoção da Alimentação Saudável (DGS), Portugal",
+        "evidenceType": "Orientação de saúde pública",
+        "population": "População geral; as necessidades variam conforme as circunstâncias",
+        "statistic": "A orientação pública da DGS sugere beber pelo menos 1,5 litros de água por dia e aumentar a ingestão em situações de calor ou exercício.",
+        "certainty": "Orientação prática geral, não um teste individual de hidratação.",
+        "limitations": "A água registada não representa todos os líquidos ingeridos; as necessidades variam com o corpo, alimentação, temperatura, atividade e saúde."
+      },
+      "ultraProcessedFood": {
+        "title": "Exposição a alimentos ultraprocessados e resultados adversos de saúde: revisão de meta-análises epidemiológicas",
+        "organization": "The BMJ / PubMed",
+        "evidenceType": "Revisão abrangente de 45 análises agrupadas, incluindo 9 888 373 participantes",
+        "population": "Estudos populacionais; exposição a alimentos ultraprocessados",
+        "statistic": "Maior exposição a alimentos ultraprocessados foi associada a resultados de ansiedade prevalente (odds ratio 1,48; IC 95% 1,37–1,59); a qualidade da evidência para este resultado foi classificada como baixa.",
+        "certainty": "Associação; qualidade da evidência baixa para o resultado de ansiedade.",
+        "limitations": "Uma odds ratio não representa o aumento percentual do risco individual. Um registo genérico de fast food não identifica a classificação NOVA nem quantifica a exposição."
+      },
+      "freeSugar": {
+        "title": "Alimentação saudável",
+        "organization": "Organização Mundial da Saúde (OMS)",
+        "evidenceType": "Orientação alimentar de saúde pública",
+        "population": "População geral; as necessidades energéticas variam",
+        "statistic": "A OMS recomenda limitar os açúcares livres a menos de 10% da energia diária, idealmente 5% ou menos. Para um adulto com 2 000 kcal/dia, 10% corresponde a cerca de 50 g.",
+        "certainty": "Recomendação oficial para a população.",
+        "limitations": "A Confia regista atualmente ocasiões ou quantidades de doces, não os gramas de açúcar livre nem a energia diária total necessários para calcular esta percentagem."
+      },
+      "salt": {
+        "title": "Alimentação saudável / Redução do sódio",
+        "organization": "Organização Mundial da Saúde (OMS)",
+        "evidenceType": "Orientação alimentar de saúde pública",
+        "population": "Adultos",
+        "statistic": "A OMS recomenda menos de 2 000 mg de sódio por dia, o equivalente a menos de 5 g de sal. Uma ingestão elevada de sódio está associada a pressão arterial elevada e maior risco cardiovascular.",
+        "certainty": "Recomendação oficial para a população.",
+        "limitations": "A categoria atual da Confia regista alimentos ou ocasiões salgados, não o teor de sódio dos produtos nem a ingestão diária total de sal."
+      },
+      "tobacco": {
+        "title": "Tabaco e nicotina",
+        "organization": "Organização Mundial da Saúde (OMS)",
+        "evidenceType": "Ficha informativa de saúde pública",
+        "population": "Pessoas que usam tabaco e pessoas expostas ao fumo passivo",
+        "statistic": "A OMS indica que o tabaco causa mais de 7 milhões de mortes por ano e que todas as formas de consumo são prejudiciais; não existe um nível seguro de exposição.",
+        "certainty": "Evidência estabelecida de danos a nível populacional.",
+        "limitations": "Uma contagem genérica não identifica o produto, teor de nicotina, quantidade ou duração, pelo que não permite estimar a exposição ou o risco individual."
+      },
+      "gamingDisorder": {
+        "title": "Perturbação de jogo",
+        "organization": "Organização Mundial da Saúde (OMS), CID-11",
+        "evidenceType": "Classificação internacional de doenças e revisão especializada",
+        "population": "Pessoas cujo padrão de jogo causa prejuízo significativo no funcionamento",
+        "statistic": "A OMS define a perturbação por controlo prejudicado, prioridade dada ao jogo sobre outras atividades e continuação apesar de consequências negativas; o padrão deve causar prejuízo significativo e normalmente estar presente durante pelo menos 12 meses.",
+        "certainty": "Classificação clínica; não é um limite para a duração habitual de jogo.",
+        "limitations": "Jogar ou uma única sessão não implica uma perturbação. O registo atual da Confia não mede horas, perda de controlo ou prejuízo funcional."
+      },
+      "alcohol": {
+        "title": "Álcool",
+        "organization": "Organização Mundial da Saúde (OMS)",
+        "evidenceType": "Ficha informativa de saúde pública",
+        "population": "População geral; o risco depende da quantidade e do contexto",
+        "statistic": "A OMS afirma que nenhuma forma de consumo de álcool é isenta de risco; o risco depende da quantidade, frequência e fatores pessoais.",
+        "certainty": "Orientação de saúde pública.",
+        "limitations": "O registo atual da Confia não recolhe de forma fiável o volume da bebida e a concentração alcoólica, pelo que não permite calcular gramas de etanol."
+      },
+      "healthyDiet": {
+        "title": "Alimentação saudável",
+        "organization": "Organização Mundial da Saúde (OMS)",
+        "evidenceType": "Orientação alimentar de saúde pública",
+        "population": "População geral; as necessidades variam com a idade, atividade e saúde",
+        "statistic": "A OMS recomenda uma alimentação variada, incluindo cereais integrais, leguminosas, vegetais, fruta e fontes adequadas de proteína. Para adultos, a gordura total deve geralmente fornecer no máximo 30% da energia, a gordura saturada menos de 10%, a gordura trans menos de 1% e os açúcares livres menos de 10%.",
+        "certainty": "Orientação alimentar oficial para a população.",
+        "limitations": "A Confia regista categorias e quantidades, mas não recolhe de forma consistente rótulos, tipo integral dos cereais, fonte de proteína, açúcares adicionados ou composição das gorduras. Estes registos não permitem calcular a ingestão individual de nutrientes."
+      }
+    }
+  },
+  "habitClock": {
+    "title": "Relógio Biológico",
+    "symbolAlt": "Símbolo de relógio com figura humana, colorido de acordo com os hábitos registados",
+    "tones": {
+      "favourable": "Registos predominantemente favoráveis",
+      "mixed": "Registos mistos ou equilíbrio intermédio",
+      "unfavourable": "Mais registos potencialmente desfavoráveis",
+      "unknown": "Sem registo"
+    },
+    "coverage": "Com base em {{count}} de 3 áreas registadas",
+    "noData": "Regista sono, movimento ou alimentação para começar. A ausência de registos não conta como hábito negativo.",
+    "disclaimer": "É um resumo visual dos registos, não uma avaliação médica do corpo.",
+    "scaleAlt": "Escala visual gradual de laranja a verde"
+  },
+  "habitTrends": {
+    "title": "A tua evolução",
+    "subtitle": "Resumo dos registos recentes. Os espaços sem registos não são tratados como zero.",
+    "period": "Últimos {{days}} dias",
+    "daysWithRecords": "{{count}} dias com registos de hábitos",
+    "sleep": "Sono médio",
+    "hours": "h/noite",
+    "measuredDays": "{{count}} dias medidos",
+    "exercise": "Movimento registado",
+    "minutes": "min",
+    "activeDays": "{{count}} dias com atividade",
+    "mood": "Avaliação emocional média",
+    "disclaimer": "As médias descrevem apenas os registos disponíveis; não demonstram que um hábito tenha causado uma alteração emocional.",
+    "comparison": "Comparação com o período anterior: {{value}}",
+    "noComparison": "Sem dados suficientes para comparar com o período anterior"
+  },
+  "habitDailyExperience": {
+    "title": "Espelhado no lago",
+    "eyebrow": "CONFIA · O TEU ESPELHO",
+    "subtitle": "Pequenos registos. Uma visão mais clara de ti, ao longo do tempo.",
+    "dayTitle": "O teu dia, até agora",
+    "dayPastTitle": "Os teus registos deste dia",
+    "domainsRecorded": "áreas registadas",
+    "recordedToday": "Registado neste dia",
+    "noPressure": "Sem pressão",
+    "evolutionTitle": "A tua evolução",
+    "evolutionSubtitle": "Compara o teu dia com a tua semana ou com os últimos 30 dias.",
+    "views": "Vistas do teu progresso",
+    "tabs": {
+      "mirror": "Espelho",
+      "calendar": "Calendário",
+      "report": "Relatório"
+    },
+    "comparisonDetails": "Ver comparação com os seis dias anteriores",
+    "chooseDate": "Escolher data para consultar",
+    "selectedDay": "Registos de {{date}}",
+    "domains": {
+      "sleep": "Sono",
+      "exercise": "Movimento",
+      "nutrition": "Alimentação",
+      "mood": "Humor"
+    },
+    "notRecorded": "Ainda sem registo",
+    "sleepValue": "{{value}} h",
+    "minutesValue": "{{value}} min",
+    "entriesValue": "{{value}} registo(s)",
+    "moodValue": "{{value}}/10",
+    "mirror": {
+      "hasRecords": "Estes são os registos disponíveis para este dia.",
+      "empty": "Ainda não há registos para este dia. Podes começar por uma pequena observação."
+    },
+    "learningTitle": "O que os teus registos mostram",
+    "learningEmpty": "Com mais registos, poderás começar a comparar o teu sono e humor com os teus padrões habituais.",
+    "insight": {
+      "sleepMood": "Em {{date}}, registaste {{sleep}} horas de sono e avaliaste o teu humor em {{mood}}/10. Nos últimos 30 dias, existem {{count}} dias com ambos os registos; ainda não há dados emparelhados suficientes para uma comparação pessoal mais estável.",
+      "sleepOnly": "Em {{date}}, registaste {{sleep}} horas de sono. Quando houver mais registos, poderás comparar este valor com os teus padrões habituais.",
+      "moodOnly": "Em {{date}}, avaliaste o teu humor em {{mood}}/10. Com mais registos, poderás acompanhar como esta avaliação varia ao longo do tempo.",
+      "empty": "Quando fizeres os primeiros registos, este espaço vai ajudar-te a compreender melhor a informação que recolheste.",
+      "caution": "Esta é uma leitura dos teus registos, não um diagnóstico. Os padrões pessoais só são apresentados quando os dados permitem uma comparação adequada.",
+      "sleepMoodHistory": "Em {{date}}: {{currentSleep}} h de sono e humor {{currentMood}}/10. Nos últimos 30 dias, em {{count}} dias com ambos os registos, as médias foram {{sleep}} h de sono e {{mood}}/10 de humor. Isto descreve os registos e não demonstra que um aspeto cause o outro."
+    },
+    "sleepCompare": "Em {{date}}, registaste {{current}} h de sono. A média dos seis dias anteriores com registos é {{average}} h. É uma comparação descritiva, não uma explicação da causa.",
+    "moodCompare": "Em {{date}}, a tua avaliação de humor foi {{current}}/10; nos seis dias anteriores com registo, a média foi {{average}}/10.",
+    "quickCheckin": "Queres registar {{domain}} agora?",
+    "calendarIntro": "Escolhe um dia para rever o que registaste. Os pontos mostram áreas observadas; os dias vazios ficam neutros.",
+    "observedDomains": "{{count}} áreas observadas",
+    "recorded": "Registos",
+    "rest": "Sem registos",
+    "gardenTitle": "O teu jardim de presença",
+    "gardenText": "Observaste o teu bem-estar em {{count}} dos últimos 7 dias. Cada registo ajuda a construir uma visão mais completa — não precisas de uma sequência perfeita.",
+    "reportTitle": "Resumo pessoal de 30 dias",
+    "reportSubtitle": "Resumo até {{date}}",
+    "report": {
+      "activeDays": "Dias com registos",
+      "sleep": "Média de sono",
+      "exercise": "Movimento registado",
+      "mood": "Humor médio",
+      "comparison": "Diferença face aos 30 dias anteriores — sono: {{sleep}}; movimento: {{exercise}}; humor: {{mood}}.",
+      "caution": "Este relatório resume apenas os dados registados. Dias sem registos não são tratados como zero e as diferenças não demonstram causalidade."
+    },
+    "daysValue": "{{value}} dias",
+    "printReport": "Imprimir / guardar como PDF",
+    "moodCheckinTitle": "Check-in rápido de humor",
+    "moodScaleLabel": "Como te sentes agora? 1 = muito em baixo · 10 = muito bem",
+    "moodSaved": "Registo guardado: {{value}}/10. Obrigado por parares um momento.",
+    "progressMilestone": "Nos últimos 30 dias, tiveste registos em pelo menos {{count}} dias. Isso já ajuda a construir uma imagem mais completa de ti — mesmo com pausas pelo caminho.",
+    "minimize": "Minimizar evolução",
+    "maximize": "Maximizar evolução"
+  },
+  "lifestyleMirror": {
+    "headers": {
+      "day": "Dia",
+      "coffee": "Café",
+      "energy": "Energéticas",
+      "fast": "Fast food",
+      "sweets": "Doces",
+      "fats": "Gorduras",
+      "exercise": "Movimento",
+      "sleep": "Sono",
+      "mood": "Humor"
+    },
+    "tableDetails": "Ver tabela completa",
+    "dailySummary": "Resumo do dia"
+  }
+}

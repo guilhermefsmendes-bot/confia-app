@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { X, ArrowRight, CheckCircle, Eye, Hand, Ear, Sparkles, Smile, Wind, Droplets, Sun, Globe } from 'lucide-react';
+import { appendPersonalEvents } from '../data/personal/personalEventStorage';
+import { makePersonalEvent } from '../data/personal/personalEvent';
+import { recordPersonalAnalytics } from '../data/personal/personalAnalytics';
 
 interface TriageModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddXp: (amount: number) => void;
 }
 
 type BranchType = 'initial' | 'terra' | 'vento' | 'agua' | 'sol';
 
-export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose, onAddXp }) => {
+export const TriageModal: React.FC<TriageModalProps> = ({ isOpen, onClose }) => {
 const { t } = useTranslation();
   const [currentBranch, setCurrentBranch] = useState<BranchType>('initial');
   const [branchStep, setBranchStep] = useState(0); // 0 = intro/interactive, 1 = affirmation/closing
@@ -34,6 +36,7 @@ const { t } = useTranslation();
   const [solStep, setSolStep] = useState(1); // 1 = maxilar, 2 = ombros, 3 = maos
 
   const [triageCompleted, setTriageCompleted] = useState(false);
+  const [postExerciseMood, setPostExerciseMood] = useState(5);
 
   // Reset states on close
   const handleReset = () => {
@@ -47,6 +50,7 @@ const { t } = useTranslation();
     setWaterSip(false);
     setSolStep(1);
     setTriageCompleted(false);
+    setPostExerciseMood(5);
     onClose();
   };
 
@@ -93,10 +97,21 @@ const { t } = useTranslation();
     if (branchStep === 0) {
       setBranchStep(1);
     } else {
-      // Award reward XP
-      onAddXp(25);
       setTriageCompleted(true);
     }
+  };
+
+  const handleSavePostExerciseMood = () => {
+    appendPersonalEvents([makePersonalEvent({
+      id: `pe_sos_after_${Date.now()}`,
+      type: "intervention",
+      timestamp: new Date().toISOString(),
+      source: "sos_grounding",
+      value: postExerciseMood,
+      metadata: { branch: currentBranch, phase: "after", selfReported: true },
+    })]);
+    recordPersonalAnalytics("intervention_after_rating");
+    handleReset();
   };
 
   const handleBackStep = () => {
@@ -155,23 +170,24 @@ const { t } = useTranslation();
                   <div className="w-16 h-16 bg-[#B85F48]/15 text-[#934A38] rounded-full flex items-center justify-center shadow-sm">
                     <CheckCircle size={36} className="animate-bounce" />
                   </div>
-                  <h3 className="text-lg font-black text-[#2F2926] font-display">{t("moodRestored")}</h3>
+                  <h3 className="text-lg font-black text-[#2F2926] font-display">{t("groundingCompletedTitle")}</h3>
                   <p className="text-xs text-slate-500 max-w-xs leading-relaxed font-semibold">
-                   {t("groundingSuccessMessage")}
+                   {t("groundingCompletedMessage")}
                   </p>
-                  <div className="bg-[#B85F48]/10 border border-[#B85F48]/20 rounded-[24px] p-5 w-full text-left">
-                    <h4 className="text-xs font-black text-[#934A38] uppercase tracking-wider mb-1 flex items-center gap-1.5 font-display">
-                     <Sparkles size={14} /> {t("companionEvolution")}
-                    </h4>
-                    <p className="text-xs text-[#2F2926] leading-relaxed font-semibold">
-                     {t("friendConnectionReward")} <strong className="text-[#934A38]">+25 XP</strong> {t("evolutionProgress")}
-                    </p>
+                  <div className="w-full rounded-2xl border border-[#E8DDD7] bg-[#FFFCFA] p-4 text-left">
+                    <label htmlFor="sos-post-exercise-mood" className="block text-xs font-black text-[#3F2C27]">{t("sosPostExerciseQuestion")}</label>
+                    <div className="mt-3 flex items-center gap-3">
+                      <span className="text-[10px] text-[#806D65]">1</span>
+                      <input id="sos-post-exercise-mood" type="range" min="1" max="10" step="1" value={postExerciseMood} onChange={event => setPostExerciseMood(Number(event.target.value))} className="min-w-0 flex-1 accent-[#934A38]" />
+                      <span className="text-[10px] text-[#806D65]">10</span>
+                      <strong className="w-5 text-right text-sm text-[#934A38]">{postExerciseMood}</strong>
+                    </div>
                   </div>
                   <button type="button"
-                    onClick={handleReset}
+                    onClick={handleSavePostExerciseMood}
                     className="w-full py-4 bg-[#934A38] hover:bg-[#B56A4F] text-white rounded-2xl font-black text-xs uppercase tracking-wider font-display transition-all shadow-lg shadow-[#934A38]/20 cursor-pointer"
                   >
-                   {t("backToMainMenu")}
+                   {t("sosSaveAndClose")}
                   </button>
                 </motion.div>
               ) : currentBranch === 'initial' ? (

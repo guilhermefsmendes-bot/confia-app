@@ -1,5 +1,15 @@
 export const PERSONAL_EVENT_SCHEMA_VERSION = 1 as const;
 
+/** Strict local calendar-date validation shared by personal history projections. */
+export function isValidPersonalLocalDate(value: unknown): value is string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(0);
+  date.setUTCHours(0, 0, 0, 0);
+  date.setUTCFullYear(year, month - 1, day);
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
 export type PersonalEventType =
   | "mood"
   | "checkin"
@@ -19,6 +29,7 @@ export type PersonalEventSource =
   | "habit_daily"
   | "objective"
   | "impulso"
+  | "sos_grounding"
   | "app_context"
   | "insight"
   | "microexperiment"
@@ -119,4 +130,34 @@ export function makePersonalEvent<T extends PersonalEvent>(event: Omit<T, "schem
     localDate: event.localDate ?? localDateFromTimestamp(event.timestamp),
     schemaVersion: PERSONAL_EVENT_SCHEMA_VERSION,
   } as T;
+}
+
+/**
+ * Builds a mood observation for the selected local calendar day.
+ * For a past day, timestamp is a noon-local placeholder for the observation date
+ * (the exact observation time is unknown); metadata.recordedAt preserves the real
+ * creation time. localDate is always the user's selected observation day.
+ */
+export function createMoodObservationEvent(selectedDate: string, value: number, now = new Date()): MoodEvent {
+  const today = localDateFromTimestamp(now.toISOString());
+  const retrospective = selectedDate !== today;
+  const timestamp = retrospective
+    ? new Date(`${selectedDate}T12:00:00`).toISOString()
+    : now.toISOString();
+  return makePersonalEvent<MoodEvent>({
+    id: createPersonalEventId("mood", `${timestamp}_${now.getTime()}`),
+    type: "mood",
+    source: "daily_rating",
+    timestamp,
+    localDate: selectedDate,
+    value,
+    metadata: {
+      moment: "evening",
+      source: "habit_quick_checkin",
+      observationDate: selectedDate,
+      recordedAt: now.toISOString(),
+      retrospective,
+      observationTimeKnown: !retrospective,
+    },
+  });
 }

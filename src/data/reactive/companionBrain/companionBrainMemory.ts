@@ -1,4 +1,4 @@
-import {getHabitOwner} from "../../habits/store";
+import {getCurrentHabitOwner} from "../../habits/owner";
 import type {
   CompanionBrainCategory,
   CompanionConversationThread,
@@ -9,7 +9,7 @@ import type {
   CompanionBrainShownMessage,
 } from "./companionBrainTypes";
 
-const storageKey = () => "confia_companion_brain_memory_v2:"+getHabitOwner();
+const storageKey = () => "confia_companion_brain_memory_v2:"+getCurrentHabitOwner();
 
 const MAX_SHOWN_MESSAGES = 120;
 const MAX_RECENT_EVENTS = 100;

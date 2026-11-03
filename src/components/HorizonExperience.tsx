@@ -33,7 +33,6 @@ const HORIZON_HAND_KEY="confia_horizon_word_hand_v1";
 const HORIZON_TREASURE_HISTORY_KEY="confia_horizon_treasure_history_v1";
 const HORIZON_ISLAND_REFLECTIONS_KEY="confia_horizon_island_reflections_v1";
 const HORIZON_QUESTION_HISTORY_KEY="confia_horizon_question_history_v1";
-const COMMUNITY_EVENT="confia:community-post-created";
 
 const COPY={
   pt:{horizon:"O teu horizonte",horizonSub:"Céu, areia e mar — três espaços para observar, guardar e transformar o que sentes.",sky:"Céu",sand:"Areia",sea:"Mar da serenidade",skySub:"O que sentes também pode ganhar forma.",sandSub:"Guarda uma carta no teu baú e reencontra-a mais tarde com novos olhos.",seaSub:"Liga emoções, pensamentos e ações. Pequenas escolhas podem mudar o rumo.",capsule:"A tua cápsula do tempo",bury:"Enterrar carta por 7 dias",placeholder:"Escreve algo que gostarias de reencontrar daqui a uma semana…",buried:"O teu baú abre em",open:"Abrir o baú",guess:"Antes de abrir, queres tentar adivinhar o que escreveste há 7 dias?",guessPlaceholder:"Escreve aqui o que pensas que deixaste na cápsula…",reveal:"Agora compara o que imaginavas com aquilo que realmente escreveste.",remembered:"O que imaginavas",actual:"O que escreveste",feedback:"O que dirias hoje ao teu eu daquela semana?",rebury:"Responder e voltar a enterrar por 7 dias",monthTitle:"O teu mês",monthPrompt:"Antes de veres os teus registos: como resumirias este último mês?",monthPlaceholder:"Escreve uma frase ou pequeno resumo do mês…",monthCompare:"Comparar com as minhas semanas",monthYourSummary:"O teu resumo do mês",monthWeekly:"O que foste dizendo semana a semana",monthCombined:"Somatório dos teus feedbacks",monthClose:"Fechar mês e começar novo ciclo",monthTreasure:"O que fica deste mês?",monthTreasurePlaceholder:"Escreve uma frase que queres levar contigo deste mês…",monthTreasureSave:"Guardar e começar novo ciclo",monthWaiting:"Perspetiva mensal",monthIn:"Revisão mensal em",quest:"Iniciativa opcional",choose:"Arrasta uma palavra para a água",needWord:"Outra palavra",needWordTitle:"Escolhe outra palavra",needWordPrompt:"Escreve uma palavra que, para ti, faça sentido vir agora depois da palavra anterior.",needWordPlaceholder:"Escreve uma palavra…",needWordFind:"Usar esta palavra",needWordNoMatch:"Podes usar livremente esta palavra.",needWordMoment:"Porque é que esta palavra faz sentido agora?",needWordMomentPlaceholder:"Explica com as tuas palavras porque escolheste esta palavra…",needWordSave:"Guardar ligação e colocar no caminho",needWordSaved:"A tua ligação ficou guardada no caminho.",bonus:"Vantagem desbloqueada",restart:"Novo caminho",resumeTitle:"Continuar o teu percurso?",resumeText:"Encontrámos um percurso que ficou guardado. Podes continuar exatamente onde paraste ou começar um percurso novo.",continueJourney:"Continuar",startJourney:"Começar percurso",savedProgress:"Percurso guardado",hint:"Dica",community:"Partilhar algo na Comunidade",water:"Beber um copo de água",pause:"Fazer 30 segundos de pausa",walk:"Caminhar 2 minutos",breathe:"Fazer 5 respirações lentas",stretch:"Alongar ombros e pescoço",window:"Olhar pela janela durante 30 segundos",invalid:"Agora podes escolher livremente.",dragTip:"Junta palavras que, naquele momento, sintas que fazem sentido estar juntas. Não há respostas certas ou erradas.",start:"Começa por aqui",introTitle:"Uma nova forma de atravessar o mar",introText:"Cada peça tem uma palavra. A tua tarefa é ir juntando palavras que, naquele momento, sintas que fazem sentido estar juntas. Não existem combinações certas ou erradas: a ligação é tua.",introExample:"Por exemplo: MEDO → PESQUISAR. Talvez sintas que, quando aparece o medo, surge também a vontade de pesquisar. Outra pessoa poderia escolher MEDO → PAUSA. As duas ligações são válidas.",introExplain:"Podes escolher uma palavra que já esteja na tua carteira. Se quiseres uma palavra que não está lá, escreve-a na opção “Outra palavra” e explica porque é que faz sentido agora. No fim, a CONFIA olha para o caminho que construíste e devolve-te uma ponderação.",introButton:"Percebi. Começar a viagem",junctionTitle:"Encontra a tua ligação",junctionStep:"Junção {step} de 3",junctionPrompt:"O que pode ligar estes dois conceitos para ti?",junctionExplain:"Escolhe a ligação que fizer sentido para ti. Não há resposta certa.",junctionPlaceholder:"Explica com as tuas palavras porque os ligaste…",junctionSave:"Guardar ligação",junctionSaved:"Ligação guardada.",treasureLabel:"Ilha Tesouro",treasureTitle:"Encontraste o baú",treasureSubtitle:"A tua viagem deixou três ligações para trás.",treasureIntro:"A CONFIA reuniu as três junções que construíste. Em vez de te dar uma conclusão, deixa-te uma ponderação para veres se reconheces algum fio no teu próprio caminho.",treasureThread:"Um possível fio no teu caminho",treasureQuestion:"Isto faz sentido para ti?",treasureClose:"Guardar esta ponderação",treasureHistory:"Histórico dos tesouros",treasureHistoryPrompt:"Rever os teus baús e acompanhar a evolução do teu pensamento.",treasureHistoryEmpty:"Ainda não tens tesouros guardados.",treasureHistoryClose:"Fechar histórico",treasureEmpty:"Completa as três junções para abrir a ponderação final.",islandReflectionTitle:"Antes de continuares",islandReflectionPrompt:"Escolheste estas três palavras. O que te fez associá-las?",islandReflectionPlaceholder:"Escreve aqui o que liga estas três palavras para ti…",islandReflectionContinue:"Guardar e continuar",islandReflectionWords:"As tuas três palavras",questionTitle:"Uma pausa para refletir",questionSubtitle:"Agora responde à pergunta para continuares a viagem.",questionRetry:"Pensa de novo nesta pergunta.",questionCorrect:"✓ Resposta certa. A tua peça pode continuar o caminho.",treasureReactive:"O que o teu caminho parece estar a dizer",treasureReactiveIntro:"A CONFIA reuniu as palavras que escolheste e aquilo que foste escrevendo entre ilhas.",treasureReactiveEmpty:"Ainda não há texto suficiente para encontrar um fio no teu percurso.",treasureReactivePatterns:"Ao longo das tuas reflexões, aparecem com frequência ideias ligadas a: {words}.",treasureReactivePath:"O teu percurso passou por {count} ilhas. As tuas palavras mostram não só o que escolheste, mas também o significado que foste dando a essas escolhas."},
@@ -599,10 +598,30 @@ function pickHandTiles(count:number,excludeIds:string[]=[]){
 function readHorizonProgress():HorizonProgress|null{return readJson<HorizonProgress|null>(HORIZON_PROGRESS_KEY,null)}
 function formatRemaining(ms:number){if(ms<=0)return "0 d 00 h 00 m 00 s";const d=Math.floor(ms/86400000);const h=Math.floor(ms%86400000/3600000);const m=Math.floor(ms%3600000/60000);const s=Math.floor(ms%60000/1000);return `${d} d ${String(h).padStart(2,"0")} h ${String(m).padStart(2,"0")} m ${String(s).padStart(2,"0")} s`}
 
-function PirateChest({open=false}:{open?:boolean}){
+// Keep the one-second clock local to the countdown labels. Updating the
+// entire Horizon screen every second made every card and board re-render.
+const CountdownValue=React.memo(function CountdownValue({target,active,onDue,className}:{target:string;active:boolean;onDue:(due:boolean)=>void;className:string}){
+ const [now,setNow]=useState(()=>Date.now());
+ const targetTime=new Date(target).getTime();
+ useEffect(()=>{
+  const current=Date.now();
+  setNow(current);
+  if(!active||targetTime<=current)return;
+  const timer=window.setInterval(()=>{
+   const next=Date.now();
+   setNow(next);
+   if(next>=targetTime)window.clearInterval(timer);
+  },1000);
+  return()=>window.clearInterval(timer);
+ },[active,target,targetTime]);
+ useEffect(()=>{if(targetTime<=now)onDue(true)},[targetTime,now,onDue]);
+ return <p className={className}>{formatRemaining(targetTime-now)}</p>;
+});
+
+function PirateChest({open=false,active=true}:{open?:boolean;active?:boolean}){
  return <div className="relative mx-auto h-[150px] w-[210px]" aria-hidden="true">
   <div className="absolute bottom-2 left-1/2 h-8 w-[190px] -translate-x-1/2 rounded-[50%] bg-[#b9844f]/25 blur-sm"/>
-  <motion.svg animate={{y:[0,-3,0]}} transition={{duration:4,repeat:Infinity,ease:"easeInOut"}} viewBox="0 0 220 160" className="relative h-full w-full drop-shadow-[0_16px_16px_rgba(78,49,27,.25)]">
+  <motion.svg animate={{y:[0,-3,0]}} transition={{duration:4,repeat:active?Infinity:0,ease:"easeInOut"}} viewBox="0 0 220 160" className="relative h-full w-full drop-shadow-[0_16px_16px_rgba(78,49,27,.25)]">
    <defs>
     <linearGradient id="wood" x1="0" x2="1"><stop stopColor="#7e4328"/><stop offset=".48" stopColor="#a86235"/><stop offset="1" stopColor="#6c351f"/></linearGradient>
     <linearGradient id="gold" x1="0" x2="1"><stop stopColor="#f2cf78"/><stop offset=".5" stopColor="#b77b2f"/><stop offset="1" stopColor="#e9b958"/></linearGradient>
@@ -651,16 +670,21 @@ function DominoPiece({tile,draggable=false,compact=false,onDrop}:{tile:Domino;dr
   <span className="absolute left-2 top-2 h-1.5 w-1.5 rounded-full bg-[#6c9aa0]/25"/><span className="absolute bottom-2 right-2 h-1.5 w-1.5 rounded-full bg-[#6c9aa0]/25"/>
  </motion.div>
 }
-export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
+export default function HorizonExperience({onOpenSky,active=true}:{onOpenSky:()=>void;active?:boolean}){
  const {i18n}=useTranslation();
  const lang=(i18n.resolvedLanguage||i18n.language||"pt").slice(0,2) as keyof typeof COPY;
  const c=COPY[lang]||COPY.pt;
  const monthCopy=MONTH_COPY[lang]||MONTH_COPY.pt;
+ const savedProgressRef=useRef<HorizonProgress|null>(null);
+ const savedProgressInitialized=useRef(false);
+ if(!savedProgressInitialized.current){savedProgressRef.current=readHorizonProgress();savedProgressInitialized.current=true;}
+ const savedProgress=savedProgressRef.current;
  const boardRef=useRef<HTMLDivElement|null>(null);
  const [section,setSection]=useState<Section>("sky");
  const [capsule,setCapsule]=useState<Capsule|null>(()=>readJson(CAPSULE_KEY,null));
+ const [capsuleDue,setCapsuleDue]=useState(false);
+ const [monthDue,setMonthDue]=useState(false);
  const [draft,setDraft]=useState("");
- const [now,setNow]=useState(Date.now());
  const [guess,setGuess]=useState("");
  const [revealed,setRevealed]=useState(false);
  const [feedback,setFeedback]=useState("");
@@ -670,11 +694,11 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [monthTreasure,setMonthTreasure]=useState("");
  const [monthlyTreasures,setMonthlyTreasures]=useState<MonthlyTreasure[]>(()=>readJson(MONTH_TREASURES_KEY,[]));
  const [monthCompared,setMonthCompared]=useState(false);
- const [placed,setPlaced]=useState<PlacedDomino[]>(()=>readHorizonProgress()?.placed||readJson(DOMINO_KEY,[]));
+ const [placed,setPlaced]=useState<PlacedDomino[]>(()=>savedProgress?.placed||readJson(DOMINO_KEY,[]));
  const [hand,setHand]=useState<Domino[]>(()=>getHorizonHand());
- const [bonuses,setBonuses]=useState(()=>readHorizonProgress()?.bonuses||readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));
- const [quest,setQuest]=useState<Quest>(()=>readHorizonProgress()?.quest||sample(QUESTS,1)[0]);
- const [questDone,setQuestDone]=useState(()=>readHorizonProgress()?.questDone||false);
+ const [bonuses,setBonuses]=useState(()=>savedProgress?.bonuses||readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));
+ const [quest,setQuest]=useState<Quest>(()=>savedProgress?.quest||sample(QUESTS,1)[0]);
+ const [questDone,setQuestDone]=useState(()=>savedProgress?.questDone||false);
  const [toast,setToast]=useState("");
  const [impulse,setImpulse]=useState<ImpulseQuestion|null>(null);
  const [impulseAnswer,setImpulseAnswer]=useState<number|null>(null);
@@ -686,25 +710,26 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const [pendingDrop,setPendingDrop]=useState<{tile:Domino;x:number;y:number;rotate:number;direction:Direction;obstacle:boolean}|null>(null);
  const [selectedPlaced,setSelectedPlaced]=useState<number|null>(null);
 
- const [unlockedIslands,setUnlockedIslands]=useState<number[]>(()=>readHorizonProgress()?.unlockedIslands||[0]);
+ const [unlockedIslands,setUnlockedIslands]=useState<number[]>(()=>savedProgress?.unlockedIslands||[0]);
  const [treasureOpen,setTreasureOpen]=useState(false);
- const [treasureAnswer,setTreasureAnswer]=useState(()=>readHorizonProgress()?.treasureAnswer||"");
+ const [treasureAnswer,setTreasureAnswer]=useState(()=>savedProgress?.treasureAnswer||"");
  const [treasureHistoryOpen,setTreasureHistoryOpen]=useState(false);
  const [treasureHistory,setTreasureHistory]=useState<TreasureHistoryEntry[]>(()=>readJson<TreasureHistoryEntry[]>(HORIZON_TREASURE_HISTORY_KEY,[]));
  const [horizonIntroOpen,setHorizonIntroOpen]=useState(false);
  const [horizonResumeOpen,setHorizonResumeOpen]=useState(false);
  const [junction,setJunction]=useState<JunctionPair|null>(null);
  const [junctionExplanation,setJunctionExplanation]=useState("");
- const [junctions,setJunctions]=useState<Junction[]>(()=>readHorizonProgress()?.junctions||readJson(HORIZON_JUNCTIONS_KEY,[]));
+ const [junctions,setJunctions]=useState<Junction[]>(()=>savedProgress?.junctions||readJson(HORIZON_JUNCTIONS_KEY,[]));
  const [wordPromptOpen,setWordPromptOpen]=useState(false);
  const [neededWord,setNeededWord]=useState("");
  const [wordTile,setWordTile]=useState<Domino|null>(null);
  const [wordMoment,setWordMoment]=useState("");
 
- useEffect(()=>{setNow(Date.now());const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id)},[]);
  useEffect(()=>{localStorage.setItem(WEEKLY_LOG_KEY,JSON.stringify(weeklyLog))},[weeklyLog]);
  useEffect(()=>{if(monthTracker)localStorage.setItem(MONTH_TRACKER_KEY,JSON.stringify(monthTracker))},[monthTracker]);
  useEffect(()=>{if(!capsule)return;const buried=new Date(capsule.buriedAt).getTime();const opens=new Date(capsule.opensAt).getTime();if(opens-buried>8*86400000){const migrated={...capsule,opensAt:new Date(buried+7*86400000).toISOString()};localStorage.setItem(CAPSULE_KEY,JSON.stringify(migrated));setCapsule(migrated)}},[]);
+ useEffect(()=>{setCapsuleDue(Boolean(capsule&&new Date(capsule.opensAt).getTime()<=Date.now()))},[capsule]);
+ useEffect(()=>{setMonthDue(Boolean(monthTracker&&new Date(monthTracker.dueAt).getTime()<=Date.now()))},[monthTracker]);
  useEffect(()=>{if(!capsule||monthTracker)return;const start=new Date(capsule.buriedAt);const tracker={startedAt:start.toISOString(),dueAt:new Date(start.getTime()+30*86400000).toISOString()};setMonthTracker(tracker)},[capsule,monthTracker]);
  useEffect(()=>{if(monthTracker?.comparedAt){setMonthCompared(true);setMonthSummary(monthTracker.summary||"")}},[]);
  useEffect(()=>{localStorage.setItem(DOMINO_KEY,JSON.stringify(placed))},[placed]);
@@ -714,13 +739,9 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  useEffect(()=>{localStorage.setItem(HORIZON_ISLAND_REFLECTIONS_KEY,JSON.stringify(islandReflections))},[islandReflections]);
  useEffect(()=>{localStorage.setItem(HORIZON_QUESTION_HISTORY_KEY,JSON.stringify(recentImpulseQuestions.slice(-90)))},[recentImpulseQuestions]);
  useEffect(()=>{setHorizonHand(hand);localStorage.setItem(HORIZON_PROGRESS_KEY,JSON.stringify({placed,hand,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone}))},[hand,placed,bonuses,unlockedIslands,junctions,treasureAnswer,quest,questDone]);
- useEffect(()=>{const onCommunity=()=>{setBonuses(readJson(BONUS_KEY,{extraChoices:0,rerolls:0,hints:0}));setToast(c.bonus);setTimeout(()=>setToast(""),2200)};window.addEventListener(COMMUNITY_EVENT,onCommunity);return()=>window.removeEventListener(COMMUNITY_EVENT,onCommunity)},[c.bonus]);
 
  const hasSavedJourney=placed.length>0||junctions.length>0||unlockedIslands.length>1||Boolean(treasureAnswer.trim());
- const remaining=capsule?new Date(capsule.opensAt).getTime()-now:0;
- const canOpen=Boolean(capsule&&remaining<=0);
- const monthRemaining=monthTracker?new Date(monthTracker.dueAt).getTime()-now:0;
- const monthDue=Boolean(monthTracker&&monthRemaining<=0);
+ const canOpen=capsuleDue;
  const monthReflections=useMemo(()=>monthTracker?weeklyLog.filter(item=>new Date(item.at).getTime()>=new Date(monthTracker.startedAt).getTime()&&new Date(item.at).getTime()<=new Date(monthTracker.dueAt).getTime()+86400000):[],[weeklyLog,monthTracker]);
  const connectionValue=(p:PlacedDomino|undefined)=>{
   if(!p)return "Stress";
@@ -742,10 +763,10 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
  const usedTileIds=useMemo(()=>new Set(placed.map(p=>p.tile.id)),[placed]);
  const availableWordTiles=useMemo(()=>[],[]);
  const neededWordSuggestions=useMemo(()=>[],[]);
- const bury=()=>{if(!draft.trim())return;const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:draft.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:(capsule?.cycle||0)+1};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);if(!monthTracker){setMonthTracker({startedAt:buriedAt.toISOString(),dueAt:new Date(buriedAt.getTime()+30*86400000).toISOString()})}setNow(Date.now());setDraft("");setGuess("");setRevealed(false)};
- const rebury=()=>{if(!capsule||!feedback.trim())return;const reflection={at:new Date().toISOString(),message:capsule.message,guess:guess.trim(),feedback:feedback.trim()};setWeeklyLog(prev=>[...prev,reflection]);const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:feedback.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:capsule.cycle+1,feedback:feedback.trim()};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);setNow(Date.now());setFeedback("");setGuess("");setRevealed(false)};
+ const bury=()=>{if(!draft.trim())return;const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:draft.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:(capsule?.cycle||0)+1};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);setCapsuleDue(false);if(!monthTracker){setMonthTracker({startedAt:buriedAt.toISOString(),dueAt:new Date(buriedAt.getTime()+30*86400000).toISOString()});setMonthDue(false)}setDraft("");setGuess("");setRevealed(false)};
+ const rebury=()=>{if(!capsule||!feedback.trim())return;const reflection={at:new Date().toISOString(),message:capsule.message,guess:guess.trim(),feedback:feedback.trim()};setWeeklyLog(prev=>[...prev,reflection]);const buriedAt=new Date();const opensAt=new Date(buriedAt.getTime()+7*86400000);const next={message:feedback.trim(),buriedAt:buriedAt.toISOString(),opensAt:opensAt.toISOString(),cycle:capsule.cycle+1,feedback:feedback.trim()};localStorage.setItem(CAPSULE_KEY,JSON.stringify(next));setCapsule(next);setCapsuleDue(false);setFeedback("");setGuess("");setRevealed(false)};
  const compareMonth=()=>{if(!monthTracker||!monthSummary.trim())return;setMonthCompared(true);setMonthTracker({...monthTracker,summary:monthSummary.trim(),comparedAt:new Date().toISOString()})};
- const closeMonth=()=>{if(monthTreasure.trim()){const nextTreasures=[...monthlyTreasures,{date:new Date().toISOString(),text:monthTreasure.trim()}].slice(-24);setMonthlyTreasures(nextTreasures);localStorage.setItem(MONTH_TREASURES_KEY,JSON.stringify(nextTreasures));}const start=new Date();const next={startedAt:start.toISOString(),dueAt:new Date(start.getTime()+30*86400000).toISOString()};setMonthTracker(next);setMonthSummary("");setMonthTreasure("");setMonthCompared(false)};
+ const closeMonth=()=>{if(monthTreasure.trim()){const nextTreasures=[...monthlyTreasures,{date:new Date().toISOString(),text:monthTreasure.trim()}].slice(-24);setMonthlyTreasures(nextTreasures);localStorage.setItem(MONTH_TREASURES_KEY,JSON.stringify(nextTreasures));}const start=new Date();const next={startedAt:start.toISOString(),dueAt:new Date(start.getTime()+30*86400000).toISOString()};setMonthTracker(next);setMonthDue(false);setMonthSummary("");setMonthTreasure("");setMonthCompared(false)};
 
  const rewardQuest=()=>{
   if(questDone)return;
@@ -970,7 +991,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
    <div className="relative min-h-[205px] overflow-hidden bg-[linear-gradient(180deg,#52669e_0%,#8794c0_48%,#f1b7a1_100%)] px-5 pb-16 pt-5 text-white">
     <div className="absolute inset-0 opacity-75" style={{backgroundImage:"radial-gradient(circle at 12% 20%,white 0 1px,transparent 1.8px),radial-gradient(circle at 42% 36%,white 0 1.3px,transparent 2px),radial-gradient(circle at 70% 15%,white 0 1px,transparent 1.7px),radial-gradient(circle at 88% 30%,white 0 1.2px,transparent 2px)"}}/>
     <div className="absolute right-8 top-7 h-10 w-10 rounded-full bg-[#fff2c8] shadow-[0_0_28px_rgba(255,241,195,.55)] before:absolute before:-left-2 before:-top-1 before:h-10 before:w-10 before:rounded-full before:bg-[#6071aa]"/>
-    <motion.div animate={{y:[0,-3,0]}} transition={{duration:5,repeat:Infinity}} className="relative z-10 max-w-[82%]">
+    <motion.div animate={{y:[0,-3,0]}} transition={{duration:5,repeat:active?Infinity:0}} className="relative z-10 max-w-[82%]">
       <p className="text-[10px] font-black uppercase tracking-[.24em] text-white/70">✦ CONFIA</p>
       <h2 className="mt-2 text-[26px] font-black tracking-[-.02em]">{c.horizon}</h2>
       <p className="mt-1 text-[12px] font-semibold leading-relaxed text-white/82">{c.horizonSub}</p>
@@ -1003,9 +1024,9 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
         </div>
        </div>
        <div><h3 className="text-[20px] font-black text-[#3d302b]">{c.capsule}</h3><p className="mt-1 text-[11px] font-semibold leading-relaxed text-[#7b665d]">{c.sandSub}</p></div>
-       <PirateChest open={revealed}/>
+       <PirateChest open={revealed} active={active}/>
        {monthTracker&&<div className="mb-4 rounded-[22px] border border-[#d9c3a8]/70 bg-white/72 p-4 shadow-[0_10px_24px_rgba(102,72,50,.08)] backdrop-blur-sm">
-        {!monthDue?<div className="flex items-center justify-between gap-3"><div><p className="text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthWaiting}</p><p className="mt-1 text-[11px] font-semibold text-[#6e5a50]">{monthCopy.monthIn}</p></div><p className="text-[13px] font-black text-[#7e4f39]">{formatRemaining(monthRemaining)}</p></div>:
+        {!monthDue?<div className="flex items-center justify-between gap-3"><div><p className="text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthWaiting}</p><p className="mt-1 text-[11px] font-semibold text-[#6e5a50]">{monthCopy.monthIn}</p></div><CountdownValue target={monthTracker.dueAt} active={active&&section==="sand"} onDue={setMonthDue} className="text-[13px] font-black text-[#7e4f39]"/></div>:
         !monthCompared?<div><p className="text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthTitle}</p><p className="mt-2 text-[13px] font-black leading-relaxed text-[#49372f]">{monthCopy.monthPrompt}</p><textarea value={monthSummary} onChange={e=>setMonthSummary(e.target.value)} maxLength={900} placeholder={monthCopy.monthPlaceholder} className="mt-3 min-h-[115px] w-full resize-none rounded-[16px] border border-[#dcc5ad] bg-white/90 p-3 text-[12px] font-medium text-[#49372f] outline-none"/><button disabled={!monthSummary.trim()} onClick={compareMonth} className="mt-3 w-full rounded-[16px] bg-[#6f4938] py-3 text-[11px] font-black text-white disabled:opacity-40">{monthCopy.monthCompare}</button></div>:
         <div><p className="text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthYourSummary}</p><p className="mt-2 rounded-[16px] bg-[#fff8ed] p-3 text-[12px] font-bold leading-relaxed text-[#49372f]">{monthTracker.summary||monthSummary}</p><p className="mt-4 text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthWeekly}</p><div className="mt-2 grid gap-2">{monthReflections.length?monthReflections.map((item,index)=><div key={item.at+index} className="rounded-[14px] border border-[#ead8c4] bg-white/85 p-3"><p className="text-[9px] font-black text-[#a06a4f]">{monthCopy.weekLabel} {index+1}</p><p className="mt-1 text-[11px] font-semibold leading-relaxed text-[#5d4b42]">{item.feedback}</p></div>):<p className="rounded-[14px] bg-white/75 p-3 text-[11px] font-semibold text-[#7a675f]">{monthCopy.noWeekly}</p>}</div><p className="mt-4 text-[9px] font-black uppercase tracking-[.16em] text-[#9a6549]">{monthCopy.monthCombined}</p><p className="mt-2 rounded-[16px] bg-[#f8efe2] p-3 text-[11px] font-semibold leading-relaxed text-[#58483f]">{monthReflections.map(item=>item.feedback).join(" • ")||"—"}</p>
          <div className="mt-4 rounded-[18px] border border-[#dfccb2] bg-white/70 p-3"><div className="flex items-center justify-between gap-1 text-center">{[0,1,2,3].map(index=><div key={index} className="flex-1"><div className={`mx-auto h-2.5 w-2.5 rounded-full ${monthReflections.length>index?"bg-[#8f503e]":"bg-[#d9c9b8]"}`}/><p className="mt-1 text-[8px] font-black text-[#8d6956]">{monthCopy.weekLabel} {index+1}</p></div>)}<div className="flex-1"><div className="mx-auto h-2.5 w-2.5 rounded-full bg-[#6f8f67]"/><p className="mt-1 text-[8px] font-black text-[#6f8f67]">{monthCopy.monthLabel}</p></div></div></div>
@@ -1015,7 +1036,7 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
        </div>}
        {!capsule?<div className="-mt-3 rounded-[24px] border border-white/70 bg-white/65 p-4 shadow-[0_12px_30px_rgba(102,72,50,.08)] backdrop-blur-sm"><textarea value={draft} onChange={e=>setDraft(e.target.value)} maxLength={700} placeholder={c.placeholder} className="min-h-[120px] w-full resize-none rounded-[18px] border border-[#e7d4bd] bg-white/80 p-3 text-[13px] font-medium text-[#493b35] outline-none placeholder:text-[#a7958c]"/><button onClick={bury} disabled={!draft.trim()} className="mt-3 flex w-full items-center justify-center gap-2 rounded-[18px] bg-[#8f503e] px-4 py-3 text-[11px] font-black text-white shadow-[0_9px_20px_rgba(143,80,62,.22)] disabled:opacity-40"><LockKeyhole size={15}/>{c.bury}</button></div>:
        <div className="-mt-3">
-        <div className="rounded-[24px] border border-white/70 bg-white/75 p-4 text-center shadow-[0_12px_28px_rgba(102,72,50,.10)] backdrop-blur-md"><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#a4654d]">{c.buried}</p><p className="mt-1.5 text-[22px] font-black text-[#4a352d]">{formatRemaining(remaining)}</p><p className="mt-1 text-[10px] font-bold text-[#8d776e]">{monthCopy.cycleLabel} {capsule.cycle}</p></div>
+        <div className="rounded-[24px] border border-white/70 bg-white/75 p-4 text-center shadow-[0_12px_28px_rgba(102,72,50,.10)] backdrop-blur-md"><p className="text-[9px] font-black uppercase tracking-[.18em] text-[#a4654d]">{c.buried}</p><CountdownValue target={capsule.opensAt} active={active&&section==="sand"} onDue={setCapsuleDue} className="mt-1.5 text-[22px] font-black text-[#4a352d]"/><p className="mt-1 text-[10px] font-bold text-[#8d776e]">{monthCopy.cycleLabel} {capsule.cycle}</p></div>
         {canOpen&&!revealed&&<div className="mt-4 rounded-[22px] bg-white/70 p-4"><p className="text-[12px] font-black text-[#49372f]">{c.guess}</p><textarea value={guess} onChange={e=>setGuess(e.target.value)} maxLength={700} placeholder={c.guessPlaceholder} className="mt-3 min-h-[110px] w-full resize-none rounded-[16px] border border-[#dcc5ad] bg-white/90 p-3 text-[12px] font-medium text-[#49372f] outline-none placeholder:text-[#a18d82]"/><button disabled={!guess.trim()} onClick={()=>setRevealed(true)} className="mt-4 w-full rounded-[16px] bg-[#3d302b] py-3 text-[11px] font-black text-white disabled:opacity-40">{c.open}</button></div>}
         {revealed&&<div className="mt-4 rounded-[22px] border border-white/70 bg-white/85 p-4 shadow-sm"><p className="text-[9px] font-black uppercase tracking-[.17em] text-[#a4654d]">{c.reveal}</p><div className="mt-3 grid gap-3"><div className="rounded-[16px] border border-[#ead7c4] bg-[#fffdf9] p-3"><p className="text-[9px] font-black uppercase tracking-[.14em] text-[#9b765f]">{c.remembered}</p><p className="mt-1.5 whitespace-pre-wrap text-[12px] font-semibold leading-relaxed text-[#5b4840]">{guess}</p></div><div className="rounded-[16px] border border-[#d9c1a3] bg-[#fff7e9] p-3"><p className="text-[9px] font-black uppercase tracking-[.14em] text-[#9a5b3f]">{c.actual}</p><p className="mt-1.5 whitespace-pre-wrap text-[13px] font-bold leading-relaxed text-[#443631]">{capsule.message}</p></div></div><p className="mt-4 rounded-[14px] bg-[#f3eadf] p-3 text-[11px] font-black leading-relaxed text-[#49372f]">{monthCopy.compareQuestion}</p><p className="mt-3 text-[11px] font-black text-[#49372f]">{c.feedback}</p><textarea value={feedback} onChange={e=>setFeedback(e.target.value)} className="mt-2 min-h-[90px] w-full rounded-[16px] border border-[#ead7c4] bg-white p-3 text-[12px] outline-none"/><button disabled={!feedback.trim()} onClick={rebury} className="mt-3 w-full rounded-[16px] bg-[#8f503e] py-3 text-[11px] font-black text-white disabled:opacity-40">{c.rebury}</button></div>}
        </div>}
@@ -1028,12 +1049,12 @@ export default function HorizonExperience({onOpenSky}:{onOpenSky:()=>void}){
       <div className="relative">
        <div className="px-1"><div className="flex items-start gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/55 text-[#176878] shadow-sm"><Waves size={22}/></div><div><h3 className="text-[20px] font-black text-[#174f5b]">{c.sea}</h3><p className="mt-1 text-[11px] font-semibold leading-relaxed text-[#39727b]">{c.seaSub}</p></div></div></div>
        <div ref={boardRef} className="relative mt-4 h-[430px] overflow-hidden rounded-[28px] border border-white/60 bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,.48),transparent_24%),linear-gradient(180deg,rgba(255,255,255,.16),rgba(27,128,145,.18))] shadow-[inset_0_0_45px_rgba(255,255,255,.22)]">
-        <motion.div animate={{x:[-16,16,-16]}} transition={{duration:8,repeat:Infinity,ease:"easeInOut"}} className="absolute -left-10 top-7 h-10 w-[120%] rounded-[50%] border-t border-white/40 opacity-70"/>
-        <motion.div animate={{x:[14,-14,14]}} transition={{duration:10,repeat:Infinity,ease:"easeInOut"}} className="absolute -left-10 top-32 h-12 w-[120%] rounded-[50%] border-t border-white/30 opacity-70"/>
-        {seaObstacles.map((o,i)=><motion.div key={o.type+i} animate={{y:[0,-3,0],rotate:o.type==="🌀"?[0,8,-8,0]:[0,-2,0]}} transition={{duration:o.type==="🌀"?5:6,repeat:Infinity}} className="absolute z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-white/40 bg-[#0e6572]/25 text-center shadow-sm" style={{left:`${o.x*100}%`,top:`${o.y*100}%`}}><span className="text-[20px] leading-none">{o.type}</span><span className="mt-0.5 text-[5px] font-black uppercase tracking-[.08em] text-white/80">{o.label}</span></motion.div>)}
+        <motion.div animate={{x:[-16,16,-16]}} transition={{duration:8,repeat:active?Infinity:0,ease:"easeInOut"}} className="absolute -left-10 top-7 h-10 w-[120%] rounded-[50%] border-t border-white/40 opacity-70"/>
+        <motion.div animate={{x:[14,-14,14]}} transition={{duration:10,repeat:active?Infinity:0,ease:"easeInOut"}} className="absolute -left-10 top-32 h-12 w-[120%] rounded-[50%] border-t border-white/30 opacity-70"/>
+        {seaObstacles.map((o,i)=><motion.div key={o.type+i} animate={{y:[0,-3,0],rotate:o.type==="🌀"?[0,8,-8,0]:[0,-2,0]}} transition={{duration:o.type==="🌀"?5:6,repeat:active?Infinity:0}} className="absolute z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-white/40 bg-[#0e6572]/25 text-center shadow-sm" style={{left:`${o.x*100}%`,top:`${o.y*100}%`}}><span className="text-[20px] leading-none">{o.type}</span><span className="mt-0.5 text-[5px] font-black uppercase tracking-[.08em] text-white/80">{o.label}</span></motion.div>)}
         {islands.map((island,index)=>{const unlocked=unlockedIslands.includes(index);const treasure=Boolean((island as any).treasure);return <div key={index} className={`absolute flex h-12 ${treasure?"w-20":"w-16"} -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[45%] border text-center shadow-[0_7px_14px_rgba(38,103,116,.20)] ${treasure?"border-[#f2cf70] bg-[radial-gradient(ellipse_at_45%_35%,#fff1b4,#c99942)]":unlocked?"border-emerald-300 bg-[radial-gradient(ellipse_at_45%_35%,#d9f4df,#75c69a)]":"border-[#d7c18c] bg-[radial-gradient(ellipse_at_45%_35%,#e6d3a0,#b7a16d)]"}`} style={{left:`${island.x*100}%`,top:`${island.y*100}%`}}><span className={`text-[6px] font-black uppercase tracking-[.10em] ${treasure?"text-[#765018]":unlocked?"text-emerald-800":"text-[#6d5b3d]"}`}>{treasure?"🏆 ":unlocked?"✓ ":""}{islandNames[index]}</span></div>})}
         <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/45 px-3 py-1.5 text-[9px] font-black text-[#286b76]">{c.start}: {placed[0]?.tile.left}</div>
-        {placed.map((p,i)=><motion.div key={p.tile.id+"-"+i} drag={false} onClick={()=>setSelectedPlaced(i)} onDragEnd={(_,info)=>{const w=44;const board=boardRef.current;if(!board)return;const rect=board.getBoundingClientRect();const prev=placed[i-1];const next=placed[i+1];let nx=Math.max(4,Math.min(rect.width-w-4,p.x+info.offset.x));const ny=Math.max(6,Math.min(rect.height-22,p.y+info.offset.y));if(prev){const requiredX=prev.x+w+4;if(Math.abs(nx-requiredX)>12){setToast("A peça tem de ficar ligada à lateral direita da anterior");setTimeout(()=>setToast(""),1800);return}nx=requiredX}if(next&&next.x<=nx+w+4){setToast("Não podes ultrapassar a peça seguinte");setTimeout(()=>setToast(""),1600);return}setPlaced(prevPlaced=>prevPlaced.map((q,j)=>j===i?{...q,x:nx,y:ny}:q));}} initial={{opacity:0,scale:.88}} animate={selectedPlaced===i?{opacity:1,scale:1,y:[0,i%2?2:-2,0]}:{opacity:1,scale:1,y:0}} transition={selectedPlaced===i?{opacity:{duration:.2},scale:{duration:.2},y:{duration:4,repeat:Infinity}}:{opacity:{duration:.2},scale:{duration:.2}}} className={`cursor-grab touch-none ${selectedPlaced===i?"ring-2 ring-[#f0b35b] ring-offset-1 rounded-lg":""}`} style={{position:"absolute",left:p.x,top:p.y,rotate:p.rotate}}><DominoPiece tile={p.tile} compact/></motion.div>)}
+        {placed.map((p,i)=><motion.div key={p.tile.id+"-"+i} drag={false} onClick={()=>setSelectedPlaced(i)} onDragEnd={(_,info)=>{const w=44;const board=boardRef.current;if(!board)return;const rect=board.getBoundingClientRect();const prev=placed[i-1];const next=placed[i+1];let nx=Math.max(4,Math.min(rect.width-w-4,p.x+info.offset.x));const ny=Math.max(6,Math.min(rect.height-22,p.y+info.offset.y));if(prev){const requiredX=prev.x+w+4;if(Math.abs(nx-requiredX)>12){setToast("A peça tem de ficar ligada à lateral direita da anterior");setTimeout(()=>setToast(""),1800);return}nx=requiredX}if(next&&next.x<=nx+w+4){setToast("Não podes ultrapassar a peça seguinte");setTimeout(()=>setToast(""),1600);return}setPlaced(prevPlaced=>prevPlaced.map((q,j)=>j===i?{...q,x:nx,y:ny}:q));}} initial={{opacity:0,scale:.88}} animate={selectedPlaced===i?{opacity:1,scale:1,y:[0,i%2?2:-2,0]}:{opacity:1,scale:1,y:0}} transition={selectedPlaced===i?{opacity:{duration:.2},scale:{duration:.2},y:{duration:4,repeat:active?Infinity:0}}:{opacity:{duration:.2},scale:{duration:.2}}} className={`cursor-grab touch-none ${selectedPlaced===i?"ring-2 ring-[#f0b35b] ring-offset-1 rounded-lg":""}`} style={{position:"absolute",left:p.x,top:p.y,rotate:p.rotate}}><DominoPiece tile={p.tile} compact/></motion.div>)}
        </div>
 
        <div className="mt-4 rounded-[24px] border border-white/60 bg-white/58 p-4 backdrop-blur-md">

@@ -1,6 +1,7 @@
 import { it } from "node:test";
 import assert from "node:assert/strict";
-import { activateHabitOwner,getHabitSnapshot,mergeHabitRecords,saveHabitRecord,makeRecord } from "../store";
+import { activateHabitOwner,getHabitOwner,getHabitSnapshot,mergeHabitRecords,saveHabitRecord,makeRecord } from "../store";
+import { getCurrentHabitOwner } from "../owner";
 import { createHabit,recordHabitDay,restartHabit,recordNutrition,recordExercise } from "../actions";
 import { habitStats } from "../statistics";
 import { localDay } from "../calendar";
@@ -12,9 +13,10 @@ Object.defineProperty(globalThis,"localStorage",{value:local,configurable:true})
 Object.defineProperty(globalThis,"window",{value:Object.assign(target,{localStorage:local}),configurable:true});
 const create=()=>createHabit({type:"tobacco",name:"",icon:"🚬",goal:"My chosen goal",active:true,createdAt:new Date().toISOString()});
 it("persists without authentication and restores after owner activation",()=>{
- activateHabitOwner("guest");const id=create();recordHabitDay(id,localDay(),true);
+ activateHabitOwner("guest");assert.equal(getCurrentHabitOwner(),getHabitOwner());const id=create();recordHabitDay(id,localDay(),true);
  assert.equal(habitStats(getHabitSnapshot().records,id).current,1);
  activateHabitOwner("alice");
+ assert.equal(getCurrentHabitOwner(),getHabitOwner());
  assert.ok(getHabitSnapshot().records.some(r=>r.id===id));
  assert.equal(data.has("confia_habits_v1:guest"),false);
  activateHabitOwner("bob");assert.equal(getHabitSnapshot().records.length,0);

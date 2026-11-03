@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import type { HabitRecord } from "../../data/habits/types";
 import { shiftDay, weekStart } from "../../data/habits/calendar";
 
@@ -8,7 +8,7 @@ function weeks(today:string){return [3,2,1,0].map(i=>{const end=shiftDay(today,-
 function average(values:number[]){return values.length?values.reduce((a,b)=>a+b,0)/values.length:undefined;}
 function trend(a:number|undefined,b:number|undefined){return a===undefined||b===undefined?undefined:Math.round((a-b)*10)/10;}
 export default function HabitEvolution({records,today,kind}:{records:HabitRecord[];today:string;kind:Kind}){
- const {t,i18n}=useTranslation();
+ const {t,i18n}=useTranslation("habits");
  const data=useMemo(()=>weeks(today).map(w=>{const rows=records.filter(r=>r.date>=w.start&&r.date<=w.end);
   if(kind==="exercise"){const logs=rows.filter((r):r is Extract<HabitRecord,{kind:"exercise"}>=>r.kind==="exercise"&&r.data.minutes>0);return {w,primary:logs.reduce((n,r)=>n+r.data.minutes,0),secondary:new Set(logs.map(r=>r.date)).size};}
   if(kind==="sleep"){const logs=rows.filter((r):r is Extract<HabitRecord,{kind:"sleep"}>=>r.kind==="sleep");return {w,primary:average(logs.map(r=>r.data.hours)),secondary:average(logs.map(r=>r.data.quality))};}

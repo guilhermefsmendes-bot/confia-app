@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 @import "./design-system.css";
 
@@ -28,4 +27,52 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Lightweight CSS entrance transitions replace App-level Motion wrappers. */
+.confia-motion-enter { animation: confia-motion-fade-up 220ms cubic-bezier(.2,.7,.2,1) both; }
+@keyframes confia-motion-fade-up {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .confia-motion-enter { animation: none; } }
+
+/* Lightweight avatar motion: keeps the home companion out of the Motion JS chunk. */
+.confia-avatar-jump { animation: confia-avatar-jump 800ms ease-out both; }
+.confia-avatar-evolution { animation: confia-avatar-evolution 1150ms ease-out both; }
+.confia-avatar-celebrating { animation: confia-avatar-celebrating 600ms ease-out both; }
+.confia-avatar-evolution-halo { animation: confia-avatar-halo 1100ms ease-out both; }
+@keyframes confia-avatar-jump {
+  0% { transform: translateY(-30px) scale(1.1,.9); }
+  65% { transform: translateY(0) scale(.9,1.1); }
+  100% { transform: translateY(0) scale(1,1); }
+}
+@keyframes confia-avatar-evolution {
+  0% { transform: translateY(0) scale(1) rotate(0); }
+  30% { transform: translateY(-10px) scale(1.08) rotate(-1.5deg); }
+  65% { transform: translateY(-4px) scale(1.035) rotate(1.5deg); }
+  100% { transform: translateY(0) scale(1) rotate(0); }
+}
+@keyframes confia-avatar-celebrating {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.035); }
+}
+@keyframes confia-avatar-halo {
+  0% { opacity: 0; scale: .72; }
+  45% { opacity: .34; scale: 1.08; }
+  100% { opacity: .18; scale: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confia-avatar-jump,
+  .confia-avatar-evolution,
+  .confia-avatar-celebrating,
+  .confia-avatar-evolution-halo { animation: none !important; }
+}
+
+/* Avoid spending CPU on decorative motion outside the visible app surface. */
+[hidden],
+[hidden] *,
+.confia-document-hidden *,
+[data-motion-paused="true"] * {
+  animation-play-state: paused !important;
 }

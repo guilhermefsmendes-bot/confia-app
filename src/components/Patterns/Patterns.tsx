@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { PatternQuestionnaire } from "./PatternQuestionnaire";
 import { PatternResults } from "./PatternResults";
@@ -24,6 +24,12 @@ export const Patterns: React.FC = () => {
   const { t } = useTranslation();
 
 const [step, setStep] = useState<Step>("home");
+  const [pageVisible, setPageVisible] = useState(() => typeof document === "undefined" || document.visibilityState !== "hidden");
+  useEffect(() => {
+    const updateVisibility = () => setPageVisible(document.visibilityState !== "hidden");
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => document.removeEventListener("visibilitychange", updateVisibility);
+  }, []);
 
   const profile = loadPatternProfile();
 
@@ -175,10 +181,10 @@ return (
     <div className="text-center mb-8">
 
       <motion.div
-        animate={{ y: [0, -8, 0] }}
+        animate={pageVisible ? { y: [0, -8, 0] } : { y: 0 }}
         transition={{
           duration: 3,
-          repeat: Infinity,
+          repeat: pageVisible ? Infinity : 0,
           ease: "easeInOut"
         }}
         className="text-6xl"

@@ -1,0 +1,228 @@
+{
+  "inventory": "Inventory",
+  "shop": "Shop",
+  "companionWidgetPrompt": {
+    "message": "Want to take me with you to your home screen? I can show your challenge and small daily goals without you having to open the app.",
+    "action": "Add widget"
+  },
+  "companionTitle": "Companion",
+  "companionAging": {
+    "first_contact": "getting to know you",
+    "early_learning": "learning with you · {{count}} records",
+    "established": "knows your rhythms · {{count}} records",
+    "personal_discovery": "has grown with you · {{count}} records"
+  },
+  "companionDaily": {
+    "quiet": "I’m here, at your pace.",
+    "hideReflection": "Hide reflection",
+    "showReflection": "Show reflection",
+    "description": "A space to notice your entries and choose a next step, without rushing.",
+    "actions": {
+      "habits": "View my challenge",
+      "habitHistory": "View challenge progress",
+      "nutrition": "Open Nutrition",
+      "exercise": "Open Exercise",
+      "plans": "View plan",
+      "breathe": "Take a breathing pause",
+      "progress": "View progress",
+      "patterns": "View patterns",
+      "completeObjective": "Complete an objective",
+      "communityPost": "Share a thought",
+      "mood": "Make a check-in",
+      "sleep": "Open Sleep"
+    },
+    "restart": [
+      "Starting again does not erase the days you have built.",
+      "There is room for a new beginning, at your pace.",
+      "The path you have already taken still counts. You can start again today."
+    ],
+    "milestone": [
+      "{{count}} days built. This path is worth acknowledging.",
+      "You have reached day {{count}} of your challenge. One day at a time.",
+      "Your challenge has reached {{count}} days. You can pause to acknowledge the effort."
+    ],
+    "continuity": [
+      "Today’s entry is part of a path of {{count}} days.",
+      "That is {{count}} days built through small choices.",
+      "Another entry in your challenge: {{count}} days, at your pace."
+    ],
+    "planEnd": [
+      "You have reached the final day of your plan. Would you like to review your entries?",
+      "Your plan has reached day 15. There is space to look back.",
+      "Would you like to review the small experiments of these 15 days?"
+    ],
+    "planStep": [
+      "On day {{count}} of your plan, a small experiment is available.",
+      "Your plan is on day {{count}}. You can choose what fits your day.",
+      "There is a simple idea for day {{count}}, with no obligation."
+    ],
+    "stillAgitated": [
+      "After the pause, you recorded that you still felt unsettled. You do not need to force another attempt.",
+      "The pause did not bring the calm you hoped for. You can choose what feels right now.",
+      "You still felt unsettled after the pause. There is room to continue gently."
+    ],
+    "breathing": [
+      "In most of your recent recorded pauses, you said you felt calmer.",
+      "In your recent breathing entries, feeling calmer was the most frequent response.",
+      "Your recent pauses have more often been followed by an entry reporting greater calm."
+    ],
+    "caffeine": [
+      "You recorded caffeine later today. You can observe your rest without drawing conclusions yet.",
+      "There is a late-day caffeine entry. If you wish, you can observe it alongside your rest.",
+      "Today’s entry includes later caffeine. It is something to observe, not a conclusion."
+    ],
+    "movement": [
+      "You recorded movement on {{count}} days this week. Small choices are worth acknowledging.",
+      "Over the last seven days, you recorded movement on {{count}} days.",
+      "Your history this week includes {{count}} days with movement."
+    ],
+    "hydration": [
+      "You have water entries on {{count}} days this week. Would you like to look at them?",
+      "Over the last seven days, you recorded water on {{count}} days.",
+      "There are {{count}} days with water entries this week. We can observe without judging."
+    ],
+    "mode": {
+      "insight": "What I noticed",
+      "suggestion": "A suggestion for you"
+    },
+    "morningTrend": [
+      "In your recent entries, your morning average has risen from {{previous}} to {{recent}}. It may be worth noticing what might be helping.",
+      "I’ve noticed your morning average has risen from {{previous}} to {{recent}}. It is not a conclusion about the cause, but it is a change worth observing.",
+      "Your latest morning ratings are higher: the average has risen from {{previous}} to {{recent}}. Perhaps it is worth noticing what has been helping."
+    ],
+    "morningTrendDeclining": [
+      "In your recent entries, your morning average has fallen from {{previous}} to {{recent}}. We can observe the change without jumping to conclusions.",
+      "I’ve noticed your morning average has fallen from {{previous}} to {{recent}}. If you want, we can watch how it develops over the next few days.",
+      "Your latest morning ratings are lower: the average has fallen from {{previous}} to {{recent}}. It is worth observing without judging yourself."
+    ],
+    "objectiveSuggestion": [
+      "Today you have completed {{completed}} of {{total}} objectives. If it feels right, you can choose one and start there.",
+      "There are still objectives to do today. One small step counts — would you like to do one?",
+      "You have {{completed}}/{{total}} objectives today. You can choose just one now and build from there."
+    ],
+    "communitySuggestion": [
+      "If you feel like it, you can leave a thought in the Community. Putting what is happening into words can sometimes help.",
+      "The Community is here. If there is something you want to share today, you can write a short thought.",
+      "Would you like to leave an idea or experience in the Community? It can be just one sentence about how you are today."
+    ],
+    "objectiveCelebration": [
+      "Nice. You just completed an objective. Small repeated actions count too.",
+      "Another objective done. It is worth noticing what helped you move forward.",
+      "Objective completed. I like seeing this part of your journey."
+    ],
+    "caffeineGuidance": {
+      "0": "You logged {{coffeeCount}} cups of coffee today. EFSA’s reference for healthy adults is up to about 5 cups per day; caffeine varies between drinks."
+    },
+    "caffeineCountGuidance": {
+      "0": "You have logged {{coffeeCount}} coffees. Caffeine varies a lot between drinks, so the Companion looks at the estimate rather than coffee count alone."
+    },
+    "lateCaffeineGuidance": {
+      "0": "You logged {{coffeeCount}} cups of coffee, including later-day intake. Caffeine close to bedtime may affect sleep in some people."
+    },
+    "activityGuidance": {
+      "0": "You have {{minutes}} minutes of moderate activity logged this week. If it feels right, a short walk or another comfortable activity can gradually move you towards general recommendations."
+    },
+    "produceGuidance": {
+      "0": "You have logged {{portions}} portions of fruit/vegetables. The general reference is at least 5 portions, around 400 g, per day."
+    },
+    "teaGuidance": {
+      "0": "You logged {{count}} tea entry/entries today. Depending on the type, tea can contribute caffeine and is part of dietary variety."
+    },
+    "cerealsGuidance": {
+      "0": "You logged {{count}} cereal portion(s). Choosing whole grains regularly can increase the fibre content of the diet."
+    },
+    "proteinGuidance": {
+      "0": "You logged {{count}} protein-food portion(s). A varied diet can combine animal and plant protein sources."
+    },
+    "fatsGuidance": {
+      "0": "You logged {{count}} fat-rich food portion(s). Fats are part of a healthy diet; type and amount matter."
+    },
+    "sweetsGuidance": {
+      "0": "You logged {{count}} sweet-food entry/entries. WHO recommends limiting free sugars and favouring a varied diet."
+    },
+    "saltyGuidance": {
+      "0": "You logged {{count}} salty-food item(s). WHO recommends limiting salt to less than 5 g per day for adults."
+    },
+    "processedFoodGuidance": {
+      "0": "You logged {{count}} fast-food/ultra-processed entry/entries. Many can be high in salt, free sugars or less favourable fats, so it can help to look at the whole day."
+    },
+    "hydrationGuidance": {
+      "0": "You logged {{ml}} ml of water today. This is the amount you recorded; hydration also comes from other foods and drinks."
+    },
+    "foodTypeSpecial": {
+      "0": "You logged {{count}} record(s) from this category today. Companion tracks this data and can compare it with your wider context over time."
+    },
+    "sleepShortGuidance": {
+      "0": "You logged {{hours}} hours of sleep. Most adults need around 7–9 hours, although individual needs vary. Today it may help to protect your rest a little more."
+    },
+    "sleepGoodGuidance": {
+      "0": "You logged {{hours}} hours of sleep with quality {{quality}}/5. That is a useful positive data point to track, without assuming one night determines how you feel today."
+    },
+    "sleepQualityGuidance": {
+      "0": "You rated sleep quality {{quality}}/5. A less restorative night can go with more daytime tiredness; today may be a good day to keep the pace gentler."
+    },
+    "morningLowGuidance": {
+      "0": "You rated your morning {{rating}}/5. A harder morning can accompany how the rest of the day feels, but it does not determine what happens. Try one simple, concrete action for this morning."
+    },
+    "afternoonLowGuidance": {
+      "0": "You rated your afternoon {{rating}}/5. If the day feels heavy, a short pause, a change of setting, or one small task may help before you continue."
+    },
+    "dayRecoveryGuidance": {
+      "0": "You moved from {{morning}}/5 in the morning to {{afternoon}}/5 in the afternoon. That is a positive change in your own record; it does not prove a cause, but it is interesting to track."
+    },
+    "exerciseType": {
+      "walk": {
+        "0": "You logged {{minutes}} minutes of walking. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      },
+      "run": {
+        "0": "You logged {{minutes}} minutes of running. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      },
+      "bike": {
+        "0": "You logged {{minutes}} minutes of cycling. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      },
+      "swim": {
+        "0": "You logged {{minutes}} minutes of swimming. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      },
+      "gym": {
+        "0": "You logged {{minutes}} minutes of strength training. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      },
+      "yoga": {
+        "0": "You logged {{minutes}} minutes of stretching/mobility. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      },
+      "sport": {
+        "0": "You logged {{minutes}} minutes of sport. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      },
+      "other": {
+        "0": "You logged {{minutes}} minutes of another activity. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      },
+      "dance": {
+        "0": "You logged {{minutes}} minutes of Dance. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      },
+      "hiit": {
+        "0": "You logged {{minutes}} minutes of HIIT. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      },
+      "stretch": {
+        "0": "You logged {{minutes}} minutes of Stretching. This enters your weekly picture and helps the Companion understand what movement is part of your routine."
+      }
+    },
+    "whatILearned": "What CONFIA noticed",
+    "why": {
+      "title": "Why I say this",
+      "general": "I am using your records and the context you have been building with me.",
+      "withWindow": "I am comparing your available records from the last {{days}} days.",
+      "insufficient": "I do not have enough information to draw a conclusion yet. I am observing, not guessing."
+    },
+    "nextStep": "What you can do now",
+    "activityIntensityGuidance": {
+      "0": "You logged {{minutes}} minutes of activity this week without specifying intensity. You also logged {{moderateMinutes}} moderate and {{vigorousMinutes}} vigorous minutes explicitly. Minutes without intensity cannot be compared directly with the recommendation of 150 moderate or 75 vigorous minutes per week. Adding intensity to future entries will make the comparison more accurate."
+    },
+    "collapseReflection": "Collapse",
+    "expandReflection": "Expand"
+  },
+  "companionContext": {
+    "title": "Personal context",
+    "description": "When enabled, the Companion may use your records and discoveries saved in Confia to tailor suggestions. This choice stays on this device and you can change it at any time. Turning it off stops the Companion from using this context in future; it does not delete your Confia records.",
+    "enabled": "Allowed",
+    "disabled": "Not allowed"
+  }
+}

@@ -1,14 +1,14 @@
 import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../i18n/useFeatureTranslation';
 import type { HabitRecord } from '../../data/habits/types';
 import { dailyLifestyleReview,weeklyLifestyleReview } from '../../data/personal/lifestyleReview';
 import { verifiedHabitSources } from '../../data/habits/sources';
 export function SourceNote({id}:{id:string}) {
- const {t}=useTranslation(),source=verifiedHabitSources.find(s=>s.id===id);if(!source)return null;
+ const {t}=useTranslation("habits"),source=verifiedHabitSources.find(s=>s.id===id);if(!source)return null;
  return <details className="mt-2 text-xs leading-5"><summary className="min-h-8 cursor-pointer font-semibold">{t('habitHub.review.why')}</summary><p>{t('habitHub.sources.explain.'+id)}</p><a className="inline-block min-h-11 py-3 underline" href={source.url} target="_blank" rel="noreferrer">{t('habitHub.review.source')} · {source.organization} · {t(source.titleKey)}</a></details>;
 }
 export default function LifestyleReview({records,date,today,compact=false}:{records:HabitRecord[];date:string;today:string;compact?:boolean}) {
- const {t,i18n}=useTranslation(),daily=useMemo(()=>dailyLifestyleReview(records,date),[records,date]),week=useMemo(()=>weeklyLifestyleReview(records,today),[records,today]);
+ const {t,i18n}=useTranslation("habits"),daily=useMemo(()=>dailyLifestyleReview(records,date),[records,date]),week=useMemo(()=>weeklyLifestyleReview(records,today),[records,today]);
  if(compact&&!daily.hasData)return null;
  return <div className="space-y-4">
  <section className="rounded-[28px] border border-[#E1D7C5] bg-[#FFFDF7] p-5" aria-label={t('habitHub.review.daily')}><h3 className="text-xl font-black">{t('habitHub.review.daily')}</h3>

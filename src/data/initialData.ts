@@ -405,10 +405,27 @@ function seededRandom(seed: number) {
 }
 
 
-export function getDailyObjectives(date = new Date()): Objective[] {
+export type DailyObjectiveNeed = "calm" | "mind" | "energy" | "support" | "well";
+
+const NEED_CATEGORY_PREFERENCES: Record<Exclude<DailyObjectiveNeed, "well">, Objective["category"][]> = {
+  calm: ["mental", "corporeo"],
+  mind: ["mental", "acao"],
+  energy: ["corporeo", "nutricao"],
+  support: ["social", "acao"],
+};
+
+export function getDailyObjectives(date = new Date(), need?: string): Objective[] {
   const dateKey = getLocalCalendarDate(date);
   const daySeed = Array.from(dateKey).reduce(
     (sum, char, index) => sum + char.charCodeAt(0) * (index + 1),
+    0
+  );
+  const normalizedNeed: DailyObjectiveNeed | undefined =
+    ["calm", "mind", "energy", "support", "well"].includes(need || "")
+      ? need as DailyObjectiveNeed
+      : undefined;
+  const needSeed = Array.from(normalizedNeed || "").reduce(
+    (sum, char, index) => sum + char.charCodeAt(0) * (index + 3),
     0
   );
   const dailyObjectives = [...OBJECTIVES_LIBRARY];
@@ -416,10 +433,31 @@ export function getDailyObjectives(date = new Date()): Objective[] {
   dailyObjectives.sort((a, b) => {
     const hashA = a.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
     const hashB = b.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
-    return seededRandom(daySeed + hashA) - seededRandom(daySeed + hashB);
+    return seededRandom(daySeed + needSeed + hashA) - seededRandom(daySeed + needSeed + hashB);
   });
 
-  return dailyObjectives.slice(0, 5).map(objective => ({
+  let selected: Objective[];
+  if (normalizedNeed === "well") {
+    // A broad need receives a balanced sample instead of five similar actions.
+    const categories: Objective["category"][] = ["mental", "corporeo", "nutricao", "social", "acao"];
+    selected = categories
+      .map(category => dailyObjectives.find(objective => objective.category === category))
+      .filter((objective): objective is Objective => Boolean(objective));
+  } else if (normalizedNeed && Object.prototype.hasOwnProperty.call(NEED_CATEGORY_PREFERENCES, normalizedNeed)) {
+    const preferredCategories = NEED_CATEGORY_PREFERENCES[normalizedNeed as Exclude<DailyObjectiveNeed, "well">];
+    const preferred = dailyObjectives.filter(objective => preferredCategories.includes(objective.category));
+    const complementary = dailyObjectives.filter(objective => !preferredCategories.includes(objective.category));
+    selected = [...preferred.slice(0, 3), ...complementary.slice(0, 2)];
+  } else {
+    selected = dailyObjectives.slice(0, 5);
+  }
+
+  if (selected.length < 5) {
+    const selectedIds = new Set(selected.map(objective => objective.id));
+    selected = [...selected, ...dailyObjectives.filter(objective => !selectedIds.has(objective.id)).slice(0, 5 - selected.length)];
+  }
+
+  return selected.slice(0, 5).map(objective => ({
     ...objective,
     completed: false,
   }));

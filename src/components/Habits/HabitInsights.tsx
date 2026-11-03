@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import type { PersonalEvent } from "../../data/personal/personalEvent";
 import { buildPersonalInsights } from "../../data/personal/personalInsights";
 export default function HabitInsights({events,today,showEmpty=true}:{events:PersonalEvent[];today:string;showEmpty?:boolean}) {
-  const {t}=useTranslation();
+  const {t}=useTranslation("habits");
   const insights=useMemo(()=>buildPersonalInsights(events).filter(i=>i.fingerprint.startsWith("lifestyle:")),[events,today]);
   if(!insights.length && !showEmpty)return null;
   if(!insights.length)return <p className="px-2 text-sm leading-6 text-[#6F5D51]">{t("habitHub.insights.empty")}</p>;

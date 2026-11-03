@@ -243,16 +243,29 @@ export function dailyCandidates(
     activity.moderateMinutes < SCIENTIFIC_GUIDANCE.activity.moderateMinutes &&
     activity.vigorousMinutes < SCIENTIFIC_GUIDANCE.activity.vigorousMinutes
   ) {
-    add(
-      "activityGuidance",
-      today,
-      70,
-      "discovery",
-      "exercise",
-      { minutes: activity.moderateMinutes, days: activity.activeDays },
-      "suggestion",
-      "companionDaily.actions.exercise",
-    );
+    if (activity.unclassifiedMinutes > 0) {
+      add(
+        "activityIntensityGuidance",
+        today,
+        70,
+        "discovery",
+        "exercise",
+        { minutes: activity.unclassifiedMinutes, moderateMinutes: activity.moderateMinutes, vigorousMinutes: activity.vigorousMinutes },
+        "suggestion",
+        "companionDaily.actions.exercise",
+      );
+    } else {
+      add(
+        "activityGuidance",
+        today,
+        70,
+        "discovery",
+        "exercise",
+        { minutes: activity.moderateMinutes, days: activity.activeDays },
+        "suggestion",
+        "companionDaily.actions.exercise",
+      );
+    }
   }
   const typeGuidance = activity.byType as Record<string,{minutes:number;days:number}>;
   if (activity.strengthDays > 0 && activity.strengthDays < SCIENTIFIC_GUIDANCE.activity.strengthDays) {

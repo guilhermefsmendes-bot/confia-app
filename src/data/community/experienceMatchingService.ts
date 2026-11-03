@@ -15,6 +15,7 @@ import {
 import { auth, signInAnonymously } from "../../firebaseAuth";
 import { db } from "../../firebaseFirestore";
 import type { SharePost } from "../../types";
+import { blockCommunityMember } from "./blocking";
 import {
   isExperienceMatchingId,
   type ExperienceMatchingId,
@@ -98,16 +99,54 @@ export async function saveExperienceMatchProfile(profile: ExperienceMatchProfile
 
 
 export function subscribeBlockedUserIds(cb: (ids: string[]) => void) {
-  let stopQuery: (() => void) | undefined;
+  let stops: Array<() => void> = [];
+  let outgoing: string[] = [];
+  let incoming: string[] = [];
+  let outgoingReady = false;
+  let incomingReady = false;
   const stopAuth = auth.onAuthStateChanged(user => {
-    stopQuery?.();
+    stops.forEach(stop => stop());
+    stops = [];
+    outgoing = [];
+    incoming = [];
+    outgoingReady = false;
+    incomingReady = false;
     if (!user) { cb([]); return; }
-    stopQuery = onSnapshot(
-      query(collection(db, "blocks"), where("blockerId", "==", user.uid), limit(100)),
-      snap => cb(snap.docs.map(d => d.data().blockedUserId).filter((x): x is string => typeof x === "string"))
-    );
+    cb(["*"]);
+    const emit = () => {
+      if (outgoingReady && incomingReady) cb([...new Set([...outgoing, ...incoming])]);
+      else cb(["*"]);
+    };
+    stops.push(onSnapshot(
+      query(collection(db, "blocks"), where("blockerId", "==", user.uid)),
+      snap => {
+        outgoing = snap.docs.map(item => item.data().blockedUserId)
+          .filter((value): value is string => typeof value === "string");
+        outgoingReady = true;
+        emit();
+      },
+      error => {
+        outgoingReady = false;
+        console.error("Não foi possível verificar os bloqueios efetuados:", error);
+        cb(["*"]);
+      },
+    ));
+    stops.push(onSnapshot(
+      query(collection(db, "blocks"), where("blockedUserId", "==", user.uid)),
+      snap => {
+        incoming = snap.docs.map(item => item.data().blockerId)
+          .filter((value): value is string => typeof value === "string");
+        incomingReady = true;
+        emit();
+      },
+      error => {
+        incomingReady = false;
+        console.error("Não foi possível verificar os bloqueios recebidos:", error);
+        cb(["*"]);
+      },
+    ));
   });
-  return () => { stopQuery?.(); stopAuth(); };
+  return () => { stops.forEach(stop => stop()); stopAuth(); };
 }
 
 export function subscribeExperienceMatchRequests(cb: (requests: ExperienceMatchRequest[]) => void) {
@@ -172,23 +211,46 @@ export async function respondToExperienceMatch(request: ExperienceMatchRequest, 
   const user = await ensureUser();
   if (request.recipientId !== user.uid || request.status !== "pending") return null;
   const ref = doc(db, "communityMatchRequests", request.id);
-  await updateDoc(ref, { status: accept ? "accepted" : "declined", respondedAt: serverTimestamp() });
-  if (!accept) return null;
+  if (!accept) {
+    await updateDoc(ref, { status: "declined", respondedAt: serverTimestamp() });
+    return null;
+  }
 
-  const postSnap = await getDoc(doc(db, "posts", request.postId));
-  if (!postSnap.exists() || postSnap.data().authorId !== user.uid) return null;
-
-  const participants = [request.requesterId, request.recipientId].sort();
+  const postRef = doc(db, "posts", request.postId);
   const chatId = `match_${request.id}`;
-  await setDoc(doc(db, "chats", chatId), {
-    participants,
-    postId: request.postId,
-    authorId: user.uid,
-    matchRequestId: request.id,
-    createdAt: serverTimestamp(),
-    lastMessage: "",
-    lastMessageAt: serverTimestamp(),
-    unreadBy: []
+  const chatRef = doc(db, "chats", chatId);
+  const participants = [request.requesterId, request.recipientId].sort();
+
+  // Acceptance and chat creation are one atomic operation. If a block exists,
+  // Firestore rules reject the chat write and the request remains pending.
+  await runTransaction(db, async transaction => {
+    const [requestSnap, postSnap, chatSnap] = await Promise.all([
+      transaction.get(ref),
+      transaction.get(postRef),
+      transaction.get(chatRef),
+    ]);
+    if (!requestSnap.exists() || !postSnap.exists()) throw new Error("match-request-unavailable");
+    const current = requestSnap.data();
+    if (current.recipientId !== user.uid || current.status !== "pending") {
+      throw new Error("match-request-no-longer-pending");
+    }
+    if (current.requesterId !== request.requesterId || current.postId !== request.postId
+      || postSnap.data().authorId !== user.uid) {
+      throw new Error("match-request-invalid");
+    }
+    if (chatSnap.exists()) throw new Error("match-chat-already-exists");
+
+    transaction.update(ref, { status: "accepted", respondedAt: serverTimestamp() });
+    transaction.set(chatRef, {
+      participants,
+      postId: request.postId,
+      authorId: user.uid,
+      matchRequestId: request.id,
+      createdAt: serverTimestamp(),
+      lastMessage: "",
+      lastMessageAt: serverTimestamp(),
+      unreadBy: [],
+    });
   });
   return chatId;
 }
@@ -294,9 +356,21 @@ export async function blockCircleParticipant(circleId: string, blockedUserId: st
   if (!circleSnap.exists()) throw new Error("circle-not-found");
   const participants: string[] = Array.isArray(circleSnap.data().participants) ? circleSnap.data().participants : [];
   if (!participants.includes(user.uid) || !participants.includes(blockedUserId)) throw new Error("not-circle-participant");
-  await setDoc(doc(db, "blocks", `${user.uid}_${blockedUserId}`), { blockerId: user.uid, blockedUserId, circleId, createdAt: serverTimestamp() });
-  // Em conversa de duas pessoas, bloquear termina imediatamente o contacto.
-  if (participants.length === 2) await leaveExperienceMatchCircle(circleId);
+  await blockCommunityMember(blockedUserId, circleId);
+  // Remove the blocked participant from this circle while keeping the blocker
+  // and unrelated members together. Firestore rules require the matching pair block.
+  await runTransaction(db, async transaction => {
+    const latest = await transaction.get(circleRef);
+    if (!latest.exists()) return;
+    const current: string[] = Array.isArray(latest.data().participants) ? latest.data().participants : [];
+    if (!current.includes(user.uid) || !current.includes(blockedUserId)) return;
+    const next = current.filter(uid => uid !== blockedUserId);
+    transaction.update(circleRef, {
+      participants: next,
+      status: next.length === 8 ? "full" : "open",
+      updatedAt: serverTimestamp(),
+    });
+  });
 }
 
 export async function reportCircleParticipant(circleId: string, reportedUserId: string, reason: string) {
@@ -306,7 +380,7 @@ export async function reportCircleParticipant(circleId: string, reportedUserId: 
   const circleSnap = await getDoc(doc(db, "experienceMatchCircles", circleId));
   const participants: string[] = circleSnap.exists() && Array.isArray(circleSnap.data().participants) ? circleSnap.data().participants : [];
   if (!participants.includes(user.uid) || !participants.includes(reportedUserId)) throw new Error("not-circle-participant");
-  await setDoc(doc(db, "reports", `circle_${circleId}_${user.uid}_${reportedUserId}`), { reporterId:user.uid, reportedUserId, postId:"circle:"+circleId, circleId, reason:cleanReason, createdAt:serverTimestamp() });
+  await setDoc(doc(db, "reports", `circle_${circleId}_${user.uid}_${reportedUserId}`), { reporterId:user.uid, reportedUserId, postId:"circle:"+circleId, circleId, reason:cleanReason, status:"pending", createdAt:serverTimestamp() });
 }
 
 export async function requestCircleParticipantRemoval(circleId: string, targetUserId: string) {
@@ -315,5 +389,5 @@ export async function requestCircleParticipantRemoval(circleId: string, targetUs
   const circleSnap = await getDoc(doc(db, "experienceMatchCircles", circleId));
   const participants: string[] = circleSnap.exists() && Array.isArray(circleSnap.data().participants) ? circleSnap.data().participants : [];
   if (participants.length < 3 || !participants.includes(user.uid) || !participants.includes(targetUserId)) throw new Error("invalid-removal-request");
-  await setDoc(doc(db, "reports", `removal_${circleId}_${user.uid}_${targetUserId}`), { reporterId:user.uid, reportedUserId:targetUserId, postId:"circle:"+circleId, circleId, reason:"Pedido de remoção da conversa de grupo", kind:"circle_removal_request", createdAt:serverTimestamp() });
+  await setDoc(doc(db, "reports", `removal_${circleId}_${user.uid}_${targetUserId}`), { reporterId:user.uid, reportedUserId:targetUserId, postId:"circle:"+circleId, circleId, reason:"Pedido de remoção da conversa de grupo", kind:"circle_removal_request", status:"pending", createdAt:serverTimestamp() });
 }

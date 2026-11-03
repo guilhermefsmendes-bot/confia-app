@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
-import { motion } from 'motion/react';
 import { ShieldCheck, Flame, Sparkles, MessageCircleCode } from 'lucide-react';
 import { AvatarState } from '../types';
 import ConfiaCreature, { type ConfiaCreatureState } from "./Companheiro/ConfiaCreature";
@@ -146,56 +145,22 @@ return (
         className="relative flex items-center justify-center cursor-pointer select-none"
         style={{ touchAction: 'manipulation' }}
       >
-<motion.div
-  animate={
+<div
+  className={`relative flex flex-col items-center ${
     isJumping
-      ? {
-          y: [-30, 0],
-          scaleY: [0.9, 1.1, 1],
-          scaleX: [1.1, 0.9, 1]
-        }
+      ? "confia-avatar-jump"
       : isMajorEvolution
-        ? {
-            y: [0, -10, -4, 0],
-            scale: [1, 1.08, 1.035, 1],
-            rotate: [0, -1.5, 1.5, 0]
-          }
+        ? "confia-avatar-evolution"
         : levelUpTrigger || celebrating
-          ? {
-              y: [0, -5, 0],
-              scale: [1, 1.035, 1]
-            }
-          : {}
-  }
-  transition={
-    isMajorEvolution
-      ? {
-          duration: 1.15,
-          ease: "easeOut"
-        }
-      : {
-          duration: 0.6,
-          ease: "easeOut"
-        }
-  }
-  className="relative flex flex-col items-center"
+          ? "confia-avatar-celebrating"
+          : ""
+  }`}
 >
   {isMajorEvolution && (
-    <motion.div
+    <div
       aria-hidden="true"
-      initial={{
-        opacity: 0,
-        scale: 0.72
-      }}
-      animate={{
-        opacity: [0, 0.34, 0.18],
-        scale: [0.72, 1.08, 1]
-      }}
-      transition={{
-        duration: 1.1,
-        ease: "easeOut"
-      }}
       className="
+        confia-avatar-evolution-halo
         pointer-events-none
         absolute
         left-1/2
@@ -218,7 +183,7 @@ return (
     reacting={isJumping}
     equippedAccessoryIds={equippedAccessoryIds}
   />
-</motion.div>
+</div>
 
 
       </div>

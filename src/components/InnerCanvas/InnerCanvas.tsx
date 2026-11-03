@@ -4,7 +4,7 @@ import React, {
   useState,
 } from "react";
 
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 
 import { getConstellationReflection } from "./constellationReflections";
 import {
@@ -488,7 +488,7 @@ function EmotionalArtwork({
   interactive?: boolean;
   tier?: InnerCanvasTier;
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation("innerCanvas");
 
   const svgId =
     useId().replace(/:/g, "");
@@ -1363,7 +1363,7 @@ function constellationLanguage(
 function ConstellationArtwork({
   answers,
 }: ConstellationArtworkProps) {
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation("innerCanvas");
 
   const match: ConstellationMatch =
     useMemo(
@@ -1710,7 +1710,7 @@ const reflection =
 export default function InnerCanvas({
   onBack,
 }: Props) {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation("innerCanvas");
 
   const [mode, setMode] =
     useState<Mode>("intro");

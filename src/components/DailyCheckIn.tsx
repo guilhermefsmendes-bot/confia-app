@@ -202,7 +202,7 @@ export default function DailyCheckIn({ onComplete }: Props) {
 
                 <input
                   type="range"
-                  min="0"
+                  min="1"
                   max="10"
                   value={mood}
                   onChange={(e) => setMood(Number(e.target.value))}

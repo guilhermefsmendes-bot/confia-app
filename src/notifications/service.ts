@@ -21,7 +21,7 @@ const prefRef=(uid:string)=>doc(db,'users',uid,'preferences','notifications');
 const deviceRef=(uid:string)=>doc(db,'users',uid,'devices',deviceId);
 const language=()=>['pt','en','es','fr'].find(l=>i18n.language?.startsWith(l))??'pt';
 function read(uid:string):NoticePreferences {try {const p=JSON.parse(localStorage.getItem(prefix+uid)??'{}');return {community:p.community===true,reminder:p.reminder===true,time:validTime(p.time)?p.time:'20:30',milestones:p.milestones===true};}catch{return {...DEFAULT_NOTICES};}}
-function persist(){localStorage.setItem(prefix+owner,JSON.stringify(preferences));notify();}
+function persist(next:NoticePreferences=preferences){localStorage.setItem(prefix+owner,JSON.stringify(next));preferences=next;notify();}
 async function configure(){if(!isNativeAndroid())return;const daily=getDailyCheckIn();await ConfiaDevice.configure({owner:owner==='guest'?'':owner,...preferences,language:language(),completedDate:daily?.completed?daily.date:''});}
 let syncing=false,resync=false;
 export async function syncNoticePreferences() {
@@ -37,7 +37,7 @@ export async function syncNoticePreferences() {
    if(sent.community===preferences.community&&sent.milestones===preferences.milestones)localStorage.removeItem(pendingKey);
   }else {
    const remote=await getDoc(prefRef(uid));if(uid!==owner)return;
-   if(remote.exists()){preferences={...preferences,community:remote.data().community===true,milestones:remote.data().milestones===true};persist();await configure();}
+   if(remote.exists()){persist({...preferences,community:remote.data().community===true,milestones:remote.data().milestones===true});await configure();}
   }
   if(uid!==owner)return;
   if(preferences.community){const {token}=await ConfiaDevice.token();if(uid!==owner||!preferences.community)return;
@@ -50,7 +50,24 @@ export async function syncNoticePreferences() {
 export async function updateNoticePreferences(patch:Partial<NoticePreferences>) {
  if(!isNativeAndroid())throw Error('native-only');
  const next={...preferences,...patch};if(!validTime(next.time))throw Error('time');
- preferences=next;persist();if(patch.community!==undefined||patch.milestones!==undefined)localStorage.setItem(prefix+owner+':pending','1');await configure();void syncNoticePreferences();
+ const key=prefix+owner,pendingKey=key+':pending';
+ const syncFieldsChanged=patch.community!==undefined||patch.milestones!==undefined;
+ let previousRaw:string|null=null,previousPending:string|null=null,snapshotComplete=false;
+ try {
+  previousRaw=localStorage.getItem(key);
+  if(syncFieldsChanged)previousPending=localStorage.getItem(pendingKey);
+  snapshotComplete=true;
+  localStorage.setItem(key,JSON.stringify(next));
+  if(syncFieldsChanged)localStorage.setItem(pendingKey,'1');
+ }catch(error){
+  if(snapshotComplete)try{
+   if(previousRaw===null)localStorage.removeItem(key);else localStorage.setItem(key,previousRaw);
+   if(syncFieldsChanged){if(previousPending===null)localStorage.removeItem(pendingKey);else localStorage.setItem(pendingKey,previousPending);}
+  }catch{/* Best-effort rollback; keep in-memory preferences unchanged. */}
+  throw error;
+ }
+ preferences=next;notify();
+ await configure();void syncNoticePreferences();
 }
 export async function allowNotices(kind:'community'|'reminder') {
  const {granted}=await ConfiaDevice.requestNoticePermission();

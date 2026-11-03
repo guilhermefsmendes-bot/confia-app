@@ -1,4 +1,4 @@
-import { dayFoodItems } from "../habits/nutrition";
+import { dayFoodItems, nutritionTotals } from "../habits/nutrition";
 import { itemVolume, type FoodItem } from "../habits/catalog";
 import type { HabitRecord, ActivityType } from "../habits/types";
 import { localDay, shiftDay } from "../habits/calendar";
@@ -29,22 +29,46 @@ function otherCaffeineEstimate(item:FoodItem):number {
   if(item.category==="soda" && item.caffeine==="yes"){const ml=itemVolume(item);return ml?ml/355*40:item.quantity*40;}
   return 0;
 }
-export function estimateDailyCaffeine(records:HabitRecord[],date:string){
- const items=dayFoodItems(records,date);let mg=0,known=false,coffeeCount=0,late=false;
- for(const record of items){const item=record.data;
+export function estimateCaffeineFromFoodItems(items:FoodItem[]){
+ let mg=0,known=false,coffeeCount=0,late=false;
+ for(const item of items){
+  if(item.deleted || item.quantity<=0) continue;
   if(item.category==="coffee"&&item.subtype!=="decaf"){coffeeCount+=item.quantity;const estimate=coffeeEstimate(item);if(estimate!==undefined){mg+=estimate;known=true;}if(item.time?item.time>="16:00":item.period==="afternoon"||item.period==="evening")late=true;}
   const other=otherCaffeineEstimate(item);if(other>0){mg+=other;known=true;if((item.time?item.time>="16:00":item.period==="afternoon"||item.period==="evening"))late=true;}
  }
- return {mg:known?Math.round(mg):undefined,coffeeCount,late,itemCount:items.length};
+ return {mg:known?Math.round(mg):undefined,coffeeCount,late,itemCount:items.filter(item=>!item.deleted&&item.quantity>0).length};
+}
+export function estimateDailyCaffeine(records:HabitRecord[],date:string){
+ const items=dayFoodItems(records,date).map(record=>record.data);
+ const estimate=estimateCaffeineFromFoodItems(items);
+ const totals=nutritionTotals(records,date);
+ const detailedCategories=new Set(items.filter(item=>!item.deleted).map(item=>item.category));
+ // Legacy nutrition entries contain category counts rather than serving details.
+ // Use conservative typical estimates only where detailed entries do not exist.
+ const legacyRates:Partial<Record<FoodItem["category"],number>>={coffee:80,tea:50,energy:80,soda:40};
+ let legacyMg=0,legacyKnown=false,legacyCoffee=0;
+ for(const category of ["coffee","tea","energy","soda"] as const){
+  if(detailedCategories.has(category)) continue;
+  const quantity=totals[category];
+  if(typeof quantity!=="number"||!Number.isFinite(quantity)||quantity<=0) continue;
+  legacyMg+=quantity*(legacyRates[category]??0);
+  legacyKnown=true;
+  if(category==="coffee") legacyCoffee+=quantity;
+ }
+ const hasDetailedCaffeine=estimate.mg!==undefined;
+ const mg=hasDetailedCaffeine||legacyKnown?Math.round((estimate.mg??0)+legacyMg):undefined;
+ return { ...estimate, mg, coffeeCount:estimate.coffeeCount+legacyCoffee,
+  itemCount:estimate.itemCount+(["coffee","tea","energy","soda"] as const).reduce((count,category)=>count+(detailedCategories.has(category)?0:typeof totals[category]==="number"&&totals[category]!>0?1:0),0) };
 }
 export function weeklyExercise(records:HabitRecord[],now:Date){
  const today=localDay(now),since=shiftDay(today,-6),sessions=records.filter((r):r is Extract<HabitRecord,{kind:"exercise"}> =>r.kind==="exercise"&&r.date>=since&&r.date<=today);
  const activeDays=new Set(sessions.filter(r=>r.data.minutes>0).map(r=>r.date));
- const moderateMinutes=sessions.filter(r=>r.data.minutes>0&&(r.data.intensity==="moderate"||r.data.intensity==="light"||!r.data.intensity)).reduce((n,r)=>n+r.data.minutes,0);
+ const moderateMinutes=sessions.filter(r=>r.data.minutes>0&&r.data.intensity==="moderate").reduce((n,r)=>n+r.data.minutes,0);
  const vigorousMinutes=sessions.filter(r=>r.data.minutes>0&&r.data.intensity==="intense").reduce((n,r)=>n+r.data.minutes,0);
+ const unclassifiedMinutes=sessions.filter(r=>r.data.minutes>0&&(!r.data.intensity||r.data.intensity==="light")).reduce((n,r)=>n+r.data.minutes,0);
  const strengthDays=new Set(sessions.filter(r=>r.data.minutes>0&&r.data.activity==="gym").map(r=>r.date)).size;
  const byType=Object.fromEntries((['walk','run','bike','swim','gym','dance','sport','hiit','stretch','yoga','other'] as ActivityType[]).map(type=>[type,{minutes:sessions.filter(r=>r.data.activity===type).reduce((n,r)=>n+r.data.minutes,0),days:new Set(sessions.filter(r=>r.data.activity===type&&r.data.minutes>0).map(r=>r.date)).size}]));
- return {moderateMinutes,vigorousMinutes,activeDays:activeDays.size,strengthDays,loggedDays:new Set(sessions.map(r=>r.date)).size,byType};
+ return {moderateMinutes,vigorousMinutes,unclassifiedMinutes,activeDays:activeDays.size,strengthDays,loggedDays:new Set(sessions.map(r=>r.date)).size,byType};
 }
 export function fruitVegetableRegistrations(records:HabitRecord[],date:string){const items=dayFoodItems(records,date).filter(r=>r.data.category==="fruit"||r.data.category==="vegetables");const portions=items.reduce((n,r)=>n+(r.data.unit==="portion"?r.data.quantity:0),0);const grams=items.reduce((n,r)=>n+(r.data.unit==="g"?r.data.quantity:0),0);return {explicitPortions:portions,grams,registrations:items.length};}
 

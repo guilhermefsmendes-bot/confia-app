@@ -98,6 +98,8 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   const [message, setMessage] = useState('');
   const [showCompose, setShowCompose] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
   const [confirmIdentify, setConfirmIdentify] = useState<string | null>(null);
   const [selectedExperience, setSelectedExperience] = useState<ExperienceMatchingId | "">("");
   const [communityView, setCommunityView] = useState<"feed" | "matching">("feed");
@@ -109,24 +111,35 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
   useEffect(() => subscribeExperienceMatchRequests(setMatchRequests), []);
   useEffect(() => subscribeBlockedUserIds(setBlockedMatchUsers), []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!message.trim()) return;
+    if (!message.trim() || submitting) return;
 
-    onAddPost(selectedFeeling, selectedTopic, message.trim(), selectedExperience ? {
-      experienceTag: selectedExperience,
-      supportMode: "share"
-    } : undefined);
+    setSubmitting(true);
+    setSubmitError(false);
+    setSuccessMsg(false);
+    try {
+      await onAddPost(selectedFeeling, selectedTopic, message.trim(), selectedExperience ? {
+        experienceTag: selectedExperience,
+        supportMode: "share"
+      } : undefined);
 
-    setMessage('');
-    setSelectedExperience('');
-    setShowCompose(false);
-    setSuccessMsg(true);
+      // Clear the draft only after the server confirms that the post exists.
+      setMessage('');
+      setSelectedExperience('');
+      setShowCompose(false);
+      setSuccessMsg(true);
 
-    setTimeout(() => {
-      setSuccessMsg(false);
-    }, 3000);
+      window.setTimeout(() => {
+        setSuccessMsg(false);
+      }, 3000);
+    } catch {
+      // Keep the complete draft available so the person can retry.
+      setSubmitError(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getFeelingStyles = (feeling: string) => {
@@ -152,6 +165,8 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
+            role="status"
+            aria-live="polite"
             className="p-3.5 bg-[#F3E3DC] border border-[#B85F48]/25 rounded-2xl flex items-center gap-2 text-[#934A38] text-xs font-bold shadow-sm"
           >
             <CheckCircle size={16} className="shrink-0" />
@@ -269,6 +284,12 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
             </div>
           </div>
 
+          {submitError && (
+            <p role="alert" className="rounded-xl border border-[#D9B8A8] bg-[#FFF4EF] px-3 py-2.5 text-xs font-semibold leading-5 text-[#8B4938]">
+              {t("shareError")}
+            </p>
+          )}
+
           {/* Form Actions */}
           <div className="flex items-center gap-2.5 pt-1">
             <button
@@ -281,7 +302,9 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
 
             <button
               type="submit"
-              className="flex-1 py-3 bg-[#B85F48] hover:bg-[#D59375] text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-md shadow-[#B85F48]/20 cursor-pointer"
+              disabled={submitting || !message.trim()}
+              aria-busy={submitting}
+              className="flex-1 py-3 bg-[#B85F48] hover:bg-[#D59375] text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-md shadow-[#B85F48]/20 cursor-pointer disabled:cursor-not-allowed disabled:opacity-55"
             >
               <Send size={13} />
               {t("sendMessage")}
@@ -398,7 +421,7 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
                     }
                   >
                     <span>{tag.emoji}</span>
-                    <span>{tag.text}</span>
+                    <span>{tag.key ? t(tag.key) : tag.text}</span>
                   </span>
                 </div>
 

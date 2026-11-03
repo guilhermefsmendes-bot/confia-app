@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from "react";
 import { getLocalCalendarDate } from "../../utils/date"
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import { emitCompanionInteraction } from "../../data/reactive/companionBrain/companionInteractionEvents";
 
 interface Props {
@@ -30,7 +30,7 @@ const icons: Record<string, string> = {
 };
 
 function HabitDailyCheck({ onBack }: Props) {
-  const { t } = useTranslation();
+  const { t } = useTranslation("patternsNew");
 
   const [habits, setHabits] = useState<Habit[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});

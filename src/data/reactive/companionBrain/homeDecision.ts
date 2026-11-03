@@ -24,6 +24,8 @@ export type HomeDecisionInput = {
   afternoonRating: number;
   ratings: DailyRating[];
   reactiveWriteAt?: number;
+  /** Explicit user consent to use personal history in Companion suggestions. */
+  allowPersonalContext?: boolean;
   personalDiscovery?: {
     id: string;
     messageKey?: string;
@@ -40,6 +42,8 @@ export function getHomeCompanionBrainDecision(input: HomeDecisionInput) {
   const now = new Date();
   const localToday = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
   if (selectedDate !== localToday) return null;
+  // Without explicit consent, the Companion does not inspect personal history or derive contextual suggestions.
+  if (input.allowPersonalContext === false) return null;
   const companionCollectedData = collectCompanionData();
   const checkin=companionCollectedData.checkIns.find(c=>c.date===localToday&&c.completed);
   const context = buildCompanionBrainContext({

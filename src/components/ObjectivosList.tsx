@@ -30,21 +30,21 @@ const { t, i18n } = useTranslation();
   const [minimumDraft, setMinimumDraft] = useState("");
   const [normalDraft, setNormalDraft] = useState("");
   const [extraDraft, setExtraDraft] = useState("");
-  const [climberGender, setClimberGender] = useState<'male' | 'female' | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const saved = window.localStorage.getItem('confia_climber_gender_v1');
-    return saved === 'female' || saved === 'male' ? saved : null;
+  const [climberGender, setClimberGender] = useState<'male' | 'female' | 'neutral'>(() => {
+    if (typeof window === 'undefined') return 'neutral';
+    try {
+      const saved = window.localStorage.getItem('confia_climber_gender_v1');
+      return saved === 'female' || saved === 'male' || saved === 'neutral' ? saved : 'neutral';
+    } catch {
+      return 'neutral';
+    }
   });
   const [showClimberChoice, setShowClimberChoice] = useState(false);
 
-  useEffect(() => {
-    if (!climberGender) setShowClimberChoice(true);
-  }, [climberGender]);
-
-  const chooseClimber = (gender: 'male' | 'female') => {
+  const chooseClimber = (gender: 'male' | 'female' | 'neutral') => {
     setClimberGender(gender);
     setShowClimberChoice(false);
-    window.localStorage.setItem('confia_climber_gender_v1', gender);
+    try { window.localStorage.setItem('confia_climber_gender_v1', gender); } catch { /* Personalization is optional. */ }
   };
 
   useEffect(() => {
@@ -306,7 +306,7 @@ const { t, i18n } = useTranslation();
     completedCount === objectives.length;
 
   return (
-    <div className="relative w-full min-h-[calc(100vh-120px)] overflow-hidden">
+    <div className="relative w-full min-h-[460px] sm:min-h-[520px] overflow-hidden">
       <AnimatePresence>
         {objectiveCelebration && (
           <motion.div
@@ -378,7 +378,7 @@ const { t, i18n } = useTranslation();
       </AnimatePresence>
 
       {/* 2B — Identidade premium + progresso diário */}
-      <section className="relative min-h-[calc(100vh-120px)] overflow-hidden bg-[#E9E0D7]">
+      <section data-testid="objective-mountain" className="relative min-h-[460px] sm:min-h-[520px] overflow-hidden bg-[#E9E0D7]">
         <div
           className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#B85F48]/10 blur-2xl"
           aria-hidden="true"
@@ -389,7 +389,7 @@ const { t, i18n } = useTranslation();
           aria-hidden="true"
         />
 
-        <div className="relative min-h-[calc(100vh-120px)]">
+        <div className="relative min-h-[460px] sm:min-h-[520px]">
           <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-white/35 via-transparent to-[#3F2C27]/25" />
           <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_50%_18%,rgba(255,255,255,.55),transparent_45%)]" />
           <div className="relative z-20 flex items-start justify-between gap-4 px-5 pt-5">
@@ -411,6 +411,13 @@ const { t, i18n } = useTranslation();
               <p className="mt-1.5 max-w-[290px] text-xs font-medium leading-relaxed text-[#7A6A64]">
                 {t("objectivesPremium.subtitle")}
               </p>
+              <button
+                type="button"
+                onClick={() => setShowClimberChoice(true)}
+                className="mt-2 min-h-8 text-[9px] font-black text-[#934A38] underline decoration-[#B85F48]/40 underline-offset-4"
+              >
+                {t("objectivesPremium.climberCustomize")}
+              </button>
             </div>
 
             <div className="shrink-0 rounded-2xl border border-[#B85F48]/20 bg-white/85 px-3 py-2 text-right shadow-sm">
@@ -502,8 +509,8 @@ const { t, i18n } = useTranslation();
               {[
                 {level:1,x:22,y:79},{level:2,x:35,y:65},{level:3,x:49,y:49},{level:4,x:64,y:34},{level:5,x:78,y:20}
               ].map(point=><div key={point.level} className="absolute z-10 h-2.5 w-2.5 -translate-x-1/2 rounded-full border-2 border-white bg-[#8F503E] shadow" style={{left:`${point.x}%`,top:`${point.y}%`}} />)}
-              <div className="absolute z-30 -translate-x-1/2 -translate-y-full text-[42px] drop-shadow-[0_8px_8px_rgba(40,30,25,.28)]" style={{ left: `${climberPosition.x}%`, top: `${climberPosition.y}%` }} aria-label={climberGender === 'female' ? t('objectivesPremium.climberFemaleAlt') : t('objectivesPremium.climberMaleAlt')}>
-                {climberGender === 'female' ? '🧗‍♀️' : '🧗‍♂️'}
+              <div className="absolute z-30 -translate-x-1/2 -translate-y-full text-[42px] drop-shadow-[0_8px_8px_rgba(40,30,25,.28)]" style={{ left: `${climberPosition.x}%`, top: `${climberPosition.y}%` }} aria-label={t(`objectivesPremium.climber${climberGender === 'female' ? 'Female' : climberGender === 'male' ? 'Male' : 'Neutral'}Alt`)}>
+                {climberGender === 'female' ? '🧗‍♀️' : climberGender === 'male' ? '🧗‍♂️' : '🧗'}
               </div>
               <div className="absolute left-4 top-[15.5rem] z-20 w-[114px] rounded-2xl border border-white/75 bg-white/80 px-2 py-1.5 shadow-sm backdrop-blur-sm">
                 <p className="text-[8px] font-black uppercase tracking-[.14em] text-[#765D52]">{t('objectivesPremium.graduationTitle')}</p>
@@ -872,6 +879,7 @@ const { t, i18n } = useTranslation();
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <button type="button" onClick={() => chooseClimber('male')} className="rounded-2xl border border-[#E8DDD4] bg-white p-4 text-center transition hover:border-[#B85F48]/45 hover:bg-[#FFF8F4]"><span className="block text-5xl">🧗‍♂️</span><span className="mt-2 block text-[10px] font-black uppercase tracking-wider text-[#765D52]">{t('objectivesPremium.climberMaleAlt')}</span></button>
                 <button type="button" onClick={() => chooseClimber('female')} className="rounded-2xl border border-[#E8DDD4] bg-white p-4 text-center transition hover:border-[#B85F48]/45 hover:bg-[#FFF8F4]"><span className="block text-5xl">🧗‍♀️</span><span className="mt-2 block text-[10px] font-black uppercase tracking-wider text-[#765D52]">{t('objectivesPremium.climberFemaleAlt')}</span></button>
+                <button type="button" onClick={() => chooseClimber('neutral')} className="rounded-2xl border border-[#E8DDD4] bg-white p-4 text-center transition hover:border-[#B85F48]/45 hover:bg-[#FFF8F4]"><span className="block text-5xl">🧗</span><span className="mt-2 block text-[10px] font-black uppercase tracking-wider text-[#765D52]">{t('objectivesPremium.climberNeutralAlt')}</span></button>
               </div>
             </motion.div>
           </motion.div>

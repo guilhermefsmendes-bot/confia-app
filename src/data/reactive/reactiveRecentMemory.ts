@@ -28,7 +28,7 @@ import type {
 } from "../companionData";
 
 import {
-  collectCompanionData,
+  collectReactiveMemoryData,
 } from "../companionData";
 
 import {
@@ -346,7 +346,7 @@ function daysAgo(
  * Obtém a média diária de humor.
  */
 function getMoodRecords(
-  data: CompanionCollectedData
+  data: Pick<CompanionCollectedData, "mood" | "objectives" | "impulse" | "checkIns">
 ): ReactiveMemoryMood[] {
   return sortByDate(
     data.mood
@@ -510,7 +510,7 @@ function getRecentMoodContinuity(
  * Check-ins ordenados cronologicamente.
  */
 function getCheckIns(
-  data: CompanionCollectedData
+  data: Pick<CompanionCollectedData, "mood" | "objectives" | "impulse" | "checkIns">
 ): ReactiveMemoryCheckIn[] {
   return sortByDate(
     data.checkIns
@@ -657,7 +657,7 @@ function normalizeImpulse(
  * não grava nada.
  */
 export function buildReactiveRecentMemory(
-  data: CompanionCollectedData
+  data: Pick<CompanionCollectedData, "mood" | "objectives" | "impulse" | "checkIns">
 ): ReactiveRecentMemory {
   const moods =
     getMoodRecords(data);
@@ -991,6 +991,6 @@ export function buildReactiveRecentMemory(
 export function collectReactiveRecentMemory():
   ReactiveRecentMemory {
   return buildReactiveRecentMemory(
-    collectCompanionData()
+    collectReactiveMemoryData()
   );
 }

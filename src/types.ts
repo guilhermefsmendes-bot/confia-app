@@ -35,9 +35,10 @@ export interface WeeklyGoal {
 
 export interface DailyRating {
   date: string; // YYYY-MM-DD
-  morning: number | null; // 0-10
-  afternoon: number | null; // 0-10
+  morning: number | null; // 1-10, normalized legacy values
+  afternoon: number | null; // 1-10, normalized legacy values
   note?: string;
+  scaleVersion?: 2;
 }
 
 export interface SharePost {

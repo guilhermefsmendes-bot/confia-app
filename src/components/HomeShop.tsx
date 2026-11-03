@@ -82,9 +82,13 @@ const HomeShop: React.FC<HomeShopProps> = ({
       return;
     }
 
-    spendPoints(item.cost);
+    // Persist ownership first. If storage is unavailable or another
+    // rapid click already completed this purchase, do not charge points.
+    if (!buyItem(item.id)) {
+      return;
+    }
 
-    buyItem(item.id);
+    spendPoints(item.cost);
 
     emitCompanionInteraction(
       "item_purchased",

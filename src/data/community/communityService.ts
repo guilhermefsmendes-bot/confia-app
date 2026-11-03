@@ -14,70 +14,168 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "../../firebaseFirestore";
 import { auth, signInAnonymously } from "../../firebaseAuth";
 import type { SharePost } from "../../types";
+import { blockCommunityMember } from "./blocking";
 
 type Reaction = "yellow" | "green" | "red";
 type Translator = (key: string) => string;
+
+export function filterBlockedCommunityPosts<T extends { authorId: string }>(
+  posts: T[],
+  blockedUserIds: ReadonlySet<string>,
+): T[] {
+  if (blockedUserIds.size === 0) return posts;
+  return posts.filter(post => !blockedUserIds.has(post.authorId));
+}
+
+function finiteNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+/** Normalize untrusted Firestore fields before they reach React components. */
+export function normalizeCommunityPost(
+  id: string,
+  value: unknown,
+  userId: string,
+  justNow: string,
+): SharePost | null {
+  if (!value || typeof value !== "object") return null;
+  const data = value as Record<string, unknown>;
+  if (typeof data.message !== "string" || !data.message.trim()) return null;
+
+  const createdAt = data.createdAt;
+  let timestamp = justNow;
+  let createdAtMs = 0;
+  if (createdAt && typeof createdAt === "object") {
+    const dateValue = createdAt as { toDate?: () => Date; toMillis?: () => number };
+    try {
+      const date = typeof dateValue.toDate === "function" ? dateValue.toDate() : null;
+      if (date instanceof Date && Number.isFinite(date.getTime())) {
+        timestamp = date.toLocaleString("pt-PT");
+      }
+      if (typeof dateValue.toMillis === "function") {
+        createdAtMs = finiteNumber(dateValue.toMillis());
+      }
+    } catch {
+      // A malformed legacy timestamp must not break the whole feed.
+    }
+  }
+
+  const stringArray = (value: unknown): string[] =>
+    Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+  const supportMode = ["share", "other_side", "seeking_match", "give_back", "poll"].includes(String(data.supportMode))
+    ? data.supportMode as SharePost["supportMode"]
+    : undefined;
+  const reaction: Reaction | undefined =
+    stringArray(data.yellowLikedBy).includes(userId) ? "yellow" :
+    stringArray(data.greenLikedBy).includes(userId) ? "green" :
+    stringArray(data.redLikedBy).includes(userId) ? "red" : undefined;
+
+  return {
+    id,
+    authorId: typeof data.authorId === "string" ? data.authorId : "",
+    userName: typeof data.userName === "string" && data.userName.trim() ? data.userName : "Guardião Anon",
+    feeling: typeof data.feeling === "string" && data.feeling.trim() ? data.feeling : "Calmo",
+    topic: typeof data.topic === "string" ? data.topic : undefined,
+    message: data.message,
+    timestamp,
+    createdAtMs,
+    experienceTag: typeof data.experienceTag === "string" ? data.experienceTag : undefined,
+    supportMode,
+    circleExpiresAt: typeof data.circleExpiresAt === "number" && Number.isFinite(data.circleExpiresAt) ? data.circleExpiresAt : undefined,
+    yellowLikes: finiteNumber(data.yellowLikes),
+    greenLikes: finiteNumber(data.greenLikes),
+    redLikes: finiteNumber(data.redLikes),
+    yellowLikedBy: stringArray(data.yellowLikedBy),
+    greenLikedBy: stringArray(data.greenLikedBy),
+    redLikedBy: stringArray(data.redLikedBy),
+    userReaction: reaction,
+  };
+}
 
 export function subscribeToCommunityPosts(
   setPosts: (posts: SharePost[]) => void,
   t: Translator,
 ) {
+  const userId = auth.currentUser?.uid;
+  if (!userId) {
+    console.error("Não foi possível iniciar o feed sem autenticação.");
+    setPosts([]);
+    return () => undefined;
+  }
+
   const postsQuery = query(
     collection(db, "posts"),
     orderBy("createdAt", "desc"),
     limit(50),
   );
+  let latestPosts: SharePost[] = [];
+  let blockedUserIds = new Set<string>();
+  let outgoingBlocks: string[] = [];
+  let incomingBlocks: string[] = [];
+  let outgoingBlocksReady = false;
+  let incomingBlocksReady = false;
+  let postsReady = false;
 
-  return onSnapshot(
+  const publishVisiblePosts = () => {
+    // Fail closed until the block list has loaded: never briefly show a
+    // blocked author's posts while the two Firestore listeners start.
+    if (!outgoingBlocksReady || !incomingBlocksReady || !postsReady) return;
+    setPosts(filterBlockedCommunityPosts(latestPosts, blockedUserIds));
+  };
+
+  const unsubscribePosts = onSnapshot(
     postsQuery,
     snapshot => {
-      const userId = auth.currentUser?.uid;
-      const firestorePosts: SharePost[] = snapshot.docs.map(postDoc => {
-        const data = postDoc.data();
-        let userReaction: Reaction | undefined;
-
-        if (userId) {
-          if (Array.isArray(data.yellowLikedBy) && data.yellowLikedBy.includes(userId)) userReaction = "yellow";
-          else if (Array.isArray(data.greenLikedBy) && data.greenLikedBy.includes(userId)) userReaction = "green";
-          else if (Array.isArray(data.redLikedBy) && data.redLikedBy.includes(userId)) userReaction = "red";
-        }
-
-        const createdAt = data.createdAt;
-        const timestamp =
-          createdAt && typeof createdAt.toDate === "function"
-            ? createdAt.toDate().toLocaleString("pt-PT")
-            : t("justNow");
-
-        return {
-          id: postDoc.id,
-          authorId: data.authorId || "",
-          userName: data.userName || "Guardião Anon",
-          feeling: data.feeling || "Calmo",
-          topic: typeof data.topic === "string" ? data.topic : undefined,
-          message: data.message || "",
-          timestamp,
-          createdAtMs: createdAt && typeof createdAt.toMillis === "function" ? createdAt.toMillis() : 0,
-          experienceTag: typeof data.experienceTag === "string" ? data.experienceTag : undefined,
-          supportMode: ["share", "other_side", "seeking_match", "give_back", "poll"].includes(data.supportMode) ? data.supportMode as SharePost["supportMode"] : undefined,
-          circleExpiresAt: typeof data.circleExpiresAt === "number" ? data.circleExpiresAt : undefined,
-          yellowLikes: data.yellowLikes || 0,
-          greenLikes: data.greenLikes || 0,
-          redLikes: data.redLikes || 0,
-          yellowLikedBy: Array.isArray(data.yellowLikedBy) ? data.yellowLikedBy : [],
-          greenLikedBy: Array.isArray(data.greenLikedBy) ? data.greenLikedBy : [],
-          redLikedBy: Array.isArray(data.redLikedBy) ? data.redLikedBy : [],
-          userReaction,
-        };
-      });
-
-      setPosts(firestorePosts);
+      latestPosts = snapshot.docs
+        .map(postDoc => normalizeCommunityPost(postDoc.id, postDoc.data(), userId, t("justNow")))
+        .filter((post): post is SharePost => post !== null);
+      postsReady = true;
+      publishVisiblePosts();
     },
     error => console.error("Erro ao ouvir comunidade:", error),
   );
+
+  const unsubscribeOutgoingBlocks = onSnapshot(
+    query(collection(db, "blocks"), where("blockerId", "==", userId)),
+    snapshot => {
+      outgoingBlocks = snapshot.docs.map(item => item.data().blockedUserId)
+        .filter((value): value is string => typeof value === "string");
+      blockedUserIds = new Set([...outgoingBlocks, ...incomingBlocks]);
+      outgoingBlocksReady = true;
+      publishVisiblePosts();
+    },
+    error => {
+      outgoingBlocksReady = false;
+      console.error("Erro ao carregar bloqueios efetuados:", error);
+      setPosts([]);
+    },
+  );
+  const unsubscribeIncomingBlocks = onSnapshot(
+    query(collection(db, "blocks"), where("blockedUserId", "==", userId)),
+    snapshot => {
+      incomingBlocks = snapshot.docs.map(item => item.data().blockerId)
+        .filter((value): value is string => typeof value === "string");
+      blockedUserIds = new Set([...outgoingBlocks, ...incomingBlocks]);
+      incomingBlocksReady = true;
+      publishVisiblePosts();
+    },
+    error => {
+      incomingBlocksReady = false;
+      console.error("Erro ao carregar bloqueios recebidos:", error);
+      setPosts([]);
+    },
+  );
+
+  return () => {
+    unsubscribePosts();
+    unsubscribeOutgoingBlocks();
+    unsubscribeIncomingBlocks();
+  };
 }
 
 async function ensureAuth() {
@@ -97,30 +195,13 @@ export async function reportCommunityPost(post: SharePost, reason: string) {
     reportedUserId: post.authorId,
     reporterId: user.uid,
     reason,
+    status: "pending",
     createdAt: serverTimestamp(),
   });
 }
 
 export async function blockCommunityUser(blockedUserId: string) {
-  const user = await ensureAuth();
-  if (user.uid === blockedUserId) return;
-  // Use the same deterministic ID as Firestore rules and listening support.
-  // Rules intentionally forbid updating existing block records; if a repeated
-  // create is rejected, confirm that the canonical block already exists.
-  const blockRef = doc(db, "blocks", `${user.uid}_${blockedUserId}`);
-  try {
-    await setDoc(blockRef, {
-      blockerId: user.uid,
-      blockedUserId,
-      createdAt: serverTimestamp(),
-    });
-  } catch (error) {
-    const existing = await getDoc(blockRef);
-    if (existing.exists()
-      && existing.data().blockerId === user.uid
-      && existing.data().blockedUserId === blockedUserId) return;
-    throw error;
-  }
+  await blockCommunityMember(blockedUserId);
 }
 
 export async function createCommunityPost(feeling: string, topic: string, message: string, options?: { experienceTag?: string; supportMode?: "share" | "other_side" | "seeking_match" | "give_back"; circleExpiresAt?: number }) {

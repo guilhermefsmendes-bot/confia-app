@@ -1,60 +1,61 @@
 import {habitDestination,screenName} from "./navigation";
-import {recordPersonalScreenView} from "./data/personal/personalAnalytics";
 import type { CompanionAction } from "./components/Companheiro/CompanionVoice";
 import type { NoticeTarget } from "./notifications/model";
-import { emitCompanionBrainEvent } from "./data/reactive/companionBrain/companionBrainEvents";
-import React, { lazy, Suspense, memo, useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { lazy, Suspense, memo, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { AppHeader } from "./components/layout/AppHeader";
 import { MainNavigation } from "./components/layout/MainNavigation";
-import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Sun, Compass, ArrowUp, ArrowLeft, Sparkles, Moon, Users, AlertCircle, Brain, CheckCircle2, Calendar, Gift, House, Wind, Target, Zap, ChartNoAxesCombined, Backpack, Store, Settings, EyeOff } from 'lucide-react';
+import { Heart, Sun, Compass, ArrowUp, ArrowLeft, Sparkles, Moon, Users, AlertCircle, Brain, CheckCircle2, Calendar, House, Wind, Target, Zap, ChartNoAxesCombined, Backpack, Store, Settings, EyeOff } from 'lucide-react';
 import { useTranslation } from "react-i18next";
+import { useAgeGate, useDocumentVisibility, useObjectiveDaySync } from "./hooks/useAppLifecycle";
+import { useDeferredAppServices } from "./hooks/useDeferredAppServices";
+import { usePersonalDiscovery } from "./hooks/usePersonalDiscovery";
+import { readCompanionPersonalContextConsent } from "./data/reactive/companionContextConsent";
+import { ProgressiveStartGuide } from "./components/ProgressiveStartGuide";
+import { useCommunityPosts } from "./hooks/useCommunityPosts";
+import { scheduleBackgroundWork } from "./utils/scheduleBackgroundWork";
+import { AgeGateScreen } from "./components/AgeGateScreen";
+import { LazySection, ScreenLoading } from "./components/AppShellParts";
+import { CommunityGuidelinesModal, LevelUpOverlay } from "./components/AppFeedbackOverlays";
 
 
 
 
-import { initLanguage, setLanguage } from "./i18n/language";
-import { emitCompanionInteraction } from "./data/reactive/companionBrain/companionInteractionEvents";
+import type { CompanionInteractionKind, CompanionSemanticArea } from "./data/reactive/companionBrain/companionEventIntelligence";
+import type { CompanionBrainTrigger } from "./data/reactive/companionBrain/companionBrainTypes";
 
-const HomeProgressSummary = lazy(() => import("./components/HomeProgressSummary"));
-const MemoHomeProgressSummary = memo(HomeProgressSummary);
 import { useDailyOpenState } from "./hooks/useDailyOpenState";
+import { useUnreadCommunityChat } from "./hooks/useUnreadCommunityChat";
+import { useTabNavigation } from "./hooks/useTabNavigation";
 import { getLocalCalendarDate } from "./utils/date";
+import { normalizeDailyRatings } from "./storage/dailyRatingStorage";
 
-const PersonalMap = lazy(() => import("./components/PersonalMap"));
+const PersonalGrowthHub = lazy(() => import("./components/PersonalGrowthHub"));
 const ConfiaCompanionHome = lazy(() => import("./components/Companheiro/ConfiaCompanionHome"));
 const MemoConfiaCompanionHome = memo(ConfiaCompanionHome);
-const DailyCheckIn = lazy(() => import("./components/DailyCheckIn/DailyCheckIn"));
 const InnerCanvas = lazy(() => import("./components/InnerCanvas/InnerCanvas"));
 const HomeInventory = lazy(() => import("./components/HomeInventory"));
 const HomeShop = lazy(() => import("./components/HomeShop"));
-const PartilhaFeed = lazy(() => import("./components/PartilhaFeed").then(m => ({ default: m.PartilhaFeed })));
-const ObjectivosList = lazy(() => import("./components/ObjectivosList").then(m => ({ default: m.ObjectivosList })));
-const WeeklyGoalSection = lazy(() => import("./components/WeeklyGoalSection").then(m => ({ default: m.WeeklyGoalSection })));
 const NotificationSettings = lazy(() => import("./components/NotificationSettings"));
+const ModeratorDashboard = lazy(() => import("./components/ModeratorDashboard"));
 const HabitDashboard = lazy(() => import("./components/Habits/HabitDashboard"));
 const MemoHabitDashboard = memo(HabitDashboard);
-const ProgressoDashboard = lazy(() => import("./components/ProgressoDashboard").then(m => ({ default: m.ProgressoDashboard })));
+const MorningSheet = lazy(() => import("./components/layout/MorningSheet").then(m => ({ default: m.MorningSheet })));
+const EmbraceTab = lazy(() => import("./components/layout/AppTabs").then(m => ({ default: m.EmbraceTab })));
+const ObjectivesTab = lazy(() => import("./components/layout/AppTabs").then(m => ({ default: m.ObjectivesTab })));
+const CommunityTab = lazy(() => import("./components/layout/AppTabs").then(m => ({ default: m.CommunityTab })));
+
 const StopMode = lazy(() => import("./components/StopMode").then(m => ({ default: m.StopMode })));
 const CommunityChat = lazy(() => import("./components/CommunityChat").then(m => ({ default: m.CommunityChat })));
 const TriageModal = lazy(() => import("./components/TriageModal").then(m => ({ default: m.TriageModal })));
 const ListeningSupportModal = lazy(() => import("./components/ListeningSupportModal").then(m => ({ default: m.ListeningSupportModal })));
-const HorizonExperience = lazy(() => import("./components/HorizonExperience"));
-const AbracoTimer = lazy(() => import("./components/AbracoTimer").then(m => ({ default: m.AbracoTimer })));
 
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
-import { INITIAL_POSTS } from './data/initialPosts';
 
 import type { ReactiveResult } from "./data/reactive/reactiveTypes";
-import type { PersonalInsight } from "./data/personal/personalInsights";
-import {
-  recordReactiveResponse,
-} from "./data/reactive/reactiveHistoryStorage";
 type ReactiveRecentMemorySnapshot = ReturnType<typeof import("./data/reactive/reactiveRecentMemory").collectReactiveRecentMemory>;
 
 // Component imports
 
-import { hasCompletedToday } from "./storage/dailyCheckInStorage";
 
 const STORAGE_KEYS = {
   AVATAR: 'confia_avatar_v2',
@@ -79,25 +80,95 @@ function readStoredJson<T>(key: string, fallback: T): T {
   }
 }
 
+// Interaction analytics is non-critical: load it only after a real user action.
+// This keeps the event-history machinery out of the initial app download.
+function recordCompanionInteractionDeferred(
+  kind: CompanionInteractionKind,
+  area: CompanionSemanticArea,
+  metadata?: Record<string, string | number | boolean | null>,
+): void {
+  void import("./data/reactive/companionBrain/companionInteractionEvents")
+    .then(({ emitCompanionInteraction }) => emitCompanionInteraction(kind, area, metadata))
+    .catch(() => { /* Optional analytics must not block the user action. */ });
+}
+
+function recordCompanionBrainEventDeferred(
+  type: CompanionBrainTrigger,
+  metadata?: Record<string, unknown>,
+): void {
+  void import("./data/reactive/companionBrain/companionBrainEvents")
+    .then(({ emitCompanionBrainEvent }) => emitCompanionBrainEvent(type, metadata))
+    .catch(() => { /* Companion memory must never block navigation or saving. */ });
+}
+
 // O histórico visual nasce exclusivamente dos registos reais do utilizador.
 // Não existe seed emocional nem histórico fictício: a CONFIA nunca deve fingir memória.
 
 export default function App() {
 const { t, i18n } = useTranslation();
-const [ageGateReady, setAgeGateReady] = useState(false);
-const [ageConfirmed, setAgeConfirmed] = useState(false);
-const [ageCheckboxChecked, setAgeCheckboxChecked] = useState(false);
-const [underageNotice, setUnderageNotice] = useState(false);
+const {
+  ageGateReady, ageConfirmed, setAgeConfirmed,
+  ageCheckboxChecked, setAgeCheckboxChecked,
+  underageNotice, setUnderageNotice, confirmAge,
+} = useAgeGate();
+const [firstScreenReady, setFirstScreenReady] = useState(false);
+const [appDataReady, setAppDataReady] = useState(false);
 
+// Work that is not required to display or navigate the first screen waits until
+// the 18+ gate is confirmed and the browser has had an opportunity to paint.
 useEffect(() => {
-  try {
-    setAgeConfirmed(localStorage.getItem("confia_age_18_confirmed_v1") === "yes");
-  } catch {
-    setAgeConfirmed(false);
-  } finally {
-    setAgeGateReady(true);
-  }
-}, []);
+  if (!ageGateReady || !ageConfirmed) { setFirstScreenReady(false); return; }
+  let frame = 0;
+  let timer = 0;
+  frame = window.requestAnimationFrame(() => {
+    timer = window.setTimeout(() => setFirstScreenReady(true), 0);
+  });
+  return () => { window.cancelAnimationFrame(frame); window.clearTimeout(timer); };
+}, [ageGateReady, ageConfirmed]);
+
+// Privacy-preserving product metrics stay on this device; no emotional content is transmitted.
+useEffect(() => {
+  if (!firstScreenReady) return;
+  void import("./data/personal/personalAnalytics").then(({ recordAppOpenLifecycleMetrics }) => recordAppOpenLifecycleMetrics());
+}, [firstScreenReady]);
+
+// Read local profile/history only after the 18+ gate and first app-shell paint.
+useEffect(() => {
+  if (!firstScreenReady) return;
+  let cancelled = false;
+  const savedAvatar = readStoredJson<AvatarState | null>(STORAGE_KEYS.AVATAR, null);
+  setAvatar(savedAvatar ? {
+    ...savedAvatar,
+    level: Number.isFinite(savedAvatar.level) ? Math.max(1, savedAvatar.level) : 1,
+    xp: Number.isFinite(savedAvatar.xp) ? Math.max(0, savedAvatar.xp) : 0,
+    maxXp: Number.isFinite(savedAvatar.maxXp) && savedAvatar.maxXp > 0 ? savedAvatar.maxXp : 100,
+    points: Number.isFinite(savedAvatar.points) ? Math.max(0, savedAvatar.points) : 0,
+  } : {
+    level: 1, xp: 15, maxXp: 100, name: i18n.t("avatarName"),
+    evolutionStage: i18n.t("avatarEvolutionStage"), points: 15,
+  });
+  setObjectivesHistory(readStoredJson(STORAGE_KEYS.OBJECTIVES_HISTORY, []));
+  setWeeklyGoal(readStoredJson<WeeklyGoal | null>("confia_weekly_goal_v1", null));
+  const savedObjectives = readStoredJson<{ date?: string; items?: Objective[] } | Objective[] | null>(STORAGE_KEYS.OBJECTIVES, null);
+  const today = getLocalCalendarDate();
+  setObjectives(savedObjectives && !Array.isArray(savedObjectives) && savedObjectives.date === today && savedObjectives.items
+    ? savedObjectives.items.slice(0, 5).map(objective => ({ ...objective }))
+    : []);
+  setRatings(normalizeDailyRatings(readStoredJson<DailyRating[]>(STORAGE_KEYS.RATINGS, [])));
+  void import("./storage/dailyCheckInStorage").then(({ hasCompletedToday }) => {
+    if (cancelled) return;
+    setHomeScreen(hasCompletedToday() ? "home" : "dailyCheckIn");
+    setAppDataReady(true);
+  }).catch(() => {
+    if (cancelled) return;
+    setHomeScreen("dailyCheckIn");
+    setAppDataReady(true);
+  });
+  return () => { cancelled = true; };
+}, [firstScreenReady, i18n]);
+
+// Lifecycle concerns are isolated from the screen composition.
+useDocumentVisibility();
 
 /**
  * ==========================================================
@@ -121,75 +192,31 @@ const {
   previousAppOpenDate,
   isFirstAppOpenToday,
   daysSincePreviousAppOpen,
-} = useDailyOpenState();
+} = useDailyOpenState(appDataReady);
 
 /* CONFIA 3A — FIM DO ESTADO DIÁRIO */
 
 
 
 const changeAppLanguage = (lang: "pt" | "en" | "es" | "fr") => {
-    setLanguage(lang);
+    void import("./i18n/language").then(({ setLanguage }) => setLanguage(lang));
 };
 
-useEffect(() => {
-    initLanguage();
-}, []);
-useEffect(() => {
-  const run = () => {
-    void import("./data/personal").then(({ syncPersonalEventsFromLegacySources }) => {
-      try { syncPersonalEventsFromLegacySources(); } catch { /* complementar */ }
-    });
-  };
-  const idle = (window as any).requestIdleCallback;
-  if (typeof idle === "function") {
-    const id = idle(run, { timeout: 2500 });
-    return () => (window as any).cancelIdleCallback?.(id);
-  }
-  const timer = window.setTimeout(run, 1200);
-  return () => window.clearTimeout(timer);
-}, []);
-useEffect(() => {
-  void import("./firebaseAuth").then(({ initAnonymousAuth }) =>
-    initAnonymousAuth().catch((error) => {
-      console.error("Firebase Auth:", error);
-    })
-  );
-}, []);
   // Global App States
 const [homeScreen, setHomeScreen] = useState<
   "home" | "dailyCheckIn" | "shop" | "inventory" | "settings" | "progress" | "innerCanvas" | "map"
->(() => (hasCompletedToday() ? "home" : "dailyCheckIn"));
-  const [avatar, setAvatar] = useState<AvatarState>(() => {
-    const saved = readStoredJson<AvatarState | null>(STORAGE_KEYS.AVATAR, null);
-    if (saved) {
-      return {
-        ...saved,
-        level: Number.isFinite(saved.level) ? Math.max(1, saved.level) : 1,
-        xp: Number.isFinite(saved.xp) ? Math.max(0, saved.xp) : 0,
-        maxXp: Number.isFinite(saved.maxXp) && saved.maxXp > 0 ? saved.maxXp : 100,
-        points: Number.isFinite(saved.points) ? Math.max(0, saved.points) : 0,
-      };
-    }
-
-    return {
-      level: 1,
-      xp: 15,
-      maxXp: 100,
-      name: t("avatarName"),
-      evolutionStage: t("avatarEvolutionStage"),
-      points: 15
-    };
-  });
+>("home");
+const [avatar, setAvatar] = useState<AvatarState>(() => ({
+  level: 1, xp: 15, maxXp: 100, name: t("avatarName"),
+  evolutionStage: t("avatarEvolutionStage"), points: 15,
+}));
 
 const [inventory, setInventory] = useState<any[]>([]);
-const [objectivesHistory, setObjectivesHistory] = useState<
-  { date: string; completed: number }[]
->(() => readStoredJson(STORAGE_KEYS.OBJECTIVES_HISTORY, []));
-const [weeklyGoal, setWeeklyGoal] = useState<WeeklyGoal | null>(() =>
-  readStoredJson<WeeklyGoal | null>('confia_weekly_goal_v1', null)
-);
+const [objectivesHistory, setObjectivesHistory] = useState<{ date: string; completed: number }[]>([]);
+const [weeklyGoal, setWeeklyGoal] = useState<WeeklyGoal | null>(null);
 
 useEffect(() => {
+  if (!appDataReady) return;
   if (weeklyGoal) {
     localStorage.setItem(
       'confia_weekly_goal_v1',
@@ -198,7 +225,7 @@ useEffect(() => {
   } else {
     localStorage.removeItem('confia_weekly_goal_v1');
   }
-}, [weeklyGoal]);
+}, [weeklyGoal, appDataReady]);
 
 
 
@@ -206,144 +233,75 @@ useEffect(() => {
 
 
 
-const [objectives, setObjectives] = useState<Objective[]>(() => {
-  const today = getLocalCalendarDate();
-  const parsed = readStoredJson<{ date?: string; items?: Objective[] } | Objective[] | null>(
-    STORAGE_KEYS.OBJECTIVES,
-    null
-  );
-
-  if (parsed && !Array.isArray(parsed) && parsed.date === today && parsed.items) {
-    return parsed.items.slice(0, 5).map(objective => ({ ...objective }));
-  }
-
-  // The daily objective library is loaded after the first render.
-  return [];
-});
+const [objectives, setObjectives] = useState<Objective[]>([]);
 
 useEffect(() => {
+  if (!appDataReady) return;
   let cancelled = false;
   void import("./data/initialData")
-    .then(({ getDailyObjectives }) => {
+    .then(async ({ getDailyObjectives }) => {
+      const { getDailyCheckIn } = await import("./storage/dailyCheckInStorage");
       if (cancelled) return;
-      setObjectives(current => current.length ? current : getDailyObjectives(new Date()));
+      const checkIn = getDailyCheckIn();
+      const need = checkIn?.date === getLocalCalendarDate() ? checkIn.need : undefined;
+      setObjectives(current => current.length ? current : getDailyObjectives(new Date(), need));
     })
     .catch(() => {
       // The rest of the app remains usable if optional starter content fails to load.
     });
   return () => { cancelled = true; };
-}, []);
+}, [appDataReady]);
 
-const objectiveDayRef = useRef(getLocalCalendarDate());
-
+// The first check-in personalizes today's action set. Do not replace work the
+// person has already started or customized in the Objectives menu.
 useEffect(() => {
-  const syncObjectiveDay = () => {
-    const today = getLocalCalendarDate();
-    if (today === objectiveDayRef.current) return;
-
-    objectiveDayRef.current = today;
-    void import("./data/initialData")
-      .then(({ getDailyObjectives }) => setObjectives(getDailyObjectives(new Date())))
-      .catch(() => {});
-  };
-
-  const intervalId = window.setInterval(syncObjectiveDay, 30_000);
-  window.addEventListener("visibilitychange", syncObjectiveDay);
-
-  return () => {
-    window.clearInterval(intervalId);
-    window.removeEventListener("visibilitychange", syncObjectiveDay);
-  };
-}, []);
- const completedObjectivesCount = objectives.filter(o => o.completed).length;
-
-  const [ratings, setRatings] = useState<DailyRating[]>(() => {
-      return readStoredJson<DailyRating[]>(STORAGE_KEYS.RATINGS, []);
-  });
-
-  const [personalEventRevision, setPersonalEventRevision] = useState(0);
-  const [personalDiscovery, setPersonalDiscovery] = useState<PersonalInsight | undefined>(undefined);
-
-  useEffect(() => {
-    let cancelled = false;
-    let unsubscribe = () => {};
-    let idleId: number | undefined;
-    let timerId: number | undefined;
-    const cancelScheduledWork = () => {
-      if (idleId !== undefined && typeof (window as any).cancelIdleCallback === "function") {
-        (window as any).cancelIdleCallback(idleId);
-      }
-      if (timerId !== undefined) window.clearTimeout(timerId);
-    };
-    void import("./data/personal").then(({ PERSONAL_EVENTS_UPDATED_EVENT, readPersonalEvents, buildPersonalInsights, applyInsightLifecycle }) => {
-      if (cancelled) return;
-      const handlePersonalEventsUpdated = () => setPersonalEventRevision(revision => revision + 1);
-      window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
-      unsubscribe = () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handlePersonalEventsUpdated);
-      const calculateDiscovery = () => {
+  if (!appDataReady) return;
+  let cancelled = false;
+  const personalizeObjectives = () => {
+    void import("./storage/dailyCheckInStorage").then(({ getDailyCheckIn }) => {
+      const checkIn = getDailyCheckIn();
+      if (cancelled || !checkIn || checkIn.date !== getLocalCalendarDate()) return;
+      void import("./data/initialData").then(({ getDailyObjectives }) => {
         if (cancelled) return;
-        const insights = applyInsightLifecycle(buildPersonalInsights(readPersonalEvents(), new Date()));
-        setPersonalDiscovery(insights
-          .filter(insight => insight.status === "consistent" || insight.status === "possible")
-          .filter(insight => insight.novelty !== "known" && insight.actionability !== "low")
-          .sort((a, b) => {
-            const confidence = { high: 3, moderate: 2, low: 1 };
-            const actionability = { high: 3, medium: 2, low: 1 };
-            return (confidence[b.confidence] * 2 + actionability[b.actionability]) - (confidence[a.confidence] * 2 + actionability[a.actionability]);
-          })[0]);
-      };
-      const idle = (window as any).requestIdleCallback;
-      if (typeof idle === "function") idleId = idle(calculateDiscovery, { timeout: 500 });
-      else timerId = window.setTimeout(calculateDiscovery, 50);
-    }).catch(() => { if (!cancelled) setPersonalDiscovery(undefined); });
-    return () => { cancelled = true; cancelScheduledWork(); unsubscribe(); };
-  }, [ratings, personalEventRevision]);
-
-  const [posts, setPosts] = useState<SharePost[]>(() =>
-    readStoredJson<SharePost[]>(STORAGE_KEYS.POSTS, INITIAL_POSTS)
-  );
-
-  const [currentTab, setCurrentTab] = useState<number>(0);
-  useEffect(()=>recordPersonalScreenView(screenName(currentTab,homeScreen)),[currentTab,homeScreen]);
-const preloadTab = useCallback((tab: number) => {
-  const preload = (loader: () => Promise<unknown>, label: string) => {
-    void loader().catch((error) => {
-      // Prefetch é apenas uma otimização: uma falha de chunk nunca pode
-      // transformar-se num erro global nem impedir a navegação normal.
-      console.warn(`[Confia] prefetch_failed:${label}`, error);
+        setObjectives(current => {
+          const alreadyStarted = current.some(item => item.completed || item.isCustom);
+          const manuallyChanged = current.length > 0 && current.length !== 5;
+          if (alreadyStarted || manuallyChanged) return current;
+          return getDailyObjectives(new Date(), checkIn.need);
+        });
+      });
     });
   };
-  if (tab === 1) {
-    preload(() => import("./components/HorizonExperience"), "horizon");
-    preload(() => import("./components/AbracoTimer"), "abraco");
-    return;
-  }
-  if (tab === 2) {
-    preload(() => import("./components/ObjectivosList"), "objectives");
-    preload(() => import("./components/WeeklyGoalSection"), "weekly-goal");
-    return;
-  }
-  if (tab === 4) {
-    preload(() => import("./components/PartilhaFeed"), "community-feed");
-    preload(() => import("./components/CommunityChat"), "community-chat");
-    return;
-  }
-}, []);
+  window.addEventListener("confia:daily-checkin-saved", personalizeObjectives);
+  return () => {
+    cancelled = true;
+    window.removeEventListener("confia:daily-checkin-saved", personalizeObjectives);
+  };
+}, [appDataReady]);
 
-const changeTab = (tab:number) => {
-  // Primeiro mudamos o separador: a interação do utilizador nunca fica
-  // à espera do carregamento de um chunk. O preload continua em background.
-  setHomeScreen("home");
-  setCurrentTab(tab);
-  const run = () => preloadTab(tab);
-  const idle = (window as any).requestIdleCallback;
-  if (typeof idle === "function") {
-    idle(run, { timeout: 1200 });
-  } else {
-    window.setTimeout(run, 0);
-  }
-};
+useObjectiveDaySync(appDataReady, setObjectives);
+ const completedObjectivesCount = objectives.filter(o => o.completed).length;
 
+  const [ratings, setRatings] = useState<DailyRating[]>([]);
+
+  const personalDiscovery = usePersonalDiscovery(appDataReady, ratings);
+
+  const { posts, setPosts, postsLoaded } = useCommunityPosts(appDataReady);
+
+  const { currentTab, setCurrentTab, visitedTabs, markVisited, preloadTab, changeTab } = useTabNavigation({
+    enabled: appDataReady,
+    resetHomeScreen: () => setHomeScreen("home"),
+  });
+  useEffect(() => {
+  if (!appDataReady) return;
+  let cancelled = false;
+  void import("./data/personal/personalAnalytics")
+    .then(({ recordPersonalScreenView }) => {
+      if (!cancelled) recordPersonalScreenView(screenName(currentTab, homeScreen));
+    })
+    .catch(() => { /* Analytics is optional; navigation must remain available. */ });
+  return () => { cancelled = true; };
+}, [currentTab, homeScreen, appDataReady]);
 // Os separadores são pré-carregados quando o utilizador demonstra intenção
 // (foco/ponteiro na navegação) e novamente após o clique. Evita descarregar
 // código de funcionalidades que a pessoa talvez nunca abra.
@@ -355,51 +313,39 @@ const changeTab = (tab:number) => {
 const [avatarCelebrating, setAvatarCelebrating] = useState(false);
 const [avatarMemoryMessage, setAvatarMemoryMessage] = useState("");
   const [prevLevel, setPrevLevel] = useState(avatar.level);
-  const [showSplash, setShowSplash] = useState(true);
-const [showStopMode, setShowStopMode] = useState(false);
+  const [showStopMode, setShowStopMode] = useState(false);
 const [openHabitSupport, setOpenHabitSupport] = useState(false);
-const [homeOverviewExpanded,setHomeOverviewExpanded]=useState(false);
-useEffect(() => {
-  const run = () => void import("./data/habits/sync").then(m => m.startHabitSync());
-  const idle = (window as any).requestIdleCallback;
-  if (typeof idle === "function") {
-    const id = idle(run, { timeout: 3500 });
-    return () => (window as any).cancelIdleCallback?.(id);
-  }
-  const timer = window.setTimeout(run, 1800);
-  return () => window.clearTimeout(timer);
-}, []);
+
 const [showCommunityTerms, setShowCommunityTerms] = useState(false);
 const [noticeDestination,setNoticeDestination]=useState<NoticeTarget|null>(null);
+useDeferredAppServices(appDataReady, setNoticeDestination);
 const [habitEntry,setHabitEntry]=useState({page:"home",key:0});
+const [habitSectionVisible, setHabitSectionVisible] = useState(false);
+const habitSectionRef = useRef<HTMLElement | null>(null);
+useEffect(() => {
+  if (!appDataReady || currentTab !== 0 || homeScreen !== "home") return;
+  if (openHabitSupport || habitEntry.key > 0 || habitEntry.page !== "home") {
+    setHabitSectionVisible(true);
+    return;
+  }
+  const target = habitSectionRef.current;
+  if (!target) return;
+  if (!("IntersectionObserver" in window)) {
+    setHabitSectionVisible(true);
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    if (entries.some((entry) => entry.isIntersecting)) {
+      setHabitSectionVisible(true);
+      observer.disconnect();
+    }
+  }, { rootMargin: "600px 0px" });
+  observer.observe(target);
+  return () => observer.disconnect();
+}, [appDataReady, currentTab, homeScreen, openHabitSupport, habitEntry.key, habitEntry.page]);
 const [noticeMessage,setNoticeMessage]=useState("");
 const [noticeMessageId,setNoticeMessageId]=useState<string|undefined>();
-useEffect(() => {
-  let stop = () => {};
-  let cancelled = false;
-  const run = () => {
-    void import("./notifications/service").then(({ connectNoticeNavigation, startNativeNotices }) => {
-      if (cancelled) return;
-      stop = connectNoticeNavigation(setNoticeDestination);
-      void startNativeNotices();
-    }).catch((error) => console.error("Notificações:", error));
-  };
-  const idle = (window as any).requestIdleCallback;
-  if (typeof idle === "function") {
-    const id = idle(run, { timeout: 3000 });
-    return () => {
-      cancelled = true;
-      (window as any).cancelIdleCallback?.(id);
-      stop();
-    };
-  }
-  const timer = window.setTimeout(run, 1500);
-  return () => {
-    cancelled = true;
-    window.clearTimeout(timer);
-    stop();
-  };
-}, []);
+
 
 // Chat privado da comunidade
 const [chatPost, setChatPost] = useState<SharePost | null>(null);
@@ -420,7 +366,7 @@ const [openPendingChatOnCommunityEntry, setOpenPendingChatOnCommunityEntry] =
   useState(false);
 
   useEffect(()=>{
-    if(!noticeDestination)return;
+    if(!appDataReady || !noticeDestination)return;
     let cancelled=false;
     const target=noticeDestination;setNoticeMessage("");
     if(target.kind==="sky"){setCurrentTab(1);setHomeScreen("innerCanvas");return;}
@@ -478,7 +424,7 @@ const [openPendingChatOnCommunityEntry, setOpenPendingChatOnCommunityEntry] =
       })();});
     }).catch(()=>{if(!cancelled)setNoticeMessage(t("notifications.unavailable"));});
     return()=>{cancelled=true;stop();};
-  },[noticeDestination]);
+  },[appDataReady, noticeDestination]);
   // Open STOP mode from Android widget/deep link
   useEffect(() => {
     const handleStopLink = () => {
@@ -494,13 +440,6 @@ const [openPendingChatOnCommunityEntry, setOpenPendingChatOnCommunityEntry] =
     return () => {
       window.removeEventListener("hashchange", handleStopLink);
     };
-  }, []);
-  // Automatically dismiss splash screen after 2.8 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 1600);
-    return () => clearTimeout(timer);
   }, []);
 
   // Today rating active inputs
@@ -559,13 +498,19 @@ const isEarlyLearning =
  */
 const [homeCompanionRelationalMemory, setHomeCompanionRelationalMemory] =
   useState<ReactiveRecentMemorySnapshot | null>(null);
+const [companionConsentRevision, setCompanionConsentRevision] = useState(0);
+useEffect(() => {
+  const refreshConsent = () => setCompanionConsentRevision(value => value + 1);
+  window.addEventListener("confia:companion-context-consent-changed", refreshConsent);
+  return () => window.removeEventListener("confia:companion-context-consent-changed", refreshConsent);
+}, []);
 
 useEffect(() => {
   let cancelled = false;
   let idleId: number | undefined;
   let timerId: number | undefined;
 
-  if (currentTab !== 0 || homeScreen !== "home") {
+  if (!appDataReady || currentTab !== 0 || homeScreen !== "home" || !readCompanionPersonalContextConsent()) {
     setHomeCompanionRelationalMemory(null);
     return;
   }
@@ -600,11 +545,11 @@ useEffect(() => {
     if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
     if (timerId !== undefined) window.clearTimeout(timerId);
   };
-}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp]);
+}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, appDataReady, companionConsentRevision]);
 
 
 const homeNowMemory = useMemo(() => {
-  if (currentTab !== 0 || homeScreen !== "home") {
+  if (currentTab !== 0 || homeScreen !== "home" || !readCompanionPersonalContextConsent()) {
     return null;
   }
 
@@ -759,6 +704,8 @@ const homeNowMemory = useMemo(() => {
   objectives,
   weeklyGoal,
   avatar.xp,
+  homeCompanionRelationalMemory,
+  companionConsentRevision,
 ]);
 
 
@@ -798,7 +745,7 @@ const handleCompanionAction = useCallback((target: CompanionAction) => {
 
     if (target === "progress") {
       // CONFIA_COMPANION_OPEN_PROGRESS
-      emitCompanionBrainEvent(
+      recordCompanionBrainEventDeferred(
         "context_changed",
         {
           from: "home",
@@ -830,46 +777,23 @@ const [homeReactiveResult, setHomeReactiveResult] =
 
 useEffect(() => {
   let cancelled = false;
-  let idleId: number | undefined;
-  let timerId: number | undefined;
-
-  if (currentTab !== 0 || homeScreen !== "home") {
+  if (!appDataReady || currentTab !== 0 || homeScreen !== "home") {
     setHomeReactiveResult(null);
     return () => { cancelled = true; };
   }
-
-  // Primeiro deixa o separador pintar; a análise contextual não deve
-  // competir com a resposta visual ao clique de navegação.
-  const scheduleAnalysis = (analyze: () => void) => {
-    if (cancelled) return;
-    const requestIdle = (window as any).requestIdleCallback;
-    if (typeof requestIdle === "function") {
-      idleId = requestIdle(() => {
-        if (!cancelled) analyze();
-      }, { timeout: 350 });
-    } else {
-      timerId = window.setTimeout(() => {
-        if (!cancelled) analyze();
-      }, 0);
-    }
-  };
-
-  import("./data/reactive/reactiveEngine")
-    .then(({ analyzeReactiveState }) => {
-      scheduleAnalysis(() => {
-        setHomeReactiveResult(analyzeReactiveState({ source: "general" }));
-      });
-    })
-    .catch(() => {
-      if (!cancelled) setHomeReactiveResult(null);
-    });
-
+  // Debounce rapid state changes and fetch the analysis engine only in idle time.
+  const cancelBackgroundStart = scheduleBackgroundWork(() => {
+    void import("./data/reactive/reactiveEngine")
+      .then(({ analyzeReactiveState }) => {
+        if (!cancelled) setHomeReactiveResult(analyzeReactiveState({ source: "general" }));
+      })
+      .catch(() => { if (!cancelled) setHomeReactiveResult(null); });
+  }, 650, 900);
   return () => {
     cancelled = true;
-    if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
-    if (timerId !== undefined) window.clearTimeout(timerId);
+    cancelBackgroundStart();
   };
-}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp]);
+}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp, appDataReady]);
 
 // Uma única observação contextual para o cartão de chegada. A prioridade é
 // diversidade real de dados (exercício/alimentação/hábitos), depois continuidade
@@ -1421,6 +1345,9 @@ const handleHomeNowAction = () => {
   // Resposta imediata da Confia após um registo do utilizador
   const [reactiveMessageKey, setReactiveMessageKey] =
     useState<string | null>(null);
+  // Prevent the ratings effect from immediately repeating the same analysis
+  // already performed synchronously by handleSaveRatings for this exact state.
+  const lastMoodAnalysisSignature = useRef<string | null>(null);
 
   // Analisa o contexto existente quando a Home é aberta.
   //
@@ -1432,36 +1359,33 @@ const handleHomeNowAction = () => {
   //   continuam a ser registadas em handleSaveRatings.
   useEffect(() => {
     let cancelled = false;
-    let idleId: number | undefined;
-    let timerId: number | undefined;
     if (currentTab !== 0 || homeScreen !== "home") return;
     if (ratings.length === 0) {
       setReactiveMessageKey(null);
       return;
     }
 
-    import("./data/reactive/reactiveEngine")
-      .then(({ analyzeReactiveState }) => {
-        const run = () => {
+    const ratingsSignature = JSON.stringify(ratings);
+    if (lastMoodAnalysisSignature.current === ratingsSignature) {
+      lastMoodAnalysisSignature.current = null;
+      return;
+    }
+
+    const cancelBackgroundStart = scheduleBackgroundWork(() => {
+      void import("./data/reactive/reactiveEngine")
+        .then(({ analyzeReactiveState }) => {
           if (cancelled) return;
           const reactiveResult = analyzeReactiveState({ source: "mood" });
           if (reactiveResult?.response?.translationKey) {
             setReactiveMessageKey(reactiveResult.response.translationKey);
           }
-        };
-        const requestIdle = (window as any).requestIdleCallback;
-        if (typeof requestIdle === "function") {
-          idleId = requestIdle(run, { timeout: 350 });
-        } else {
-          timerId = window.setTimeout(run, 0);
-        }
-      })
-      .catch(() => { if (!cancelled) setReactiveMessageKey(null); });
+        })
+        .catch(() => { if (!cancelled) setReactiveMessageKey(null); });
+    }, 500, 700);
 
     return () => {
       cancelled = true;
-      if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
-      if (timerId !== undefined) window.clearTimeout(timerId);
+      cancelBackgroundStart();
     };
   }, [currentTab, homeScreen, ratings]);
 
@@ -1508,11 +1432,13 @@ const companionVoiceInput = useMemo(() => ({
 
   // Save states to localStorage on changes
   useEffect(() => {
+    if (!appDataReady) return;
     localStorage.setItem(STORAGE_KEYS.AVATAR, JSON.stringify(avatar));
     window.dispatchEvent(new CustomEvent("confia:avatar-updated"));
-  }, [avatar]);
+  }, [avatar, appDataReady]);
 
   useEffect(() => {
+   if (!appDataReady) return;
    localStorage.setItem(
   STORAGE_KEYS.OBJECTIVES,
   JSON.stringify({
@@ -1521,124 +1447,29 @@ const companionVoiceInput = useMemo(() => ({
   })
 );
    window.dispatchEvent(new CustomEvent("confia:objectives-updated"));
-  }, [objectives]);
+  }, [objectives, appDataReady]);
 useEffect(() => {
+if (!appDataReady) return;
 localStorage.setItem(
   STORAGE_KEYS.OBJECTIVES_HISTORY,
   JSON.stringify(objectivesHistory)
 );
-}, [objectivesHistory]);
+}, [objectivesHistory, appDataReady]);
   useEffect(() => {
+    if (!appDataReady) return;
     localStorage.setItem(STORAGE_KEYS.RATINGS, JSON.stringify(ratings));
-  }, [ratings]);
+  }, [ratings, appDataReady]);
 
   useEffect(() => {
+    if (!postsLoaded) return;
     localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
-  }, [posts]);
+  }, [posts, postsLoaded]);
 
-// Escuta os chats privados deste utilizador.
-// Não abre nada automaticamente aqui: apenas mantém memória
-// da conversa não lida mais recente.
-useEffect(() => {
-  let unsubscribe: (() => void) | undefined;
-  let cancelled = false;
-
-  const startUnreadChatListener = async () => {
-    const [{ auth }, { db }, firestore] = await Promise.all([
-      import("./firebaseAuth"),
-      import("./firebaseFirestore"),
-      import("firebase/firestore")
-    ]);
-    if (cancelled) return;
-
-    let user = auth.currentUser;
-
-    if (!user) {
-      await new Promise<void>((resolve) => {
-        const unsubscribeAuth = auth.onAuthStateChanged((authUser) => {
-          unsubscribeAuth();
-          resolve();
-        });
-      });
-
-      user = auth.currentUser;
-    }
-
-    if (!user || cancelled) return;
-
-    const myUid = user.uid;
-
-    const chatsQuery = firestore.query(
-      firestore.collection(db, "chats"),
-      firestore.where("participants", "array-contains", myUid)
-    );
-
-    unsubscribe = firestore.onSnapshot(
-      chatsQuery,
-      (snapshot) => {
-        if (cancelled) return;
-
-        const unreadChats = snapshot.docs
-          .map((chatDoc) => ({
-            id: chatDoc.id,
-            ...chatDoc.data()
-          }) as {
-            id: string;
-            postId?: string;
-            unreadBy?: string[];
-            lastMessageAt?: any;
-          })
-          .filter((chat) =>
-            Boolean(chat.postId) &&
-            Array.isArray(chat.unreadBy) &&
-            chat.unreadBy.includes(myUid)
-          )
-          .sort((a, b) => {
-            const aTime =
-              typeof a.lastMessageAt?.toMillis === "function"
-                ? a.lastMessageAt.toMillis()
-                : 0;
-
-            const bTime =
-              typeof b.lastMessageAt?.toMillis === "function"
-                ? b.lastMessageAt.toMillis()
-                : 0;
-
-            return bTime - aTime;
-          });
-
-        const newest = unreadChats[0];
-
-        if (!newest?.postId) {
-          setPendingCommunityChat(null);
-          return;
-        }
-
-        setPendingCommunityChat({
-          id: newest.id,
-          postId: newest.postId,
-          lastMessageAt: newest.lastMessageAt
-        });
-      },
-      (error) => {
-        console.error(
-          "Erro ao verificar mensagens da comunidade:",
-          error
-        );
-      }
-    );
-  };
-
-  startUnreadChatListener();
-
-  return () => {
-    cancelled = true;
-    unsubscribe?.();
-  };
-}, []);
+// Mantém o badge da conversa privada mais recente sem bloquear o arranque.
+useUnreadCommunityChat({ setPendingCommunityChat, enabled: appDataReady });
 
 useEffect(() => {
-  if (currentTab !== 4) return;
+  if (!appDataReady || currentTab !== 4) return;
 
   let unsubscribe: (() => void) | undefined;
   let cancelled = false;
@@ -1664,13 +1495,14 @@ useEffect(() => {
     cancelled = true;
     unsubscribe?.();
   };
-}, [currentTab, t]);
+}, [appDataReady, currentTab, t]);
 
 // Ao tocar em Comunidade, se existir uma mensagem privada
 // não lida, esperamos que o feed esteja disponível e abrimos
 // automaticamente a publicação/conversa correspondente.
 useEffect(() => {
   if (
+    !appDataReady ||
     currentTab !== 4 ||
     !openPendingChatOnCommunityEntry
   ) {
@@ -1726,6 +1558,7 @@ useEffect(() => {
 
   void openUnreadConversation();
 }, [
+  appDataReady,
   currentTab,
   openPendingChatOnCommunityEntry,
   pendingCommunityChat,
@@ -1738,8 +1571,8 @@ useEffect(() => {
 
   if (loggedDay) {
     setTodayLogged(true);
-    setMorningRating(loggedDay.morning);
-    setAfternoonRating(loggedDay.afternoon);
+    setMorningRating(loggedDay.morning ?? 5);
+    setAfternoonRating(loggedDay.afternoon ?? 5);
     setNoteText(loggedDay.note || "");
   } else {
     setTodayLogged(false);
@@ -1777,7 +1610,7 @@ useEffect(() => {
   }
 
 }, [ratings, selectedDate]);
-  
+
   /**
    * ==========================================================
    * CONFIA — COMPANION BRAIN
@@ -1821,7 +1654,7 @@ setTimeout(() => {
   }, []);
 
 const handleMicroHabitCompleted = () => {
-  emitCompanionInteraction(
+  recordCompanionInteractionDeferred(
     "tool_completed",
     "exercise",
     { tool: "micro_habit" }
@@ -1854,7 +1687,7 @@ const handleBuyItem = (item: any) => {
   // Pet Amigo (Interaction)
   const handlePetAvatar = useCallback(() => {
     // CONFIA_COMPANION_EVENT_AVATAR_TAPPED
-    emitCompanionBrainEvent(
+    recordCompanionBrainEventDeferred(
       "avatar_tapped",
       {
         source: "home_companion",
@@ -1891,7 +1724,8 @@ const handleSaveRatings = () => {
     date: selectedDate,
     morning: morningRating,
     afternoon: afternoonRating,
-    note: noteText.trim() || undefined
+    note: noteText.trim() || undefined,
+    scaleVersion: 2,
   };
 
   if (existingIdx >= 0) {
@@ -1914,11 +1748,23 @@ const handleSaveRatings = () => {
     JSON.stringify(nextRatings)
   );
 
+  lastMoodAnalysisSignature.current = JSON.stringify(nextRatings);
   setRatings(nextRatings);
   setTodayLogged(true);
+  // Keep the progressive onboarding guide in sync within this same session.
+  window.dispatchEvent(new Event("confia:daily-rating-saved"));
+
+  // Keep the personal timeline in step with both daily-entry mechanisms.
+  // This is deliberately deferred: the rating is already saved and the UI
+  // must remain responsive if the optional projection cannot be updated.
+  void import("./data/personal/syncPersonalEvents")
+    .then(({ syncPersonalEventsFromLegacySources }) => {
+      try { syncPersonalEventsFromLegacySources(); } catch { /* recover on next sync */ }
+    })
+    .catch(() => { /* personal discovery is optional to the save action */ });
 
   // CONFIA_COMPANION_EVENT_MOOD_SAVED
-  emitCompanionBrainEvent(
+  recordCompanionBrainEventDeferred(
     "mood_saved",
     {
       date: selectedDate,
@@ -1936,12 +1782,12 @@ const handleSaveRatings = () => {
     .then(({ analyzeReactiveState }) => {
       const reactiveResult = analyzeReactiveState({ source: "mood" });
       setReactiveMessageKey(reactiveResult.response.translationKey);
-      recordReactiveResponse({
+      void import("./data/reactive/reactiveHistoryStorage").then(({ recordReactiveResponse }) => recordReactiveResponse({
         responseId: reactiveResult.response.id,
         situation: reactiveResult.situation,
         intent: reactiveResult.intent,
         timestamp: new Date().toISOString(),
-      });
+      })).catch(() => {});
     })
     .catch(() => setReactiveMessageKey(null));
 };
@@ -1973,12 +1819,12 @@ const handleSaveRatings = () => {
                   objectiveCompleted: true,
                 });
                 setReactiveMessageKey(objectiveReactiveResult.response.translationKey);
-                recordReactiveResponse({
+                void import("./data/reactive/reactiveHistoryStorage").then(({ recordReactiveResponse }) => recordReactiveResponse({
                   responseId: objectiveReactiveResult.response.id,
                   situation: objectiveReactiveResult.situation,
                   intent: objectiveReactiveResult.intent,
                   timestamp: new Date().toISOString(),
-                });
+                })).catch(() => {});
               })
               .catch(() => setReactiveMessageKey(null));
 
@@ -2276,37 +2122,20 @@ const handleAddPost = useCallback(async (feeling: string, topic: string, message
 
     // O Companion só deve tratar a publicação como facto depois de
     // a publicação ter sido criada com sucesso.
-    emitCompanionBrainEvent("community_posted", {
+    recordCompanionBrainEventDeferred("community_posted", {
       postId: created.id,
       topic,
       feeling,
     });
 
-    // Partilhar na comunidade = +10 XP
-    addXp(10);
-
-    // O Mar da Serenidade transforma participação real numa vantagem leve:
-    // publicar na Comunidade desbloqueia uma escolha extra no próximo caminho.
-    try {
-      const bonusKey = "confia_horizon_bonuses_v1";
-      const stored = JSON.parse(localStorage.getItem(bonusKey) || "{}");
-      localStorage.setItem(
-        bonusKey,
-        JSON.stringify({
-          extraChoices: Math.max(0, Number(stored.extraChoices) || 0) + 1,
-          rerolls: Math.max(0, Number(stored.rerolls) || 0),
-          hints: Math.max(0, Number(stored.hints) || 0),
-        })
-      );
-      window.dispatchEvent(new CustomEvent("confia:community-post-created"));
-    } catch {
-      // A publicação nunca deve falhar por causa da camada de jogo.
-    }
+    // Publicar conteúdo pessoal nunca concede XP nem vantagens de jogo.
+    // A participação comunitária deve ser livre, sem pressão para revelar mais.
 
   } catch (error) {
     console.error("Erro ao publicar na comunidade:", error);
+    throw error;
   }
-}, [t, addXp]);
+}, [t]);
 
   /**
    * Partilha de troféus.
@@ -2366,7 +2195,7 @@ const handleConnectCommunityMatch = useCallback(async (post: SharePost) => {
   }
 }, []);
 
-// Visual text helper for slider values (0-10)
+// Visual text helper for the shared 1–10 emotional scale
 
 const getRatingLabel = useCallback((val: number) => {
     if (val <= 2) return { text: t("moodVeryAgitated"), emoji: '🥺', color: 'text-[#934A38]' };
@@ -2380,10 +2209,6 @@ const handleOpenInnerCanvas = useCallback(() => {
   setHomeScreen("innerCanvas");
 }, []);
 
-const handleOpenProgress = useCallback(() => {
-  setHomeScreen("progress");
-}, []);
-
 const handleMainNavigation = useCallback((index: number) => {
   setOpenHabitSupport(false);
   setHomeScreen("home");
@@ -2393,10 +2218,11 @@ const handleMainNavigation = useCallback((index: number) => {
   setOpenPendingChatOnCommunityEntry(false);
   const targetTab = index === 3 ? 0 : index;
   setCurrentTab(targetTab);
+  markVisited(targetTab);
   // Começa a descarregar o código do separador em paralelo com a navegação.
   // Não aguardamos pelo import: o clique e a mudança visual nunca ficam bloqueados.
   preloadTab(targetTab);
-}, []);
+}, [markVisited, preloadTab]);
 
 if (!ageGateReady) {
   return <div className="min-h-screen bg-[#FAF7F2]" aria-label="Confia" />;
@@ -2404,84 +2230,16 @@ if (!ageGateReady) {
 
 if (!ageConfirmed) {
   const language = (i18n.resolvedLanguage || i18n.language || "pt").slice(0, 2);
-  const copy = language === "en"
-    ? { title: "Welcome to Confia", intro: "Confia is intended for people aged 18 and over.", check: "I confirm that I am 18 years old or older.", continue: "Continue", under: "I am under 18", blocked: "You must be at least 18 years old to use Confia." }
-    : language === "es"
-    ? { title: "Bienvenido/a a Confia", intro: "Confia está destinada a personas mayores de 18 años.", check: "Confirmo que tengo 18 años o más.", continue: "Continuar", under: "Tengo menos de 18 años", blocked: "Debes tener al menos 18 años para utilizar Confia." }
-    : language === "fr"
-    ? { title: "Bienvenue sur Confia", intro: "Confia est destinée aux personnes âgées de 18 ans ou plus.", check: "Je confirme avoir 18 ans ou plus.", continue: "Continuer", under: "J’ai moins de 18 ans", blocked: "Vous devez avoir au moins 18 ans pour utiliser Confia." }
-    : { title: "Bem-vindo/a à Confia", intro: "A Confia destina-se a pessoas com 18 anos ou mais.", check: "Confirmo que tenho 18 anos ou mais.", continue: "Continuar", under: "Tenho menos de 18 anos", blocked: "Tens de ter pelo menos 18 anos para utilizar a Confia." };
+  return <AgeGateScreen language={language} checked={ageCheckboxChecked} underageNotice={underageNotice} onCheckedChange={setAgeCheckboxChecked} onConfirm={confirmAge} onShowUnderageNotice={() => setUnderageNotice(true)} />;
+}
 
-  return (
-    <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center p-5 text-[#2F2926]" lang={language}>
-      <section className="w-full max-w-md rounded-3xl bg-white p-7 shadow-lg border border-[#E8DED4]" aria-labelledby="confia-age-title">
-        <img src="/images/confia-icon.png" alt="Confia" className="mx-auto mb-5 h-16 w-16 rounded-2xl" />
-        <h1 id="confia-age-title" className="mb-3 text-center text-2xl font-bold">{copy.title}</h1>
-        <p className="mb-6 text-center leading-relaxed">{copy.intro}</p>
-        {!underageNotice ? (
-          <>
-            <label className="mb-6 flex items-start gap-3 rounded-xl bg-[#FAF7F2] p-4 text-sm leading-relaxed">
-              <input type="checkbox" checked={ageCheckboxChecked} onChange={(event) => setAgeCheckboxChecked(event.target.checked)} className="mt-1 h-4 w-4 accent-[#B85F48]" />
-              <span>{copy.check}</span>
-            </label>
-            <button type="button" disabled={!ageCheckboxChecked} onClick={() => {
-              try { localStorage.setItem("confia_age_18_confirmed_v1", "yes"); } catch { /* mantém a confirmação nesta sessão */ }
-              setAgeConfirmed(true);
-            }} className="mb-3 w-full rounded-xl bg-[#B85F48] px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">{copy.continue}</button>
-            <button type="button" onClick={() => setUnderageNotice(true)} className="w-full rounded-xl px-5 py-3 text-sm text-[#6B5D55] underline">{copy.under}</button>
-          </>
-        ) : (
-          <p role="alert" className="rounded-xl bg-[#FAF0ED] p-4 text-center font-medium">{copy.blocked}</p>
-        )}
-      </section>
-    </div>
-  );
+if (!appDataReady) {
+  return <div className="min-h-screen bg-[#FAF7F2]" aria-label="Confia"><ScreenLoading label={t("loading")} /></div>;
 }
 
 return (
     <div className="confia-app min-h-screen flex flex-col antialiased">
 
-      {/* Splash Welcome Screen Overlay */}
-      <AnimatePresence>
-        {showSplash && (
-<motion.div
-  key="splash-screen"
-  initial={{ opacity: 1 }}
-  exit={{ opacity: 0, transition: { duration: 0.5, ease: "easeInOut" } }}
-  className="fixed inset-0 z-[999] bg-white flex flex-col items-center justify-center p-6 cursor-pointer"
-  onClick={() => setShowSplash(false)}
->
-  <div className="flex flex-col items-center space-y-6 max-w-sm text-center">
-    <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: [0.8, 1.05, 1], opacity: 1 }}
-      transition={{ duration: 1.2, ease: "easeOut" }}
-className="flex items-center justify-center w-24 h-24 relative"
-    >
-      <motion.div
-        animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
-        transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-        className="absolute inset-0 rounded-full border-2 border-[#B85F48]/30"
-      />
-<img
-  src="/images/confia-icon.png"
-  alt="Confia"
-  className="w-16 h-16 rounded-2xl shadow-md"
-/>
-    </motion.div>
-
-    <motion.h2
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4, duration: 0.8 }}
-      className="text-2xl font-black text-[#2F2926] font-display tracking-tight"
-    >
-      Confia
-    </motion.h2>
-  </div>
-</motion.div>
-)}
-      </AnimatePresence>
       <AppHeader avatar={avatar} />
 
       {/* Main Content Stage */}
@@ -2489,7 +2247,7 @@ className="flex items-center justify-center w-24 h-24 relative"
         className={`confia-main confia-main--tab-${currentTab === 1 ? "horizon" : currentTab === 2 ? "objectives" : currentTab === 4 ? "community" : "home"} flex-1 pb-28 px-4 sm:px-6 w-full pt-5 sm:pt-7`}
       >
 {currentTab === 0 && homeScreen === "dailyCheckIn" && (
-  <MorningSheet
+  <Suspense fallback={<ScreenLoading label={t("loading")} />}><MorningSheet
     onComplete={() => {
       addXp(20);
     }}
@@ -2513,7 +2271,7 @@ className="flex items-center justify-center w-24 h-24 relative"
       setCurrentTab(2);
       setHomeScreen("home");
     }}
-  />
+  /></Suspense>
 )}
 
 {currentTab === 0 && homeScreen === "home" && (
@@ -2572,9 +2330,11 @@ className="flex items-center justify-center w-24 h-24 relative"
 {homeScreen === "home" && (
   <section className="relative overflow-hidden rounded-[30px] border border-[#E8DDD7]/70 bg-gradient-to-br from-white via-[#FFFDFC] to-[#FFF6F1] p-4 shadow-[0_12px_32px_rgba(92,64,52,0.055)]" aria-label={t("homeSpace.title")}>
     <div className="px-1 pb-3"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38]">{t("homeSpace.title")}</p><p className="mt-1 text-[11px] font-semibold text-[var(--cf-muted)]">{t("homeSpace.subtitle")}</p></div>
-    <button type="button" onClick={() => { emitCompanionInteraction("reflection_opened","map",{from:"home",to:"map"}); setHomeScreen("map"); }} className="mt-2 w-full rounded-[22px] border border-[#E8DDD7] bg-[#FFF9F5] px-4 py-3 text-left">
-      <div className="flex items-center gap-3"><Compass size={17} className="text-[#934A38]"/><div className="flex-1"><span className="block text-xs font-black text-[#4A352F]">{t("personalMap.title")}</span><span className="mt-0.5 block text-[10px] text-[#806D65]">{t("personalMap.homeLearning")}</span></div><span className="text-[#934A38]">→</span></div>
-    </button>
+    <ProgressiveStartGuide
+      onOpenRecord={() => setHomeScreen("dailyCheckIn")}
+      onOpenTool={() => { setCurrentTab(1); setHomeScreen("home"); }}
+      onOpenMap={() => { recordCompanionInteractionDeferred("reflection_opened","map",{from:"home",to:"map"}); setHomeScreen("map"); }}
+    />
     <button type="button" onClick={() => setHomeScreen("settings")} className="mt-2 flex w-full items-center justify-end gap-1.5 px-2 py-2 text-[9px] font-bold text-[var(--cf-muted)]"><Settings size={12}/>{t("settings")}</button>
   </section>
 )}
@@ -2739,7 +2499,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                           <span
                             className={`text-[10px] font-bold flex items-center gap-1 ${getRatingLabel(morningRating).color}`}
                           >
-                            
+
                             <span>{getRatingLabel(morningRating).text}</span>
                           </span>
                         </div>
@@ -2747,7 +2507,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
                       <input
                         type="range"
-                        min="0"
+                        min="1"
                         max="10"
                         step="1"
                         value={morningRating}
@@ -2756,7 +2516,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                       />
 
                       <div className="flex justify-between text-[9px] text-[var(--cf-muted)] font-bold">
-                        <span>0 · {t("difficult")}</span>
+                        <span>1 · {t("difficult")}</span>
                         <span>10 · {t("peaceful")}</span>
                       </div>
                     </div>
@@ -2777,7 +2537,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                           <span
                             className={`text-[10px] font-bold flex items-center gap-1 ${getRatingLabel(afternoonRating).color}`}
                           >
-                            
+
                             <span>{getRatingLabel(afternoonRating).text}</span>
                           </span>
                         </div>
@@ -2785,7 +2545,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 
                       <input
                         type="range"
-                        min="0"
+                        min="1"
                         max="10"
                         step="1"
                         value={afternoonRating}
@@ -2794,7 +2554,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                       />
 
                       <div className="flex justify-between text-[9px] text-[var(--cf-muted)] font-bold">
-                        <span>0 · {t("difficult")}</span>
+                        <span>1 · {t("difficult")}</span>
                         <span>10 · {t("peaceful")}</span>
                       </div>
                     </div>
@@ -2818,7 +2578,7 @@ className="flex items-center justify-center w-24 h-24 relative"
                     {/* Guardar */}
                     <button type="button"
                       onClick={() => {
-  emitCompanionInteraction(
+  recordCompanionInteractionDeferred(
     "checkin_completed",
     "checkin",
     { source: "home_day_rating" }
@@ -2841,16 +2601,19 @@ className="flex items-center justify-center w-24 h-24 relative"
               </div>
 
 {/* Hábitos — relógio, Alimenta-me e Exercício entre Classificar o teu dia e SOS */}
-<section id="home-habits" className="scroll-mt-24" aria-label={t("habitHub.title")}>
-  <Suspense fallback={<p role="status">{t("loading")}</p>}>
-    <MemoHabitDashboard
-      embedded
-      onAddXp={addXp}
-      openSupport={openHabitSupport}
-      initialPage={habitEntry.page}
-      navigationKey={habitEntry.key}
-    />
-  </Suspense>
+<section id="home-habits" ref={habitSectionRef} className="scroll-mt-24" aria-label={t("habitHub.title")}>
+  {habitSectionVisible ? (
+    <Suspense fallback={<div className="min-h-40 rounded-3xl bg-[#F7F5F2] animate-pulse" aria-busy="true" aria-label={t("loading")} />}>
+      <MemoHabitDashboard
+        embedded
+        openSupport={openHabitSupport}
+        initialPage={habitEntry.page}
+        navigationKey={habitEntry.key}
+      />
+    </Suspense>
+  ) : (
+    <div className="min-h-40 rounded-3xl bg-[#F7F5F2]" aria-hidden="true" />
+  )}
 </section>
 
 {/* Apoio humano — entrada para a comunidade, acima do SOS */}
@@ -2914,7 +2677,7 @@ className="flex items-center justify-center w-24 h-24 relative"
         {t("crisisQuestion")}
       </p>
 
-      <p className="mt-0.5 truncate text-[10px] font-semibold text-white/70">
+      <p className="mt-0.5 text-[10px] font-semibold leading-relaxed text-white/75">
         {t("crisisStartSupport")}
       </p>
     </div>
@@ -2940,61 +2703,18 @@ className="flex items-center justify-center w-24 h-24 relative"
           )}
 
 
-{/* Evolução — ecrã próprio dentro do Principal */}
-{currentTab === 0 && homeScreen === "progress" && (
-  <div
-    key="progress-screen"
-    className="flex-1"
-  >
-    <div className="mb-4 flex items-center gap-3">
-      <button
-        type="button"
-        onClick={() => {
-          // CONFIA_COMPANION_HOME_RETURNED_PROGRESS
-          emitCompanionBrainEvent(
-            "home_returned",
-            {
-              from: "progress",
-            }
-          );
-
-          setHomeScreen("home");
-        }}
-        aria-label={t("back")}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E8DDD7]/80 bg-white text-[#934A38] shadow-sm transition-transform active:scale-95"
-      >
-        <ArrowLeft
-          size={18}
-          strokeWidth={1.9}
-        />
-      </button>
-
-      <div className="min-w-0">
-        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#934A38]">
-          {t("homeProgress.eyebrow")}
-        </p>
-
-        <h2 className="text-lg font-black tracking-tight text-[#2F2926]">
-          {t("homeProgress.evolutionTitle")}
-        </h2>
-      </div>
-    </div>
-
-    <LazySection>
-      <ProgressoDashboard
-        ratings={ratings}
-        avatarLevel={avatar.level}
-        avatarXp={avatar.xp}
-        completedObjectivesCount={completedObjectivesCount}
-        objectivesHistory={objectivesHistory}
-      />
-    </LazySection>
-  </div>
-)}
-
-{/* CONFIA — QUADRO INTERIOR / 60 SEGUNDOS */}
-{currentTab === 0 && homeScreen === "map" && (
-  <Suspense fallback={<ScreenLoading label={t("loading")} />}><PersonalMap onBack={() => setHomeScreen("home")} /></Suspense>
+{/* O progresso e o Mapa Pessoal passam a viver no mesmo espaço de aprendizagem. */}
+{currentTab === 0 && (homeScreen === "progress" || homeScreen === "map") && (
+  <Suspense fallback={<ScreenLoading label={t("loading")} />}>
+    <PersonalGrowthHub
+      onBack={() => setHomeScreen("home")}
+      ratings={ratings}
+      avatarLevel={avatar.level}
+      avatarXp={avatar.xp}
+      completedObjectivesCount={completedObjectivesCount}
+      objectivesHistory={objectivesHistory}
+    />
+  </Suspense>
 )}
 
 {currentTab === 1 && homeScreen === "innerCanvas" && (
@@ -3015,7 +2735,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 <HomeShop
   onBack={() => {
     // CONFIA_COMPANION_HOME_RETURNED_SHOP
-    emitCompanionBrainEvent(
+    recordCompanionBrainEventDeferred(
       "home_returned",
       {
         from: "shop",
@@ -3035,7 +2755,7 @@ className="flex items-center justify-center w-24 h-24 relative"
 <HomeInventory
     onBack={() => {
       // CONFIA_COMPANION_HOME_RETURNED_INVENTORY
-      emitCompanionBrainEvent(
+      recordCompanionBrainEventDeferred(
         "home_returned",
         {
           from: "inventory",
@@ -3069,6 +2789,7 @@ className="flex items-center justify-center w-24 h-24 relative"
     </div>
 
 <Suspense fallback={<ScreenLoading label={t("loading")} />}><NotificationSettings/></Suspense>
+<Suspense fallback={null}><ModeratorDashboard /></Suspense>
 {/* Idioma */}
   <div className="bg-white border border-[#B85F48]/20 rounded-3xl p-5 shadow-sm mb-4">
     <h3 className="text-sm font-black text-[#2F2926] mb-1">
@@ -3111,6 +2832,12 @@ className="flex items-center justify-center w-24 h-24 relative"
   </div>
 
 <div className="bg-white border border-[#B85F48]/20 rounded-3xl p-5 shadow-sm mb-4">
+  <h3 className="text-sm font-black text-[#2F2926] mb-1">{t("privacyPolicyTitle")}</h3>
+  <p className="text-xs text-[var(--cf-text-soft)] leading-relaxed mb-4">{t("privacyPolicyDescription")}</p>
+  <a href={(i18n.resolvedLanguage || i18n.language || "pt").split("-")[0] === "pt" ? "/privacy-policy.html" : `/privacy-policy-${(i18n.resolvedLanguage || i18n.language || "pt").split("-")[0]}.html`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-[#B85F48]/30 bg-[#F3E3DC] px-4 py-3 text-xs font-black uppercase tracking-wide text-[#934A38]">{t("privacyPolicyOpen")}</a>
+</div>
+
+<div className="bg-white border border-[#B85F48]/20 rounded-3xl p-5 shadow-sm mb-4">
 
 
 
@@ -3138,6 +2865,7 @@ className="flex items-center justify-center w-24 h-24 relative"
       <p className="text-xs text-[var(--cf-text-soft)] leading-relaxed mb-4">
         {t("deleteMyDataDescription")}
       </p>
+      <p className="mb-4 text-[10px] leading-5 text-[#806D65]">{t("deleteDataRetentionNotice")}</p>
 
       <button type="button"
         onClick={handleDeleteAccountData}
@@ -3155,58 +2883,17 @@ className="flex items-center justify-center w-24 h-24 relative"
 
 
 
-{/* Community Guidelines Modal */}
+<CommunityGuidelinesModal open={showCommunityTerms} onClose={() => setShowCommunityTerms(false)} t={t} />
 
-{showCommunityTerms && (
-  <div
-    className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-5"
-    onClick={() => setShowCommunityTerms(false)}
-  >
-
-    <div
-      className="w-full max-w-md bg-white rounded-[32px] shadow-2xl p-6"
-      onClick={(e) => e.stopPropagation()}
-    >
-
-      <div className="flex items-center justify-between mb-5">
-
-        <h2 className="text-xl font-black text-[#2F2926]">
-          {t("communityGuidelines")}
-        </h2>
-
-        <button type="button"
-          onClick={() => setShowCommunityTerms(false)}
-          className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-[var(--cf-text-soft)]"
-          aria-label={t("close")}
-        >
-          ×
-        </button>
-
-      </div>
-
-      <div className="text-sm text-slate-600 leading-relaxed">
-        {t("communityGuidelinesDescription")}
-      </div>
-
-      <button type="button"
-        onClick={() => setShowCommunityTerms(false)}
-        className="w-full mt-6 py-3.5 rounded-2xl bg-[#F3E3DC] border border-[#B85F48]/30 text-[#934A38] font-black text-xs uppercase tracking-wide"
-      >
-        {t("close")}
-      </button>
-
-    </div>
-
+{visitedTabs.includes(1) && (
+  <div hidden={currentTab !== 1 || homeScreen === "innerCanvas"} aria-hidden={currentTab !== 1 || homeScreen === "innerCanvas"}>
+    <Suspense fallback={<ScreenLoading label={t("loading")} />}><EmbraceTab onOpenSky={handleOpenInnerCanvas} onAddXp={addXp} active={currentTab === 1 && homeScreen !== "innerCanvas"} /></Suspense>
   </div>
 )}
 
-
-{currentTab === 1 && homeScreen !== "innerCanvas" && (
-  <EmbraceTab onOpenSky={handleOpenInnerCanvas} onAddXp={addXp} />
-)}
-
-{currentTab === 2 && (
-  <ObjectivesTab
+{visitedTabs.includes(2) && (
+  <div hidden={currentTab !== 2} aria-hidden={currentTab !== 2}>
+  <Suspense fallback={<ScreenLoading label={t("loading")} />}><ObjectivesTab
     reactiveMessageKey={reactiveMessageKey}
     objectives={objectives}
     weeklyGoal={weeklyGoal}
@@ -3216,11 +2903,12 @@ className="flex items-center justify-center w-24 h-24 relative"
     onCreateGoal={handleCreateWeeklyGoal}
     onCompleteDay={handleCompleteWeeklyDay}
     onShareTrophy={handleShareWeeklyTrophy}
-  />
+  /></Suspense>
+  </div>
 )}
 
 {currentTab === 4 && (
-  <CommunityTab
+  <Suspense fallback={<ScreenLoading label={t("loading")} />}><CommunityTab
     posts={posts}
     onAddPost={handleAddPost}
     onLikePost={handleLikePost}
@@ -3230,7 +2918,7 @@ className="flex items-center justify-center w-24 h-24 relative"
     onDeletePost={handleDeletePost}
     onReportPost={handleReportPost}
     onBlockUser={handleBlockUser}
-  />
+  /></Suspense>
 )}
 
       </main>
@@ -3252,54 +2940,12 @@ className="flex items-center justify-center w-24 h-24 relative"
 <TriageModal
         isOpen={triageOpen}
       onClose={() => setTriageOpen(false)}
-        onAddXp={addXp}
       />
 </LazySection>
 
-      {/* Celebratory Level Up Overlay */}
-      <AnimatePresence>
-        {levelUpOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-[32px] p-7 text-center max-w-sm border border-[#B85F48]/20 shadow-2xl space-y-4"
-            >
-              <div className="w-16 h-16 bg-[#F3E3DC] rounded-full flex items-center justify-center mx-auto text-[#934A38] animate-bounce">
-                <Gift size={32} />
-              </div>
-<div className="space-y-1.5">
-<h3 className="text-xl font-black text-[#2F2926] font-display">
-  {t("companionEvolution")}
-</h3>
+      <LevelUpOverlay open={levelUpOpen} previousLevel={prevLevel} onClose={() => setLevelUpOpen(false)} t={t} />
 
-<p className="text-xs text-[var(--cf-text-soft)] leading-relaxed font-semibold">
-  {t("guardianEvolution")}
-</p>
-
-<div className="py-2.5 px-4 bg-[#B85F48]/15 text-[#934A38] border border-[#B85F48]/30 rounded-2xl text-xs font-black font-display">
-  {t("levelReached", { level: prevLevel })} 🎉
-</div>
-
-<p className="text-[10px] text-[var(--cf-muted)] font-extrabold font-mono uppercase tracking-wider">
-  {t("extraReward")}
-
-              </p>
-</div>
-              <button type="button"
-            onClick={() => setLevelUpOpen(false)}
-                className="w-full py-3 bg-[#B85F48] hover:bg-[#D59375] text-white shadow-lg shadow-[#B85F48]/25 font-black text-xs uppercase tracking-wider font-display rounded-xl cursor-pointer"
-              >
-{t("continueWalking")}
-              </button>
-            </motion.div>
-          </div>
-        )}
-
-
-      </AnimatePresence>
-      {showStopMode && (
+{showStopMode && (
       <LazySection>
         <StopMode
           onStartImpulse={() => {
@@ -3336,307 +2982,4 @@ className="flex items-center justify-center w-24 h-24 relative"
       />
     </div>
   );
-}
-
-
-type MorningSheetProps = {
-  onComplete: () => void;
-  onOpenSky: () => void;
-  onOpenMountain: () => void;
-  onOpenSea: () => void;
-  onOpenCommunity: () => void;
-  onOpenChest: () => void;
-};
-
-const MorningSheet = memo(function MorningSheet({
-  onComplete,
-  onOpenSky,
-  onOpenMountain,
-  onOpenSea,
-  onOpenCommunity,
-  onOpenChest,
-}: MorningSheetProps) {
-  const { t } = useTranslation();
-  const [showDestinations, setShowDestinations] = useState(false);
-
-  const destinations = [
-    {
-      key: "sky",
-      title: t("morningSheet.sky.title", { defaultValue: "CÉU" }),
-      text: t("morningSheet.sky.text", { defaultValue: "Deslumbra a tua constelação hoje" }),
-      icon: "✨",
-      onClick: onOpenSky,
-      className: "bg-gradient-to-br from-[#172B4D] via-[#355B78] to-[#B8CFE0]",
-    },
-    {
-      key: "mountain",
-      title: t("morningSheet.mountain.title", { defaultValue: "MONTANHA" }),
-      text: t("morningSheet.mountain.text", { defaultValue: "De degrau a degrau, progride hoje" }),
-      icon: "🏔️",
-      onClick: onOpenMountain,
-      className: "bg-gradient-to-br from-[#D9E3E5] via-[#9FAEAE] to-[#685B55]",
-    },
-    {
-      key: "sea",
-      title: t("morningSheet.sea.title", { defaultValue: "MAR" }),
-      text: t("morningSheet.sea.text", { defaultValue: "Traça e descobre a rota do teu eu" }),
-      icon: "🌊",
-      onClick: onOpenSea,
-      className: "bg-gradient-to-br from-[#A9D8DF] via-[#4D9AA7] to-[#245D70]",
-    },
-    {
-      key: "community",
-      title: t("morningSheet.community.title", { defaultValue: "COMUNIDADE" }),
-      text: t("morningSheet.community.text", { defaultValue: "Humaniza os teus sentimentos" }),
-      icon: "🤝",
-      onClick: onOpenCommunity,
-      className: "bg-gradient-to-br from-[#F3D7C8] via-[#D49D88] to-[#8E6559]",
-    },
-    {
-      key: "chest",
-      title: t("morningSheet.chest.title", { defaultValue: "COFRE · TERRA" }),
-      text: t("morningSheet.chest.text", { defaultValue: "Guarda o que conquistaste e continua a caminhar" }),
-      icon: "🗝️",
-      onClick: onOpenChest,
-      className: "bg-gradient-to-br from-[#D9C19D] via-[#9E7A51] to-[#4E3A2C]",
-    },
-  ];
-
-  if (!showDestinations) {
-    return (
-      <div className="flex min-h-[calc(100vh-150px)] items-start justify-center">
-        <div className="w-full max-w-md">
-          <div className="mb-4 px-1 text-center">
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#934A38]">
-              {t("morningSheet.eyebrow", { defaultValue: "FOLHA DE BOM DIA" })}
-            </p>
-            <h1 className="mt-1 text-2xl font-black tracking-tight text-[#2F2926]">
-              {t("morningSheet.title", { defaultValue: "Como te sentes neste momento?" })}
-            </h1>
-            <p className="mx-auto mt-1.5 max-w-sm text-[11px] font-semibold leading-relaxed text-[#806D65]">
-              {t("morningSheet.subtitle", { defaultValue: "Começa pelo que está presente em ti. Depois, escolhe por onde queres caminhar hoje." })}
-            </p>
-          </div>
-
-          <LazySection>
-            <DailyCheckIn
-              onComplete={() => {
-                onComplete();
-                setShowDestinations(true);
-              }}
-            />
-          </LazySection>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <motion.div
-      key="morning-destinations"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex min-h-[calc(100vh-150px)] items-start justify-center"
-    >
-      <div className="w-full max-w-md">
-        <div className="mb-4 px-1">
-          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#934A38]">
-            {t("morningSheet.eyebrow", { defaultValue: "FOLHA DE BOM DIA" })}
-          </p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-[#2F2926]">
-            {t("morningSheet.portalTitle", { defaultValue: "Por onde queres começar hoje?" })}
-          </h1>
-          <p className="mt-1.5 text-[11px] font-semibold leading-relaxed text-[#806D65]">
-            {t("morningSheet.portalSubtitle", { defaultValue: "Cinco caminhos. Um só dia. Escolhe o que te chama." })}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          {destinations.map((destination, index) => (
-            <button
-              key={destination.key}
-              type="button"
-              onClick={destination.onClick}
-              className={[
-                "group relative min-h-[150px] overflow-hidden rounded-[26px] border border-white/40 p-4 text-left shadow-[0_12px_28px_rgba(47,41,38,0.14)] transition-transform active:scale-[0.98]",
-                destination.className,
-                index === 4 ? "col-span-2 min-h-[118px]" : "",
-              ].join(" ")}
-            >
-              <div aria-hidden="true" className="absolute -right-5 -top-5 h-24 w-24 rounded-full bg-white/15 blur-2xl" />
-              <div aria-hidden="true" className="absolute bottom-2 right-3 text-5xl opacity-80 transition-transform duration-300 group-hover:scale-110">
-                {destination.icon}
-              </div>
-              <div className="relative z-10 max-w-[82%]">
-                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-white/80">
-                  {destination.title}
-                </p>
-                <p className="mt-2 text-[15px] font-black leading-snug text-white drop-shadow-sm">
-                  {destination.text}
-                </p>
-                <span className="mt-3 inline-flex items-center rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[9px] font-black text-white">
-                  {t("morningSheet.open", { defaultValue: "Entrar →" })}
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
-});
-
-type EmbraceTabProps = {
-  onOpenSky: () => void;
-  onAddXp: (amount: number) => void;
-};
-
-const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp }: EmbraceTabProps) {
-  const { t } = useTranslation();
-  const loadingFallback = <div role="status" aria-live="polite" className="flex min-h-24 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>;
-  return (
-    <motion.div
-      key="embrace-tab"
-      initial={false}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-    >
-      <div className="space-y-4">
-        <Suspense fallback={loadingFallback}>
-          <HorizonExperience onOpenSky={onOpenSky} />
-        </Suspense>
-        <Suspense fallback={loadingFallback}>
-          <AbracoTimer onAddXp={onAddXp} />
-        </Suspense>
-      </div>
-    </motion.div>
-  );
-});
-
-type ObjectivesTabProps = {
-  reactiveMessageKey: string | null;
-  objectives: Objective[];
-  weeklyGoal: WeeklyGoal | null;
-  onToggleComplete: (id: string) => void;
-  onAddCustomObjective: (text: string, category: 'corporeo' | 'mental' | 'social' | 'nutricao') => void;
-  onDeleteObjective: (id: string) => void;
-  onCreateGoal: (title: string) => void;
-  onCompleteDay: (targetDate: string, ease: number, note: string, recovery: boolean) => void;
-  onShareTrophy: () => void;
-};
-
-const ObjectivesTab = memo(function ObjectivesTab({
-  reactiveMessageKey,
-  objectives,
-  weeklyGoal,
-  onToggleComplete,
-  onAddCustomObjective,
-  onDeleteObjective,
-  onCreateGoal,
-  onCompleteDay,
-  onShareTrophy,
-}: ObjectivesTabProps) {
-  const { t } = useTranslation();
-  const loadingFallback = <div role="status" aria-live="polite" className="flex min-h-24 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>;
-
-  return (
-    <motion.div
-      key="goals-tab"
-      initial={false}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <div className="confia-surface-panel">
-        {reactiveMessageKey && (
-          <section className="mb-4 overflow-hidden rounded-[28px] border border-[#B85F48]/25 bg-gradient-to-br from-[#FFF8F4] via-white to-[#FFFDFC] shadow-[0_12px_32px_rgba(92,64,52,0.06)]">
-            <div className="flex items-start gap-3.5 p-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#B85F48]/15 bg-white text-[#934A38] shadow-sm">
-                <Sparkles size={18} strokeWidth={1.8} aria-hidden="true" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#934A38]">{t("homeNow.eyebrow")}</p>
-                <p className="mt-1.5 text-sm font-semibold leading-relaxed text-[#2F2926]">{t(reactiveMessageKey)}</p>
-              </div>
-            </div>
-            <div aria-hidden="true" className="h-[3px] w-full bg-gradient-to-r from-[#B85F48]/10 via-[#934A38]/45 to-[#B85F48]/10" />
-          </section>
-        )}
-        <Suspense fallback={loadingFallback}>
-          <ObjectivosList
-            objectives={objectives}
-            onToggleComplete={onToggleComplete}
-            onAddCustomObjective={onAddCustomObjective}
-            onDeleteObjective={onDeleteObjective}
-          />
-          <WeeklyGoalSection
-            weeklyGoal={weeklyGoal}
-            onCreateGoal={onCreateGoal}
-            onCompleteDay={onCompleteDay}
-            onShareTrophy={onShareTrophy}
-          />
-        </Suspense>
-      </div>
-    </motion.div>
-  );
-});
-
-type CommunityTabProps = {
-  posts: SharePost[];
-  onAddPost: (
-    feeling: string,
-    topic: string,
-    message: string,
-    options?: {
-      experienceTag?: string;
-      supportMode?: "share" | "other_side" | "seeking_match" | "give_back";
-      circleExpiresAt?: number;
-    }
-  ) => Promise<void>;
-  onLikePost: (id: string, reaction: "yellow" | "green" | "red") => Promise<void>;
-  onOpenChat: (post: SharePost) => void;
-  onConnectMatch: (post: SharePost) => Promise<void>;
-  onOpenMatchedChat: (post: SharePost, chatId: string) => void;
-  onDeletePost: (id: string) => Promise<void>;
-  onReportPost: (post: SharePost, reason: string) => Promise<void>;
-  onBlockUser: (blockedUserId: string) => Promise<void>;
-};
-
-const CommunityTab = memo(function CommunityTab(props: CommunityTabProps) {
-  const { t } = useTranslation();
-  return (
-    <motion.div
-      key="community-tab"
-      initial={false}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className="w-full min-w-0 overflow-x-clip"
-    >
-      <Suspense fallback={<div role="status" aria-live="polite" className="flex min-h-24 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>}>
-        <PartilhaFeed
-          posts={props.posts}
-          onAddPost={props.onAddPost}
-          onLikePost={props.onLikePost}
-          onOpenChat={props.onOpenChat}
-          onConnectMatch={props.onConnectMatch}
-          onOpenMatchedChat={props.onOpenMatchedChat}
-          onDeletePost={props.onDeletePost}
-          onReportPost={props.onReportPost}
-          onBlockUser={props.onBlockUser}
-        />
-      </Suspense>
-    </motion.div>
-  );
-});
-
-
-function LazySection({ children }: { children: React.ReactNode }) {
-  return (
-    <Suspense fallback={null}>
-      {children}
-    </Suspense>
-  );
-}
-
-
-function ScreenLoading({ label }: { label: string }) {
-  return <div className="flex min-h-[40vh] items-center justify-center"><div role="status" aria-live="polite" className="rounded-full border border-[#E8DDD4] bg-white/90 px-4 py-2 text-xs font-bold text-[#795B50] shadow-sm">{label}</div></div>;
 }

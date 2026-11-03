@@ -1,11 +1,13 @@
 name: Build Android AAB
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
       - release/confia-support-performance-1.0.47
       - fix/listening-request-delivery-cloudshell
+      - feature/habit-impact-engine
 
 jobs:
   build:

@@ -1,19 +1,21 @@
 import {test,expect} from '@playwright/test';
-for(const [lang,hug,sky] of [['pt','Abraço','O teu céu'],['en','Hug','Your sky'],['es','Abrazo','Tu cielo'],['fr','Câlin','Ton ciel']])test('four tabs and sky in embrace: '+lang,async({page})=>{
+for(const [lang,hug,sky,explore,pause] of [['pt','Abraço','Céu','Quero explorar','Preciso de uma pausa'],['en','Hug','Sky','I want to explore','I need a pause'],['es','Abrazo','Cielo','Quiero explorar','Necesito una pausa'],['fr','Câlin','Ciel','Je veux explorer',"J'ai besoin d'une pause"]])test('four tabs and sky in embrace: '+lang,async({page})=>{
  await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());await page.addInitScript(l=>localStorage.setItem('confia_language',l),lang);await page.goto('/');
+ await page.locator('#home-habits').scrollIntoViewIfNeeded();
  const nav=page.locator('footer');await expect(nav.getByRole('button')).toHaveCount(4);await expect(page.getByTestId('challenge-clock')).toBeVisible();
- await expect(nav.getByRole('button',{name:/^(Hábitos|Habits|Habitudes)$/})).toHaveCount(0);await expect(page.getByRole('button',{name:sky,exact:true})).toHaveCount(0);
- await nav.getByRole('button').nth(1).click();const button=page.getByRole('button',{name:sky,exact:true});await expect(button).toBeVisible();await button.click();await expect(page.locator('footer button[aria-current="page"]')).toHaveText(hug);await expect(page.getByTestId('challenge-clock')).toHaveCount(0);
+ await expect(nav.getByRole('button',{name:/^(Hábitos|Habits|Habitudes)$/})).toHaveCount(0);await expect(page.getByRole('button',{name:new RegExp(sky+'$','i')})).toHaveCount(0);
+ await nav.getByRole('button').nth(1).click();await page.getByRole('button',{name:pause,exact:true}).toHaveAttribute('aria-pressed','true');await page.getByRole('button',{name:explore,exact:true}).click();await expect(page.getByRole('button',{name:explore,exact:true})).toHaveAttribute('aria-pressed','true');await page.getByRole('button',{name:pause,exact:true}).click();await expect(page.getByRole('button',{name:pause,exact:true})).toHaveAttribute('aria-pressed','true');await page.getByRole('button',{name:explore,exact:true}).click();const button=page.getByRole('button',{name:new RegExp(sky+'$','i')});await expect(button).toBeVisible();await button.click();await expect(page.locator('footer button[aria-current="page"]')).toHaveText(hug);await expect(page.getByTestId('challenge-clock')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await nav.getByRole('button').first().click();await expect(page.getByTestId('challenge-clock')).toBeVisible();
 });
 test('home loads heavy habit screens only on demand and fits 320px',async({page})=>{
  await page.setViewportSize({width:320,height:740});await page.emulateMedia({reducedMotion:'reduce'});
  await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());await page.addInitScript(()=>localStorage.setItem('confia_language','pt'));
- const requested:string[]=[];page.on('request',r=>requested.push(r.url()));await page.goto('/');await page.getByTestId('challenge-clock').waitFor();await page.waitForTimeout(1200);
- expect(requested.some(u=>/\/(NutritionDashboard|ExerciseDashboard|HabitHistory|WellbeingPlans|LifestyleReview)-/.test(u))).toBe(false);
+ const requested:string[]=[];page.on('request',r=>requested.push(r.url()));await page.goto('/');await page.locator('#home-habits').scrollIntoViewIfNeeded();await page.getByTestId('challenge-clock').waitFor();await page.waitForTimeout(1200);
+ expect(requested.some(u=>/\/(NutritionDashboard|ExerciseDashboard|HabitHistory|WellbeingPlans)-/.test(u))).toBe(false);
+ expect(requested.some(u=>/\/LifestyleReview-/.test(u))).toBe(true);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'/tmp/confia-new-home-320.png',fullPage:true});
- await page.getByRole('button',{name:/Alimenta-me/}).click();await expect(page.getByRole('heading',{name:'Alimenta-me',exact:true})).toBeVisible();expect(requested.some(u=>/\/NutritionDashboard-/.test(u))).toBe(true);
+ await page.getByRole('button',{name:/Alimentação/}).click();await expect(page.getByRole('heading',{name:'Alimenta-me',exact:true})).toBeVisible();expect(requested.some(u=>/\/NutritionDashboard-/.test(u))).toBe(true);
 });
 test('companion supports a restart, shares its utterance and keeps bounded memory',async({page})=>{
  await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());
@@ -37,4 +39,25 @@ test('personal-event listeners remain bounded after repeated records',async({pag
  for(let i=0;i<5;i++){await page.evaluate(()=>window.dispatchEvent(new Event('confia:personal-events-updated')));await page.waitForTimeout(120);}
  await expect.poll(()=>page.evaluate(()=>(window as any).personalListenerCount())).toBe(before);
  expect(before).toBeLessThanOrEqual(4);
+});
+
+test('objectives show the next action without forcing a gendered avatar choice',async({page})=>{
+ await page.setViewportSize({width:320,height:740});
+ await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());
+ await page.addInitScript(()=>localStorage.setItem('confia_language','pt'));
+ await page.goto('/');
+ await page.locator('footer').getByRole('button').nth(2).click();
+ const customize=page.getByRole('button',{name:'Personalizar explorador',exact:true});
+ await expect(customize).toBeVisible();
+ await expect(page.getByText('Quem vai subir contigo?',{exact:true})).toHaveCount(0);
+ const mountain=page.getByTestId('objective-mountain');
+ await expect(mountain).toBeVisible();
+ const height=await mountain.evaluate(element=>element.getBoundingClientRect().height);
+ expect(height).toBeLessThan(600);
+ await customize.click();
+ await expect(page.getByText('Quem vai subir contigo?',{exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Explorador/a',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Explorador/a',exact:true}).click();
+ await expect(page.getByText('Quem vai subir contigo?',{exact:true})).toHaveCount(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });

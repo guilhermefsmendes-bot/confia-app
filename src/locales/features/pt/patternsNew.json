@@ -1,0 +1,213 @@
+{
+  "patternsNew": {
+    "title": "Conhece os teus Padrões",
+    "description": "Descobre os hábitos que influenciam o teu bem-estar e acompanha a tua evolução.",
+    "assessment": "Avalia os teus hábitos",
+    "assessmentDesc": "Identifica hábitos que podem estar a prejudicar o teu bem-estar.",
+    "daily": "Acompanha o teu progresso",
+    "dailyDesc": "Avalia diariamente como conseguiste gerir estes hábitos.",
+    "evolution": "A minha evolução",
+    "evolutionDesc": "Observa a evolução dos teus hábitos e compara com o teu bem-estar diário.",
+    "evolutionDescription": "Observa como tens conseguido gerir os teus hábitos ao longo do tempo.",
+    "noRecords": "Ainda não tens registos suficientes.",
+    "lastRecord": "Último registo",
+    "date": "Data",
+    "habitManagement": "Gestão dos hábitos",
+    "startEvolution": "Começa por acompanhar o teu progresso diariamente.",
+    "plan": {
+      "title": "Plano Personalizado",
+      "description": "Recebe objetivos adaptados ao teu perfil."
+    },
+    "inventory": {
+      "title": "Inventário",
+      "empty": "Ainda não tens objetos.",
+      "equip": "Equipar",
+      "equipped": "Equipado"
+    },
+    "shop": {
+      "title": "Loja",
+      "availableXp": "XP disponível"
+    },
+    "homeItems": {
+      "flower1": {
+        "name": "Flor pequena"
+      },
+      "flower2": {
+        "name": "Flor rosa"
+      },
+      "flower3": {
+        "name": "Flor vermelha"
+      },
+      "flower4": {
+        "name": "Tulipa"
+      },
+      "flower5": {
+        "name": "Rosa"
+      },
+      "flower6": {
+        "name": "Rosa murcha"
+      },
+      "flower7": {
+        "name": "Ramo de flores"
+      },
+      "flower8": {
+        "name": "Jacinto"
+      },
+      "tree1": {
+        "name": "Árvore verde"
+      },
+      "tree2": {
+        "name": "Pinheiro"
+      },
+      "tree3": {
+        "name": "Palmeira"
+      },
+      "tree4": {
+        "name": "Árvore de Natal"
+      },
+      "tree5": {
+        "name": "Cacto"
+      },
+      "tree6": {
+        "name": "Tronco"
+      },
+      "tree7": {
+        "name": "Trevo"
+      },
+      "tree8": {
+        "name": "Trevo pequeno"
+      },
+      "rock1": {
+        "name": "Rocha pequena"
+      },
+      "rock2": {
+        "name": "Rocha"
+      },
+      "rock3": {
+        "name": "Pedra natural"
+      },
+      "rock4": {
+        "name": "Pedra grande"
+      },
+      "rock5": {
+        "name": "Rocha escura"
+      },
+      "rock6": {
+        "name": "Pedra antiga"
+      },
+      "bench1": {
+        "name": "Banco de madeira"
+      },
+      "bench2": {
+        "name": "Banco simples"
+      },
+      "bench3": {
+        "name": "Banco confortável"
+      },
+      "bench4": {
+        "name": "Banco elegante"
+      },
+      "bench5": {
+        "name": "Banco de jardim"
+      },
+      "bench6": {
+        "name": "Banco especial"
+      },
+      "water1": {
+        "name": "Gota de água"
+      },
+      "water2": {
+        "name": "Flor aquática"
+      },
+      "water3": {
+        "name": "Fonte"
+      },
+      "water4": {
+        "name": "Onda"
+      },
+      "water5": {
+        "name": "Concha"
+      },
+      "water6": {
+        "name": "Pato"
+      },
+      "extra1": {
+        "name": "Lanterna"
+      },
+      "extra2": {
+        "name": "Borboleta"
+      },
+      "extra3": {
+        "name": "Esquilo"
+      },
+      "extra4": {
+        "name": "Ninho"
+      },
+      "extra5": {
+        "name": "Sol"
+      },
+      "extra6": {
+        "name": "Arco-íris"
+      }
+    }
+  },
+  "patternsPremium": {
+    "habits": "Hábitos",
+    "days": "Dias",
+    "wellbeing": "Bem-estar",
+    "avgWellbeing": "Bem-estar médio",
+    "whyTitle": "Porque observar os teus padrões?",
+    "whyDescription": "Alguns comportamentos podem aliviar a ansiedade no momento, mas mantê-la a longo prazo. A Confia ajuda-te a observar esses padrões e a descobrir se pequenas mudanças estão associadas a uma melhoria do teu bem-estar.",
+    "assessmentIntro": "Identifica comportamentos que queres compreender melhor. Não precisas de os eliminar — primeiro vamos conhecê-los.",
+    "habitName": "Que comportamento queres observar?",
+    "category": "Em que área se encaixa?",
+    "baseline": "Com que intensidade acontece normalmente?",
+    "motivation": "Quão importante é para ti mudar este comportamento?",
+    "addHabit": "Adicionar hábito",
+    "yourHabits": "Os teus padrões",
+    "baselineShort": "habitual",
+    "dailyIntro": "Regista apenas o que aconteceu hoje. Não há respostas certas ou erradas.",
+    "done": "registos",
+    "intensityQuestion": "Quanto este comportamento esteve presente hoje?",
+    "none": "Nada",
+    "veryHigh": "Muito",
+    "daysShort": "dias",
+    "evolutionTitle": "A minha evolução",
+    "evolutionDescription": "Compara os teus padrões com o teu bem-estar e procura mudanças ao longo do tempo.",
+    "wellbeingChart": "O teu bem-estar",
+    "wellbeingChartDesc": "Média dos registos de manhã e à tarde",
+    "records": "registos",
+    "startAverage": "Início",
+    "currentAverage": "Mais recente",
+    "trendDown": "A diminuir",
+    "trendUp": "A aumentar",
+    "trendStable": "Estável",
+    "relationship": "Relação com o bem-estar",
+    "negativeRelationship": "Nos dias em que este comportamento esteve mais presente, o teu bem-estar tende a ser mais baixo.",
+    "positiveRelationship": "Nos dias em que este comportamento esteve mais presente, o teu bem-estar tende a ser mais elevado.",
+    "noClearRelationship": "Ainda não existe uma relação clara entre este comportamento e o teu bem-estar.",
+    "analysisTitle": "A tua análise",
+    "analysisIntro": "A Confia encontrou alguns padrões nos dados que registaste.",
+    "attention": "Padrão que merece atenção",
+    "negativeInsight": "Os teus registos sugerem uma possível relação entre «{{habit}}» e dias de menor bem-estar.",
+    "positiveInsightTitle": "Uma mudança positiva",
+    "positiveInsight": "Os teus dados sugerem uma possível relação entre «{{habit}}» e o teu bem-estar.",
+    "stillLearningTitle": "A Confia ainda está a aprender contigo",
+    "stillLearningDescription": "Continua a registar os teus hábitos e o teu bem-estar. Quanto mais dias tiveres, melhor poderemos identificar tendências pessoais.",
+    "analysisDisclaimer": "Esta análise mostra associações nos teus registos. Não prova que um comportamento seja a causa direta de uma alteração no bem-estar.",
+    "noHabitsTitle": "Primeiro, vamos conhecer os teus padrões",
+    "noHabitsDescription": "Adiciona pelo menos um comportamento que queiras observar ao longo dos próximos dias.",
+    "notEnoughDataTitle": "Ainda precisamos de alguns dias",
+    "notEnoughDataDescription": "Regista os teus comportamentos diariamente. Depois poderás começar a ver tendências.",
+    "categories": {
+      "digital": "Tecnologia",
+      "gaming": "Videojogos",
+      "checking": "Pesquisas / confirmação",
+      "mental": "Pensamentos",
+      "avoidance": "Evitamento",
+      "sleep": "Sono e rotina",
+      "body": "Corpo",
+      "other": "Outro"
+    }
+  }
+}

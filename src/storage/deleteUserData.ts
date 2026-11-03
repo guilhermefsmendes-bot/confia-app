@@ -1,221 +1,50 @@
+import { httpsCallable, getFunctions } from "firebase/functions";
+import { reload, signOut } from "firebase/auth";
+import { auth } from "../firebaseAuth";
 import { clearNativeNotices } from "../notifications/service";
 import { pauseHabitSyncForDeletion, resumeHabitSyncAfterDeletionError } from "../data/habits/sync";
-import {
-  collection,
-  doc,
-  getDoc,
-  limit,
-  getDocs,
-  query,
-  where,
-  writeBatch,
-  type WriteBatch,
-} from "firebase/firestore";
-import { deleteUser } from "firebase/auth";
-import { db } from "../firebaseFirestore";
-import { auth } from "../firebaseAuth";
+import { app } from "../firebaseApp";
+
+const functions = getFunctions(app, "europe-west1");
+
+function clearLocalAccountData() {
+  try { localStorage.clear(); } catch { /* Storage may be unavailable in restricted contexts. */ }
+  try { sessionStorage.clear(); } catch { /* Storage may be unavailable in restricted contexts. */ }
+}
+
+async function authIdentityWasDeleted(): Promise<boolean> {
+  const user = auth.currentUser;
+  if (!user) return false;
+  try {
+    await reload(user);
+    return false;
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error
+      ? String((error as { code?: unknown }).code)
+      : "";
+    return code === "auth/user-not-found";
+  }
+}
 
 export async function deleteAllUserData(): Promise<void> {
   await clearNativeNotices();
   await pauseHabitSyncForDeletion();
-  try { await deleteUserDataAndHabits(); }
-  catch (error) { resumeHabitSyncAfterDeletionError(); throw error; }
-}
-async function deleteUserDataAndHabits(): Promise<void> {
-  const user = auth.currentUser;
-
-  if (!user) {
-    throw new Error("Utilizador não autenticado.");
-  }
-
-  const uid = user.uid;
-
-  for (const name of ["devices", "preferences"]) {
-    while (true) {
-      const page = await getDocs(query(collection(db,"users",uid,name),limit(100)));
-      if (page.empty) break;
-      const batch=writeBatch(db);page.docs.forEach(d=>batch.delete(d.ref));await batch.commit();
+  try {
+    const deleteAccountData = httpsCallable(functions, "deleteAccountData", { timeout: 540_000 });
+    await deleteAccountData({});
+    // The server removes the Firebase Auth identity after the remote data pass.
+    // Clear local-only data only after the server confirms completion.
+    try { await signOut(auth); } catch { /* The server-side Auth deletion already succeeded. */ }
+    clearLocalAccountData();
+  } catch (error) {
+    // A network response can be lost after the server has deleted Auth.
+    // Reload distinguishes that completed operation from a retryable partial failure.
+    if (await authIdentityWasDeleted()) {
+      try { await signOut(auth); } catch { /* The identity no longer exists. */ }
+      clearLocalAccountData();
+      return;
     }
+    resumeHabitSyncAfterDeletionError();
+    throw error;
   }
-  // 1. Procurar todas as publicações do utilizador
-  const postsQuery = query(
-    collection(db, "posts"),
-    where("authorId", "==", uid)
-  );
-
-  const postsSnapshot = await getDocs(postsQuery);
-
-  // 2. Procurar todas as publicações onde o utilizador deixou uma reação
-  const yellowQuery = query(
-    collection(db, "posts"),
-    where("yellowLikedBy", "array-contains", uid)
-  );
-
-  const greenQuery = query(
-    collection(db, "posts"),
-    where("greenLikedBy", "array-contains", uid)
-  );
-
-  const redQuery = query(
-    collection(db, "posts"),
-    where("redLikedBy", "array-contains", uid)
-  );
-
-  const [yellowSnapshot, greenSnapshot, redSnapshot] =
-    await Promise.all([
-      getDocs(yellowQuery),
-      getDocs(greenQuery),
-      getDocs(redQuery)
-    ]);
-
-  // 3. Procurar chats onde o utilizador participa
-  const chatsQuery = query(
-    collection(db, "chats"),
-    where("participants", "array-contains", uid)
-  );
-  // When a member closes an SOS chat, they are removed from participants.
-  // Find those closed chats separately so account deletion can still clean them.
-  const closedListeningChatsQuery = query(
-    collection(db, "chats"),
-    where("closedBy", "==", uid)
-  );
-
-  const [participantChatsSnapshot, closedListeningChatsSnapshot] = await Promise.all([
-    getDocs(chatsQuery),
-    getDocs(closedListeningChatsQuery),
-  ]);
-  const chatsById = new Map<string, (typeof participantChatsSnapshot.docs)[number]>();
-  participantChatsSnapshot.docs.forEach(chat => chatsById.set(chat.id, chat));
-  closedListeningChatsSnapshot.docs.forEach(chat => {
-    if (typeof chat.data().listeningRequestId === "string") chatsById.set(chat.id, chat);
-  });
-  const chatsSnapshot = { docs: [...chatsById.values()] };
-
-  // 4. Procurar denúncias e bloqueios criados pelo utilizador.
-  // Estes documentos também contêm identificadores pessoais e devem ser
-  // removidos quando o utilizador elimina a própria conta.
-  const reportsQuery = query(
-    collection(db, "reports"),
-    where("reporterId", "==", uid)
-  );
-  const blocksQuery = query(
-    collection(db, "blocks"),
-    where("blockerId", "==", uid)
-  );
-
-  const ownListeningRequestsQuery = query(
-    collection(db, "listeningRequests"),
-    where("requesterId", "==", uid)
-  );
-  const assignedListeningRequestsQuery = query(
-    collection(db, "listeningRequests"),
-    where("acceptedBy", "==", uid),
-    where("status", "in", ["matched", "closed"])
-  );
-  const listeningProfileRef = doc(db, "listeningProfiles", uid);
-
-  const [
-    reportsSnapshot,
-    blocksSnapshot,
-    ownListeningRequestsSnapshot,
-    assignedListeningRequestsSnapshot,
-    listeningProfileSnapshot,
-  ] = await Promise.all([
-    getDocs(reportsQuery),
-    getDocs(blocksQuery),
-    getDocs(ownListeningRequestsQuery),
-    getDocs(assignedListeningRequestsQuery),
-    getDoc(listeningProfileRef),
-  ]);
-
-  // 5–7. Preparar operações e executá-las em lotes seguros.
-  // Firestore limita cada batch a 500 operações; 400 deixa margem para
-  // futuras alterações e impede que a eliminação falhe com contas grandes.
-  const operations: Array<(batch: WriteBatch) => void> = [];
-  const queueDelete = (ref: Parameters<WriteBatch["delete"]>[0]) => operations.push(batch => batch.delete(ref));
-  const queueUpdate = (ref: Parameters<WriteBatch["update"]>[0], data: Record<string, unknown>) => operations.push(batch => batch.update(ref, data));
-
-  const ownedPostIds = new Set(postsSnapshot.docs.map(postDoc => postDoc.id));
-  postsSnapshot.forEach(postDoc => queueDelete(postDoc.ref));
-
-  const reactionSnapshots = [yellowSnapshot, greenSnapshot, redSnapshot];
-  const processedPosts = new Set<string>();
-  reactionSnapshots.forEach(snapshot => {
-    snapshot.forEach(postDoc => {
-      // A post owned by the user is already queued for deletion. Never queue
-      // an update for the same document in the same batch.
-      if (ownedPostIds.has(postDoc.id) || processedPosts.has(postDoc.id)) return;
-      processedPosts.add(postDoc.id);
-      const data = postDoc.data();
-      const updates: Record<string, unknown> = {};
-
-      for (const reaction of ["yellow", "green", "red"] as const) {
-        const users = data[`${reaction}LikedBy`];
-        if (!Array.isArray(users)) continue;
-        const filtered = users.filter((id: unknown) => id !== uid);
-        if (filtered.length !== users.length) {
-          updates[`${reaction}LikedBy`] = filtered;
-          updates[`${reaction}Likes`] = filtered.length;
-        }
-      }
-      if (Object.keys(updates).length) queueUpdate(postDoc.ref, updates);
-    });
-  });
-
-  reportsSnapshot.forEach(reportDoc => queueDelete(reportDoc.ref));
-  blocksSnapshot.forEach(blockDoc => queueDelete(blockDoc.ref));
-  ownListeningRequestsSnapshot.forEach(requestDoc => queueDelete(requestDoc.ref));
-  assignedListeningRequestsSnapshot.forEach(requestDoc => queueDelete(requestDoc.ref));
-  if (listeningProfileSnapshot.exists()) queueDelete(listeningProfileRef);
-
-  for (const chatDoc of chatsSnapshot.docs) {
-    const data = chatDoc.data();
-    const deletingOwnedChat = data.authorId === uid || typeof data.listeningRequestId === "string";
-    const messagesSnapshot = await getDocs(collection(db, "chats", chatDoc.id, "messages"));
-    messagesSnapshot.forEach(messageDoc => {
-      // When removing an owned chat, delete its full message subcollection.
-      // Firestore does not cascade subcollection deletes with the parent doc.
-      if (deletingOwnedChat || messageDoc.data().senderId === uid) {
-        queueDelete(messageDoc.ref);
-      }
-    });
-    const participants = Array.isArray(data.participants) ? data.participants : [];
-    const remainingParticipants = participants.filter((participant: unknown) => participant !== uid);
-
-    // O campo authorId identifica estruturalmente o autor da conversa e as
-    // regras não permitem alterá-lo. Se o autor apagar a conta, remover o
-    // chat inteiro evita deixar uma conversa sem autor válido.
-    if (remainingParticipants.length === 0 || data.authorId === uid || typeof data.listeningRequestId === "string") {
-      queueDelete(chatDoc.ref);
-      continue;
-    }
-
-    const updates: Record<string, unknown> = {
-      participants: remainingParticipants,
-      lastMessage: "",
-      lastMessageAt: null,
-    };
-    queueUpdate(chatDoc.ref, updates);
-  }
-
-  for (let start = 0; start < operations.length; start += 400) {
-    const batch = writeBatch(db);
-    operations.slice(start, start + 400).forEach(operation => operation(batch));
-    await batch.commit();
-  }
-
-  // Private habit records are paginated; parent/user deletion does not cascade.
-  while (true) {
-    const entries = await getDocs(query(collection(db, "users", uid, "habitRecords"), limit(200)));
-    if (entries.empty) break;
-    const batch = writeBatch(db);
-    entries.docs.forEach(entry => batch.delete(entry.ref));
-    await batch.commit();
-  }
-
-  // 7. Limpar dados locais da aplicação
-  localStorage.clear();
-
-  // 8. Apagar a conta anónima Firebase
-  await deleteUser(user);
 }

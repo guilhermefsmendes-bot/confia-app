@@ -70,8 +70,8 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
 
         // X coordinate (spread across chartWidth)
         const x = paddingLeft + (idx / (sortedRatings.length - 1)) * chartWidth;
-        // Y coordinate (0-10 mapped to chartHeight)
-        const y = paddingTop + chartHeight - (val / 10) * chartHeight;
+        // Shared emotional scale: 1 is the lower edge and 10 is the upper edge.
+        const y = paddingTop + chartHeight - ((val - 1) / 9) * chartHeight;
 
         return `${x},${y}`;
       })
@@ -148,8 +148,8 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
           <div className="relative w-full flex items-center justify-center">
             <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible select-none">
               {/* Y-Axis Grid Lines & Labels */}
-              {[0, 2, 4, 6, 8, 10].map(val => {
-                const y = paddingTop + chartHeight - (val / 10) * chartHeight;
+              {[1, 3, 5, 7, 10].map(val => {
+                const y = paddingTop + chartHeight - ((val - 1) / 9) * chartHeight;
                 return (
                   <g key={val} className="opacity-40">
                     <line
@@ -222,7 +222,7 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
                     {rating.morning !== null && (
                       <circle
                         cx={x}
-                        cy={paddingTop + chartHeight - (rating.morning / 10) * chartHeight}
+                        cy={paddingTop + chartHeight - ((rating.morning - 1) / 9) * chartHeight}
                         r="4"
                         fill="#B85F48"
                         stroke="#ffffff"
@@ -232,7 +232,7 @@ export const ProgressoDashboard: React.FC<ProgressoDashboardProps> = ({
                     {rating.afternoon !== null && (
                       <circle
                         cx={x}
-                        cy={paddingTop + chartHeight - (rating.afternoon / 10) * chartHeight}
+                        cy={paddingTop + chartHeight - ((rating.afternoon - 1) / 9) * chartHeight}
                         r="4"
                         fill="#8B5C4D"
                         stroke="#ffffff"

@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 
 interface Props {
   onBack: () => void;
@@ -14,7 +14,7 @@ function PatternsNew({
   onOpenDaily,
   onOpenEvolution,
 }: Props) {
-  const { t } = useTranslation();
+  const { t } = useTranslation("patternsNew");
 
   const habits = (() => {
     try {

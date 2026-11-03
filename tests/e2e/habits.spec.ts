@@ -1,15 +1,21 @@
 import { test,expect,type Page } from "@playwright/test";
 async function openHabits(page:Page,lang="pt",label="Hábitos") {
   await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,route=>route.abort());
-  await page.addInitScript(l=>localStorage.setItem("confia_language",l),lang);
+  await page.addInitScript(l=>{
+    localStorage.setItem("confia_language",l);
+    const d=new Date(),date=[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
+    const checkin={date,mood:7,need:"calm",completed:true,scaleVersion:2};
+    localStorage.setItem("confia_daily_checkin",JSON.stringify(checkin));
+    localStorage.setItem("confia_daily_checkin_history",JSON.stringify([checkin]));
+  },lang);
   await page.goto("/");
+  await page.locator("#home-habits").scrollIntoViewIfNeeded();
   await page.getByTestId("challenge-clock").waitFor();
   await expect(page.getByTestId("challenge-clock")).toBeVisible();
 }
 test("habits: create, confirm, restart, retain history and switch main habit",async({page})=>{
   const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
   await openHabits(page);
- await page.getByText("O meu dia: análises e planos",{exact:true}).click();
   await expect(page.getByText("Espaço Efémero",{exact:true})).toHaveCount(0);
   await page.getByRole("button",{name:"Escolher um hábito",exact:true}).click();
   await page.getByRole("button",{name:"☕ Café em excesso",exact:true}).click();
@@ -19,7 +25,7 @@ test("habits: create, confirm, restart, retain history and switch main habit",as
   await page.getByRole("button",{name:"Registar",exact:true}).click();
   await page.getByRole("button",{name:"Cumpri o meu objetivo",exact:true}).click();
   await expect(page.getByText("DIA 1",{exact:true})).toBeVisible();
-  await page.getByRole("button",{name:"Recomeçar ciclo",exact:true}).click();
+  await page.getByRole("button",{name:"Recomeçar ciclo",exact:true}).first().click();
   await page.getByRole("button",{name:"Aconteceu uma vez",exact:true}).click();
   await expect(page.getByText("DIA 0",{exact:true})).toBeVisible();
   await page.getByRole("button",{name:"Ver histórico",exact:true}).click();
@@ -42,8 +48,7 @@ test("habits: create, confirm, restart, retain history and switch main habit",as
 });
 test("habits: food, movement, explicit zero, offline durability",async({page,context})=>{
   await openHabits(page);
- await page.getByText("O meu dia: análises e planos",{exact:true}).click();
-  await page.getByRole("button",{name:/Alimenta-me/}).click();
+  await page.getByRole("button",{name:/Alimentação/}).click();
   await page.getByRole("button",{name:/Café Adicionar/}).click();
   await page.getByLabel("Quantidade exata").fill("3");
   await page.getByRole("button",{name:"Guardar alimento ou bebida",exact:true}).click();
@@ -51,28 +56,27 @@ test("habits: food, movement, explicit zero, offline durability",async({page,con
   await page.getByLabel("Quantidade exata").fill("6");
   await page.getByRole("button",{name:"Guardar alimento ou bebida",exact:true}).click();
   await context.setOffline(true);
-  await page.getByRole("button",{name:"Concluir e ver o meu dia",exact:true}).click();
-  await expect(page.getByText("Hoje: 2 categorias registadas.",{exact:true})).toBeVisible();
+  await page.getByRole("button",{name:/Voltar/}).click();
+  await expect(page.getByRole("button",{name:/Alimentação/})).toContainText(/3 registo/);
   await context.setOffline(false);
-  await page.getByRole("button",{name:/Exercício/}).click();
+  await page.getByRole("button",{name:/Movimento/}).click();
   await page.getByRole("button",{name:"30 min",exact:true}).click();
   await page.getByRole("button",{name:"Guardar registo",exact:true}).click();
   await expect(page.getByText("30 min",{exact:true}).first()).toBeVisible();
   await page.reload();await page.getByTestId("challenge-clock").waitFor();
-  await expect(page.getByText("Hoje: 2 categorias registadas.",{exact:true})).toBeVisible();
+  await expect(page.getByRole("button",{name:/Alimentação/})).toContainText(/3 registo/);
   await expect(page.getByText("30 min",{exact:true}).first()).toBeVisible();
-  await page.getByText("O meu dia: análises e planos",{exact:true}).click();
-  await expect(page.getByText("A CONFIA precisa de conhecer um pouco mais", {exact:false})).toBeVisible();
+   await expect(page.getByRole("heading",{name:"O que os teus registos mostram",exact:true})).toBeVisible();
 });
 for(const [lang,label,choose,nutrition,exercise] of [
- ["en","Habits","Choose a habit","Nourish me","Exercise"],
- ["es","Hábitos","Elegir un hábito","Aliméntame","Ejercicio"],
- ["fr","Habitudes","Choisir une habitude","Me nourrir","Activité physique"],
+ ["en","Habits","Choose a habit","Nutrition","Movement"],
+ ["es","Hábitos","Elegir un hábito","Alimentación","Movimiento"],
+ ["fr","Habitudes","Choisir une habitude","Alimentation","Mouvement"],
 ])test("habits: complete "+lang+" surface and mobile fit",async({page})=>{
   await openHabits(page,lang,label);
   await expect(page.getByRole("button",{name:choose,exact:true})).toBeVisible();
-  await expect(page.getByRole("heading",{name:nutrition,exact:true})).toBeVisible();
-  await expect(page.getByRole("heading",{name:exercise,exact:true})).toBeVisible();
+  await expect(page.getByRole("button",{name:new RegExp(nutrition,"i")})).toBeVisible();
+  await expect(page.getByRole("button",{name:new RegExp(exercise,"i")})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
   expect(await page.locator("main").innerText()).not.toContain("habitHub.");
 });
@@ -89,21 +93,20 @@ test("habits: populated weekly reviews, evidence and 30-day trophy",async({page}
   for(let n=0;n<30;n++)records.push(record("log_"+n,"habitLog",day(-n),{habitId:"habit_seed",completed:true}));
   for(let n=0;n<14;n++){
    records.push(record("nutrition_"+n,"nutrition",day(-n),{coffee:n%2?3:0,water:5,fruit:1}));
-   records.push(record("exercise_"+n,"exercise",day(-n),{activity:"walk",minutes:n%2?20:0}));
+   records.push(record("exercise_"+n,"exercise",day(-n),{activity:"walk",minutes:n<2?20:0}));
    events.push({id:"mood_"+n,type:"mood",source:"daily_rating",timestamp:stamp(day(-n)),localDate:day(-n),schemaVersion:1,value:n%2?7:3,metadata:{moment:"morning"}});
   }
   localStorage.setItem("confia_habits_v1:guest",JSON.stringify({version:1,records,pending:{}}));
   localStorage.setItem("confia_personal_events_v1",JSON.stringify(events));
  });
  await openHabits(page);
- await page.getByText("O meu dia: análises e planos",{exact:true}).click();
  await expect(page.getByText("DIA 30",{exact:true})).toBeVisible();
  await expect(page.getByText("30 dias e um caminho que continua.",{exact:false})).toBeVisible();
- await expect(page.getByRole("heading",{name:"O que a CONFIA está a perceber",exact:true})).toBeVisible();
- await page.getByRole("button",{name:/Alimenta-me/}).click();
+ await expect(page.getByRole("heading",{name:"O que os teus registos mostram",exact:true})).toBeVisible();
+ await page.getByRole("button",{name:/Alimentação/}).click();
  await expect(page.getByText("Média:",{exact:false}).first()).toBeVisible();
  await page.getByRole("button",{name:/Voltar/}).click();
- await page.getByRole("button",{name:/Exercício/}).click();
+ await page.getByRole("button",{name:/Movimento/}).click();
  await expect(page.getByText("2 dias com movimento registado",{exact:true})).toBeVisible();
  await expect(page.getByText("40 min",{exact:true})).toBeVisible();
 });

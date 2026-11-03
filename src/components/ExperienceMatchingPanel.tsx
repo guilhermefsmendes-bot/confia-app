@@ -32,6 +32,9 @@ interface Props {
 export default function ExperienceMatchingPanel({ posts, profile, requests, blockedUserIds, onOpenMatchedChat }: Props) {
   const { t } = useTranslation();
   const uid = auth.currentUser?.uid;
+  // The subscription uses "*" while either block list is loading or unavailable.
+  // Fail closed: do not expose matches or incoming requests until both lists load.
+  const blockListUnavailable = blockedUserIds.includes("*");
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [joinError, setJoinError] = useState(false);
@@ -44,6 +47,7 @@ export default function ExperienceMatchingPanel({ posts, profile, requests, bloc
   ), [requests, uid]);
 
   const candidates = useMemo(() => posts.filter(post =>
+    !blockListUnavailable &&
     post.authorId !== uid &&
     !blockedUserIds.includes(post.authorId) &&
     !!post.experienceTag &&
@@ -54,9 +58,9 @@ export default function ExperienceMatchingPanel({ posts, profile, requests, bloc
       (profile.preference === "same_now" && !["other_side", "give_back"].includes(post.supportMode || ""))
     ) &&
     !["declined", "cancelled"].includes(requestByPost.get(post.id)?.status || "")
-  ).slice(0, 8), [posts, profile.activeTags, profile.preference, requestByPost, blockedUserIds, uid]);
+  ).slice(0, 8), [posts, profile.activeTags, profile.preference, requestByPost, blockedUserIds, blockListUnavailable, uid]);
 
-  const incoming = requests.filter(r => r.recipientId === uid && r.status === "pending" && !blockedUserIds.includes(r.requesterId));
+  const incoming = requests.filter(r => !blockListUnavailable && r.recipientId === uid && r.status === "pending" && !blockedUserIds.includes(r.requesterId));
   const accepted = requests.filter(r => r.status === "accepted");
 
   const toggleTag = async (tag: ExperienceMatchingId) => {

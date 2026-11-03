@@ -1,0 +1,228 @@
+{
+  "inventory": "Inventário",
+  "shop": "Loja",
+  "companionWidgetPrompt": {
+    "message": "Queres levar-me contigo para o ecrã inicial? Posso mostrar-te o teu desafio e os teus pequenos objetivos sem precisares de abrir a app.",
+    "action": "Adicionar widget"
+  },
+  "companionTitle": "Companheiro",
+  "companionAging": {
+    "first_contact": "a conhecer-te",
+    "early_learning": "a aprender contigo · {{count}} registos",
+    "established": "já conhece os teus ritmos · {{count}} registos",
+    "personal_discovery": "cresceu contigo · {{count}} registos"
+  },
+  "companionDaily": {
+    "quiet": "Estou por aqui, ao teu ritmo.",
+    "hideReflection": "Ocultar reflexão",
+    "showReflection": "Mostrar reflexão",
+    "description": "Um espaço para reparar nos teus registos e escolher o próximo passo, sem pressa.",
+    "actions": {
+      "habits": "Ver o meu desafio",
+      "habitHistory": "Ver progresso do desafio",
+      "nutrition": "Abrir Alimentar",
+      "exercise": "Abrir Exercício",
+      "plans": "Ver plano",
+      "breathe": "Respirar um pouco",
+      "progress": "Ver evolução",
+      "patterns": "Ver padrões",
+      "completeObjective": "Fazer um objetivo",
+      "communityPost": "Partilhar um pensamento",
+      "mood": "Fazer o registo",
+      "sleep": "Abrir Sono"
+    },
+    "restart": [
+      "Recomeçar não apaga os dias que já construíste.",
+      "Há espaço para um novo começo, ao teu ritmo.",
+      "O caminho que já fizeste continua a contar. Hoje podes recomeçar."
+    ],
+    "milestone": [
+      "{{count}} dias construídos. Vale a pena reconhecer este caminho.",
+      "Chegaste aos {{count}} dias do teu desafio. Um dia de cada vez.",
+      "O teu desafio soma {{count}} dias. Podes parar um instante para reconhecer o esforço."
+    ],
+    "continuity": [
+      "O teu registo de hoje faz parte de um caminho de {{count}} dias.",
+      "São {{count}} dias construídos em pequenas escolhas.",
+      "Mais um registo no teu desafio: {{count}} dias, ao teu ritmo."
+    ],
+    "planEnd": [
+      "Chegaste ao último dia do plano. Queres ver o que ficou registado?",
+      "O teu plano chega ao dia 15. Há espaço para olhar para estes dias.",
+      "Queres rever as pequenas experiências destes 15 dias?"
+    ],
+    "planStep": [
+      "No dia {{count}} do plano, há uma pequena experiência disponível.",
+      "O plano está no dia {{count}}. Podes escolher o que cabe no teu dia.",
+      "Há uma proposta simples para o dia {{count}}, sem obrigação."
+    ],
+    "stillAgitated": [
+      "Depois da pausa, registaste que ainda havia agitação. Não precisas de forçar outra tentativa.",
+      "A pausa não trouxe a calma que procuravas. Podes escolher o que te faz sentido agora.",
+      "Ainda havia agitação no fim da pausa. Há espaço para continuar com gentileza."
+    ],
+    "breathing": [
+      "Na maioria das tuas últimas pausas registadas, disseste sentir-te mais calmo.",
+      "Nos teus registos recentes de respiração, a resposta mais frequente foi sentir mais calma.",
+      "As tuas últimas pausas têm sido seguidas, mais vezes, de um registo de maior calma."
+    ],
+    "caffeine": [
+      "Hoje registaste cafeína mais tarde. Podes observar como será o teu descanso, sem tirar conclusões já.",
+      "Há um registo de cafeína ao fim do dia. Se quiseres, podes acompanhá-lo com o teu descanso.",
+      "O teu registo de hoje inclui cafeína mais tarde. É uma observação para acompanhar, não uma conclusão."
+    ],
+    "movement": [
+      "Registaste movimento em {{count}} dias desta semana. Há pequenas escolhas para reconhecer.",
+      "Nos últimos sete dias, há movimento registado em {{count}} dias.",
+      "O teu histórico desta semana inclui {{count}} dias com movimento."
+    ],
+    "hydration": [
+      "Tens registos de água em {{count}} dias desta semana. Queres olhar para eles?",
+      "Nos últimos sete dias, registaste água em {{count}} dias.",
+      "Há {{count}} dias com registos de água esta semana. Podemos observar sem avaliar."
+    ],
+    "mode": {
+      "insight": "O que notei",
+      "suggestion": "Uma sugestão para ti"
+    },
+    "morningTrend": [
+      "Nos teus registos recentes, a tua média da manhã passou de {{previous}} para {{recent}}. É uma mudança positiva; vale a pena rever o que te pode estar a ajudar.",
+      "Tenho reparado que a tua média da manhã passou de {{previous}} para {{recent}}. Não é uma conclusão sobre a causa, mas é uma mudança que merece ser observada.",
+      "As tuas últimas avaliações da manhã estão mais altas: a média passou de {{previous}} para {{recent}}. Talvez valha a pena perceber o que tem ajudado."
+    ],
+    "morningTrendDeclining": [
+      "Nos teus registos recentes, a tua média da manhã passou de {{previous}} para {{recent}}. Podemos observar esta mudança sem tirar conclusões precipitadas.",
+      "Tenho reparado que a tua média da manhã passou de {{previous}} para {{recent}}. Se quiseres, podemos acompanhar como evolui nos próximos dias.",
+      "As tuas últimas avaliações da manhã estão mais baixas: a média passou de {{previous}} para {{recent}}. Vale a pena observar o que acontece, sem te julgares."
+    ],
+    "objectiveSuggestion": [
+      "Hoje tens {{completed}} de {{total}} objetivos concluídos. Se fizer sentido, podes escolher um e começar por aí.",
+      "Ainda há objetivos por fazer hoje. Um pequeno passo já conta — queres fazer um deles?",
+      "Tens {{completed}}/{{total}} objetivos hoje. Podes escolher apenas um agora e continuar a partir daí."
+    ],
+    "communitySuggestion": [
+      "Se te apetecer, podes deixar um pensamento na Comunidade. Às vezes, pôr em palavras o que está a acontecer também ajuda a dar-lhe forma.",
+      "A Comunidade está por perto. Se houver algo que queiras partilhar hoje, podes escrever um pequeno pensamento.",
+      "Queres deixar uma ideia ou experiência na Comunidade? Pode ser apenas uma frase sobre como estás hoje."
+    ],
+    "objectiveCelebration": [
+      "Boa. Acabaste de concluir um objetivo. Pequenas ações repetidas também contam.",
+      "Mais um objetivo feito. Vale a pena reparar no que te ajudou a avançar.",
+      "Objetivo concluído. Gosto de ver esta parte do teu caminho."
+    ],
+    "caffeineGuidance": {
+      "0": "Registaste {{coffeeCount}} chávenas de café hoje. A referência da EFSA para adultos saudáveis é até cerca de 5 chávenas por dia; a cafeína varia entre bebidas."
+    },
+    "caffeineCountGuidance": {
+      "0": "Já registaste {{coffeeCount}} cafés. A quantidade de cafeína varia muito entre bebidas, por isso o Companheiro olha para a estimativa e não apenas para o número de cafés."
+    },
+    "lateCaffeineGuidance": {
+      "0": "Registaste {{coffeeCount}} chávenas de café, incluindo consumo mais tarde no dia. A cafeína perto da hora de dormir pode afetar o sono em algumas pessoas."
+    },
+    "activityGuidance": {
+      "0": "Já tens {{minutes}} minutos de atividade moderada registados nesta semana. Se te fizer sentido, uma pequena caminhada ou outra atividade confortável pode ajudar a aproximar-te gradualmente das recomendações gerais."
+    },
+    "produceGuidance": {
+      "0": "Já registaste {{portions}} porções de fruta/vegetais. A referência geral é pelo menos 5 porções, cerca de 400 g, por dia."
+    },
+    "teaGuidance": {
+      "0": "Hoje registaste {{count}} registo(s) de chá. Dependendo do tipo, o chá pode contribuir para a ingestão de cafeína e faz parte da variedade alimentar."
+    },
+    "cerealsGuidance": {
+      "0": "Registaste {{count}} porção(ões) de cereais. Dar preferência frequente a cereais integrais ajuda a aumentar a presença de fibra na alimentação."
+    },
+    "proteinGuidance": {
+      "0": "Registaste {{count}} porção(ões) de alimentos proteicos. Uma alimentação variada pode combinar fontes animais e vegetais de proteína."
+    },
+    "fatsGuidance": {
+      "0": "Registaste {{count}} porção(ões) de alimentos ricos em gordura. As gorduras fazem parte de uma alimentação saudável; a qualidade e a quantidade importam."
+    },
+    "sweetsGuidance": {
+      "0": "Registaste {{count}} registo(s) de doces. A OMS recomenda limitar os açúcares livres e privilegiar uma alimentação variada."
+    },
+    "saltyGuidance": {
+      "0": "Registaste {{count}} alimento(s) da categoria salgada. A OMS recomenda limitar o sal a menos de 5 g por dia nos adultos."
+    },
+    "processedFoodGuidance": {
+      "0": "Registaste {{count}} registo(s) de fast food/ultraprocessados. Muitos destes alimentos podem ser ricos em sal, açúcares ou gorduras menos favoráveis, por isso vale a pena olhar para o conjunto do dia."
+    },
+    "hydrationGuidance": {
+      "0": "Registaste {{ml}} ml de água hoje. Esta é a quantidade que registaste; a hidratação também vem de outros alimentos e bebidas."
+    },
+    "foodTypeSpecial": {
+      "0": "Registaste {{count}} registo(s) desta categoria hoje. O Companheiro acompanha este dado e pode cruzá-lo com o restante contexto ao longo do tempo."
+    },
+    "sleepShortGuidance": {
+      "0": "Registaste {{hours}} horas de sono. A maioria dos adultos precisa de cerca de 7–9 horas, embora a necessidade individual varie. Hoje pode ser útil proteger um pouco mais o teu descanso."
+    },
+    "sleepGoodGuidance": {
+      "0": "Registaste {{hours}} horas de sono com qualidade {{quality}}/5. É um dado positivo para acompanhar ao longo do tempo, sem assumir que uma noite determina como te vais sentir hoje."
+    },
+    "sleepQualityGuidance": {
+      "0": "Avaliaste a qualidade do sono em {{quality}}/5. Uma noite menos reparadora pode ser acompanhada por mais cansaço durante o dia; hoje pode valer a pena manter o ritmo mais gentil."
+    },
+    "morningLowGuidance": {
+      "0": "A tua manhã foi avaliada em {{rating}}/5. Uma manhã mais difícil pode acompanhar a forma como atravessas o resto do dia, mas não determina o que vai acontecer. Experimenta escolher uma ação simples e concreta para esta manhã."
+    },
+    "afternoonLowGuidance": {
+      "0": "A tua tarde foi avaliada em {{rating}}/5. Se o dia está a pesar, pode ajudar fazer uma pausa curta, mudar de ambiente ou escolher uma tarefa pequena antes de continuares."
+    },
+    "dayRecoveryGuidance": {
+      "0": "Passaste de {{morning}}/5 de manhã para {{afternoon}}/5 à tarde. Isso mostra uma mudança positiva no teu próprio registo; não prova uma causa, mas é uma diferença interessante para acompanhar."
+    },
+    "exerciseType": {
+      "walk": {
+        "0": "Registaste {{minutes}} minutos de caminhada. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "run": {
+        "0": "Registaste {{minutes}} minutos de corrida. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "bike": {
+        "0": "Registaste {{minutes}} minutos de bicicleta. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "swim": {
+        "0": "Registaste {{minutes}} minutos de natação. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "gym": {
+        "0": "Registaste {{minutes}} minutos de ginásio. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "yoga": {
+        "0": "Registaste {{minutes}} minutos de alongamentos/mobilidade. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "sport": {
+        "0": "Registaste {{minutes}} minutos de desporto. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "other": {
+        "0": "Registaste {{minutes}} minutos de outra atividade. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "dance": {
+        "0": "Registaste {{minutes}} minutos de Dança. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "hiit": {
+        "0": "Registaste {{minutes}} minutos de HIIT. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      },
+      "stretch": {
+        "0": "Registaste {{minutes}} minutos de Alongamentos. Este registo entra no teu quadro semanal e ajuda o Companheiro a perceber que movimento está a fazer parte da tua rotina."
+      }
+    },
+    "whatILearned": "O que a CONFIA percebeu",
+    "why": {
+      "title": "Porque digo isto",
+      "general": "Estou a basear-me nos teus registos e no contexto que tens construído comigo.",
+      "withWindow": "Estou a comparar os teus registos disponíveis nos últimos {{days}} dias.",
+      "insufficient": "Ainda tenho pouca informação para tirar uma conclusão. Estou a observar, não a adivinhar."
+    },
+    "nextStep": "O que podes fazer agora",
+    "activityIntensityGuidance": {
+      "0": "Tens {{minutes}} minutos de atividade registados esta semana sem intensidade indicada. Também tens {{moderateMinutes}} minutos moderados e {{vigorousMinutes}} minutos vigorosos explicitamente registados. Os minutos sem intensidade não podem ser comparados diretamente com a recomendação de 150 minutos moderados ou 75 vigorosos por semana. Indicar a intensidade nos próximos registos permitirá uma comparação mais rigorosa."
+    },
+    "collapseReflection": "Recolher",
+    "expandReflection": "Expandir"
+  },
+  "companionContext": {
+    "title": "Contexto pessoal",
+    "description": "Quando está ativo, o Companheiro pode usar os teus registos e descobertas guardados na Confia para adaptar sugestões. A escolha fica neste dispositivo e podes alterá-la quando quiseres. Desativar impede o uso futuro deste contexto pelo Companheiro; não elimina os teus registos da Confia.",
+    "enabled": "Autorizado",
+    "disabled": "Não autorizado"
+  }
+}

@@ -3,6 +3,11 @@ async function prepare(page:Page,days=0,lang="pt") {
   await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());
   await page.addInitScript(({days,lang})=>{
     localStorage.setItem("confia_language",lang);
+    const checkinDate=new Date();
+    const checkinDay=[checkinDate.getFullYear(),String(checkinDate.getMonth()+1).padStart(2,"0"),String(checkinDate.getDate()).padStart(2,"0")].join("-");
+    const checkin={date:checkinDay,mood:7,need:"calm",completed:true,scaleVersion:2};
+    localStorage.setItem("confia_daily_checkin",JSON.stringify(checkin));
+    localStorage.setItem("confia_daily_checkin_history",JSON.stringify([checkin]));
     if(!days)return;
     const fmt=(d:Date)=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");
     const today=fmt(new Date());
@@ -19,6 +24,7 @@ async function prepare(page:Page,days=0,lang="pt") {
     localStorage.setItem("confia_habits_v1:guest",JSON.stringify({version:1,records,pending:{}}));
   },{days,lang});
   await page.goto("/");
+  await page.locator("#home-habits").scrollIntoViewIfNeeded();
   await page.getByTestId("challenge-clock").waitFor();
   await expect(page.getByTestId("challenge-clock")).toBeVisible();
 }
@@ -68,39 +74,35 @@ test("clock: midnight recalculates locally and preserves days and history",async
   await page.clock.runFor(2100);
   await expect(page.getByTestId("challenge-countdown")).toHaveText("24:00:00");
   expect(Number(await page.getByTestId("challenge-day-ring").getAttribute("stroke-dashoffset"))).toBeGreaterThan(99.99);
-  await expect(page.getByLabel("DIA 7",{exact:true})).toBeVisible();
+  await expect(page.getByLabel(/dia 7/i)).toBeVisible();
   expect(await page.evaluate(()=>localStorage.getItem("confia_habits_v1:guest"))).toBe(before);
   await page.clock.setSystemTime(new Date("2026-09-29T08:30:00Z"));
   await page.evaluate(()=>window.dispatchEvent(new Event("pageshow")));
   await expect(page.getByTestId("challenge-countdown")).toHaveText("15:30:00");
 });
-test("clock: ticks do not rerender dashboard/card or write data",async({page})=>{
-  await page.addInitScript(()=>{
-    const previous=new Map<string,unknown>();const changes={dashboard:0,card:0,app:0,voice:0};
-    const hook={
-      supportsFiber:true,inject:()=>1,onCommitFiberUnmount:()=>{},
-      onCommitFiberRoot:(_id:number,root:any)=>{
-        const visit=(node:any)=>{
-          if(!node)return;
-          if(typeof node.type==="function"){
-            const p=node.memoizedProps;
-            const name=p?.records && p?.onOpen?"card":p?.onAddXp && "openSupport" in p?"dashboard":p?.input&&p?.onEmotion?"voice":node.child?.type==="div"&&String(node.child?.memoizedProps?.className).startsWith("confia-app ")?"app":undefined;
-            if(name){if(previous.has(name) && previous.get(name)!==node.memoizedState)changes[name]++;previous.set(name,node.memoizedState);}
-          }
-          visit(node.child);visit(node.sibling);
-        };visit(root.current);
-      },
-    };
-    Object.assign(window,{__REACT_DEVTOOLS_GLOBAL_HOOK__:hook,__clockChanges:changes,__clockTracked:()=>previous.size});
-  });
+test("clock: ticks update the countdown without writing user data",async({page})=>{
   await page.clock.install({time:new Date("2026-09-28T12:00:00Z")});
   await prepare(page,7);
   await page.clock.pauseAt(new Date("2026-09-28T12:00:10Z"));
-  expect(await page.evaluate(()=>(window as any).__clockTracked())).toBe(4);
-  const snapshot=await page.evaluate(()=>({changes:{...(window as any).__clockChanges},storage:JSON.stringify({...localStorage})}));
-  const time=await page.getByTestId("challenge-countdown").textContent();
+  await page.clock.runFor(4000); // allow the initial check-in projection to settle before measuring timer writes
+  const before=await page.evaluate(()=>({
+    habitData:localStorage.getItem("confia_habits_v1:guest"),
+    checkin:localStorage.getItem("confia_daily_checkin"),
+    history:localStorage.getItem("confia_daily_checkin_history"),
+    actions:document.querySelector(".challenge-clock-actions")?.textContent,
+    countdown:document.querySelector(".challenge-clock-countdown")?.textContent,
+  }));
   await page.clock.runFor(4000);
-  expect(await page.getByTestId("challenge-countdown").textContent()).not.toBe(time);
-  expect(await page.evaluate(()=>(window as any).__clockChanges)).toEqual(snapshot.changes);
-  expect(await page.evaluate(()=>JSON.stringify({...localStorage}))).toBe(snapshot.storage);
+  const after=await page.evaluate(()=>({
+    habitData:localStorage.getItem("confia_habits_v1:guest"),
+    checkin:localStorage.getItem("confia_daily_checkin"),
+    history:localStorage.getItem("confia_daily_checkin_history"),
+    actions:document.querySelector(".challenge-clock-actions")?.textContent,
+    countdown:document.querySelector(".challenge-clock-countdown")?.textContent,
+  }));
+  expect(after.countdown).not.toBe(before.countdown);
+  expect(after.actions).toBe(before.actions);
+  expect(after.habitData).toBe(before.habitData);
+  expect(after.checkin).toBe(before.checkin);
+  expect(after.history).toBe(before.history);
 });

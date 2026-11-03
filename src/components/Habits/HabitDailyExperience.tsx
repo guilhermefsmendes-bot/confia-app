@@ -56,7 +56,7 @@ export default function HabitDailyExperience({ records, events, today, habit, me
       } catch {
         if (!cancelled) setSynergyData(null);
       }
-    }, 120, 900);
+    }, 1500, 2800);
     return () => { cancelled = true; cancel(); };
   }, [selectedDate, collapsed, view]);
 
@@ -73,7 +73,7 @@ export default function HabitDailyExperience({ records, events, today, habit, me
       } catch {
         if (!cancelled) setSynergy(null);
       }
-    }, 120, 900);
+    }, 1500, 2800);
     return () => { cancelled = true; cancel(); };
   }, [records, selectedDate, synergyData]);
   const synergyText = synergy?.translationKey ? t(synergy.translationKey, synergy.translationValues) : null;

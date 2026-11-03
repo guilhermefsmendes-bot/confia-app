@@ -1,20 +1,16 @@
 import { useEffect, useState } from "react";
 
 export function useAgeGate() {
-  const [ageGateReady, setAgeGateReady] = useState(false);
-  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(() => {
+    try {
+      return typeof window !== "undefined" && window.localStorage.getItem("confia_age_18_confirmed_v1") === "yes";
+    } catch {
+      return false;
+    }
+  });
+  const ageGateReady = true;
   const [ageCheckboxChecked, setAgeCheckboxChecked] = useState(false);
   const [underageNotice, setUnderageNotice] = useState(false);
-
-  useEffect(() => {
-    try {
-      setAgeConfirmed(localStorage.getItem("confia_age_18_confirmed_v1") === "yes");
-    } catch {
-      setAgeConfirmed(false);
-    } finally {
-      setAgeGateReady(true);
-    }
-  }, []);
 
   const confirmAge = () => {
     try { localStorage.setItem("confia_age_18_confirmed_v1", "yes"); } catch { /* sessão atual */ }

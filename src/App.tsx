@@ -3,6 +3,7 @@ import type { CompanionAction } from "./components/Companheiro/CompanionVoice";
 import type { NoticeTarget } from "./notifications/model";
 import { lazy, Suspense, memo, startTransition, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { AppHeader } from "./components/layout/AppHeader";
+import ConfiaCompanionHome from "./components/Companheiro/ConfiaCompanionHome";
 import { MainNavigation } from "./components/layout/MainNavigation";
 import { Heart, Sun, Compass, ArrowUp, ArrowLeft, Sparkles, Moon, Users, AlertCircle, Brain, CheckCircle2, Calendar, House, Wind, Target, Zap, ChartNoAxesCombined, Backpack, Store, Settings, EyeOff } from 'lucide-react';
 import { useTranslation } from "react-i18next";
@@ -28,9 +29,9 @@ import { useUnreadCommunityChat } from "./hooks/useUnreadCommunityChat";
 import { useTabNavigation } from "./hooks/useTabNavigation";
 import { getLocalCalendarDate } from "./utils/date";
 import { normalizeDailyRatings } from "./storage/dailyRatingStorage";
+import { hasCompletedToday } from "./storage/dailyCheckInStorage";
 
 const PersonalGrowthHub = lazy(() => import("./components/PersonalGrowthHub"));
-const ConfiaCompanionHome = lazy(() => import("./components/Companheiro/ConfiaCompanionHome"));
 const MemoConfiaCompanionHome = memo(ConfiaCompanionHome);
 const InnerCanvas = lazy(() => import("./components/InnerCanvas/InnerCanvas"));
 const HomeInventory = lazy(() => import("./components/HomeInventory"));
@@ -107,35 +108,22 @@ function recordCompanionBrainEventDeferred(
 export default function App() {
 const { t, i18n } = useTranslation();
 const {
-  ageGateReady, ageConfirmed, setAgeConfirmed,
+  ageGateReady, ageConfirmed,
   ageCheckboxChecked, setAgeCheckboxChecked,
   underageNotice, setUnderageNotice, confirmAge,
 } = useAgeGate();
-const [firstScreenReady, setFirstScreenReady] = useState(false);
 const [appDataReady, setAppDataReady] = useState(false);
-
-// Work that is not required to display or navigate the first screen waits until
-// the 18+ gate is confirmed and the browser has had an opportunity to paint.
-useEffect(() => {
-  if (!ageGateReady || !ageConfirmed) { setFirstScreenReady(false); return; }
-  let frame = 0;
-  let timer = 0;
-  frame = window.requestAnimationFrame(() => {
-    timer = window.setTimeout(() => setFirstScreenReady(true), 0);
-  });
-  return () => { window.cancelAnimationFrame(frame); window.clearTimeout(timer); };
-}, [ageGateReady, ageConfirmed]);
 
 // Privacy-preserving product metrics stay on this device; no emotional content is transmitted.
 useEffect(() => {
-  if (!firstScreenReady) return;
+  if (!appDataReady) return;
   void import("./data/personal/personalAnalytics").then(({ recordAppOpenLifecycleMetrics }) => recordAppOpenLifecycleMetrics());
-}, [firstScreenReady]);
+}, [appDataReady]);
 
-// Read local profile/history only after the 18+ gate and first app-shell paint.
+// Hydrate local profile/history immediately after the synchronous 18+ gate.
+// These reads are local-only; network services remain deferred separately.
 useEffect(() => {
-  if (!firstScreenReady) return;
-  let cancelled = false;
+  if (!ageGateReady || !ageConfirmed) return;
   const savedAvatar = readStoredJson<AvatarState | null>(STORAGE_KEYS.AVATAR, null);
   setAvatar(savedAvatar ? {
     ...savedAvatar,
@@ -155,17 +143,12 @@ useEffect(() => {
     ? savedObjectives.items.slice(0, 5).map(objective => ({ ...objective }))
     : []);
   setRatings(normalizeDailyRatings(readStoredJson<DailyRating[]>(STORAGE_KEYS.RATINGS, [])));
-  void import("./storage/dailyCheckInStorage").then(({ hasCompletedToday }) => {
-    if (cancelled) return;
-    setHomeScreen(hasCompletedToday() ? "home" : "dailyCheckIn");
-    setAppDataReady(true);
-  }).catch(() => {
-    if (cancelled) return;
-    setHomeScreen("dailyCheckIn");
-    setAppDataReady(true);
-  });
-  return () => { cancelled = true; };
-}, [firstScreenReady, i18n]);
+  // This tiny local-storage read is synchronous and deterministic. Keeping it
+  // in the app shell avoids a needless dynamic-import loading screen on every
+  // cold start; no network or Firebase work is performed here.
+  setHomeScreen(hasCompletedToday() ? "home" : "dailyCheckIn");
+  setAppDataReady(true);
+}, [ageGateReady, ageConfirmed, i18n]);
 
 // Lifecycle concerns are isolated from the screen composition.
 useDocumentVisibility();
@@ -284,7 +267,7 @@ useObjectiveDaySync(appDataReady, setObjectives);
 
   const [ratings, setRatings] = useState<DailyRating[]>([]);
 
-  const personalDiscovery = usePersonalDiscovery(appDataReady, ratings);
+  const personalDiscovery = usePersonalDiscovery(appDataReady);
 
   const { posts, setPosts, postsLoaded } = useCommunityPosts(appDataReady);
 
@@ -519,9 +502,8 @@ useEffect(() => {
     return;
   }
 
-  // A memória contextual é complementar: não deve bloquear a primeira pintura
-  // da Home nem a resposta imediata ao navegar entre separadores.
-  setHomeCompanionRelationalMemory(null);
+  // A memória contextual é complementar: não bloqueia a primeira pintura.
+  // Mantém o último snapshot válido durante a atualização em background.
   const calculate = () => {
     void import("./data/reactive/reactiveRecentMemory")
       .then(({ collectReactiveRecentMemory }) => {
@@ -539,9 +521,9 @@ useEffect(() => {
 
   const requestIdle = (window as any).requestIdleCallback;
   if (typeof requestIdle === "function") {
-    idleId = requestIdle(calculate, { timeout: 500 });
+    idleId = requestIdle(calculate, { timeout: 3200 });
   } else {
-    timerId = window.setTimeout(calculate, 50);
+    timerId = window.setTimeout(calculate, 1800);
   }
 
   return () => {
@@ -792,7 +774,7 @@ useEffect(() => {
         if (!cancelled) setHomeReactiveResult(analyzeReactiveState({ source: "general" }));
       })
       .catch(() => { if (!cancelled) setHomeReactiveResult(null); });
-  }, 650, 900);
+  }, 1800, 3200);
   return () => {
     cancelled = true;
     cancelBackgroundStart();
@@ -1349,49 +1331,8 @@ const handleHomeNowAction = () => {
   // Resposta imediata da Confia após um registo do utilizador
   const [reactiveMessageKey, setReactiveMessageKey] =
     useState<string | null>(null);
-  // Prevent the ratings effect from immediately repeating the same analysis
-  // already performed synchronously by handleSaveRatings for this exact state.
-  const lastMoodAnalysisSignature = useRef<string | null>(null);
-
-  // Analisa o contexto existente quando a Home é aberta.
-  //
-  // Importante:
-  // - apenas lê o contexto existente;
-  // - não regista uma nova resposta no histórico;
-  // - não altera o reactiveEngine;
-  // - respostas provocadas explicitamente pelo utilizador
-  //   continuam a ser registadas em handleSaveRatings.
-  useEffect(() => {
-    let cancelled = false;
-    if (currentTab !== 0 || homeScreen !== "home") return;
-    if (ratings.length === 0) {
-      setReactiveMessageKey(null);
-      return;
-    }
-
-    const ratingsSignature = JSON.stringify(ratings);
-    if (lastMoodAnalysisSignature.current === ratingsSignature) {
-      lastMoodAnalysisSignature.current = null;
-      return;
-    }
-
-    const cancelBackgroundStart = scheduleBackgroundWork(() => {
-      void import("./data/reactive/reactiveEngine")
-        .then(({ analyzeReactiveState }) => {
-          if (cancelled) return;
-          const reactiveResult = analyzeReactiveState({ source: "mood" });
-          if (reactiveResult?.response?.translationKey) {
-            setReactiveMessageKey(reactiveResult.response.translationKey);
-          }
-        })
-        .catch(() => { if (!cancelled) setReactiveMessageKey(null); });
-    }, 500, 700);
-
-    return () => {
-      cancelled = true;
-      cancelBackgroundStart();
-    };
-  }, [currentTab, homeScreen, ratings]);
+  // A Home usa o resultado reativo partilhado com o Companheiro.
+  // A análise específica de humor já é executada no próprio ato de guardar.
 
   /**
    * Objetivos — leitura contextual ao entrar.
@@ -1404,18 +1345,21 @@ const handleHomeNowAction = () => {
    */
   useEffect(() => {
     if (currentTab !== 2) return;
-
-    import("./data/reactive/reactiveEngine")
-      .then(({ analyzeReactiveState }) => {
-        const objectiveReactiveResult = analyzeReactiveState({ source: "objective" });
-        if (objectiveReactiveResult.situation === "no_data") {
-          setReactiveMessageKey(null);
-          return;
-        }
-        setReactiveMessageKey(objectiveReactiveResult?.response?.translationKey ?? null);
-      })
-      .catch(() => setReactiveMessageKey(null));
-
+    let cancelled = false;
+    const cancelBackgroundStart = scheduleBackgroundWork(() => {
+      void import("./data/reactive/reactiveEngine")
+        .then(({ analyzeReactiveState }) => {
+          if (cancelled) return;
+          const objectiveReactiveResult = analyzeReactiveState({ source: "objective" });
+          setReactiveMessageKey(
+            objectiveReactiveResult.situation === "no_data"
+              ? null
+              : objectiveReactiveResult?.response?.translationKey ?? null
+          );
+        })
+        .catch(() => { if (!cancelled) setReactiveMessageKey(null); });
+    }, 450, 1400);
+    return () => { cancelled = true; cancelBackgroundStart(); };
   }, [currentTab, objectivesHistory]);
 
 const [selectedDate, setSelectedDate] = useState(
@@ -1752,7 +1696,6 @@ const handleSaveRatings = () => {
     JSON.stringify(nextRatings)
   );
 
-  lastMoodAnalysisSignature.current = JSON.stringify(nextRatings);
   setRatings(nextRatings);
   setTodayLogged(true);
   // Keep the progressive onboarding guide in sync within this same session.
@@ -2238,7 +2181,7 @@ if (!ageConfirmed) {
 }
 
 if (!appDataReady) {
-  return <div className="min-h-screen bg-[#FAF7F2]" aria-label="Confia"><ScreenLoading label={t("loading")} /></div>;
+  return <div className="min-h-screen bg-[#FAF7F2]" aria-label="Confia" />;
 }
 
 return (
@@ -2302,7 +2245,6 @@ return (
 ====================================================== */}
 
 
-<Suspense fallback={<div role="status" aria-live="polite" className="flex min-h-40 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>}>
 <MemoConfiaCompanionHome
   avatar={avatar}
   avatarCelebrating={avatarCelebrating}
@@ -2325,7 +2267,6 @@ return (
 
   onCompanionAction={handleCompanionAction}
 />
-</Suspense>
 
 
 {/* O teu espaço — superfície deliberadamente simples.
@@ -2891,13 +2832,13 @@ return (
 
 {visitedTabs.includes(1) && (
   <div hidden={currentTab !== 1 || homeScreen === "innerCanvas"} aria-hidden={currentTab !== 1 || homeScreen === "innerCanvas"}>
-    <Suspense fallback={<ScreenLoading label={t("loading")} />}><EmbraceTab onOpenSky={handleOpenInnerCanvas} onAddXp={addXp} active={currentTab === 1 && homeScreen !== "innerCanvas"} /></Suspense>
+    <Suspense fallback={<div className="min-h-[55vh]" aria-hidden="true" />}><EmbraceTab onOpenSky={handleOpenInnerCanvas} onAddXp={addXp} active={currentTab === 1 && homeScreen !== "innerCanvas"} /></Suspense>
   </div>
 )}
 
 {visitedTabs.includes(2) && (
   <div hidden={currentTab !== 2} aria-hidden={currentTab !== 2}>
-  <Suspense fallback={<ScreenLoading label={t("loading")} />}><ObjectivesTab
+  <Suspense fallback={<div className="min-h-64" aria-hidden="true" />}><ObjectivesTab
     reactiveMessageKey={reactiveMessageKey}
     objectives={objectives}
     weeklyGoal={weeklyGoal}
@@ -2912,7 +2853,7 @@ return (
 )}
 
 {currentTab === 4 && (
-  <Suspense fallback={<ScreenLoading label={t("loading")} />}><CommunityTab
+  <Suspense fallback={<div className="min-h-64" aria-hidden="true" />}><CommunityTab
     posts={posts}
     onAddPost={handleAddPost}
     onLikePost={handleLikePost}

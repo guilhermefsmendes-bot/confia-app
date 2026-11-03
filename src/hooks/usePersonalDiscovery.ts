@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import type { DailyRating } from "../types";
 import type { PersonalInsight } from "../data/personal/personalInsights";
 import { scheduleBackgroundWork } from "../utils/scheduleBackgroundWork";
 import { readCompanionPersonalContextConsent } from "../data/reactive/companionContextConsent";
 
-export function usePersonalDiscovery(appDataReady: boolean, ratings: DailyRating[]) {
+export function usePersonalDiscovery(appDataReady: boolean) {
   const [personalDiscovery, setPersonalDiscovery] = useState<PersonalInsight | undefined>(undefined);
   const [revision, setRevision] = useState(0);
 
@@ -60,7 +59,7 @@ export function usePersonalDiscovery(appDataReady: boolean, ratings: DailyRating
         if (typeof idle === "function") idleId = idle(calculateDiscovery, { timeout: 700 });
         else timerId = window.setTimeout(calculateDiscovery, 50);
       }).catch(() => { if (!cancelled) setPersonalDiscovery(undefined); });
-    }, 900, 1200);
+    }, 4200, 5200);
     return () => {
       cancelled = true;
       window.removeEventListener("confia:companion-context-consent-changed", handleConsentChanged);
@@ -68,7 +67,7 @@ export function usePersonalDiscovery(appDataReady: boolean, ratings: DailyRating
       cancelScheduledWork();
       unsubscribe();
     };
-  }, [ratings, revision, appDataReady]);
+  }, [revision, appDataReady]);
 
   return personalDiscovery;
 }

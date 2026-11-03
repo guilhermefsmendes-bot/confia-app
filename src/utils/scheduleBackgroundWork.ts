@@ -11,13 +11,20 @@ export function scheduleBackgroundWork(task: () => void, delayMs: number, idleTi
         if (!cancelled) task();
       }, { timeout: idleTimeoutMs });
     } else {
-      task();
+      // WebViews without requestIdleCallback still get a separate task turn,
+      // allowing the browser to paint and dispatch pending input first.
+      idleId = window.setTimeout(() => {
+        if (!cancelled) task();
+      }, 240);
     }
   };
   delayTimer = window.setTimeout(schedule, delayMs);
   return () => {
     cancelled = true;
     if (delayTimer !== undefined) window.clearTimeout(delayTimer);
-    if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
+    if (idleId !== undefined) {
+      (window as any).cancelIdleCallback?.(idleId);
+      window.clearTimeout(idleId);
+    }
   };
 }

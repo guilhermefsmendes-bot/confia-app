@@ -2,7 +2,6 @@ const WellbeingPlans=lazy(()=>import("./WellbeingPlans"));
 import { lazy,Suspense,useEffect,useMemo,useState,useSyncExternalStore } from "react";
 import { useTranslation } from "../../i18n/useFeatureTranslation";
 import { getHabitSnapshot,getHabitRevision,subscribeHabits } from "../../data/habits/store";
-import { startHabitSync,syncHabits } from "../../data/habits/sync";
 import { recordHabitDay,restartHabit } from "../../data/habits/actions";
 import { habitStats } from "../../data/habits/statistics";
 import { readPersonalEvents,PERSONAL_EVENTS_UPDATED_EVENT } from "../../data/personal/personalEventStorage";
@@ -26,7 +25,6 @@ export default function HabitDashboard({openSupport=false,initialPage="home",nav
   useEffect(()=>{if(embedded)recordPersonalScreenView(page==="home"?"home":"home_habits_"+page);},[embedded,page]);
   const [message,setMessage]=useState("");const [error,setError]=useState("");
   const [logDate,setLogDate]=useState(today);
-  useEffect(()=>{startHabitSync();},[]);
   useEffect(()=>{setPage(openSupport?"support":"home");},[openSupport]);
   useEffect(()=>{const update=()=>setEventRevision(n=>n+1);window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT,update);return()=>window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT,update);},[]);
   const records=getHabitSnapshot().records;

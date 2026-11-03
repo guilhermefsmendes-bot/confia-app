@@ -1,12 +1,14 @@
 import {useEffect,useRef,useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import {useTranslation} from '../../i18n/useFeatureTranslation';
 import {useCompanionVoice} from './useCompanionVoice';
 import type {HomeDecisionInput} from '../../data/reactive/companionBrain/homeDecision';
 import type {CompanionBrainCandidate} from '../../data/reactive/companionBrain/companionBrainTypes';
 import {emitCompanionBrainEvent} from '../../data/reactive/companionBrain/companionBrainEvents';
+import {getHabitOwner} from '../../data/habits/store';
 export type CompanionAction=NonNullable<CompanionBrainCandidate['action']>['target']|'inventory'|'shop'|'record';
 export function CompanionVoice({input,onAction,onEmotion}:{input:HomeDecisionInput;onAction:(target:CompanionAction)=>void;onEmotion?:(emotion:string)=>void}){
- const {t,i18n}=useTranslation();const {decision,shown}=useCompanionVoice(input);const root=useRef<HTMLDivElement>(null);const [open,setOpen]=useState(true);
+ const {t,i18n}=useTranslation("companion");const {decision,shown}=useCompanionVoice(input);const root=useRef<HTMLDivElement>(null);const preferenceKey=() => "confia_companion_reflection_expanded_v1:" + (getHabitOwner() ?? "local");const [open,setOpen]=useState(()=>{try{return typeof window === "undefined" ? true : window.localStorage.getItem(preferenceKey()) !== "false";}catch{return true;}});
+ const toggleOpen=()=>setOpen(current=>{const next=!current;try{window.localStorage.setItem(preferenceKey(),String(next));}catch{/* Presentation preference is optional. */}return next;});
  const candidate=decision?.candidate;
  const translationKey=candidate?.translationKey;
  const fallbackKey=candidate?.metadata?.family?`companionDaily.${candidate.metadata.family}.0`:translationKey;
@@ -30,8 +32,8 @@ export function CompanionVoice({input,onAction,onEmotion}:{input:HomeDecisionInp
      ? t('companionDaily.why.withWindow',{days:windowDays})
      : t('companionDaily.why.general');
  return <div ref={root} data-testid="companion-voice" data-rule={candidate!.id} data-mode={mode} className="relative rounded-[28px] border border-[#E8D8CF] bg-[linear-gradient(145deg,#fffdfa,#fff7f2)] text-left shadow-[0_10px_30px_rgba(91,66,56,.07)] before:absolute before:-top-2 before:left-1/2 before:h-4 before:w-4 before:-translate-x-1/2 before:rotate-45 before:border-l before:border-t before:border-[#E8D8CF] before:bg-[#fffdfa]">
-  <button type="button" aria-expanded={open} onClick={()=>setOpen(v=>!v)} className="relative flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left">
-   <span className="flex min-w-0 items-center gap-2"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F3E3DA] text-sm">🧠</span><span className="truncate text-[10px] font-black uppercase tracking-[.13em] text-[#A36A55]">{t('companionDaily.whatILearned')}</span></span>
+  <button type="button" aria-expanded={open} aria-label={t(open ? "companionDaily.collapseReflection" : "companionDaily.expandReflection")} onClick={toggleOpen} className="relative flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left">
+   <span className="flex min-w-0 items-center gap-2"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F3E3DA] text-sm">🧠</span><span className="truncate text-[10px] font-black uppercase tracking-[.13em] text-[#A36A55]">{t('companionDaily.whatILearned')}</span><span className="text-[9px] font-semibold text-[#8A7971]">{t(open ? "companionDaily.collapseReflection" : "companionDaily.expandReflection")}</span></span>
    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#E5D2C7] bg-white text-[#8A5A48] transition-transform duration-200 ${open?'rotate-180':''}`} aria-hidden="true">⌄</span>
   </button>
   {open&&<div className="border-t border-[#EFE1D9] px-4 pb-4 pt-3">

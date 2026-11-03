@@ -1,0 +1,213 @@
+{
+  "patternsNew": {
+    "title": "Conoce tus Patrones",
+    "description": "Descubre los hábitos que influyen en tu bienestar y sigue tu evolución.",
+    "assessment": "Evalúa tus hábitos",
+    "assessmentDesc": "Identifica los hábitos que pueden estar afectando tu bienestar.",
+    "daily": "Sigue tu progreso",
+    "dailyDesc": "Evalúa cada día cómo has gestionado estos hábitos.",
+    "evolution": "Mi evolución",
+    "evolutionDesc": "Observa la evolución de tus hábitos y compárala con tu bienestar diario.",
+    "evolutionDescription": "Observa cómo gestionas tus hábitos a lo largo del tiempo.",
+    "noRecords": "Todavía no tienes suficientes registros.",
+    "lastRecord": "Último registro",
+    "date": "Fecha",
+    "habitManagement": "Gestión de hábitos",
+    "startEvolution": "Empieza registrando tu progreso diariamente.",
+    "plan": {
+      "title": "Plan personalizado",
+      "description": "Recibe objetivos adaptados a tu perfil."
+    },
+    "homeItems": {
+      "bench1": {
+        "name": "Banco de madera"
+      },
+      "bench2": {
+        "name": "Banco sencillo"
+      },
+      "bench3": {
+        "name": "Banco cómodo"
+      },
+      "bench4": {
+        "name": "Banco elegante"
+      },
+      "bench5": {
+        "name": "Banco de jardín"
+      },
+      "bench6": {
+        "name": "Banco especial"
+      },
+      "extra1": {
+        "name": "Linterna"
+      },
+      "extra2": {
+        "name": "Mariposa"
+      },
+      "extra3": {
+        "name": "Ardilla"
+      },
+      "extra4": {
+        "name": "Nido"
+      },
+      "extra5": {
+        "name": "Sol"
+      },
+      "extra6": {
+        "name": "Arcoíris"
+      },
+      "flower1": {
+        "name": "Flor pequeña"
+      },
+      "flower2": {
+        "name": "Flor rosa"
+      },
+      "flower3": {
+        "name": "Flor roja"
+      },
+      "flower4": {
+        "name": "Tulipán"
+      },
+      "flower5": {
+        "name": "Rosa"
+      },
+      "flower6": {
+        "name": "Rosa marchita"
+      },
+      "flower7": {
+        "name": "Ramo de flores"
+      },
+      "flower8": {
+        "name": "Jacinto"
+      },
+      "rock1": {
+        "name": "Roca pequeña"
+      },
+      "rock2": {
+        "name": "Roca"
+      },
+      "rock3": {
+        "name": "Piedra natural"
+      },
+      "rock4": {
+        "name": "Piedra grande"
+      },
+      "rock5": {
+        "name": "Roca oscura"
+      },
+      "rock6": {
+        "name": "Piedra antigua"
+      },
+      "tree1": {
+        "name": "Árbol verde"
+      },
+      "tree2": {
+        "name": "Pino"
+      },
+      "tree3": {
+        "name": "Palmera"
+      },
+      "tree4": {
+        "name": "Árbol de Navidad"
+      },
+      "tree5": {
+        "name": "Cactus"
+      },
+      "tree6": {
+        "name": "Tronco"
+      },
+      "tree7": {
+        "name": "Trébol"
+      },
+      "tree8": {
+        "name": "Trébol pequeño"
+      },
+      "water1": {
+        "name": "Gota de agua"
+      },
+      "water2": {
+        "name": "Flor acuática"
+      },
+      "water3": {
+        "name": "Fuente"
+      },
+      "water4": {
+        "name": "Ola"
+      },
+      "water5": {
+        "name": "Concha"
+      },
+      "water6": {
+        "name": "Pato"
+      }
+    },
+    "inventory": {
+      "title": "Inventario",
+      "empty": "Todavía no tienes objetos.",
+      "equip": "Equipar",
+      "equipped": "Equipado"
+    },
+    "shop": {
+      "title": "Tienda",
+      "availableXp": "XP disponible"
+    }
+  },
+  "patternsPremium": {
+    "habits": "Hábitos",
+    "days": "Días",
+    "wellbeing": "Bienestar",
+    "avgWellbeing": "Bienestar medio",
+    "whyTitle": "¿Por qué observar tus patrones?",
+    "whyDescription": "Algunos comportamientos pueden aliviar la ansiedad en el momento, pero mantener el ciclo a largo plazo. Confia te ayuda a observar estos patrones y descubrir si pequeños cambios se relacionan con una mejora de tu bienestar.",
+    "assessmentIntro": "Identifica comportamientos que quieras comprender mejor. No necesitas eliminarlos — primero vamos a conocerlos.",
+    "habitName": "¿Qué comportamiento quieres observar?",
+    "category": "¿En qué área encaja?",
+    "baseline": "¿Con qué intensidad ocurre normalmente?",
+    "motivation": "¿Qué importancia tiene para ti cambiar este comportamiento?",
+    "addHabit": "Añadir hábito",
+    "yourHabits": "Tus patrones",
+    "baselineShort": "habitual",
+    "dailyIntro": "Registra solo lo que ocurrió hoy. No hay respuestas correctas o incorrectas.",
+    "done": "registros",
+    "intensityQuestion": "¿Cuánto estuvo presente este comportamiento hoy?",
+    "none": "Nada",
+    "veryHigh": "Mucho",
+    "daysShort": "días",
+    "evolutionTitle": "Mi evolución",
+    "evolutionDescription": "Compara tus patrones con tu bienestar y busca cambios a lo largo del tiempo.",
+    "wellbeingChart": "Tu bienestar",
+    "wellbeingChartDesc": "Media de los registros de mañana y tarde",
+    "records": "registros",
+    "startAverage": "Inicio",
+    "currentAverage": "Reciente",
+    "trendDown": "Disminuyendo",
+    "trendUp": "Aumentando",
+    "trendStable": "Estable",
+    "relationship": "Relación con el bienestar",
+    "negativeRelationship": "Los días en que este comportamiento estuvo más presente, tu bienestar tiende a ser menor.",
+    "positiveRelationship": "Los días en que este comportamiento estuvo más presente, tu bienestar tiende a ser mayor.",
+    "noClearRelationship": "Todavía no existe una relación clara entre este comportamiento y tu bienestar.",
+    "analysisTitle": "Tu análisis",
+    "analysisIntro": "Confia encontró algunos patrones en los datos que registraste.",
+    "attention": "Un patrón que merece atención",
+    "negativeInsight": "Tus registros sugieren una posible relación entre «{{habit}}» y días con menor bienestar.",
+    "positiveInsightTitle": "Un cambio positivo",
+    "positiveInsight": "Tus datos sugieren una posible relación entre «{{habit}}» y tu bienestar.",
+    "stillLearningTitle": "Confia todavía está aprendiendo contigo",
+    "stillLearningDescription": "Continúa registrando tus hábitos y tu bienestar. Cuantos más días tengas, mejor podremos identificar tendencias personales.",
+    "analysisDisclaimer": "Este análisis muestra asociaciones en tus registros. No demuestra que un comportamiento sea la causa directa de un cambio en el bienestar.",
+    "noHabitsTitle": "Primero, conozcamos tus patrones",
+    "noHabitsDescription": "Añade al menos un comportamiento que quieras observar durante los próximos días.",
+    "notEnoughDataTitle": "Todavía necesitamos algunos días",
+    "notEnoughDataDescription": "Registra tus comportamientos diariamente. Después empezarás a ver tendencias.",
+    "categories": {
+      "digital": "Tecnología",
+      "gaming": "Videojuegos",
+      "checking": "Búsquedas / confirmación",
+      "mental": "Pensamientos",
+      "avoidance": "Evitación",
+      "sleep": "Sueño y rutina",
+      "body": "Cuerpo",
+      "other": "Otro"
+    }
+  }
+}

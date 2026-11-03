@@ -1,9 +1,8 @@
 import { test,expect,type Page } from '@playwright/test';
 async function open(page:Page,lang='pt') {
  await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());
- await page.addInitScript(l=>localStorage.setItem('confia_language',l),lang);await page.goto('/');
+ await page.addInitScript(l=>{localStorage.setItem('confia_language',l);const d=new Date(),date=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');const checkin={date,mood:7,need:'calm',completed:true,scaleVersion:2};localStorage.setItem('confia_daily_checkin',JSON.stringify(checkin));localStorage.setItem('confia_daily_checkin_history',JSON.stringify([checkin]));},lang);await page.goto('/');
   await page.getByTestId("challenge-clock").waitFor();
-  await page.locator("#home-habits details").filter({has:page.locator("summary",{hasText:/O meu dia|My day|Mi día|Ma journée/})}).locator("summary").first().click();
 }
 async function seed(page:Page,mode='baseline') {
  await page.clock.install({time:new Date('2026-09-28T12:00:00Z')});
@@ -18,7 +17,7 @@ async function seed(page:Page,mode='baseline') {
 }
 test('detailed foods: multiple fruits, timed coffee, drinks, edits and offline persistence',async({page,context})=>{
  test.setTimeout(60000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await open(page);
- await page.getByRole('button',{name:/Alimenta-me/}).click();
+ await page.getByRole('button',{name:/Alimentação/}).click();
  async function category(name:RegExp){await page.getByRole('button',{name}).click();await expect(page.getByRole('dialog')).toBeVisible();}
  async function save(){await page.getByRole('button',{name:'Guardar alimento ou bebida',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);}
  await category(/Fruta Adicionar/);await page.getByRole('button',{name:'Maçã',exact:true}).click();await page.getByLabel('Quantidade exata').fill('2');await save();
@@ -26,6 +25,7 @@ test('detailed foods: multiple fruits, timed coffee, drinks, edits and offline p
  await category(/Café Adicionar/);await page.getByRole('button',{name:'Café de filtro',exact:true}).click();await page.getByLabel('Quantidade exata').fill('3');await page.getByLabel('Período do dia (opcional)').selectOption('afternoon');await page.getByText('Mais detalhes (opcional)',{exact:true}).click();await page.getByLabel('Hora aproximada').fill('17:30');await page.getByLabel('Intensidade percebida').selectOption('strong');await save();
  await category(/Refrigerantes e sumos Adicionar/);await page.getByRole('button',{name:'Coca-Cola',exact:true}).click();await page.getByLabel('Unidade',{exact:true}).selectOption('can');await page.getByLabel('ml por recipiente').fill('330');await save();
  await category(/Água Adicionar/);await page.getByLabel('Unidade',{exact:true}).selectOption('ml');await page.getByLabel('Quantidade exata').fill('1500');await context.setOffline(true);await save();
+ await page.getByText('Ver os registos detalhados',{exact:true}).click();
  const apple=page.locator('li').filter({hasText:/maçã/i});await apple.getByRole('button',{name:'Editar',exact:true}).click();await page.getByLabel('Quantidade exata').fill('4');await save();
  await expect(apple).toContainText('4 maçãs');await expect(page.getByText('17:30',{exact:true})).toBeVisible();
  await expect(page.getByRole('heading',{name:'Algo a observar',exact:true})).toBeVisible();await expect(page.getByText(/Registaste cafeína à tarde/)).toBeVisible();
@@ -34,8 +34,8 @@ test('detailed foods: multiple fruits, timed coffee, drinks, edits and offline p
  expect(snapshot.records.find((r:any)=>r.kind==='nutrition').data).toMatchObject({fruit:5,coffee:3,water:6,soda:1});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:'/tmp/confia-detailed-nutrition.png',fullPage:true});
- await context.setOffline(false);await page.getByRole('button',{name:'Concluir e ver o meu dia',exact:true}).click();
- await page.getByRole('button',{name:/Exercício/}).click();await page.getByRole('button',{name:'30 min',exact:true}).click();await page.getByLabel('Período do dia (opcional)').selectOption('evening');await page.getByRole('button',{name:'Guardar registo',exact:true}).click();
+ await context.setOffline(false);await page.getByRole('button',{name:/Voltar/}).click();
+ await page.getByRole('button',{name:/Movimento/}).click();await page.getByRole('button',{name:'30 min',exact:true}).click();await page.getByLabel('Período do dia (opcional)').selectOption('evening');await page.getByRole('button',{name:'Guardar registo',exact:true}).click();
  await expect(page.getByText('Registaste 30 minutos de movimento.',{exact:false})).toBeVisible();
   await page.reload();await page.getByTestId("challenge-clock").waitFor();
  const restored=await page.evaluate(()=>JSON.parse(localStorage.getItem('confia_habits_v1:guest')!));
@@ -67,9 +67,11 @@ test('insufficient data: no personal association or invitation after two days',a
  await seed(page,'insufficient');await open(page);await expect(page.getByRole('button',{name:'Experimentar',exact:true})).toHaveCount(0);await expect(page.getByText('Há um sinal inicial.',{exact:true})).toHaveCount(0);
  await expect(page.getByText('As propostas surgem após pelo menos cinco dias',{exact:false})).toBeVisible();
 });
-for(const [lang,food,fruit,plans] of [['pt','Alimenta-me','Fruta','Planos de 15 dias'],['en','Nourish me','Fruit','15-day plans'],['es','Aliméntame','Fruta','Planes de 15 días'],['fr','Me nourrir','Fruits','Parcours de 15 jours']])test('four-language detail, plans and mountain: '+lang,async({page})=>{
- await page.setViewportSize({width:320,height:740});await open(page,lang);await expect(page.getByTestId('challenge-mountain')).toBeVisible();await expect(page.getByRole('heading',{name:plans,exact:true})).toBeVisible();
+for(const [lang,food,fruit] of [
+ ['pt','Alimentação','Fruta'],['en','Nutrition','Fruit'],['es','Alimentación','Fruta'],['fr','Alimentation','Fruits']
+])test('four-language daily mirror, food entry and mountain: '+lang,async({page})=>{
+ await page.setViewportSize({width:320,height:740});await open(page,lang);await expect(page.getByTestId('challenge-mountain')).toBeVisible();
  await page.screenshot({path:'/tmp/confia-mountain-'+lang+'.png',fullPage:true});
- await page.getByRole('button',{name:new RegExp(food)}).click();await page.getByRole('button',{name:new RegExp(fruit)}).first().click();await expect(page.getByRole('dialog')).toBeVisible();
+ await page.getByRole('button',{name:new RegExp(food,'i')}).click();await page.getByRole('button',{name:new RegExp(fruit,'i')}).first().click();await expect(page.getByRole('dialog')).toBeVisible();
  expect(await page.getByRole('dialog').innerText()).not.toContain('habitHub.');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);
 });

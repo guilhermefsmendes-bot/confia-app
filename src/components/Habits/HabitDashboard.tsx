@@ -1,6 +1,6 @@
 const WellbeingPlans=lazy(()=>import("./WellbeingPlans"));
 import { lazy,Suspense,useEffect,useMemo,useState,useSyncExternalStore } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import { getHabitSnapshot,getHabitRevision,subscribeHabits } from "../../data/habits/store";
 import { startHabitSync,syncHabits } from "../../data/habits/sync";
 import { recordHabitDay,restartHabit } from "../../data/habits/actions";
@@ -17,10 +17,10 @@ const NutritionDashboard=lazy(()=>import("./NutritionDashboard"));
 const ExerciseDashboard=lazy(()=>import("./ExerciseDashboard"));
 const SleepDashboard=lazy(()=>import("./SleepDashboard"));
 const Support=lazy(()=>import("../ImpulsoSOS").then(m=>({default:m.ImpulsoSOS})));
-export default function HabitDashboard({onAddXp,openSupport=false,initialPage="home",navigationKey=0,embedded=false}:{onAddXp:(n:number)=>void;openSupport?:boolean;initialPage?:string;navigationKey?:number;embedded?:boolean}) {
-  const {t}=useTranslation();const today=useLocalDay();
+export default function HabitDashboard({openSupport=false,initialPage="home",navigationKey=0,embedded=false}:{openSupport?:boolean;initialPage?:string;navigationKey?:number;embedded?:boolean}) {
+  const {t}=useTranslation("habits");const today=useLocalDay();
   const revision=useSyncExternalStore(subscribeHabits,getHabitRevision,getHabitRevision);
-  const [expanded,setExpanded]=useState(!embedded);
+  const [expanded,setExpanded]=useState(false);
   const [eventRevision,setEventRevision]=useState(0);
   const [page,setPage]=useState(openSupport?"support":"home");
   useEffect(()=>{if(embedded)recordPersonalScreenView(page==="home"?"home":"home_habits_"+page);},[embedded,page]);
@@ -75,7 +75,7 @@ export default function HabitDashboard({onAddXp,openSupport=false,initialPage="h
       {page==="nutrition" && <NutritionDashboard records={records} events={events} today={today} run={run} onDone={back}/>}
       {page==="exercise" && <ExerciseDashboard records={records} events={events} today={today} run={run} onDone={back}/>}
       {page==="sleep" && <SleepDashboard records={records} events={events} today={today} run={run} onDone={back}/>}
-      {page==="support" && <Support onAddXp={onAddXp}/>}
+      {page==="support" && <Support />}
     </Suspense></Panel>}
   </div>;
 }

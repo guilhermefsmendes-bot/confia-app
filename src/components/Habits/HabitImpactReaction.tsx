@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import type { HabitRecord } from "../../data/habits/types";
 import type { PersonalEvent } from "../../data/personal/personalEvent";
 import type { HabitImpactSource } from "../../data/habits/impactKnowledge";
 import { buildHabitImpact, getHabitImpactSource } from "../../data/habits/impactEngine";
 
 export default function HabitImpactReaction({ records, events, date }: { records: HabitRecord[]; events: PersonalEvent[]; date: string }) {
-  const { t } = useTranslation();
-  const [showAll, setShowAll] = useState(false);
+  const { t } = useTranslation("habits");
+  const [showAll, setShowAll] = useState(true);
   const [expanded, setExpanded] = useState(true);
   const report = useMemo(() => buildHabitImpact(records, events, date), [records, events, date]);
   if (!report.hasData) return null;
@@ -57,6 +57,7 @@ export default function HabitImpactReaction({ records, events, date }: { records
         <p className="font-bold">{t("habitImpact.personal." + item.habit)}</p>
         <p className="mt-1 text-sm leading-6">{t("habitImpact.personal.pattern", {
           direction: t("habitImpact.personal.direction." + item.direction),
+          condition: t("habitImpact.personal." + item.habit),
           exposedMean: item.exposedMean.toFixed(1), comparisonMean: item.comparisonMean.toFixed(1),
           exposedDays: item.exposedDays, comparisonDays: item.comparisonDays,
           difference: Math.abs(item.difference).toFixed(1),

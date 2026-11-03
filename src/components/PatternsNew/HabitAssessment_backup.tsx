@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 
 interface Props {
   onBack: () => void;
@@ -29,7 +29,7 @@ const levels = [
 
 export default function HabitAssessment({ onBack }: Props) {
 
-  const { t } = useTranslation();
+  const { t } = useTranslation("patternsNew");
 
   const [selected, setSelected] = useState<string[]>([]);
   const [ratings, setRatings] = useState<Record<string,string>>({});

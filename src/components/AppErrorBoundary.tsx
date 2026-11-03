@@ -11,11 +11,10 @@ export class AppErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[Confia] render_error", {
-      name: error.name,
-      message: error.message,
-      componentStack: info.componentStack,
-    });
+    console.error("[Confia] render_error", { name: error.name, message: error.message });
+    void import("../monitoring/errorReporter")
+      .then(({ reportRenderError }) => reportRenderError(error, { componentStack: info.componentStack }))
+      .catch(() => {});
   }
 
   private recover = () => {

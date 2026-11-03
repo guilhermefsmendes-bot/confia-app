@@ -32,61 +32,49 @@ function safeParseIdList(
 
 
 export function getInventory(): string[] {
+  try {
+    const saved = localStorage.getItem(INVENTORY_KEY);
 
-  const saved = localStorage.getItem(INVENTORY_KEY);
-
-  if (saved) {
-    const inventory = safeParseIdList(saved);
-
-    // B1 — remove IDs pertencentes ao antigo mundo.
-    // Os acessórios CONFIA usam o prefixo "confia_".
-    const cleanedInventory = inventory.filter(
-      id => id.startsWith("confia_")
-    );
-
-    if (
-      cleanedInventory.length !== inventory.length
-    ) {
-      localStorage.setItem(
-        INVENTORY_KEY,
-        JSON.stringify(cleanedInventory)
-      );
+    if (saved) {
+      // Preserve every valid legacy ID. Items absent from the current
+      // catalogue may not be rendered, but reading must never delete them.
+      return [...new Set(safeParseIdList(saved))];
     }
 
-    return cleanedInventory;
+    const initialInventory: string[] = [];
+    localStorage.setItem(INVENTORY_KEY, JSON.stringify(initialInventory));
+    return initialInventory;
+  } catch {
+    // Storage can be unavailable in private/restricted browser contexts.
+    return [];
   }
-
-
-  // B1 — novos utilizadores começam sem itens antigos.
-  const initialInventory: string[] = [];
-
-  localStorage.setItem(
-    INVENTORY_KEY,
-    JSON.stringify(initialInventory)
-  );
-
-
-  return initialInventory;
-
 }
 
 
 
-export function buyItem(id: string) {
+export function buyItem(id: string): boolean {
+  if (typeof id !== "string" || !id.startsWith("confia_")) {
+    return false;
+  }
 
   const inventory = getInventory();
 
-  if (!inventory.includes(id)) {
-
-    inventory.push(id);
-
-    localStorage.setItem(
-      INVENTORY_KEY,
-      JSON.stringify(inventory)
-    );
-
+  // The storage layer is the final duplicate guard. This matters when
+  // two rapid clicks occur before React has refreshed the shop UI.
+  if (inventory.includes(id)) {
+    return false;
   }
 
+  try {
+    localStorage.setItem(
+      INVENTORY_KEY,
+      JSON.stringify([...inventory, id])
+    );
+    return true;
+  } catch {
+    // A failed persistence must never be reported as a successful purchase.
+    return false;
+  }
 }
 
 
@@ -100,27 +88,14 @@ export function isOwned(id: string) {
 
 
 export function getEquipped(): string[] {
-
-  const saved = localStorage.getItem(EQUIPPED_KEY);
-
-  const equipped = safeParseIdList(saved);
-
-  // B1 — remove equipamento pertencente ao antigo mundo.
-  const cleanedEquipped = equipped.filter(
-    id => id.startsWith("confia_")
-  );
-
-  if (
-    cleanedEquipped.length !== equipped.length
-  ) {
-    localStorage.setItem(
-      EQUIPPED_KEY,
-      JSON.stringify(cleanedEquipped)
-    );
+  try {
+    const saved = localStorage.getItem(EQUIPPED_KEY);
+    // Keep legacy equipment IDs. The companion preview consumes only
+    // known accessory IDs, while persistence remains lossless.
+    return [...new Set(safeParseIdList(saved))];
+  } catch {
+    return [];
   }
-
-  return cleanedEquipped;
-
 }
 
 

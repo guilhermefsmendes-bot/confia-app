@@ -9,6 +9,7 @@
   display: grid;
   place-items: center;
   width: min(100%, 23rem);
+  min-height: 0;
   aspect-ratio: 1 / 1;
   margin-inline: auto;
   border-radius: 50%;
@@ -162,7 +163,7 @@
 /* Mobile: keep the challenge clock compact so it does not dominate the screen. */
 @media (max-width: 600px) {
   .challenge-clock {
-    width: min(50vw, 11.5rem);
+    width: min(80vw, 11.5rem);
   }
 }
 

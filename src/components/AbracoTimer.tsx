@@ -8,6 +8,7 @@ const ZenReleaseExperience=lazy(()=>import("./ZenRelease/ZenReleaseExperience"))
 interface AbracoTimerProps {
   onAddXp: (amount: number) => void;
   onRegisterStop?: (stopFunction: () => void) => void;
+  active?: boolean;
 }
 
 type FiveMinuteMood =
@@ -45,7 +46,7 @@ const DOODLE_PROMPT_KEYS = [
   "hugDoodle.prompts.tinyWorld",
 ] as const;
 
-export const AbracoTimer: React.FC<AbracoTimerProps> = ({ onAddXp, onRegisterStop }) => {
+export const AbracoTimer: React.FC<AbracoTimerProps> = ({ onAddXp, onRegisterStop, active = true }) => {
 const { t, i18n } = useTranslation();
   const TOTAL_SECONDS = 300; // 5 minutes
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
@@ -89,6 +90,11 @@ const stopAudio = () => {
 
   setIsActive(false);
 };
+
+// Retained tabs must not keep a breathing/countdown timer or background audio active.
+useEffect(() => {
+  if (!active) stopAudio();
+}, [active]);
 useEffect(() => {
   const listener = () => {
     stopAudio();
@@ -198,7 +204,7 @@ const handleToggle = () => {
   if (!isActive) {
     if (soundEnabled) {
       const sound =
-        new Audio(`/audio/${selectedSound}.mp3`);
+        new Audio(`/audio/${selectedSound}.m4a`);
 
       sound.loop = true;
 

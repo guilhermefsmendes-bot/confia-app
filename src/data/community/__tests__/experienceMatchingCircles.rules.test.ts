@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { after, before, describe, it } from "node:test";
 import { initializeTestEnvironment, assertFails, assertSucceeds, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc, updateDoc, Timestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
 
 let env: RulesTestEnvironment;
 const rules = readFileSync("firestore.rules", "utf8");
@@ -70,6 +70,14 @@ describe("Experience Matching circles", () => {  it("enforces the eight member c
     }));
     await assertFails(getDoc(doc(db("u9"), message)));
   });
+  it("allows a member to delete only their own group messages", async () => {
+    const circle = "experienceMatchCircles/circle_delete_own_message";
+    await assertSucceeds(setDoc(doc(db("u1"), circle), { experienceTag:"stress", participants:["u1"], capacity:8, status:"open", createdAt:now, updatedAt:now }));
+    await assertSucceeds(setDoc(doc(db("u1"), circle + "/messages/m1"), { senderId:"u1", text:"my message", createdAt:now }));
+    await assertFails(deleteDoc(doc(db("u2"), circle + "/messages/m1")));
+    await assertSucceeds(deleteDoc(doc(db("u1"), circle + "/messages/m1")));
+  });
+
   it("does not let one member expel another directly", async () => {
     const circle = "experienceMatchCircles/circle_safety_direct";
     await assertSucceeds(setDoc(doc(db("u1"), circle), { experienceTag:"stress", participants:["u1"], capacity:8, status:"open", createdAt:now, updatedAt:now }));

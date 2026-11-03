@@ -1,6 +1,6 @@
 import { MoonStar, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import HabitEvolution from "./HabitEvolution";
 import type { HabitRecord } from "../../data/habits/types";
 import type { PersonalEvent } from "../../data/personal/personalEvent";
@@ -10,7 +10,7 @@ import { shiftDay } from "../../data/habits/calendar";
 import { DayPicker,buttonClass,inputClass,primaryClass,type RunAction } from "./shared";
 
 export default function SleepDashboard({records,events,today,run,onDone}:{records:HabitRecord[];events:PersonalEvent[];today:string;run:RunAction;onDone:()=>void}) {
- const {t,i18n}=useTranslation(); const [date,setDate]=useState(today);
+ const {t,i18n}=useTranslation("habits"); const [date,setDate]=useState(today);
  const locale=i18n.language.startsWith("pt")?"pt-PT":i18n.language.startsWith("es")?"es-ES":i18n.language.startsWith("fr")?"fr-FR":"en-US";
  const formatDate=(value:string)=>new Date(`${value}T12:00:00`).toLocaleDateString(locale,{day:"numeric",month:"long",year:"numeric"});
  const current=useMemo(()=>records.find(r=>r.kind==="sleep"&&r.date===date),[records,date]);

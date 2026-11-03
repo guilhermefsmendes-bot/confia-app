@@ -1,5 +1,6 @@
 import { loadEpisodes } from "../../components/Impulso/storage";
 import { getDailyCheckInHistory } from "../../storage/dailyCheckInStorage";
+import { normalizeDailyRatings } from "../../storage/dailyRatingStorage";
 import { appendPersonalEvents, readPersonalEvents } from "./personalEventStorage";
 import { createPersonalEventId, localDateFromTimestamp, makePersonalEvent } from "./personalEvent";
 import type { PersonalEvent } from "./personalEvent";
@@ -33,7 +34,7 @@ export function migrateLegacyPersonalData(): PersonalMigrationResult {
   const sources: string[] = [];
   const push = (event: PersonalEvent, source: string) => { events.push(event); if (!sources.includes(source)) sources.push(source); };
 
-  const ratings = readJson<Array<{ date: string; morning?: number | null; afternoon?: number | null; note?: string }>>("confia_ratings_v2", []);
+  const ratings = normalizeDailyRatings(readJson<unknown>("confia_ratings_v2", []));
   for (const rating of ratings) {
     for (const [moment, value] of [["morning", rating.morning], ["afternoon", rating.afternoon]] as const) {
       if (typeof value !== "number") continue;

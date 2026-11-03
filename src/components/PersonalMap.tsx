@@ -6,8 +6,16 @@ import { buildPersonalInsights, explainInsight } from "../data/personal/personal
 import { applyInsightLifecycle, markInsightsShown } from "../data/personal/personalInsightLifecycle";
 import { recordPersonalAnalytics } from "../data/personal/personalAnalytics";
 import type { PersonalInsight } from "../data/personal/personalInsights";
+import type { ReactNode } from "react";
+import PersonalManual from "./PersonalManual";
+import PersonalExperimentsPanel from "./PersonalExperimentsPanel";
+import NeuroscienceLearning from "./NeuroscienceLearning";
+import { readPersonalInsightFeedback, savePersonalInsightFeedback } from "../data/personal/personalInsightFeedback";
+import { readExperiments } from "../data/personal/personalExperiments";
+import PersonalMapOverview from "./PersonalMapOverview";
+import FutureSelfLetter from "./FutureSelfLetter";
 
-type Props = { onBack: () => void };
+type Props = { onBack: () => void; progressContent?: ReactNode; };
 
 const confidenceRank: Record<PersonalInsight["confidence"], number> = { high: 3, moderate: 2, low: 1 };
 const statusRank: Record<PersonalInsight["status"], number> = { consistent: 4, possible: 3, emerging: 2, changed: 2, weakened: 1, disappeared: 0 };
@@ -28,37 +36,50 @@ function formatPeriod(start: string, end: string) {
   return start + " — " + end;
 }
 
-export default function PersonalMap({ onBack }: Props) {
+export default function PersonalMap({ onBack, progressContent }: Props) {
   const { t } = useTranslation();
   const [revision, setRevision] = useState(0);
-  const [feedback, setFeedback] = useState<Record<string, "useful" | "dismissed">>({});
-  const events = useMemo(() => readPersonalEvents(), [revision]);
+  const [feedback, setFeedback] = useState<Record<string, "useful" | "dismissed">>(() => Object.fromEntries(Object.entries(readPersonalInsightFeedback()).map(([id, item]) => [id, item.value])));
+  // readPersonalEvents reuses a mutable cache; copy the array so React's memoized projections refresh after event updates.
+  const events = useMemo(() => [...readPersonalEvents()], [revision]);
+  const experiments = useMemo(() => readExperiments(), [revision]);
   const insights = useMemo(
     () => applyInsightLifecycle(buildPersonalInsights(events)).sort(rankInsight),
     [events],
   );
   const observations = insights.slice(0, 3);
   const suggestions = insights
-    .filter(insight => insight.actionability !== "low" && insight.confidence !== "low")
-    .sort((a, b) => actionRank[b.actionability] - actionRank[a.actionability] || rankInsight(a, b))
+    .filter(insight => insight.actionability !== "low" && insight.confidence !== "low" && feedback[insight.id] !== "dismissed")
+    .sort((a, b) => (feedback[b.id] === "useful" ? 1 : 0) - (feedback[a.id] === "useful" ? 1 : 0) || actionRank[b.actionability] - actionRank[a.actionability] || rankInsight(a, b))
     .slice(0, 2);
   const shownInsightIds = useRef(new Set<string>());
+  const viewRecorded = useRef(false);
 
   useEffect(() => {
     const handleUpdated = () => setRevision(value => value + 1);
+    const handleExperimentsUpdated = () => setRevision(value => value + 1);
     window.addEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handleUpdated);
-    recordPersonalAnalytics("personal_map_viewed");
-
-    const newlyVisible = insights.filter(insight => !shownInsightIds.current.has(insight.id));
-    if (newlyVisible.length) {
-      markInsightsShown(newlyVisible);
-      newlyVisible.forEach(insight => shownInsightIds.current.add(insight.id));
+    window.addEventListener("confia:experiments-updated", handleExperimentsUpdated);
+    if (!viewRecorded.current) {
+      recordPersonalAnalytics("personal_map_viewed");
+      viewRecorded.current = true;
     }
 
-    return () => window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handleUpdated);
+    return () => {
+      window.removeEventListener(PERSONAL_EVENTS_UPDATED_EVENT, handleUpdated);
+      window.removeEventListener("confia:experiments-updated", handleExperimentsUpdated);
+    };
+  }, []);
+
+  useEffect(() => {
+    const newlyVisible = insights.filter(insight => !shownInsightIds.current.has(insight.id) || insight.novelty === "returning");
+    if (!newlyVisible.length) return;
+    markInsightsShown(newlyVisible);
+    newlyVisible.forEach(insight => shownInsightIds.current.add(insight.id));
   }, [insights]);
 
   const sendFeedback = (insight: PersonalInsight, value: "useful" | "dismissed") => {
+    savePersonalInsightFeedback(insight.id, value);
     setFeedback(current => ({ ...current, [insight.id]: value }));
     recordPersonalAnalytics(value === "useful" ? "insight_useful" : "insight_dismissed", insight.id);
   };
@@ -75,12 +96,15 @@ export default function PersonalMap({ onBack }: Props) {
             <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#B86B52]">CONFIA · {t("personalMap.eyebrow")}</p>
             <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight text-[#3F2C27] sm:text-4xl">{t("personalMap.title")}</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-[#735F56]">{t("personalMap.subtitle")}</p>
+            <p className="mt-3 text-[10px] font-bold tracking-wide text-[#9A786B]">{t("personalMap.journey")}</p>
           </div>
           <div className="hidden h-14 w-14 items-center justify-center rounded-2xl border border-white/80 bg-white/65 shadow-sm sm:flex">
             <Compass className="text-[#B86B52]" />
           </div>
         </div>
       </section>
+
+      <PersonalMapOverview events={events} insights={insights} experiments={experiments} />
 
       <section className="mt-4 rounded-[30px] border border-white bg-white/90 p-5 shadow-sm sm:p-6">
         <div className="flex items-center gap-2">
@@ -145,11 +169,25 @@ export default function PersonalMap({ onBack }: Props) {
                     {formatPeriod(insight.periodStart, insight.periodEnd)}
                   </span>
                 </div>
+                <button type="button" onClick={() => document.getElementById("personal-experiments")?.scrollIntoView({ behavior: "smooth", block: "center" })} className="mt-3 min-h-10 rounded-full border border-[#DCC8BE] bg-white px-4 text-[10px] font-black text-[#8A4D3C]">
+                  {t("personalMap.experiments.start")}
+                </button>
               </article>
             ))}
           </div>
         )}
       </section>
+
+      <PersonalExperimentsPanel />
+      <PersonalManual events={events} insights={insights} />
+      <FutureSelfLetter />
+
+      {/* Personalized discoveries stay ahead of generic learning content. */}
+      <NeuroscienceLearning />
+
+      {progressContent && <section className="mt-4 rounded-[30px] border border-white bg-white/90 p-5 shadow-sm sm:p-6">
+        {progressContent}
+      </section>}
     </main>
   );
 }
@@ -191,10 +229,10 @@ function InsightCard({
           {feedback ? t("personalMap.feedbackThanks") : t("personalMap.feedbackPrompt")}
         </span>
         <div className="flex gap-2">
-          <button type="button" onClick={() => onFeedback("useful")} disabled={!!feedback} className="flex min-h-10 min-w-10 items-center justify-center rounded-full border border-[#E5D5CD] bg-white text-[#6B8A72] disabled:opacity-60" aria-label={t("personalMap.useful")}>
+          <button type="button" onClick={() => onFeedback("useful")} aria-pressed={feedback === "useful"} className={`flex min-h-10 min-w-10 items-center justify-center rounded-full border border-[#E5D5CD] text-[#6B8A72] ${feedback === "useful" ? "bg-[#EAF2E9]" : "bg-white"}`} aria-label={t("personalMap.useful")}>
             <ThumbsUp size={15} />
           </button>
-          <button type="button" onClick={() => onFeedback("dismissed")} disabled={!!feedback} className="flex min-h-10 min-w-10 items-center justify-center rounded-full border border-[#E5D5CD] bg-white text-[#9A6E64] disabled:opacity-60" aria-label={t("personalMap.dismiss")}>
+          <button type="button" onClick={() => onFeedback("dismissed")} aria-pressed={feedback === "dismissed"} className={`flex min-h-10 min-w-10 items-center justify-center rounded-full border border-[#E5D5CD] text-[#9A6E64] ${feedback === "dismissed" ? "bg-[#F7EAE7]" : "bg-white"}`} aria-label={t("personalMap.dismiss")}>
             <ThumbsDown size={15} />
           </button>
         </div>

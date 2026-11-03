@@ -214,7 +214,7 @@ test("four languages have identical new keys and placeholders", () => {
     flat(
       JSON.parse(
         fs.readFileSync(
-          new URL("../../../locales/" + l + ".json", import.meta.url),
+          new URL("../../../locales/features/" + l + "/companion.json", import.meta.url),
           "utf8",
         ),
       ).companionDaily,

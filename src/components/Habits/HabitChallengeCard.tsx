@@ -1,5 +1,5 @@
 import { useMemo, type CSSProperties } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import { Beer, Candy, Cigarette, Coffee, Gamepad2, Moon, Search, ShoppingBag, Smartphone, Sprout, Trophy } from "lucide-react";
 import { type HabitDefinition,type HabitRecord } from "../../data/habits/types";
 import { habitStats } from "../../data/habits/statistics";
@@ -11,7 +11,7 @@ import "./challengeClock.css";
 
 const habitIcons = { tobacco:Cigarette, coffee:Coffee, alcohol:Beer, social:Smartphone, gaming:Gamepad2, sugar:Candy, shopping:ShoppingBag, checking:Search, sleep:Moon, custom:Sprout };
 export default function HabitChallengeCard({habit,records,today,onOpen}:{habit?:HabitDefinition;records:HabitRecord[];today:string;onOpen:(page:string)=>void}) {
-  const {t}=useTranslation();
+  const {t}=useTranslation("habits");
   const stats=useMemo(()=>habit?habitStats(records,habit.id,today):null,[habit,records,today]);
   const days=stats?.current??0;
   const palette=challengePalette(days);

@@ -15,7 +15,7 @@
   "startTimer": "Iniciar tiempo",
   "petCompanion": "Compañero",
   "crisisQuestion": "¿Estás pasando por un momento difícil?",
-  "crisisStartSupport": "Elegir un apoyo ahora",
+  "crisisStartSupport": "Apoyo individual. No contacta con terceros ni envía solicitudes de ayuda.",
   "listeningSupport": {
     "title": "Quiero desahogarme",
     "subtitle": "Encuentra a alguien de la comunidad disponible para escucharte.",
@@ -118,7 +118,6 @@
   "impulseHistoryTitle": "🛡️ Historial de impulsos",
   "impulseLastUsed": "Último uso: hace {{days}} día(s)",
   "impulseTotalUses": "Usos totales: {{count}}",
-  "inventory": "Inventario",
   "companionCustomization": {
     "title": "Personaliza tu CONFIA",
     "subtitle": "Elige pequeños detalles que hagan que tu CONFIA sea más tuya.",
@@ -187,7 +186,6 @@
       "confia_eyes_honey": "Ojos Miel"
     }
   },
-  "shop": "Tienda",
   "companionSynergy": {
     "eyebrow": "Red de conexiones",
     "title": "Lo que estoy percibiendo",
@@ -235,10 +233,6 @@
     "wellbeing": "Bienestar",
     "wellbeingAverage": "media mañana/tarde"
   },
-  "companionWidgetPrompt": {
-    "message": "¿Quieres llevarme contigo a la pantalla de inicio? Puedo mostrarte tu reto y tus pequeños objetivos sin que tengas que abrir la app.",
-    "action": "Añadir widget"
-  },
   "companionShop": {
     "title": "Tienda de CONFIA",
     "subtitle": "Elige pequeños detalles para hacer que tu CONFIA sea aún más tuya.",
@@ -264,6 +258,11 @@
   "mainNavigation": "Navegación principal",
   "home": "Inicio",
   "hug": "Abrazo",
+  "embraceModePrompt": "¿Qué necesitas ahora mismo?",
+  "embraceModePause": "Necesito una pausa",
+  "embraceModePauseHint": "Respirar, bajar el ritmo y recuperar espacio.",
+  "embraceModeExplore": "Quiero explorar",
+  "embraceModeExploreHint": "Reflexionar, guardar y descubrir conexiones.",
   "objectives": "Objetivos",
   "impulse": "Hábitos",
   "progress": "Progreso",
@@ -491,6 +490,7 @@
   "safeSharing": "Comparte libremente y de forma segura",
   "sharePlaceholder": "Describe tus sensaciones o victorias de hoy de una forma reconfortante...",
   "shareSuccess": "¡Gracias por compartir! Tu mensaje fue enviado al panel de compartir.",
+  "shareError": "No se pudo publicar. Tu mensaje sigue aquí para que puedas intentarlo de nuevo.",
   "identifyTitle": "Me identifico",
   "identifyMessage": "¿Quieres decir que te identificas con esta experiencia?",
   "identifyCancel": "Todavía no",
@@ -531,7 +531,7 @@
   "liberatingSigh": "Suspiro Liberador",
   "sighInstruction": "Da un último suspiro largo y sonoro por la boca... ¡Déjalo ir todo!",
   "sosMoment": "Instante SOS 🚨",
-  "sosDescription": "¿Sientes un impulso o ansiedad? Vamos a concentrarnos y gestionarlo juntos.",
+  "sosDescription": "¿Sientes un impulso o ansiedad? Utiliza este espacio individual para parar, respirar y elegir el siguiente paso.",
   "startExercise": "Comenzar Ejercicio",
   "startExerciseTimed": "Comenzar Ejercicio (10 Min)",
   "finish": "Terminar",
@@ -901,158 +901,6 @@
       }
     }
   },
-  "patternsNew": {
-    "title": "Conoce tus Patrones",
-    "description": "Descubre los hábitos que influyen en tu bienestar y sigue tu evolución.",
-    "assessment": "Evalúa tus hábitos",
-    "assessmentDesc": "Identifica los hábitos que pueden estar afectando tu bienestar.",
-    "daily": "Sigue tu progreso",
-    "dailyDesc": "Evalúa cada día cómo has gestionado estos hábitos.",
-    "evolution": "Mi evolución",
-    "evolutionDesc": "Observa la evolución de tus hábitos y compárala con tu bienestar diario.",
-    "evolutionDescription": "Observa cómo gestionas tus hábitos a lo largo del tiempo.",
-    "noRecords": "Todavía no tienes suficientes registros.",
-    "lastRecord": "Último registro",
-    "date": "Fecha",
-    "habitManagement": "Gestión de hábitos",
-    "startEvolution": "Empieza registrando tu progreso diariamente.",
-    "plan": {
-      "title": "Plan personalizado",
-      "description": "Recibe objetivos adaptados a tu perfil."
-    },
-    "homeItems": {
-      "bench1": {
-        "name": "Banco de madera"
-      },
-      "bench2": {
-        "name": "Banco sencillo"
-      },
-      "bench3": {
-        "name": "Banco cómodo"
-      },
-      "bench4": {
-        "name": "Banco elegante"
-      },
-      "bench5": {
-        "name": "Banco de jardín"
-      },
-      "bench6": {
-        "name": "Banco especial"
-      },
-      "extra1": {
-        "name": "Linterna"
-      },
-      "extra2": {
-        "name": "Mariposa"
-      },
-      "extra3": {
-        "name": "Ardilla"
-      },
-      "extra4": {
-        "name": "Nido"
-      },
-      "extra5": {
-        "name": "Sol"
-      },
-      "extra6": {
-        "name": "Arcoíris"
-      },
-      "flower1": {
-        "name": "Flor pequeña"
-      },
-      "flower2": {
-        "name": "Flor rosa"
-      },
-      "flower3": {
-        "name": "Flor roja"
-      },
-      "flower4": {
-        "name": "Tulipán"
-      },
-      "flower5": {
-        "name": "Rosa"
-      },
-      "flower6": {
-        "name": "Rosa marchita"
-      },
-      "flower7": {
-        "name": "Ramo de flores"
-      },
-      "flower8": {
-        "name": "Jacinto"
-      },
-      "rock1": {
-        "name": "Roca pequeña"
-      },
-      "rock2": {
-        "name": "Roca"
-      },
-      "rock3": {
-        "name": "Piedra natural"
-      },
-      "rock4": {
-        "name": "Piedra grande"
-      },
-      "rock5": {
-        "name": "Roca oscura"
-      },
-      "rock6": {
-        "name": "Piedra antigua"
-      },
-      "tree1": {
-        "name": "Árbol verde"
-      },
-      "tree2": {
-        "name": "Pino"
-      },
-      "tree3": {
-        "name": "Palmera"
-      },
-      "tree4": {
-        "name": "Árbol de Navidad"
-      },
-      "tree5": {
-        "name": "Cactus"
-      },
-      "tree6": {
-        "name": "Tronco"
-      },
-      "tree7": {
-        "name": "Trébol"
-      },
-      "tree8": {
-        "name": "Trébol pequeño"
-      },
-      "water1": {
-        "name": "Gota de agua"
-      },
-      "water2": {
-        "name": "Flor acuática"
-      },
-      "water3": {
-        "name": "Fuente"
-      },
-      "water4": {
-        "name": "Ola"
-      },
-      "water5": {
-        "name": "Concha"
-      },
-      "water6": {
-        "name": "Pato"
-      }
-    },
-    "inventory": {
-      "title": "Inventario",
-      "empty": "Todavía no tienes objetos.",
-      "equip": "Equipar",
-      "equipped": "Equipado"
-    },
-    "shop": {
-      "title": "Tienda",
-      "availableXp": "XP disponible"
-    }
-  },
   "communityChat": "Conversar",
   "shareCornerTitle": "Rincón para Compartir",
   "currentFeeling": "¿Cuál es tu sentimiento actual?",
@@ -1120,7 +968,6 @@
   "companionSubtitle": "Un pequeño espacio para conocerte mejor.",
   "companionSuggestionInitial": "Continúa registrando cómo te sientes. Con el tiempo, tu Compañero podrá reconocer mejor tus patrones.",
   "companionSuggestionTitle": "Sugerencia para hoy",
-  "companionTitle": "Compañero",
   "companionToday": "Hoy",
   "companionMessageInsufficient": "Tu Compañero está conociendo mejor tus ritmos. Continúa registrando cómo te sientes.",
   "companionSuggestionInsufficient": "Continúa usando Confia como un pequeño espacio para parar, observar y cuidarte.",
@@ -1140,65 +987,6 @@
   "companionMessagePositive": "Tus registros recientes muestran señales positivas. Hay una evolución que merece ser reconocida.",
   "companionSuggestionPositive": "Continúa observando lo que haces en los días en que te sientes mejor. Estos patrones pueden enseñarte mucho.",
   "companionGratitudePositive": "Hoy vale la pena agradecer que algo esté yendo un poco mejor.",
-  "patternsPremium": {
-    "habits": "Hábitos",
-    "days": "Días",
-    "wellbeing": "Bienestar",
-    "avgWellbeing": "Bienestar medio",
-    "whyTitle": "¿Por qué observar tus patrones?",
-    "whyDescription": "Algunos comportamientos pueden aliviar la ansiedad en el momento, pero mantener el ciclo a largo plazo. Confia te ayuda a observar estos patrones y descubrir si pequeños cambios se relacionan con una mejora de tu bienestar.",
-    "assessmentIntro": "Identifica comportamientos que quieras comprender mejor. No necesitas eliminarlos — primero vamos a conocerlos.",
-    "habitName": "¿Qué comportamiento quieres observar?",
-    "category": "¿En qué área encaja?",
-    "baseline": "¿Con qué intensidad ocurre normalmente?",
-    "motivation": "¿Qué importancia tiene para ti cambiar este comportamiento?",
-    "addHabit": "Añadir hábito",
-    "yourHabits": "Tus patrones",
-    "baselineShort": "habitual",
-    "dailyIntro": "Registra solo lo que ocurrió hoy. No hay respuestas correctas o incorrectas.",
-    "done": "registros",
-    "intensityQuestion": "¿Cuánto estuvo presente este comportamiento hoy?",
-    "none": "Nada",
-    "veryHigh": "Mucho",
-    "daysShort": "días",
-    "evolutionTitle": "Mi evolución",
-    "evolutionDescription": "Compara tus patrones con tu bienestar y busca cambios a lo largo del tiempo.",
-    "wellbeingChart": "Tu bienestar",
-    "wellbeingChartDesc": "Media de los registros de mañana y tarde",
-    "records": "registros",
-    "startAverage": "Inicio",
-    "currentAverage": "Reciente",
-    "trendDown": "Disminuyendo",
-    "trendUp": "Aumentando",
-    "trendStable": "Estable",
-    "relationship": "Relación con el bienestar",
-    "negativeRelationship": "Los días en que este comportamiento estuvo más presente, tu bienestar tiende a ser menor.",
-    "positiveRelationship": "Los días en que este comportamiento estuvo más presente, tu bienestar tiende a ser mayor.",
-    "noClearRelationship": "Todavía no existe una relación clara entre este comportamiento y tu bienestar.",
-    "analysisTitle": "Tu análisis",
-    "analysisIntro": "Confia encontró algunos patrones en los datos que registraste.",
-    "attention": "Un patrón que merece atención",
-    "negativeInsight": "Tus registros sugieren una posible relación entre «{{habit}}» y días con menor bienestar.",
-    "positiveInsightTitle": "Un cambio positivo",
-    "positiveInsight": "Tus datos sugieren una posible relación entre «{{habit}}» y tu bienestar.",
-    "stillLearningTitle": "Confia todavía está aprendiendo contigo",
-    "stillLearningDescription": "Continúa registrando tus hábitos y tu bienestar. Cuantos más días tengas, mejor podremos identificar tendencias personales.",
-    "analysisDisclaimer": "Este análisis muestra asociaciones en tus registros. No demuestra que un comportamiento sea la causa directa de un cambio en el bienestar.",
-    "noHabitsTitle": "Primero, conozcamos tus patrones",
-    "noHabitsDescription": "Añade al menos un comportamiento que quieras observar durante los próximos días.",
-    "notEnoughDataTitle": "Todavía necesitamos algunos días",
-    "notEnoughDataDescription": "Registra tus comportamientos diariamente. Después empezarás a ver tendencias.",
-    "categories": {
-      "digital": "Tecnología",
-      "gaming": "Videojuegos",
-      "checking": "Búsquedas / confirmación",
-      "mental": "Pensamientos",
-      "avoidance": "Evitación",
-      "sleep": "Sueño y rutina",
-      "body": "Cuerpo",
-      "other": "Otro"
-    }
-  },
   "homeProgress": {
     "eyebrow": "Tu evolución",
     "title": "Cómo has estado",
@@ -1570,7 +1358,21 @@
   },
   "homeSpace": {
     "title": "Tu espacio",
-    "subtitle": "Todo lo que crece contigo"
+    "subtitle": "Todo lo que crece contigo",
+    "guidedStart": {
+      "eyebrow": "Primeros pasos",
+      "title": "Empieza a tu ritmo",
+      "subtitle": "No necesitas conocer toda la aplicación. Un pequeño paso cada vez.",
+      "companion": "Tu compañero está en la pantalla de inicio",
+      "available": "Disponible",
+      "firstRecord": "Hacer el primer registro",
+      "done": "Hecho",
+      "recordAction": "Registrar",
+      "tryTool": "Probar una herramienta sencilla",
+      "toolAction": "Hacer una pausa",
+      "mapTitle": "El Mapa Personal crece con tus registros",
+      "mapHint": "Después de 3 días con registros diarios, tu Mapa Personal podrá ofrecerte una visión más útil de tu recorrido."
+    }
   },
   "community": "Comunidad",
   "impulsePremium": {
@@ -1591,6 +1393,19 @@
     "history": "Tu recorrido",
     "historyUses": "{{count}} usos",
     "historyFirst": "Este espacio aprende contigo cada vez que lo utilizas."
+  ,
+    "safePlace": {
+      "title": "Mi Lugar Seguro",
+      "subtitle": "Recorridos del SOS que has elegido guardar para acceder rápidamente. Siguen siendo ejercicios individuales de autorregulación.",
+      "save": "Guardar este recorrido",
+      "remove": "Quitar de Mi Lugar Seguro",
+      "storageError": "No se pudo guardar tu elección en este dispositivo."
+    ,
+      "empty": "Todavía no has guardado ningún recorrido. Puedes elegir uno abajo y guardarlo.",
+      "phraseLabel": "Una frase que te gustaría encontrar aquí",
+      "phrasePlaceholder": "Escribe una frase, recordatorio o recuerdo que te pueda ayudar leer…",
+      "phraseHint": "Se guarda solo en este dispositivo. Puedes cambiarla o borrarla cuando quieras."
+    }
   },
   "impulseAdaptive": {
     "routeLabel": "Recorrido elegido",
@@ -1735,6 +1550,8 @@
     "graduationDays": "días",
     "climberChoiceTitle": "¿Quién subirá contigo?",
     "climberChoiceHint": "Elige tu alpinista. Puedes cambiarlo más adelante.",
+    "climberCustomize": "Personalizar alpinista",
+    "climberNeutralAlt": "Alpinista neutro",
     "climberMale": "Alpinista",
     "climberFemale": "Alpinista",
     "climberContinue": "Continuar",
@@ -1996,76 +1813,11 @@
   "companionBrain.conversationMorningRecovery": "Hace poco estábamos hablando de una mañana más difícil. Tu registro de la tarde está mejor; parece que algo ha cambiado desde entonces.",
   "companionBrain.conversationAfterHarderMoment": "Hace poco parecía que el día se estaba volviendo más difícil. Ahora veo una señal diferente. Quizá valga la pena observar qué ha cambiado mientras tanto.",
   "companionBrain.conversationAfterImpulseImprovement": "Hace poco hablamos de aquel momento en el que necesitaste apoyo inmediato. Ahora tu registro está mejor. No sé si ambas cosas están relacionadas, pero es un cambio que merece ser observado.",
-  "innerCanvas": {
-    "title": "Tu cielo",
-    "sixtySeconds": "TU CIELO",
-    "introTitle": "Descubre la constelación de tu momento.",
-    "introText": "Dinos cómo te sientes ahora. CONFIA transforma tus respuestas en una constelación única y la aproxima a una de las 88 constelaciones del cielo.",
-    "start": "Descubrir mi cielo",
-    "gallery": "Mi Cielo",
-    "galleryCount": "{{count}} momentos guardados",
-    "questionEyebrow": "Parte {{current}} de {{total}}",
-    "questionTitle": "¿Cómo te sientes ahora?",
-    "scaleHelp": "No busques la respuesta perfecta. Usa 0 cuando no lo sientas y 10 cuando esté muy presente.",
-    "none": "Nada",
-    "veryMuch": "Mucho",
-    "continue": "Continuar",
-    "createArtwork": "Crear mi lienzo",
-    "resultEyebrow": "Tu momento",
-    "resultTitle": "Esto nació de cómo te sientes ahora.",
-    "tapArtwork": "Toca la imagen para ver los puntos emocionales que ayudaron a crearla.",
-    "showMap": "Ver focos",
-    "hideMap": "Ocultar focos",
-    "artworkAria": "Obra emocional interactiva",
-    "redo": "Hacerlo de nuevo",
-    "openGallery": "Ver galería",
-    "savedAutomatically": "Guardado automáticamente en tu Galería Interior.",
-    "galleryEyebrow": "Tu historia visual",
-    "galleryTitle": "Galería Interior",
-    "gallerySubtitle": "Cada imagen representa un momento diferente de ti. Toca una para volver a explorarla.",
-    "emptyGallery": "Todavía no tienes ninguna obra guardada.",
-    "delete": "Eliminar",
-    "deleteConfirm": "¿Quieres eliminar esta obra?",
-    "homeTitle": "Tu cielo",
-    "homeSubtitle": "Descubre la constelación de tu momento",
-    "states": {
-      "motivated": "Motivado",
-      "energetic": "Enérgico",
-      "enthusiastic": "Entusiasmado",
-      "sociable": "Sociable",
-      "anxious": "Ansioso",
-      "irritated": "Irritado",
-      "overwhelmed": "Abrumado",
-      "restless": "Inquieto",
-      "tired": "Cansado",
-      "sad": "Triste",
-      "withdrawn": "Reservado",
-      "discouraged": "Desanimado",
-      "calm": "Tranquilo",
-      "thoughtful": "Reflexivo",
-      "observant": "Observador",
-      "secure": "Seguro"
-    },
-    "tierBronze": "Bronce",
-    "tierSilver": "Plata",
-    "tierGold": "Oro",
-    "weeklyPiece": "Semana Interior",
-    "monthlyPiece": "Mes Interior",
-    "silverHint": "Registra los 7 días de esta semana para revelar tu pieza de Plata.",
-    "goldHint": "Registra 20 días este mes para revelar tu pieza de Oro.",
-    "silverUnlocked": "Tu pieza de Plata de esta semana ha sido desbloqueada.",
-    "goldUnlocked": "Tu pieza de Oro de este mes ha sido desbloqueada.",
-    "createdFromMoments": "Creada a partir de {{count}} momentos",
-    "galleryCount_one": "{{count}} momento guardado",
-    "galleryCount_other": "{{count}} momentos guardados",
-    "saveInMySky": "Guardar en Mi Cielo",
-    "savedInMySky": "Guardada en tu cielo",
-    "notSavedYet": "Esta constelación todavía no está guardada en tu cielo."
-  },
   "personalMap": {
     "backAria": "Back",
-    "title": "Mi Manual",
+    "title": "Mapa Personal",
     "subtitle": "Lo que CONFIA está aprendiendo sobre cómo funcionas, construido únicamente a partir de tus propios registros.",
+    "journey": "Registrar · Comprender · Descubrir · Experimentar · Evolucionar",
     "observations": "observations",
     "observationsTitle": "Observaciones que CONFIA identifica",
     "days": "days",
@@ -2153,7 +1905,25 @@
         "people": "Personas",
         "drains": "Me agota",
         "victories": "Logros"
-      }
+      },
+      "eyebrow": "memoria personal",
+      "reportMonth": "Mes",
+      "reportRecords": "Registros este mes",
+      "reportObservations": "Observaciones disponibles",
+      "reportNote": "Nota personal",
+      "reportDisclaimer": "Este resumen describe tus registros. No es un diagnóstico ni demuestra causalidad.",
+      "noteLabel": "Qué quiero recordar sobre mí",
+      "savedLocally": "Nota guardada en este dispositivo.",
+      "localOnly": "Esta nota se guarda localmente en este dispositivo.",
+      "exportReport": "Exportar informe mensual",
+      "clearNote": "Borrar nota"
+    ,
+      "storyTitle": "Mi historia a lo largo del tiempo",
+      "storyWeek": "Últimos 7 días",
+      "storyMonth": "Este mes",
+      "storyAvailable": "En este periodo tienes {{records}} registros repartidos en {{days}} días. Se identificaron {{discoveries}} observaciones y {{experiments}} experiencias tuvieron actividad durante este periodo.",
+      "storyEmpty": "Todavía no hay registros en este periodo. Tu historia puede construirse a tu propio ritmo.",
+      "storyNote": "Este resumen describe únicamente lo registrado; no mide tu valor ni demuestra que una experiencia haya causado un cambio."
     },
     "future": {
       "eyebrow": "Mensaje para mi yo futuro",
@@ -2162,9 +1932,28 @@
       "markRead": "Marcar como releído",
       "placeholder": "¿Qué te gustaría que recordara tu yo futuro?",
       "saveSixMonths": "Guardar para dentro de 6 meses"
+    ,
+      "sectionTitle": "Una carta para mi Yo del Futuro",
+      "writeLabel": "¿Qué te gustaría decirte?",
+      "dateLabel": "¿Cuándo te gustaría volver a leer esta carta?",
+      "saveLetter": "Guardar carta",
+      "empty": "Todavía no has escrito ninguna carta. Puedes empezar cuando quieras.",
+      "ready": "{{count}} carta(s) han llegado a la fecha que elegiste.",
+      "returnDate": "Volver a leer el {{date}}",
+      "read": "Ya releída",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "cancel": "Cancelar edición",
+      "saved": "Carta guardada en este dispositivo.",
+      "storageError": "No se pudo guardar la carta. Comprueba el espacio disponible en el dispositivo.",
+      "localOnly": "Las cartas permanecen privadas en este dispositivo. Confia no envía notificaciones ni comparte estas cartas.",
+      "confirmDelete": "¿Quieres eliminar esta carta? Esta acción no se puede deshacer."
+    ,
+      "history": "Cartas anteriores"
     },
     "signalsDetected": "{{count}} señales detectadas",
     "homeLearning": "Lo que CONFIA está aprendiendo contigo",
+    "openMap": "Explorar mi recorrido",
     "liveMemory": {
       "eyebrow": "Memoria viva",
       "title": "Lo que tu historia está enseñando",
@@ -2185,6 +1974,168 @@
         "recovered": "¿Cómo me recuperé?",
         "knowMe": "¿Qué sabes de mí?"
       }
+    },
+    "experiments": {
+      "eyebrow": "experimentos personales",
+      "title": "Descubre qué te hace bien",
+      "subtitle": "Prueba un pequeño cambio durante 7 o 14 días. Registra cómo fue, sin tratar una experiencia individual como prueba científica.",
+      "days": "días",
+      "start": "Empezar experimento",
+      "empty": "Todavía no tienes experimentos activos. Elige uno pequeño cuando te apetezca.",
+      "logged": "{{count}} registros realizados",
+      "todayDone": "Ya has registrado el experimento de hoy.",
+      "better": "Me sentí mejor",
+      "same": "Sin diferencia",
+      "worse": "Me sentí peor",
+      "caution": "Los resultados son autorreportes y no demuestran causalidad. Puedes parar cuando quieras.",
+      "completed": "Experimentos completados ({{count}})",
+      "notEnough": "Pocos registros para resumir",
+      "betterSummary": "Más registros indicaron mejora",
+      "worseSummary": "Más registros indicaron empeoramiento",
+      "mixedSummary": "Los registros mostraron resultados mixtos",
+      "mixed": "Resultados mixtos",
+      "storageError": "No se pudo guardar el experimento en este dispositivo. Comprueba el espacio disponible e inténtalo de nuevo."
+    }
+  ,
+    "livingMap": {
+  "eyebrow": "MI MAPA VIVO",
+  "title": "Lo que tu historia empieza a mostrar",
+  "subtitle": "Un retrato en construcción, basado en tus registros, descubrimientos y experiencias. No define quién eres.",
+  "stageTitle": "¿En qué punto está tu mapa?",
+  "stageMethod": "Cómo se asignan los estados: las primeras señales requieren al menos 4 registros en 3 días; los patrones emergentes o consistentes proceden del motor de análisis existente; los cambios se basan en su historial. Estos estados describen solo los datos disponibles, no tu salud emocional.",
+  "stages": {
+    "insufficient": {
+      "title": "Todavía estamos conociendo tu recorrido",
+      "description": "Aún no hay suficientes registros para describir un patrón. Puedes continuar a tu ritmo."
+    },
+    "first_signals": {
+      "title": "Primeras señales",
+      "description": "Ya hay registros en varios días. Son puntos de partida para explorar, todavía no un patrón identificado."
+    },
+    "emerging": {
+      "title": "Patrón emergente",
+      "description": "El motor de análisis existente ha identificado una posible asociación en tus registros. Obsérvala con curiosidad, sin asumir que sea una causa."
+    },
+    "consistent": {
+      "title": "Patrón consistente",
+      "description": "El motor ha identificado un patrón repetido con confianza alta. Sigue siendo una observación de tus registros, no una causa ni un diagnóstico."
+    },
+    "changing": {
+      "title": "Patrón en cambio",
+      "description": "Un patrón seguido por Confia está cambiando en tus registros más recientes. El cambio también forma parte de tu historia."
+    }
+  },
+  "metrics": {
+    "records": "Registros personales",
+    "days": "Días con registros",
+    "discoveries": "Observaciones identificadas",
+    "activeExperiments": "Experiencias en curso"
+  ,
+        "completedExperiments": "Experiencias completadas"
+      },
+  "timelineTitle": "Línea de tiempo — momentos recientes",
+  "timelineEmpty": "Cuando empieces a registrar, tus momentos aparecerán aquí en el orden en que ocurrieron.",
+  "timelineNote": "La línea de tiempo muestra los 12 registros más recientes del periodo seleccionado. Las observaciones mensuales enlazan con los registros que les dan contexto.",
+  "noDate": "Fecha no disponible",
+  "rating": "Registro: {{value}}/10",
+  "experimentStarted": "Experiencia iniciada",
+  "experimentCompleted": "Experiencia completada",
+  "experimentMeasured": "Observación de la experiencia",
+  "eventTypes": {
+    "mood": "Estado emocional",
+    "checkin": "Registro personal",
+    "habit": "Registro de hábito",
+    "goal": "Objetivo",
+    "intervention": "Ejercicio de autorregulación",
+    "context": "Contexto personal",
+    "insight_feedback": "Opinión sobre un descubrimiento",
+    "experiment": "Experiencia personal",
+    "nutrition": "Registro de alimentación",
+    "exercise": "Registro de actividad física",
+    "habit_challenge": "Reto de hábito",
+    "other": "Registro personal"
+  },
+  "periodLabel": "Periodo",
+      "periods": {
+        "all": "Todo el historial",
+        "week": "Últimos 7 días",
+        "month": "Últimos 30 días",
+        "quarter": "Últimos 90 días"
+      },
+      "categoryLabel": "Tipo de registro",
+      "categories": {
+        "all": "Todas las categorías",
+        "emotional": "Emociones y autorregulación",
+        "habits": "Hábitos",
+        "goals": "Objetivos",
+        "experiments": "Experiencias",
+        "lifestyle": "Alimentación y actividad"
+      },
+      "recordOrigin": "Ver origen del registro",
+      "sources": {
+        "daily_checkin": "Registro diario",
+        "daily_rating": "Valoración diaria",
+        "habit_daily": "Registro diario de hábitos",
+        "objective": "Objetivos personales",
+        "impulso": "Impulso SOS / autorregulación",
+        "sos_grounding": "Ejercicio de orientación SOS",
+        "app_context": "Contexto de la aplicación",
+        "insight": "Descubrimiento personal",
+        "microexperiment": "Laboratorio de experiencias",
+        "migration": "Datos anteriores importados",
+        "habits": "Módulo de hábitos",
+        "other": "Origen no identificado"
+      },
+  "historyRange": "Registros disponibles entre {{start}} y {{end}}.",
+      "showAll": "Mostrar los {{count}} registros",
+      "showRecent": "Mostrar solo los más recientes",
+      "monthly": {
+        "title": "¿Qué he descubierto sobre mí este mes?",
+        "month": "Resumen de {{month}}",
+        "intro": "Este mes has realizado {{records}} registros en {{days}} días. Esto es lo que permiten observar tus propios datos.",
+        "insufficient": "Este mes contiene {{records}} registros en {{days}} días. Todavía no hay información suficiente para identificar una tendencia mensual sólida.",
+        "changed": "Qué ha cambiado",
+        "noneChanged": "Todavía no se ha identificado un cambio sostenido en este periodo.",
+        "remains": "Qué se mantiene",
+        "noneRemains": "Todavía no hay un patrón consistente que podamos decir que se mantiene.",
+        "observations": "Qué está surgiendo",
+        "noneObservations": "Todavía no hay otras observaciones disponibles para este mes.",
+        "experiments": "Qué has aprendido de tus experiencias",
+        "limit": "Estas observaciones describen los registros disponibles. No demuestran causas ni eficacia clínica; la ausencia de registros no significa que una experiencia no haya ocurrido.",
+        "sources": "Ver {{count}} registros relacionados"
+      },
+      "privacyNote": "Este resumen utiliza únicamente los registros personales disponibles en tu Mapa Personal. No crea diagnósticos ni demuestra relaciones de causa y efecto."
+    }
+  ,
+    "growthTree": {
+      "eyebrow": "Tu recorrido",
+      "title": "Árbol de la Evolución",
+      "subtitle": "Cada rama representa una dimensión que has empezado a conocer mediante registros, descubrimientos o experiencias.",
+      "visualLabel": "{{learned}} de {{total}} dimensiones con aprendizajes identificados",
+      "learnedDimensions": "dimensiones con aprendizaje identificado",
+      "method": "Las ramas crecen cuando hay evidencias variadas en días distintos u observaciones consistentes, no por abrir la aplicación.",
+      "learned": "Aprendizaje identificado",
+      "growing": "Aún por explorar",
+      "noStreaks": "No hay rachas, puntos ni penalizaciones. Las ramas pueden aparecer, cambiar o quedar abiertas mientras te conoces.",
+      "dimensions": {
+        "self_awareness": "Autoconocimiento",
+        "habits": "Hábitos",
+        "relationships": "Relaciones",
+        "rest": "Descanso",
+        "self_regulation": "Autorregulación",
+        "goals": "Objetivos"
+      }
+    ,
+      "evidence": "{{count}} evidencias · {{days}} días"
+    }
+  ,
+    "lakeReflection": {
+      "title": "Lo que tu Espejo empieza a reflejar",
+      "subtitle": "Observaciones construidas a partir de los mismos registros que ya alimentan tu Mapa Personal.",
+      "empty": "Todavía no hay evidencia suficiente para destacar un patrón. Continúa solo si te resulta útil; puedes consultar cada registro en su fecha.",
+      "evidence": "{{count}} registros del {{start}} al {{end}}.",
+      "openRecord": "Ver este día en el Espejo",
+      "caution": "Son asociaciones observadas en tus registros, no relaciones de causa y efecto."
     }
   },
   "companionPresence": {
@@ -2702,6 +2653,7 @@
   "chatStartMessage": "Puedes empezar la conversación aquí.",
   "chatPlaceholder": "Escribe un mensaje…",
   "chatSend": "Enviar mensaje",
+  "communityChatSendError": "No se pudo enviar el mensaje. Sigue aquí para que puedas intentarlo de nuevo.",
   "objectiveEmotionalLink": "Este objetivo estuvo asociado a {{count}} registros emocionales.",
   "communityPremium": {
     "eyebrow": "apoyo humano",
@@ -2779,12 +2731,6 @@
       "body": "En momentos comparables encontramos {{withCount}} intervalos con uso de apoyo inmediato (cambio medio {{withDelta}}) y {{withoutCount}} sin uso registrado ({{withoutDelta}})."
     }
   },
-  "companionAging": {
-    "first_contact": "conociéndote",
-    "early_learning": "aprendiendo contigo · {{count}} registros",
-    "established": "ya conoce tus ritmos · {{count}} registros",
-    "personal_discovery": "ha crecido contigo · {{count}} registros"
-  },
   "experienceMatching": {
     "community": "Comunidad",
     "menu": "Alguien como yo",
@@ -2861,7 +2807,8 @@
     "report": "Denunciar",
     "requestRemoval": "Pedir expulsión del grupo",
     "leave": "Salir de esta conversación",
-    "privateNote": "Bloquear oculta inmediatamente los mensajes de esa persona para ti. Las denuncias y solicitudes de expulsión son privadas y quedan disponibles para moderación."
+    "privateNote": "Bloquear oculta inmediatamente los mensajes de esa persona para ti. Las denuncias y solicitudes de expulsión son privadas y quedan disponibles para moderación.",
+    "blocked": "Ya bloqueado"
   },
   "sosLongitudinal": {
     "title": "Memoria longitudinal",
@@ -3636,212 +3583,6 @@
       ]
     }
   },
-  "homeDaily": {
-    "more": "Mi día: observaciones y planes"
-  },
-  "companionDaily": {
-    "quiet": "Estoy aquí, a tu ritmo.",
-    "description": "Un espacio para observar tus registros y elegir el siguiente paso, sin prisa.",
-    "actions": {
-      "habits": "Ver mi reto",
-      "habitHistory": "Ver progreso del reto",
-      "nutrition": "Abrir Alimentación",
-      "exercise": "Abrir Ejercicio",
-      "plans": "Ver plan",
-      "breathe": "Respirar un poco",
-      "progress": "Ver evolución",
-      "patterns": "Ver patrones",
-      "completeObjective": "Hacer un objetivo",
-      "communityPost": "Compartir un pensamiento",
-      "mood": "Hacer el registro",
-      "sleep": "Abrir Sueño"
-    },
-    "restart": [
-      "Volver a empezar no borra los días que ya has construido.",
-      "Hay espacio para un nuevo comienzo, a tu ritmo.",
-      "El camino recorrido sigue contando. Hoy puedes volver a empezar."
-    ],
-    "milestone": [
-      "{{count}} días construidos. Merece la pena reconocer este camino.",
-      "Has llegado al día {{count}} de tu reto. Un día a la vez.",
-      "Tu reto suma {{count}} días. Puedes parar un momento para reconocer el esfuerzo."
-    ],
-    "continuity": [
-      "El registro de hoy forma parte de un camino de {{count}} días.",
-      "Son {{count}} días construidos con pequeñas decisiones.",
-      "Un registro más en tu reto: {{count}} días, a tu ritmo."
-    ],
-    "planEnd": [
-      "Has llegado al último día del plan. ¿Quieres revisar tus registros?",
-      "Tu plan llega al día 15. Hay espacio para mirar estos días.",
-      "¿Quieres repasar las pequeñas experiencias de estos 15 días?"
-    ],
-    "planStep": [
-      "En el día {{count}} del plan hay una pequeña experiencia disponible.",
-      "El plan está en el día {{count}}. Puedes elegir lo que cabe en tu día.",
-      "Hay una propuesta sencilla para el día {{count}}, sin obligación."
-    ],
-    "stillAgitated": [
-      "Después de la pausa registraste que seguías sintiendo agitación. No tienes que forzar otro intento.",
-      "La pausa no trajo la calma que buscabas. Puedes elegir lo que tiene sentido ahora.",
-      "Al terminar la pausa todavía había agitación. Hay espacio para seguir con amabilidad."
-    ],
-    "breathing": [
-      "En la mayoría de tus últimas pausas registradas dijiste sentir más calma.",
-      "En tus registros recientes de respiración, sentir más calma fue la respuesta más frecuente.",
-      "Tus últimas pausas han ido seguidas, más veces, de un registro de mayor calma."
-    ],
-    "caffeine": [
-      "Hoy registraste cafeína más tarde. Puedes observar tu descanso sin sacar conclusiones todavía.",
-      "Hay un registro de cafeína al final del día. Si quieres, puedes observarlo junto con tu descanso.",
-      "El registro de hoy incluye cafeína más tarde. Es una observación, no una conclusión."
-    ],
-    "movement": [
-      "Registraste movimiento en {{count}} días esta semana. Hay pequeñas decisiones que reconocer.",
-      "En los últimos siete días hay movimiento registrado en {{count}} días.",
-      "Tu historial de esta semana incluye {{count}} días con movimiento."
-    ],
-    "hydration": [
-      "Tienes registros de agua en {{count}} días esta semana. ¿Quieres mirarlos?",
-      "En los últimos siete días registraste agua en {{count}} días.",
-      "Hay {{count}} días con registros de agua esta semana. Podemos observar sin evaluar."
-    ],
-    "mode": {
-      "insight": "Lo que he notado",
-      "suggestion": "Una sugerencia para ti"
-    },
-    "morningTrend": [
-      "En tus registros recientes, tu media de la mañana ha subido de {{previous}} a {{recent}}. Puede valer la pena observar qué podría estar ayudando.",
-      "He observado que tu media de la mañana ha subido de {{previous}} a {{recent}}. No es una conclusión sobre la causa, pero sí un cambio que merece observarse.",
-      "Tus últimas valoraciones de la mañana son más altas: la media ha subido de {{previous}} a {{recent}}. Quizá valga la pena observar qué te está ayudando."
-    ],
-    "morningTrendDeclining": [
-      "En tus registros recientes, tu media de la mañana ha bajado de {{previous}} a {{recent}}. Podemos observar el cambio sin sacar conclusiones rápidas.",
-      "He observado que tu media de la mañana ha bajado de {{previous}} a {{recent}}. Si quieres, podemos ver cómo evoluciona durante los próximos días.",
-      "Tus últimas valoraciones de la mañana son más bajas: la media ha bajado de {{previous}} a {{recent}}. Vale la pena observarlo sin juzgarte."
-    ],
-    "objectiveSuggestion": [
-      "Hoy has completado {{completed}} de {{total}} objetivos. Si te apetece, puedes elegir uno y empezar por ahí.",
-      "Todavía quedan objetivos por hacer hoy. Un pequeño paso cuenta — ¿quieres hacer uno?",
-      "Tienes {{completed}}/{{total}} objetivos hoy. Puedes elegir solo uno ahora y continuar desde ahí."
-    ],
-    "communitySuggestion": [
-      "Si te apetece, puedes dejar un pensamiento en la Comunidad. A veces, poner en palabras lo que ocurre también ayuda.",
-      "La Comunidad está cerca. Si hay algo que quieras compartir hoy, puedes escribir un pequeño pensamiento.",
-      "¿Quieres dejar una idea o experiencia en la Comunidad? Puede ser solo una frase sobre cómo estás hoy."
-    ],
-    "objectiveCelebration": [
-      "Bien. Acabas de completar un objetivo. Las pequeñas acciones repetidas también cuentan.",
-      "Otro objetivo hecho. Vale la pena notar qué te ayudó a avanzar.",
-      "Objetivo completado. Me gusta ver esta parte de tu camino."
-    ],
-    "caffeineGuidance": {
-      "0": "Hoy registraste {{coffeeCount}} tazas de café. La referencia de la EFSA para adultos sanos es de hasta unas 5 tazas al día; la cafeína varía entre bebidas."
-    },
-    "caffeineCountGuidance": {
-      "0": "Ya has registrado {{coffeeCount}} cafés. La cantidad de cafeína varía mucho, por eso el Compañero mira la estimación y no solo el número de cafés."
-    },
-    "lateCaffeineGuidance": {
-      "0": "Registraste {{coffeeCount}} tazas de café, incluyendo consumo más tarde. La cafeína cerca de la hora de dormir puede afectar al sueño en algunas personas."
-    },
-    "activityGuidance": {
-      "0": "Tienes {{minutes}} minutos de actividad moderada registrados esta semana. Si te apetece, un paseo corto u otra actividad cómoda puede ayudarte a acercarte gradualmente a las recomendaciones generales."
-    },
-    "produceGuidance": {
-      "0": "Has registrado {{portions}} porciones de fruta/verduras. La referencia general es al menos 5 porciones, unos 400 g, al día."
-    },
-    "teaGuidance": {
-      "0": "Has registrado {{count}} registro(s) de té. Según el tipo, el té puede aportar cafeína y forma parte de la variedad alimentaria."
-    },
-    "cerealsGuidance": {
-      "0": "Has registrado {{count}} porción(es) de cereales. Elegir cereales integrales con frecuencia puede aumentar la fibra de la dieta."
-    },
-    "proteinGuidance": {
-      "0": "Has registrado {{count}} porción(es) de alimentos proteicos. Una dieta variada puede combinar fuentes animales y vegetales de proteína."
-    },
-    "fatsGuidance": {
-      "0": "Has registrado {{count}} porción(es) de alimentos ricos en grasa. Las grasas forman parte de una dieta saludable; importan el tipo y la cantidad."
-    },
-    "sweetsGuidance": {
-      "0": "Has registrado {{count}} alimento(s) dulce(s). La OMS recomienda limitar los azúcares libres y favorecer una alimentación variada."
-    },
-    "saltyGuidance": {
-      "0": "Has registrado {{count}} alimento(s) salado(s). La OMS recomienda limitar la sal a menos de 5 g al día en adultos."
-    },
-    "processedFoodGuidance": {
-      "0": "Has registrado {{count}} registro(s) de comida rápida/ultraprocesados. Muchos pueden tener mucha sal, azúcares libres o grasas menos favorables; conviene mirar el conjunto del día."
-    },
-    "hydrationGuidance": {
-      "0": "Hoy registraste {{ml}} ml de agua. Esta es la cantidad que registraste; la hidratación también procede de otros alimentos y bebidas."
-    },
-    "foodTypeSpecial": {
-      "0": "Has registrado {{count}} registro(s) de esta categoría hoy. El Compañero sigue este dato y puede compararlo con el resto de tu contexto a lo largo del tiempo."
-    },
-    "sleepShortGuidance": {
-      "0": "Has registrado {{hours}} horas de sueño. La mayoría de los adultos necesita unas 7–9 horas, aunque las necesidades individuales varían. Hoy puede ser útil proteger un poco más tu descanso."
-    },
-    "sleepGoodGuidance": {
-      "0": "Has registrado {{hours}} horas de sueño con calidad {{quality}}/5. Es un dato positivo para seguir, sin asumir que una noche determina cómo te sentirás hoy."
-    },
-    "sleepQualityGuidance": {
-      "0": "Has valorado la calidad del sueño en {{quality}}/5. Una noche menos reparadora puede acompañarse de más cansancio durante el día; hoy puede ser útil bajar un poco el ritmo."
-    },
-    "morningLowGuidance": {
-      "0": "Has valorado tu mañana en {{rating}}/5. Una mañana difícil puede acompañar cómo se vive el resto del día, pero no determina lo que ocurrirá. Prueba una acción sencilla y concreta esta mañana."
-    },
-    "afternoonLowGuidance": {
-      "0": "Has valorado tu tarde en {{rating}}/5. Si el día pesa, una pausa breve, cambiar de ambiente o elegir una tarea pequeña puede ayudarte antes de continuar."
-    },
-    "dayRecoveryGuidance": {
-      "0": "Pasaste de {{morning}}/5 por la mañana a {{afternoon}}/5 por la tarde. Es un cambio positivo en tu propio registro; no demuestra una causa, pero es interesante seguirlo."
-    },
-    "exerciseType": {
-      "walk": {
-        "0": "Has registrado {{minutes}} minutos de caminata. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      },
-      "run": {
-        "0": "Has registrado {{minutes}} minutos de carrera. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      },
-      "bike": {
-        "0": "Has registrado {{minutes}} minutos de bicicleta. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      },
-      "swim": {
-        "0": "Has registrado {{minutes}} minutos de natación. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      },
-      "gym": {
-        "0": "Has registrado {{minutes}} minutos de fuerza/gimnasio. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      },
-      "yoga": {
-        "0": "Has registrado {{minutes}} minutos de estiramientos/movilidad. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      },
-      "sport": {
-        "0": "Has registrado {{minutes}} minutos de deporte. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      },
-      "other": {
-        "0": "Has registrado {{minutes}} minutos de otra actividad. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      },
-      "dance": {
-        "0": "Has registrado {{minutes}} minutos de Danza. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      },
-      "hiit": {
-        "0": "Has registrado {{minutes}} minutos de HIIT. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      },
-      "stretch": {
-        "0": "Has registrado {{minutes}} minutos de Estiramientos. Este dato entra en tu semana y ayuda al Compañero a entender qué movimiento forma parte de tu rutina."
-      }
-    },
-    "whatILearned": "Lo que CONFIA ha percibido",
-    "why": {
-      "title": "Por qué lo digo",
-      "general": "Me baso en tus registros y en el contexto que has ido construyendo conmigo.",
-      "withWindow": "Estoy comparando tus registros disponibles de los últimos {{days}} días.",
-      "insufficient": "Todavía tengo poca información para sacar una conclusión. Estoy observando, no adivinando."
-    },
-    "nextStep": "Qué puedes hacer ahora",
-    "activityIntensityGuidance": {
-      "0": "Registraste {{minutes}} minutos de actividad esta semana sin indicar la intensidad. También registraste explícitamente {{moderateMinutes}} minutos moderados y {{vigorousMinutes}} vigorosos. Los minutos sin intensidad no se pueden comparar directamente con la recomendación de 150 minutos moderados o 75 vigorosos por semana. Indicar la intensidad en próximos registros permitirá una comparación más precisa."
-    }
-  },
   "companionBrain.actionRegisterMorning": "Registrar la mañana",
   "companionBrain.actionRegisterAfternoon": "Registrar la tarde",
   "companionBrain.actionTalkAboutIt": "Abrir Comunidad",
@@ -3903,317 +3644,14 @@
     "insufficient": "datos insuficientes",
     "guardrail": "CONFIA usa tu propia historia, conserva las contradicciones y no convierte asociaciones en causalidad. Esto no es un diagnóstico clínico."
   },
-  "habitImpact": {
-    "title": "Impacto de los hábitos",
-    "subtitle": "Qué permiten concluir tus registros, qué midió la investigación y qué sigue siendo desconocido en tu caso.",
-    "evidence": "Ver evidencia científica y limitaciones",
-    "evidenceType": "Tipo de evidencia",
-    "population": "Población estudiada",
-    "statistic": "Resultado medido",
-    "certainty": "Grado de certeza",
-    "limitations": "Limitaciones",
-    "openSource": "Consultar la fuente original",
-    "lastReviewed": "Fuente revisada el",
-    "showMore": "Ver {{count}} observaciones más",
-    "showLess": "Mostrar menos",
-    "cards": {
-      "sleepShort": {
-        "title": "Sueño inferior a 7 horas",
-        "message": "Registraste {{hours}} horas: {{deficit}} horas por debajo del mínimo habitual de 7 horas para adultos y {{differenceFromReference}} horas por debajo de una referencia de 8 horas. Un metaanálisis de 44 estudios cuantificó los efectos de una noche con una oportunidad de sueño de 2–6 horas: somnolencia (SMD 0,986), tiempo de reacción (SMD 0,512) y lapsos de atención (SMD 0,489). Son diferencias estandarizadas entre grupos, no porcentajes ni predicciones individuales."
-      },
-      "sleepRange": {
-        "title": "Duración del sueño registrada",
-        "message": "Registraste {{hours}} horas, dentro de la referencia habitual de 7–9 horas para adultos. Las necesidades individuales varían; este registro por sí solo no mide la calidad del sueño ni el funcionamiento del sistema nervioso."
-      },
-      "sleepLong": {
-        "title": "Sueño superior a 9 horas",
-        "message": "Registraste {{hours}} horas. Dormir más de 9 horas no significa automáticamente que exista un problema: puede ser adecuado durante la recuperación de la falta de sueño u otras circunstancias. La duración por sí sola no permite determinar la causa."
-      },
-      "exercise": {
-        "title": "Actividad física — últimos 7 días",
-        "message": "Actividad registrada de intensidad moderada: {{moderate}} min (referencia mínima: {{moderateTarget}} min/semana). Intensidad vigorosa: {{vigorous}} min (referencia mínima: {{vigorousTarget}} min/semana). Otros minutos, de intensidad ligera o no indicada: {{unclassified}} min; no se suman a los objetivos de intensidad moderada/vigorosa porque la intensidad no está confirmada."
-      },
-      "caffeine": {
-        "title": "Cafeína estimada",
-        "message": "Según los tipos y cantidades registrados, la estimación es de {{mg}} mg de cafeína, aproximadamente el {{percentage}} % de la referencia de 400 mg/día de la EFSA para la mayoría de los adultos sanos. Se basa en raciones típicas, no en una medición del producto consumido."
-      },
-      "caffeineLate": {
-        "title": "Cafeína registrada al final del día",
-        "message": "Se registró cafeína a una hora tardía. La EFSA indica que una dosis única de 100 mg puede afectar al sueño de algunas personas, especialmente cerca de la hora de acostarse. Confia puede no conocer tu hora de dormir ni la dosis exacta, por lo que no puede calcularse el efecto de este registro."
-      },
-      "produce": {
-        "title": "Fruta y verdura — comparación con la recomendación",
-        "message": "Registraste {{value}} {{unit}}. La referencia de la OMS es de al menos {{reference}} {{unit}} al día para personas mayores de 10 años. Esta comparación solo utiliza cantidades registradas explícitamente en gramos o porciones; no convierte piezas individuales en pesos supuestos."
-      },
-      "produceUnquantified": {
-        "title": "Fruta y verdura sin cantidad comparable",
-        "message": "Registraste fruta o verdura, pero la cantidad está expresada en unidades y no en gramos o porciones. No estimaré el peso ni afirmaré que alcanzaste o no la recomendación de la OMS."
-      },
-      "water": {
-        "title": "Agua registrada",
-        "message": "Registraste aproximadamente {{ml}} ml de agua. La DGS de Portugal ofrece 1.500 ml/día como orientación práctica general, pero las necesidades varían y este registro puede no incluir todos los líquidos. El valor no diagnostica deshidratación."
-      },
-      "limits": {
-        "fastFood": {
-          "title": "Comida rápida registrada",
-          "message": "Registraste {{count}} entrada(s) en esta categoría. El registro no identifica el grado de procesamiento ni los gramos de sal, azúcar, grasa o energía. No es científicamente válido aplicar directamente a esta comida los riesgos observados en estudios sobre el consumo habitual de ultraprocesados."
-        },
-        "sweets": {
-          "title": "Dulces registrados — cantidad no cuantificada",
-          "message": "Registraste {{count}} entrada(s) de dulces, pero Confia no dispone de los gramos de azúcares libres. La recomendación de la OMS se expresa como porcentaje de la energía diaria; estos datos no permiten calcular tu porcentaje."
-        },
-        "salt": {
-          "title": "Alimentos salados — sal no cuantificada",
-          "message": "Registraste {{count}} entrada(s) de alimentos salados, pero esta categoría no mide los gramos de sal consumidos. La recomendación poblacional de la OMS es inferior a 5 g de sal al día; este registro no permite calcular tu ingesta."
-        },
-        "alcohol": {
-          "title": "Alcohol registrado — cantidad no cuantificada",
-          "message": "Registraste {{count}} entrada(s) de alcohol. Sin el volumen de la bebida y su graduación no se pueden calcular los gramos de etanol ni la exposición. La OMS indica que ningún consumo de alcohol está exento de riesgo; este depende de la cantidad, la frecuencia y el contexto."
-        },
-        "tobacco": {
-          "title": "Tabaco registrado — exposición no cuantificada",
-          "message": "Registraste {{count}} entrada(s) de tabaco, pero el modelo actual no identifica con precisión el producto ni la dosis. Se puede señalar el registro, pero no calcular la exposición o el riesgo individual con esta categoría."
-        }
-      },
-      "habitLog": {
-        "title": "Registro de tu hábito",
-        "message": "Hábito: «{{habitName}}». Objetivo definido: «{{goal}}». Este registro indica si marcaste el objetivo como cumplido, pero no mide automáticamente la dosis, la duración ni el efecto fisiológico. Para un análisis cuantificado, el objetivo necesita una medida observable."
-      },
-      "caffeineUnknown": {
-        "title": "No se puede cuantificar la cafeína de este registro",
-        "message": "El tipo o la cantidad registrada no permite estimar la cafeína con fiabilidad. Las cantidades varían mucho según el producto y el tamaño; no asumiré una dosis típica como si fuera exacta."
-      },
-      "nutrientDetailLimit": {
-        "title": "Composición nutricional no registrada",
-        "message": "El registro guarda la categoría y la cantidad, pero no los valores de la etiqueta nutricional. Por tanto, no se pueden calcular con precisión las calorías ni los gramos de azúcar, sal o grasas saturadas de este consumo."
-      },
-      "waterUnknown": {
-        "title": "Agua registrada sin volumen comparable",
-        "message": "Este registro antiguo contiene una cantidad de agua, pero no el volumen en ml ni el tamaño de la ración. No convertiré esa cantidad en litros sin conocer el tamaño del vaso o la botella."
-      },
-      "sleepDetails": {
-        "title": "Calidad del sueño y despertares registrados",
-        "message": "Además de la duración, valoraste la calidad del sueño con {{quality}}/5 y registraste {{awakenings}} despertares. Estos datos autodeclarados ayudan a comparar patrones, pero no miden las fases del sueño ni diagnostican trastornos.",
-        "qualityOnly": "Valoraste la calidad del sueño con {{quality}}/5. Es una valoración subjetiva; no mide las fases del sueño ni diagnostica trastornos."
-      }
-    },
-    "personal": {
-      "title": "Lo que aparece en tu historial",
-      "intro": "Comparación de tus propias valoraciones emocionales en días con y sin la condición indicada.",
-      "sleep": "Menos de 7 horas de sueño",
-      "exercise": "Actividad física registrada",
-      "caffeine": "Al menos 2 unidades de café registradas",
-      "fastFood": "Comida rápida registrada",
-      "pattern": "En tus registros, la valoración emocional media fue {{direction}} en los días con la primera condición ({{exposedMean}}/10; {{exposedDays}} días) que en los días de comparación ({{comparisonMean}}/10; {{comparisonDays}} días). Diferencia observada: {{difference}} puntos.",
-      "direction": {
-        "lower": "más baja",
-        "higher": "más alta",
-        "similar": "sin diferencia relevante"
-      },
-      "caution": "Esto es una asociación observada en tu historial, no demuestra que el hábito haya causado el cambio. Puede haber otros factores y los registros incompletos pueden sesgar la comparación.",
-      "insufficient": "Todavía no hay datos suficientes para una comparación personal fiable. El motor exige al menos 5 días medidos en cada grupo y una valoración emocional en esos mismos días. Los días sin registro no se consideran cero. Días con valoraciones emocionales disponibles en los últimos 30 días: {{count}}."
-    },
-    "units": {
-      "g": "g",
-      "portions": "porciones"
-    },
-    "sources": {
-      "sleepRestriction": {
-        "title": "Impacto de una noche de restricción del sueño en la somnolencia y la función cognitiva: revisión sistemática y metaanálisis",
-        "organization": "Sleep Medicine Reviews / PubMed",
-        "evidenceType": "Revisión sistemática y metaanálisis de 44 estudios",
-        "population": "Adultos; oportunidad de sueño limitada a 2–6 horas durante una noche",
-        "statistic": "Una noche de sueño restringido aumentó la somnolencia subjetiva (diferencia media estandarizada 0,986) y perjudicó la atención sostenida: tiempo de reacción 0,512 y lapsos de atención 0,489.",
-        "certainty": "Evidencia de efectos a corto plazo sobre la somnolencia y la atención sostenida; los efectos variaron según el resultado cognitivo.",
-        "limitations": "Las diferencias medias estandarizadas no son porcentajes ni predicen el tiempo de reacción o el estado emocional de una persona."
-      },
-      "adultSleep": {
-        "title": "Cantidad de sueño recomendada para adultos sanos: declaración de consenso conjunto",
-        "organization": "American Academy of Sleep Medicine / Sleep Research Society",
-        "evidenceType": "Declaración de consenso de expertos",
-        "population": "Adultos sanos",
-        "statistic": "Los adultos deberían dormir regularmente al menos 7 horas por noche para favorecer una salud óptima.",
-        "certainty": "Recomendación de consenso respaldada por una revisión de resultados de salud.",
-        "limitations": "Las necesidades individuales y la recuperación ocasional varían; una sola noche corta no es un diagnóstico."
-      },
-      "caffeine": {
-        "title": "Cafeína",
-        "organization": "Autoridad Europea de Seguridad Alimentaria (EFSA)",
-        "evidenceType": "Evaluación científica del riesgo y orientación pública",
-        "population": "Adultos sanos; no se aplica a todas las condiciones médicas ni al embarazo",
-        "statistic": "La EFSA indica que hasta 400 mg al día no plantean problemas de seguridad para la mayoría de los adultos sanos; una dosis única de 100 mg puede afectar al sueño en algunas personas, especialmente cerca de la hora de acostarse.",
-        "certainty": "Orientación oficial a nivel poblacional; la sensibilidad individual varía.",
-        "limitations": "Las cantidades de cafeína de Confia se estiman a partir de raciones típicas, no de mediciones de laboratorio ni de la etiqueta del producto."
-      },
-      "physicalActivity": {
-        "title": "Directrices de la OMS sobre actividad física y comportamiento sedentario: resumen",
-        "organization": "Organización Mundial de la Salud (OMS)",
-        "evidenceType": "Directriz de salud pública basada en una revisión de la evidencia",
-        "population": "Adultos",
-        "statistic": "La OMS recomienda 150–300 minutos de actividad aeróbica moderada por semana, o 75–150 minutos de actividad vigorosa, y ejercicios de fortalecimiento muscular al menos 2 días por semana.",
-        "certainty": "Recomendación de salud pública; cualquier actividad es mejor que ninguna.",
-        "limitations": "Los minutos sin intensidad registrada no pueden contarse con fiabilidad como actividad moderada o vigorosa. La capacidad individual y el contexto médico son importantes."
-      },
-      "fruitVegetables": {
-        "title": "Alimentación saludable",
-        "organization": "Organización Mundial de la Salud (OMS)",
-        "evidenceType": "Recomendación de salud pública",
-        "population": "Personas mayores de 10 años",
-        "statistic": "La OMS recomienda al menos 400 g de frutas y verduras al día para personas mayores de 10 años.",
-        "certainty": "Recomendación nutricional oficial para la población.",
-        "limitations": "El número de piezas no se puede convertir con precisión en gramos sin conocer el peso o el tamaño de la porción."
-      },
-      "hydrationPortugal": {
-        "title": "Conoce los alimentos — alimentación completa, equilibrada y variada",
-        "organization": "Programa Nacional para la Promoción de la Alimentación Saludable (DGS), Portugal",
-        "evidenceType": "Orientación de salud pública",
-        "population": "Población general; las necesidades varían según las circunstancias",
-        "statistic": "La orientación pública de la DGS sugiere beber al menos 1,5 litros de agua al día y aumentar la cantidad con calor o ejercicio.",
-        "certainty": "Orientación práctica general, no una prueba de hidratación individual.",
-        "limitations": "El agua registrada no representa todos los líquidos; las necesidades varían según el tamaño corporal, la alimentación, la temperatura, la actividad y la salud."
-      },
-      "ultraProcessedFood": {
-        "title": "Exposición a alimentos ultraprocesados y resultados adversos para la salud: revisión panorámica de metaanálisis epidemiológicos",
-        "organization": "The BMJ / PubMed",
-        "evidenceType": "Revisión panorámica de 45 análisis agrupados, con 9.888.373 participantes",
-        "population": "Estudios poblacionales; exposición a alimentos ultraprocesados",
-        "statistic": "Una mayor exposición a alimentos ultraprocesados se asoció con resultados de ansiedad prevalente (odds ratio 1,48; IC del 95 %: 1,37–1,59); la calidad de la evidencia para este resultado se calificó como baja.",
-        "certainty": "Asociación; la calidad de la evidencia es baja para el resultado relacionado con la ansiedad.",
-        "limitations": "Una odds ratio no es un aumento porcentual del riesgo de ansiedad individual. Un registro genérico de comida rápida no demuestra la clasificación NOVA ni cuantifica la exposición."
-      },
-      "freeSugar": {
-        "title": "Alimentación saludable",
-        "organization": "Organización Mundial de la Salud (OMS)",
-        "evidenceType": "Recomendación de salud pública sobre alimentación",
-        "population": "Población general; las necesidades energéticas varían",
-        "statistic": "La OMS recomienda limitar los azúcares libres a menos del 10 % de la energía diaria, idealmente al 5 % o menos. Para un adulto que consume 2.000 kcal/día, el 10 % equivale aproximadamente a 50 g.",
-        "certainty": "Recomendación oficial para la población.",
-        "limitations": "Confia registra actualmente ocasiones o cantidades de dulces, no gramos de azúcares libres ni la energía diaria total necesaria para calcular este porcentaje."
-      },
-      "salt": {
-        "title": "Alimentación saludable / reducción del sodio",
-        "organization": "Organización Mundial de la Salud (OMS)",
-        "evidenceType": "Recomendación de salud pública sobre alimentación",
-        "population": "Adultos",
-        "statistic": "La OMS recomienda menos de 2.000 mg de sodio al día, equivalentes a menos de 5 g de sal. Un consumo elevado de sodio se asocia con presión arterial alta y mayor riesgo cardiovascular.",
-        "certainty": "Recomendación oficial de salud pública.",
-        "limitations": "La categoría actual de Confia registra alimentos salados u ocasiones, no el contenido de sodio de cada producto ni la ingesta diaria total de sal."
-      },
-      "tobacco": {
-        "title": "Tabaco y nicotina",
-        "organization": "Organización Mundial de la Salud (OMS)",
-        "evidenceType": "Ficha informativa de salud pública",
-        "population": "Personas que consumen tabaco y personas expuestas al humo ajeno",
-        "statistic": "La OMS informa de que el tabaco causa más de 7 millones de muertes al año y que todas las formas de consumo son perjudiciales; no existe un nivel seguro de exposición.",
-        "certainty": "Evidencia poblacional establecida sobre los daños.",
-        "limitations": "El recuento genérico no identifica el producto, el contenido de nicotina, la cantidad ni la duración; no permite estimar la exposición o el riesgo individual."
-      },
-      "gamingDisorder": {
-        "title": "Trastorno por videojuegos",
-        "organization": "Organización Mundial de la Salud (OMS), CIE-11",
-        "evidenceType": "Clasificación internacional de enfermedades y revisión experta",
-        "population": "Personas cuyo patrón de juego causa un deterioro significativo del funcionamiento",
-        "statistic": "La OMS define el trastorno por videojuegos por el control reducido, la prioridad del juego sobre otras actividades y su continuación pese a consecuencias negativas; el patrón debe causar un deterioro significativo y se observa normalmente durante al menos 12 meses.",
-        "certainty": "Clasificación clínica; no es un umbral para la duración habitual del juego.",
-        "limitations": "Jugar o una sola sesión no implica un trastorno. El registro actual de hábitos de Confia no mide horas, pérdida de control ni deterioro funcional."
-      },
-      "alcohol": {
-        "title": "Alcohol",
-        "organization": "Organización Mundial de la Salud (OMS)",
-        "evidenceType": "Ficha informativa de salud pública",
-        "population": "Población general; el riesgo depende de la cantidad y el contexto",
-        "statistic": "La OMS indica que ningún tipo de consumo de alcohol está exento de riesgo; el riesgo depende de la cantidad, la frecuencia y los factores personales.",
-        "certainty": "Orientación de salud pública.",
-        "limitations": "La entrada actual no registra de forma fiable el volumen de la bebida ni la concentración de alcohol, por lo que no se pueden calcular los gramos de etanol."
-      }
-    },
-    "submenuHint": "Abre para explorar señales, evidencias y tus patrones personales.",
-    "minimize": "Minimizar",
-    "maximize": "Ampliar"
-  },
-  "habitClock": {
-    "title": "Reloj biológico",
-    "symbolAlt": "Símbolo de reloj y figura humana coloreado según los hábitos registrados",
-    "tones": {
-      "favourable": "Registros mayoritariamente favorables",
-      "mixed": "Registros mixtos o equilibrio intermedio",
-      "unfavourable": "Más registros potencialmente desfavorables",
-      "unknown": "Todavía no hay datos suficientes"
-    },
-    "coverage": "Basado en {{count}} de 3 áreas registradas",
-    "noData": "Registra sueño, movimiento o alimentación para empezar. La falta de registros no cuenta como hábito negativo.",
-    "disclaimer": "Es un resumen visual de los registros, no una evaluación médica del cuerpo.",
-    "scaleAlt": "Escala gradual de naranja a verde"
-  },
-  "habitTrends": {
-    "title": "Tu evolución",
-    "subtitle": "Resumen de los registros recientes. Los días sin registros no se consideran cero.",
-    "period": "Últimos {{days}} días",
-    "daysWithRecords": "{{count}} días con registros de hábitos",
-    "sleep": "Sueño medio",
-    "hours": "h/noche",
-    "measuredDays": "{{count}} días medidos",
-    "exercise": "Movimiento registrado",
-    "minutes": "min",
-    "activeDays": "{{count}} días con actividad",
-    "mood": "Valoración emocional media",
-    "disclaimer": "Las medias describen solo los registros disponibles; no demuestran que un hábito haya causado un cambio emocional.",
-    "comparison": "Comparación con el período anterior: {{value}}",
-    "noComparison": "No hay datos suficientes para comparar con el período anterior"
-  },
-  "habitDailyExperience": {
-    "title": "Reflejado en el lago",
-    "subtitle": "Pequeños registros, una visión más clara con el tiempo. Sin culpa en los días de pausa.",
-    "views": "Vistas de tu progreso",
-    "tabs": {
-      "mirror": "Espejo",
-      "calendar": "Calendario",
-      "report": "Informe"
-    },
-    "selectedDay": "Registros del {{date}}",
-    "domains": {
-      "sleep": "Sueño",
-      "exercise": "Movimiento",
-      "nutrition": "Alimentación",
-      "mood": "Estado de ánimo"
-    },
-    "notRecorded": "Aún sin registro",
-    "sleepValue": "{{value}} h",
-    "minutesValue": "{{value}} min",
-    "entriesValue": "{{value}} registro(s)",
-    "moodValue": "{{value}}/10",
-    "mirror": {
-      "hasRecords": "Hoy has observado {{count}} área(s) de tu bienestar.",
-      "empty": "Todavía no hay registros para este día. Puedes empezar con una pequeña observación."
-    },
-    "learningTitle": "Una observación para ti",
-    "learningEmpty": "A medida que registres más días, podrás comparar el sueño y el estado de ánimo con tus propios valores habituales.",
-    "sleepCompare": "Hoy registraste {{current}} h de sueño. La media de los otros días observados de esta semana es {{average}} h. Es una comparación descriptiva, no una explicación causal.",
-    "moodCompare": "Tu valoración del estado de ánimo fue {{current}}/10; la media de los otros días registrados esta semana fue {{average}}/10.",
-    "quickCheckin": "¿Quieres registrar {{domain}} ahora?",
-    "calendarIntro": "Elige un día para revisar tus registros. Los puntos muestran áreas observadas; los días vacíos permanecen neutros.",
-    "observedDomains": "{{count}} áreas observadas",
-    "recorded": "Registros",
-    "rest": "Sin registros",
-    "gardenTitle": "Tu jardín de presencia",
-    "gardenText": "Observaste tu bienestar en {{count}} de los últimos 7 días. Cada registro ayuda a construir una visión más completa; no necesitas una racha perfecta.",
-    "reportTitle": "Resumen personal de 30 días",
-    "reportSubtitle": "Resumen hasta {{date}}",
-    "report": {
-      "activeDays": "Días con registros",
-      "sleep": "Sueño medio",
-      "exercise": "Movimiento registrado",
-      "mood": "Estado de ánimo medio",
-      "comparison": "Cambio respecto a los 30 días anteriores — sueño: {{sleep}}; movimiento: {{exercise}}; estado de ánimo: {{mood}}.",
-      "caution": "Este informe resume únicamente los datos registrados. Los días sin registros no se consideran cero y las diferencias no demuestran causalidad."
-    },
-    "daysValue": "{{value}} días",
-    "printReport": "Imprimir / guardar como PDF",
-    "moodCheckinTitle": "Registro rápido del estado de ánimo",
-    "moodScaleLabel": "¿Cómo te sientes ahora? 1 = muy mal · 10 = muy bien",
-    "moodSaved": "Registro guardado: {{value}}/10. Gracias por dedicarte un momento.",
-    "progressMilestone": "En los últimos 30 días, registraste datos en al menos {{count}} días. Eso ayuda a construir una visión más completa de ti; las pausas también forman parte del proceso.",
-    "minimize": "Minimizar evolución",
-    "maximize": "Ampliar evolución"
-  }
+  "privacyPolicyTitle": "Política de privacidad",
+  "privacyPolicyDescription": "Consulta cómo CONFIA utiliza, almacena y protege tus datos, incluidos tus registros personales y las interacciones en la Comunidad.",
+  "privacyPolicyOpen": "Consultar política de privacidad",
+  "deleteDataRetentionNotice": "Las denuncias que presentaste se eliminan. Las denuncias sobre tu cuenta pueden conservarse mientras estén pendientes y hasta 180 días después de la decisión de moderación. Los bloqueos creados por otras personas pueden permanecer como preferencias de seguridad.",
+  "groundingCompletedTitle": "Ejercicio completado",
+  "groundingCompletedMessage": "Has terminado esta pausa de autorregulación. Observa qué ha cambiado — o no — sin juzgarte.",
+  "sosPostExerciseQuestion": "¿Cómo te sientes ahora? Es solo tu percepción en este momento.",
+  "sosSaveAndClose": "Guardar respuesta y cerrar",
+  "stopSubtitle": "Una pausa breve para interrumpir el impulso y elegir el siguiente paso. No contacta con nadie.",
+  "impulseSafetyNote": "Ejercicio individual de autorregulación. No es un servicio de emergencia ni contacta con terceros."
 }

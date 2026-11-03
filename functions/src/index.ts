@@ -1,7 +1,10 @@
 import {initializeApp} from 'firebase-admin/app';
-import {getFirestore,FieldValue,Timestamp} from 'firebase-admin/firestore';
+import {getAuth} from 'firebase-admin/auth';
+import {getFirestore,FieldValue,Timestamp,FieldPath} from 'firebase-admin/firestore';
 import {getMessaging} from 'firebase-admin/messaging';
 import {onDocumentCreated,onDocumentUpdated} from 'firebase-functions/v2/firestore';
+import {onSchedule} from 'firebase-functions/v2/scheduler';
+import {onCall, HttpsError} from 'firebase-functions/v2/https';
 import {deliverCommunityMessage,type DeliveryDeps} from './delivery';
 initializeApp();const db=getFirestore();
 const deps:DeliveryDeps={
@@ -153,4 +156,215 @@ export const listeningSupportRequestClosed=onDocumentUpdated({document:'listenin
    android:{priority:'high',ttl:60000}
   })));
  }));
+});
+
+
+// Retain moderation reports while they are pending. Once reviewed, actioned or
+// dismissed, keep the audit record for 180 days and then remove it automatically.
+// This scheduled cleanup is deliberately conservative: it never deletes pending reports.
+export const moderationRetentionCleanup=onSchedule({
+ schedule:'every day 03:20',
+ timeZone:'Europe/Lisbon',
+ region:'europe-west1',
+ maxInstances:1,
+ memory:'256MiB',
+},async()=>{
+ const cutoff=Timestamp.fromMillis(Date.now()-180*24*60*60*1000);
+ const finalStatuses=['reviewed','actioned','dismissed'];
+ for(const status of finalStatuses){
+  let cursor: FirebaseFirestore.QueryDocumentSnapshot | undefined;
+  while(true){
+   let reportQuery=db.collection('reports').where('status','==',status).where('reviewedAt','<=',cutoff).orderBy('reviewedAt','asc').limit(200);
+   if(cursor)reportQuery=reportQuery.startAfter(cursor);
+   const expired=await reportQuery.get();
+   if(expired.empty)break;
+   const deletable=expired.docs.filter(report=>report.get('legalHold')!==true);
+   if(deletable.length){
+    const batch=db.batch();
+    deletable.forEach(report=>batch.delete(report.ref));
+    await batch.commit();
+   }
+   cursor=expired.docs[expired.docs.length-1];
+   if(expired.size<200)break;
+  }
+ }
+});
+
+
+async function deleteQueryInPages(query: FirebaseFirestore.Query, pageSize = 400): Promise<number> {
+ let total = 0;
+ while (true) {
+  const page = await query.limit(pageSize).get();
+  if (page.empty) break;
+  const batch = db.batch();
+  page.docs.forEach(document => batch.delete(document.ref));
+  await batch.commit();
+  total += page.size;
+  if (page.size < pageSize) break;
+ }
+ return total;
+}
+
+// Remove the departing user's own block decisions, but preserve a block
+// independently created by another participant as that person's safety setting.
+async function removeOwnCanonicalBlocks(uid: string): Promise<void> {
+ const ownBlocks = db.collection('blockPairs').where('blockedBy', 'array-contains', uid);
+ while (true) {
+  const page = await ownBlocks.limit(200).get();
+  if (page.empty) break;
+  const batch = db.batch();
+  page.docs.forEach(document => {
+   const data = document.data();
+   const blockedBy = Array.isArray(data.blockedBy)
+    ? data.blockedBy.filter((value: unknown) => typeof value === 'string' && value !== uid)
+    : [];
+   if (!blockedBy.length) {
+    batch.delete(document.ref);
+    return;
+   }
+   // With two participants, the remaining UID is the only surviving block owner.
+   batch.update(document.ref, {
+    blockerId: blockedBy[0],
+    blockedUserId: uid,
+    blockedBy,
+   });
+  });
+  await batch.commit();
+ }
+}
+
+// Account deletion is performed with Admin privileges so it can remove nested
+// subcollections and historical group messages even after a member has left a circle.
+export const deleteAccountData=onCall({
+ region:'europe-west1',
+ timeoutSeconds:540,
+ memory:'512MiB',
+ maxInstances:3,
+},async request=>{
+ const uid=request.auth?.uid;
+ if(!uid)throw new HttpsError('unauthenticated','É necessário iniciar sessão para eliminar os dados.');
+ try{
+  // Delete owned posts in bounded pages.
+  await deleteQueryInPages(db.collection('posts').where('authorId','==',uid));
+
+  // Remove the account from every reaction list. Each update removes the user
+  // from the query result, so the next bounded page can safely start at the top.
+  for(const field of ['yellowLikedBy','greenLikedBy','redLikedBy']){
+   const countField=field.replace('LikedBy','Likes');
+   const reactionQuery=db.collection('posts').where(field,'array-contains',uid);
+   while(true){
+    const page=await reactionQuery.limit(400).get();
+    if(page.empty)break;
+    const batch=db.batch();
+    page.docs.forEach(document=>{
+     const data=document.data(),users=Array.isArray(data[field])?data[field]:[];
+     const filtered=users.filter((value:any)=>value!==uid);
+     batch.update(document.ref,{[field]:filtered,[countField]:filtered.length});
+    });
+    await batch.commit();
+   }
+  }
+
+  // Remove the user from any polls they created or voted in.
+  let pollCursor: FirebaseFirestore.QueryDocumentSnapshot | undefined;
+  while(true){
+   let pollQuery=db.collection('communityPolls').orderBy(FieldPath.documentId()).limit(200);
+   if(pollCursor)pollQuery=pollQuery.startAfter(pollCursor);
+   const pollPage=await pollQuery.get();
+   if(pollPage.empty)break;
+   const batch=db.batch();
+   let pollWrites=0;
+   pollPage.docs.forEach(document=>{
+    const data=document.data();
+    if(data.authorId===uid){batch.delete(document.ref);pollWrites+=1;return;}
+    const hasVote=Array.isArray(data.options)&&data.options.some((option:any)=>Array.isArray(option?.voterIds)&&option.voterIds.includes(uid));
+    if(!hasVote)return;
+    const options=data.options.map((option:any)=>{
+     if(!Array.isArray(option?.voterIds)||!option.voterIds.includes(uid))return option;
+     const voterIds=option.voterIds.filter((value:any)=>value!==uid);
+     return {...option,voterIds,count:voterIds.length};
+    });
+    batch.update(document.ref,{options});
+    pollWrites+=1;
+   });
+   if(pollWrites)await batch.commit();
+   pollCursor=pollPage.docs[pollPage.docs.length-1];
+   if(pollPage.size<200)break;
+  }
+
+  // Remove own messages from every chat/group, including circles the account left earlier.
+  await deleteQueryInPages(db.collectionGroup('messages').where('senderId','==',uid));
+
+  // Delete chats authored by the account or associated with a peer-listening request.
+  const participantChatsQuery=db.collection('chats').where('participants','array-contains',uid);
+  while(true){
+   const page=await participantChatsQuery.limit(200).get();
+   if(page.empty)break;
+   const updates:Array<{ref:FirebaseFirestore.DocumentReference;data:FirebaseFirestore.UpdateData<FirebaseFirestore.DocumentData>}>=[];
+   const deletes:FirebaseFirestore.DocumentReference[]=[];
+   page.docs.forEach(chat=>{
+    const data=chat.data();
+    if(data.authorId===uid||typeof data.listeningRequestId==='string'){deletes.push(chat.ref);return;}
+    const participants=Array.isArray(data.participants)?data.participants.filter((value:any)=>value!==uid):[];
+    if(!participants.length){deletes.push(chat.ref);return;}
+    const unreadBy=Array.isArray(data.unreadBy)?data.unreadBy.filter((value:any)=>value!==uid):[];
+    const update:FirebaseFirestore.UpdateData<FirebaseFirestore.DocumentData>={participants,lastMessage:'',lastMessageAt:null,unreadBy};
+    if(data.lastSenderId===uid)update.lastSenderId=FieldValue.delete();
+    updates.push({ref:chat.ref,data:update});
+   });
+   for(const ref of deletes)await db.recursiveDelete(ref);
+   for(let start=0;start<updates.length;start+=400){
+    const batch=db.batch();
+    updates.slice(start,start+400).forEach(item=>batch.update(item.ref,item.data));
+    await batch.commit();
+   }
+  }
+  // Closed listening conversations may already have removed the account from participants.
+  const closedChatQuery=db.collection('chats').where('closedBy','==',uid);
+  while(true){
+   const page=await closedChatQuery.limit(200).get();
+   if(page.empty)break;
+   for(const chat of page.docs)await db.recursiveDelete(chat.ref);
+  }
+
+  // Remove the account from current experience circles. Its messages have already been deleted.
+  const circleQuery=db.collection('experienceMatchCircles').where('participants','array-contains',uid);
+  while(true){
+   const page=await circleQuery.limit(400).get();
+   if(page.empty)break;
+   const batch=db.batch();
+   page.docs.forEach(circle=>{
+    const participants=Array.isArray(circle.data().participants)?circle.data().participants.filter((value:any)=>value!==uid):[];
+    batch.update(circle.ref,{participants,status:'open',updatedAt:FieldValue.serverTimestamp()});
+   });
+   await batch.commit();
+  }
+
+  // Delete all requests/profiles created for matching and peer listening.
+  await Promise.all([
+   deleteQueryInPages(db.collection('communityMatchRequests').where('requesterId','==',uid)),
+   deleteQueryInPages(db.collection('communityMatchRequests').where('recipientId','==',uid)),
+   deleteQueryInPages(db.collection('listeningRequests').where('requesterId','==',uid)),
+   deleteQueryInPages(db.collection('listeningRequests').where('acceptedBy','==',uid)),
+   deleteQueryInPages(db.collection('reports').where('reporterId','==',uid)),
+   // Delete only legacy block decisions created by this account. Incoming
+   // blocks remain as another person's safety preference, as disclosed in-app.
+   deleteQueryInPages(db.collection('blocks').where('blockerId','==',uid)),
+  ]);
+  await removeOwnCanonicalBlocks(uid);
+  await Promise.all([
+   db.doc(`communityMatchProfiles/${uid}`).delete(),
+   db.doc(`listeningProfiles/${uid}`).delete(),
+   db.recursiveDelete(db.doc(`users/${uid}`)),
+  ]);
+
+  // Reports about this account and blocks created by other people are retained
+  // as limited safety/audit records; report retention is handled by the scheduled policy.
+  await getAuth().deleteUser(uid);
+  return {success:true};
+ }catch(error){
+  console.error('[Confia] account deletion failed',error);
+  if(error instanceof HttpsError)throw error;
+  throw new HttpsError('internal','Não foi possível concluir a eliminação dos dados. Tenta novamente ou contacta o suporte.');
+ }
 });

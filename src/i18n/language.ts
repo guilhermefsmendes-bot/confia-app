@@ -1,8 +1,4 @@
-import i18n, {
-  CONFIA_SUPPORTED_LANGUAGES,
-  ConfiaLanguage,
-  getSupportedDeviceLanguage,
-} from "./index";
+import { ensureLanguageLoaded, CONFIA_SUPPORTED_LANGUAGES, type ConfiaLanguage, getSupportedDeviceLanguage } from "./index";
 
 const STORAGE_KEY = "confia_language";
 
@@ -31,38 +27,15 @@ export const getLanguage = (): LanguagePreference => {
   return "auto";
 };
 
-const syncDocumentLanguage = (language: ConfiaLanguage) => {
-  if (typeof document !== "undefined") {
-    document.documentElement.lang = language;
-  }
-};
-
-export const setLanguage = (
-  language: LanguagePreference
-) => {
+export const setLanguage = async (language: LanguagePreference) => {
   localStorage.setItem(STORAGE_KEY, language);
-
-  if (language === "auto") {
-    const deviceLanguage = getSupportedDeviceLanguage();
-    i18n.changeLanguage(deviceLanguage);
-    syncDocumentLanguage(deviceLanguage);
-    return;
-  }
-
-  i18n.changeLanguage(language);
-  syncDocumentLanguage(language);
+  const resolved = language === "auto" ? getSupportedDeviceLanguage() : language;
+  await ensureLanguageLoaded(resolved);
 };
 
 export const initLanguage = () => {
   const saved = getLanguage();
 
-  if (saved === "auto") {
-    const deviceLanguage = getSupportedDeviceLanguage();
-    i18n.changeLanguage(deviceLanguage);
-    syncDocumentLanguage(deviceLanguage);
-    return;
-  }
-
-  i18n.changeLanguage(saved);
-  syncDocumentLanguage(saved);
+  const resolved = saved === "auto" ? getSupportedDeviceLanguage() : saved;
+  void ensureLanguageLoaded(resolved);
 };

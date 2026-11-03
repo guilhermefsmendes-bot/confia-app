@@ -42,14 +42,21 @@ import { getExperimentLearningForSOS } from "../data/personal/personalExperiment
 import { readPersonalEvents } from "../data/personal/personalEventStorage";
 import { getBestPersonalIntervention } from "../data/personal/premiumIntelligence";
 
-interface ImpulsoSOSProps {
-  onAddXp: (amount: number) => void;
+type Thought = string;
+const SAFE_PLACE_KEY = "confia_safe_place_needs_v1";
+const SAFE_PLACE_PHRASE_KEY = "confia_safe_place_phrase_v1";
+const SAFE_PLACE_NEEDS: ImpulseNeed[] = ["calm", "mind", "control", "support"];
+function readSafePlacePhrase(): string {
+  try { return localStorage.getItem(SAFE_PLACE_PHRASE_KEY) || ""; } catch { return ""; }
+}
+function readSafePlaceNeeds(): ImpulseNeed[] {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(SAFE_PLACE_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.filter((value): value is ImpulseNeed => typeof value === "string" && SAFE_PLACE_NEEDS.includes(value as ImpulseNeed)) : [];
+  } catch { return []; }
 }
 
-type Thought = string;
-
-
-export const ImpulsoSOS: React.FC<ImpulsoSOSProps> = ({ onAddXp }) => {
+export const ImpulsoSOS: React.FC = () => {
 const { t } = useTranslation();
 const triggers: Array<{
   id: Trigger;
@@ -114,28 +121,31 @@ const thoughts: Thought[] = [
   const [step, setStep] = useState(0);
   const [intensity, setIntensity] = useState<Intensity>(5);
   const [finalIntensity, setFinalIntensity] = useState<Intensity>(5);
-const lastUse = localStorage.getItem("confia_last_impulse_use_v1");
-
-const impulseCount = Number(
-  localStorage.getItem("confia_impulse_count_v1") || "0"
-);
-
-const daysWithoutUse =
-  lastUse !== null
-    ? Math.max(
-        1,
-        Math.floor(
-          (Date.now() - new Date(lastUse).getTime()) /
-            (1000 * 60 * 60 * 24)
-        )
-      )
-    : null;
+const lastUse = (() => { try { return localStorage.getItem("confia_last_impulse_use_v1"); } catch { return null; } })();
+const impulseCount = (() => { try { const value = Number(localStorage.getItem("confia_impulse_count_v1") || "0"); return Number.isFinite(value) ? value : 0; } catch { return 0; } })();
+const lastUseTime = lastUse ? new Date(lastUse).getTime() : NaN;
+const daysWithoutUse = Number.isFinite(lastUseTime)
+  ? Math.max(1, Math.floor((Date.now() - lastUseTime) / (1000 * 60 * 60 * 24)))
+  : null;
 
   // Estados de seleção
   const [trigger, setTrigger] = useState<Trigger | null>(null);
   const [emotion, setEmotion] = useState<Emotion | null>(null);
   const [thought, setThought] = useState<Thought | null>(null);
   const [impulseNeed, setImpulseNeed] = useState<ImpulseNeed | null>(null);
+  const [safePlaceNeeds, setSafePlaceNeeds] = useState<ImpulseNeed[]>(readSafePlaceNeeds);
+  const [safePlacePhrase, setSafePlacePhrase] = useState(readSafePlacePhrase);
+  const [safePlaceStorageError, setSafePlaceStorageError] = useState(false);
+  const updateSafePlacePhrase = (value: string) => {
+    setSafePlacePhrase(value);
+    try { localStorage.setItem(SAFE_PLACE_PHRASE_KEY, value); setSafePlaceStorageError(false); }
+    catch { setSafePlaceStorageError(true); }
+  };
+  const toggleSafePlaceNeed = (need: ImpulseNeed) => {
+    const next = safePlaceNeeds.includes(need) ? safePlaceNeeds.filter(item => item !== need) : [...safePlaceNeeds, need];
+    try { localStorage.setItem(SAFE_PLACE_KEY, JSON.stringify(next)); setSafePlaceNeeds(next); setSafePlaceStorageError(false); }
+    catch { setSafePlaceStorageError(true); }
+  };
   
   const [completed, setCompleted] = useState(false);
   const [reactiveMessageKey, setReactiveMessageKey] =
@@ -298,7 +308,8 @@ const getPsychoeducationMessage = () => {
       emotion: emotion ?? undefined,
       thought: thought ?? undefined,
       completed: true,
-      xpEarned: 30,
+      // SOS no longer awards XP; retain an explicit zero in the episode record.
+      xpEarned: 0,
     });
 
     // Alimenta o modelo pessoal com o resultado real da intervenção.
@@ -361,7 +372,6 @@ const getPsychoeducationMessage = () => {
       timestamp: new Date().toISOString(),
     });
 
-    onAddXp(30);
     setCompleted(true);
   };
 
@@ -442,6 +452,9 @@ const getPsychoeducationMessage = () => {
           <p className="mx-auto mt-2 max-w-[330px] text-xs font-semibold leading-relaxed text-slate-400">
             {t("impulseClosing.completedDesc")}
           </p>
+          <p className="mx-auto mt-3 max-w-[330px] text-[10px] leading-relaxed text-[#806D65]">
+            {t("impulseSafetyNote")}
+          </p>
         </div>
 
         <div className="relative mt-6 grid grid-cols-3 gap-2">
@@ -500,25 +513,6 @@ const getPsychoeducationMessage = () => {
           </div>
         )}
 
-        <div className="relative mt-4 flex items-center gap-3 rounded-[20px] border border-[#E8DDD7]/60 bg-white/75 px-4 py-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] bg-[#FFF3EC]">
-            <Sparkles
-              size={15}
-              strokeWidth={1.8}
-              className="text-[#934A38]"
-            />
-          </div>
-
-          <div>
-            <p className="text-xs font-black text-[#2F2926]">
-              {t("impulseClosing.xpEarned")}
-            </p>
-
-            <p className="mt-0.5 text-[9px] font-semibold leading-relaxed text-slate-400">
-              {t("impulseClosing.xpDesc")}
-            </p>
-          </div>
-        </div>
       </section>
     );
   }
@@ -578,23 +572,16 @@ const getPsychoeducationMessage = () => {
     const experimentTemplateKey = experimentLearning?.item.templateId === "wind_down" ? "windDown" : experimentLearning?.item.templateId === "short_walk" ? "shortWalk" : experimentLearning?.item.templateId === "screen_pause" ? "screenPause" : experimentLearning?.item.templateId === "worry_note" ? "worryNote" : null;
 
 
-    const beginImpulse = () => {
-      if (!impulseNeed) return;
+    const beginImpulse = (selectedNeed: ImpulseNeed | null = impulseNeed) => {
+      if (!selectedNeed) return;
 
-      localStorage.setItem(
-        "confia_last_impulse_use_v1",
-        new Date().toISOString()
-      );
+      try {
+        localStorage.setItem("confia_last_impulse_use_v1", new Date().toISOString());
+        const count = Number(localStorage.getItem("confia_impulse_count_v1") || "0");
+        localStorage.setItem("confia_impulse_count_v1", String(Number.isFinite(count) ? count + 1 : 1));
+      } catch { /* SOS remains available when local storage is unavailable. */ }
 
-      const count = Number(
-        localStorage.getItem("confia_impulse_count_v1") || "0"
-      );
-
-      localStorage.setItem(
-        "confia_impulse_count_v1",
-        String(count + 1)
-      );
-
+      setImpulseNeed(selectedNeed);
       setStarted(true);
       setStep(1);
     };
@@ -645,6 +632,15 @@ const getPsychoeducationMessage = () => {
             <p className="text-sm font-black text-[#2F2926]">
               {t("impulsePremium.question")}
             </p>
+
+            <section className="mb-4 mt-3 rounded-[22px] border border-[#D8E5D5] bg-[#F7FBF5] p-3" aria-label={t("impulsePremium.safePlace.title")}>
+              <p className="text-[10px] font-black uppercase tracking-[.14em] text-[#557A58]">{t("impulsePremium.safePlace.title")}</p>
+              <p className="mt-1 text-[10px] leading-4 text-[#6C806C]">{t("impulsePremium.safePlace.subtitle")}</p>
+              {safePlaceNeeds.length > 0 ? <div className="mt-2 flex flex-wrap gap-2">{safePlaceNeeds.map(need => <button key={need} type="button" onClick={() => beginImpulse(need)} className="min-h-11 rounded-full border border-[#C9DCC6] bg-white px-3 text-[11px] font-bold text-[#4F7453]">{getNeedLabel(need)} →</button>)}</div> : <p className="mt-2 text-[10px] leading-4 text-[#6C806C]">{t("impulsePremium.safePlace.empty")}</p>}
+              <label className="mt-3 block border-t border-[#DDE8D9] pt-3 text-[10px] font-bold text-[#557A58]">{t("impulsePremium.safePlace.phraseLabel")}<textarea value={safePlacePhrase} onChange={event => updateSafePlacePhrase(event.target.value)} rows={2} maxLength={280} placeholder={t("impulsePremium.safePlace.phrasePlaceholder")} className="mt-1 min-h-20 w-full resize-y rounded-xl border border-[#D8E5D5] bg-white px-3 py-2 text-xs font-medium leading-5 text-[#405A43] placeholder:text-[#9AA99A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6F9673]"/></label>
+              <p className="mt-1 text-[9px] leading-4 text-[#6C806C]">{t("impulsePremium.safePlace.phraseHint")}</p>
+              {safePlaceStorageError && <p role="status" className="mt-2 text-[10px] text-[#9A5C45]">{t("impulsePremium.safePlace.storageError")}</p>}
+            </section>
 
             {personalInterventionMemory && personalInterventionMemory.attempts >= 4 && (
               <div className="mb-4 rounded-[22px] border border-[#E5D7C7] bg-[#FFFBF4] p-4">
@@ -741,13 +737,15 @@ const getPsychoeducationMessage = () => {
                 );
               })}
             </div>
+            {impulseNeed && <div className="mt-3"><button type="button" onClick={() => toggleSafePlaceNeed(impulseNeed)} aria-pressed={safePlaceNeeds.includes(impulseNeed)} className="min-h-11 rounded-full border border-[#D8E5D5] bg-[#F7FBF5] px-4 text-[11px] font-bold text-[#557A58]">{safePlaceNeeds.includes(impulseNeed) ? t("impulsePremium.safePlace.remove") : t("impulsePremium.safePlace.save")}</button></div>}
+            {safePlaceStorageError && <p role="status" className="mt-2 text-[10px] text-[#9A5C45]">{t("impulsePremium.safePlace.storageError")}</p>}
           </div>
 
           {/* CTA */}
           <button
             type="button"
             disabled={!impulseNeed}
-            onClick={beginImpulse}
+            onClick={() => beginImpulse()}
             className={`mt-5 flex w-full items-center justify-between rounded-[20px] px-4 py-4 transition-all duration-200 ${
               impulseNeed
                 ? "bg-[#934A38] text-white shadow-[0_10px_24px_rgba(201,123,94,0.18)] active:scale-[0.99]"
@@ -818,6 +816,7 @@ const getPsychoeducationMessage = () => {
                 ? t(routeLabelKey[impulseNeed])
                 : t("impulse")}
             </p>
+            <p className="mt-1 max-w-[270px] text-[10px] leading-relaxed text-slate-500">{t("impulseSafetyNote")}</p>
           </div>
 
           <div className="shrink-0 text-right">

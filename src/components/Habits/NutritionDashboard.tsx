@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../i18n/useFeatureTranslation';
 import { FOOD_TYPES,FOOD_ICONS,type FoodType,type HabitRecord } from '../../data/habits/types';
 import type { PersonalEvent } from '../../data/personal/personalEvent';
 import HabitImpactReaction from './HabitImpactReaction';
@@ -14,21 +14,21 @@ import LifestyleReview from './LifestyleReview';
 import HabitEvolution from './HabitEvolution';
 import './nutrition.css';
 export function FoodItemLabel({record}:{record:FoodRecord}) {
- const {t,i18n}=useTranslation(),d=record.data;
+ const {t,i18n}=useTranslation("habits"),d=record.data;
  const amount=new Intl.NumberFormat(i18n.language,{maximumFractionDigits:1}).format(d.quantity);
  const volume=itemVolume(d);
  const countName=d.category==='fruit'&&d.unit==='item'&&d.subtype!=='unspecified';
  return <><strong>{countName?t('habitHub.detail.fruitCount.'+d.subtype,{count:d.quantity}):t('habitHub.catalog.'+d.category+'.'+d.subtype)}</strong>{!countName&&<span> · {amount} {t('habitHub.detail.units.'+d.unit,{count:d.quantity})}</span>}{volume!==undefined&&d.unit!=='ml'&&<span> · {volume} ml</span>}{(d.time||d.period)&&<span className="block text-xs text-[#6F5D51]">{d.time??t('habitHub.detail.periods.'+d.period)}</span>}</>;
 }
 function NutritionComparison({records,date}:{records:HabitRecord[];date:string}) {
- const {t}=useTranslation(); const caffeine=estimateDailyCaffeine(records,date); const produce=fruitVegetableRegistrations(records,date);
+ const {t}=useTranslation("habits"); const caffeine=estimateDailyCaffeine(records,date); const produce=fruitVegetableRegistrations(records,date);
  const rows=[...(caffeine.mg!==undefined?[{key:"caffeine",value:t("habitHub.nutrition.values.mg",{value:caffeine.mg}),reference:t("habitHub.nutrition.references.caffeine",{value:SCIENTIFIC_GUIDANCE.caffeine.dailyMg}),state:caffeine.mg<=SCIENTIFIC_GUIDANCE.caffeine.dailyMg?"ok":"high"}]:[]),...(produce.registrations>0?[{key:"produce",value:t("habitHub.nutrition.values.portions",{value:produce.explicitPortions}),reference:t("habitHub.nutrition.references.produce",{value:SCIENTIFIC_GUIDANCE.fruitVegetables.portions}),state:produce.explicitPortions>=SCIENTIFIC_GUIDANCE.fruitVegetables.portions?"ok":"low"}]:[])];
  if(!rows.length) return <p className="mt-4 rounded-2xl bg-[#FAF8F3] p-4 text-sm leading-6">{t("habitHub.nutrition.comparisonEmpty")}</p>;
  return <div className="mt-4 space-y-3">{rows.map(row=><div key={row.key} className="rounded-2xl border border-[#E8DDD7] p-4"><div className="grid grid-cols-[1fr_auto] gap-3 text-sm"><div><p className="font-black">{t("habitHub.nutrition.compare."+row.key)}</p><p className="mt-1 text-xs text-[#6F5D51]">{t("habitHub.nutrition.you")}: <strong>{row.value}</strong></p></div><div className="text-right"><p className="text-xs text-[#6F5D51]">{t("habitHub.nutrition.referenceLabel")}</p><p className="font-bold">{row.reference}</p></div></div><p className="mt-3 text-xs font-semibold">{t("habitHub.nutrition.status."+row.state)}</p></div>)}</div>;
 }
 
 export default function NutritionDashboard({records,events,today,run,onDone}:{records:HabitRecord[];events:PersonalEvent[];today:string;run:RunAction;onDone:()=>void}) {
- const {t,i18n}=useTranslation();const [date,setDate]=useState(today),[editor,setEditor]=useState<{category:FoodType;record?:FoodRecord}|null>(null);
+ const {t,i18n}=useTranslation("habits");const [date,setDate]=useState(today),[editor,setEditor]=useState<{category:FoodType;record?:FoodRecord}|null>(null);
  const [limit,setLimit]=useState(7),[loading,setLoading]=useState(false),[loadError,setLoadError]=useState(false);
  const items=dayFoodItems(records,date),totals=nutritionTotals(records,date);
  const legacy=Object.entries(totals).filter(([key])=>!records.some(r=>r.kind==='foodItem'&&r.date===date&&r.data.category===key));

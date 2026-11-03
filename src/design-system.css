@@ -161,8 +161,29 @@ body {
   .confia-header { padding-inline: 1rem; }
   .confia-header img { width: 2.5rem; height: 2.5rem; }
   .confia-main { padding-bottom: calc(7.5rem + env(safe-area-inset-bottom)); }
-  .confia-nav-inner { min-height: 62px; border-radius: 21px; }
-  .confia-nav button { min-height: 50px; border-radius: 16px; }
+  .confia-nav-inner { min-height: 64px; border-radius: 21px; gap: .2rem; backdrop-filter: blur(10px) saturate(1.04); }
+  .confia-nav button { min-height: 52px; border-radius: 16px; }
+  .confia-element-tab { min-width: 0; padding-inline: .1rem; }
+  .confia-element-tab > span:last-child { font-size: 10px; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
+  .confia-app button { min-height: 44px; }
+  /* Evita o zoom automático do Safari ao focar campos de texto. */
+  .confia-app input, .confia-app textarea, .confia-app select { font-size: 16px; }
+  /* Reduz o custo de composição durante o scroll em telemóveis. */
+  .confia-main--tab-home .bg-white,
+  .confia-main--tab-horizon .bg-white,
+  .confia-main--tab-objectives .bg-white,
+  .confia-main--tab-community .bg-white {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: rgb(255 255 255 / .94) !important;
+  }
+  .confia-main--tab-home .bg-slate-50,
+  .confia-main--tab-horizon .bg-slate-50,
+  .confia-main--tab-objectives .bg-slate-50,
+  .confia-main--tab-community .bg-slate-50 {
+    background-color: rgb(250 248 246 / .94) !important;
+  }
+  .confia-surface-panel { padding: 1rem; border-radius: 1.25rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

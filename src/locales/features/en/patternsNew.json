@@ -1,0 +1,213 @@
+{
+  "patternsNew": {
+    "title": "Know your Patterns",
+    "description": "Discover the habits that influence your wellbeing and track your evolution.",
+    "assessment": "Assess your habits",
+    "assessmentDesc": "Identify habits that may be affecting your wellbeing.",
+    "daily": "Track your progress",
+    "dailyDesc": "Evaluate daily how you managed these habits.",
+    "evolution": "My evolution",
+    "evolutionDesc": "Observe the evolution of your habits and compare it with your daily wellbeing.",
+    "evolutionDescription": "See how you manage your habits over time.",
+    "noRecords": "You do not have enough records yet.",
+    "lastRecord": "Last record",
+    "date": "Date",
+    "habitManagement": "Habit management",
+    "startEvolution": "Start by tracking your progress daily.",
+    "plan": {
+      "title": "Personalised Plan",
+      "description": "Receive goals tailored to your profile."
+    },
+    "inventory": {
+      "title": "Inventory",
+      "empty": "You do not have any items yet.",
+      "equip": "Equip",
+      "equipped": "Equipped"
+    },
+    "shop": {
+      "title": "Shop",
+      "availableXp": "Available XP"
+    },
+    "homeItems": {
+      "flower1": {
+        "name": "Small flower"
+      },
+      "flower2": {
+        "name": "Pink flower"
+      },
+      "flower3": {
+        "name": "Red flower"
+      },
+      "flower4": {
+        "name": "Tulip"
+      },
+      "flower5": {
+        "name": "Rose"
+      },
+      "flower6": {
+        "name": "Wilted rose"
+      },
+      "flower7": {
+        "name": "Bouquet"
+      },
+      "flower8": {
+        "name": "Hyacinth"
+      },
+      "tree1": {
+        "name": "Green tree"
+      },
+      "tree2": {
+        "name": "Pine tree"
+      },
+      "tree3": {
+        "name": "Palm tree"
+      },
+      "tree4": {
+        "name": "Christmas tree"
+      },
+      "tree5": {
+        "name": "Cactus"
+      },
+      "tree6": {
+        "name": "Log"
+      },
+      "tree7": {
+        "name": "Clover"
+      },
+      "tree8": {
+        "name": "Small clover"
+      },
+      "rock1": {
+        "name": "Small rock"
+      },
+      "rock2": {
+        "name": "Rock"
+      },
+      "rock3": {
+        "name": "Natural stone"
+      },
+      "rock4": {
+        "name": "Large stone"
+      },
+      "rock5": {
+        "name": "Dark rock"
+      },
+      "rock6": {
+        "name": "Ancient stone"
+      },
+      "bench1": {
+        "name": "Wooden bench"
+      },
+      "water1": {
+        "name": "Water drop"
+      },
+      "extra1": {
+        "name": "Lantern"
+      },
+      "extra2": {
+        "name": "Butterfly"
+      },
+      "extra3": {
+        "name": "Squirrel"
+      },
+      "extra4": {
+        "name": "Nest"
+      },
+      "extra5": {
+        "name": "Sun"
+      },
+      "extra6": {
+        "name": "Rainbow"
+      },
+      "bench2": {
+        "name": "Simple bench"
+      },
+      "bench3": {
+        "name": "Comfortable bench"
+      },
+      "bench4": {
+        "name": "Elegant bench"
+      },
+      "bench5": {
+        "name": "Garden bench"
+      },
+      "bench6": {
+        "name": "Special bench"
+      },
+      "water2": {
+        "name": "Water flower"
+      },
+      "water3": {
+        "name": "Fountain"
+      },
+      "water4": {
+        "name": "Wave"
+      },
+      "water5": {
+        "name": "Shell"
+      },
+      "water6": {
+        "name": "Duck"
+      }
+    }
+  },
+  "patternsPremium": {
+    "habits": "Habits",
+    "days": "Days",
+    "wellbeing": "Well-being",
+    "avgWellbeing": "Average well-being",
+    "whyTitle": "Why observe your patterns?",
+    "whyDescription": "Some behaviours may relieve anxiety in the moment while keeping the cycle going over time. Confia helps you observe these patterns and discover whether small changes are associated with better well-being.",
+    "assessmentIntro": "Identify behaviours you want to understand better. You do not need to eliminate them — first, we get to know them.",
+    "habitName": "What behaviour do you want to observe?",
+    "category": "Which area does it belong to?",
+    "baseline": "How intense is it usually?",
+    "motivation": "How important is it for you to change this behaviour?",
+    "addHabit": "Add habit",
+    "yourHabits": "Your patterns",
+    "baselineShort": "usual",
+    "dailyIntro": "Record only what happened today. There are no right or wrong answers.",
+    "done": "records",
+    "intensityQuestion": "How present was this behaviour today?",
+    "none": "None",
+    "veryHigh": "Very high",
+    "daysShort": "days",
+    "evolutionTitle": "My evolution",
+    "evolutionDescription": "Compare your patterns with your well-being and look for changes over time.",
+    "wellbeingChart": "Your well-being",
+    "wellbeingChartDesc": "Average of morning and afternoon check-ins",
+    "records": "records",
+    "startAverage": "Start",
+    "currentAverage": "Recent",
+    "trendDown": "Decreasing",
+    "trendUp": "Increasing",
+    "trendStable": "Stable",
+    "relationship": "Relationship with well-being",
+    "negativeRelationship": "On days when this behaviour was more present, your well-being tends to be lower.",
+    "positiveRelationship": "On days when this behaviour was more present, your well-being tends to be higher.",
+    "noClearRelationship": "There is not yet a clear relationship between this behaviour and your well-being.",
+    "analysisTitle": "Your analysis",
+    "analysisIntro": "Confia found some patterns in the data you recorded.",
+    "attention": "A pattern worth noticing",
+    "negativeInsight": "Your records suggest a possible relationship between «{{habit}}» and days with lower well-being.",
+    "positiveInsightTitle": "A positive change",
+    "positiveInsight": "Your data suggests a possible relationship between «{{habit}}» and your well-being.",
+    "stillLearningTitle": "Confia is still learning about you",
+    "stillLearningDescription": "Keep recording your habits and well-being. The more days you have, the better we can identify personal trends.",
+    "analysisDisclaimer": "This analysis shows associations in your records. It does not prove that a behaviour directly causes a change in well-being.",
+    "noHabitsTitle": "First, let's get to know your patterns",
+    "noHabitsDescription": "Add at least one behaviour you want to observe over the next few days.",
+    "notEnoughDataTitle": "We still need a few days",
+    "notEnoughDataDescription": "Record your behaviours daily. Then you will start to see trends.",
+    "categories": {
+      "digital": "Technology",
+      "gaming": "Gaming",
+      "checking": "Checking / reassurance",
+      "mental": "Thoughts",
+      "avoidance": "Avoidance",
+      "sleep": "Sleep & routine",
+      "body": "Body",
+      "other": "Other"
+    }
+  }
+}

@@ -16,6 +16,8 @@ export function StopMode({ onStartImpulse }: StopModeProps) {
        {t("stopTitle")}
       </h1>
 
+      <p className="max-w-md text-sm font-semibold leading-relaxed text-[#806D65] mb-6">{t("stopSubtitle")}</p>
+
       <p className="text-lg text-[#2F2926] mb-4">
        {t("stopPause")}
       </p>

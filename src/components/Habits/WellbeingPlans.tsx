@@ -1,6 +1,6 @@
 import { hasOlderHabits,loadOlderHabits } from "../../data/habits/sync";
 import { useEffect,useMemo,useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../i18n/useFeatureTranslation';
 import type { HabitRecord } from '../../data/habits/types';
 import type { PersonalEvent } from '../../data/personal/personalEvent';
 import { eligiblePlans,suggestedPlanFromSignals,planDay,planAction,PLAN_TEMPLATES,type PlanRecord,type PlanId } from '../../data/habits/plans';
@@ -8,7 +8,7 @@ import { startWellbeingPlan,changeWellbeingPlan,recordPlanCheck,dismissPlanInvit
 import { buttonClass,primaryClass,inputClass,type RunAction,formatDay } from './shared';
 import { SourceNote } from './LifestyleReview';
 export default function WellbeingPlans({records,today,run,events}:{records:HabitRecord[];today:string;run:RunAction;events:PersonalEvent[]}) {
- const {t,i18n}=useTranslation();const [historyLimit,setHistoryLimit]=useState(10),[loadingHistory,setLoadingHistory]=useState(false),[historyError,setHistoryError]=useState(false);
+ const {t,i18n}=useTranslation("habits");const [historyLimit,setHistoryLimit]=useState(10),[loadingHistory,setLoadingHistory]=useState(false),[historyError,setHistoryError]=useState(false);
  const [selected,setSelected]=useState<PlanId|''>(''),[confirm,setConfirm]=useState(false);
  const plans=records.filter((r):r is PlanRecord=>r.kind==='wellbeingPlan').sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
  const active=plans.find(r=>r.data.status==='active'||r.data.status==='paused');

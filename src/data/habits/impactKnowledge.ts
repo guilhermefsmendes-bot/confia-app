@@ -149,6 +149,18 @@ export const HABIT_IMPACT_SOURCES: Record<string, HabitImpactSource> = {
     limitations: "Gaming or a single gaming session does not imply a disorder. Confia's current habit check-in does not measure hours, impaired control or functional impairment.",
     checkedOn: "2026-10-29",
   },
+  healthyDiet: {
+    id: "healthyDiet",
+    title: "Healthy diet",
+    organization: "World Health Organization (WHO)",
+    url: "https://www.who.int/news-room/fact-sheets/detail/healthy-diet",
+    evidenceType: "Public health dietary guideline",
+    population: "General population; dietary needs vary by age, activity and health",
+    statistic: "WHO guidance emphasizes a varied diet including whole grains, pulses, vegetables, fruit and appropriate protein sources. For adults, total fat should generally provide no more than 30% of energy, saturated fat less than 10%, trans fat less than 1%, and free sugars less than 10%.",
+    certainty: "Official population-level dietary guidance.",
+    limitations: "Confia records food categories and quantities but does not consistently capture product labels, whole-grain status, protein source, added sugars or fat composition. These entries cannot calculate an individual's nutrient intake.",
+    checkedOn: "2026-11-02",
+  },
   alcohol: {
     id: "alcohol",
     title: "Alcohol",

@@ -32,26 +32,49 @@ describe("Habit Impact Engine", () => {
     assert.equal(report.cards.length, 0);
   });
 
-  it("shows a personal association only after five measured days in both groups", () => {
+  it("shows a personal association only after ten measured days in both groups", () => {
     const date = "2026-10-29";
     const records: HabitRecord[] = [];
     const events: PersonalEvent[] = [];
-    for (let i = 0; i < 10; i++) {
-      const day = shiftDay(date, i - 9);
-      const short = i < 5;
+    for (let i = 0; i < 20; i++) {
+      const day = shiftDay(date, i - 19);
+      const short = i < 10;
       records.push(record("sleep_" + day, "sleep", day, short ? 5 : 8));
       events.push(mood(day, short ? 4 : 7));
     }
     const report = buildHabitImpact(records, events, date);
     const association = report.personalAssociations.find(item => item.habit === "sleep");
     assert.ok(association);
-    assert.equal(association.exposedDays, 5);
-    assert.equal(association.comparisonDays, 5);
+    assert.equal(association.exposedDays, 10);
+    assert.equal(association.comparisonDays, 10);
     assert.equal(association.direction, "lower");
     assert.equal(association.difference, -3);
   });
 
-  it("does not apply population-level ultra-processed-food statistics to one generic fast-food entry", () => {
+  it("keeps independent mood observations from different sources on the same moment", () => {
+    const date = "2026-10-29";
+    const records: HabitRecord[] = [];
+    const events: PersonalEvent[] = [];
+    for (let i = 0; i < 20; i++) {
+      const day = shiftDay(date, i - 19);
+      const short = i < 10;
+      records.push(record("source_sleep_" + day, "sleep", day, short ? 5 : 8));
+      const first = short ? 4 : 7;
+      const second = short ? 8 : 9;
+      events.push(makePersonalEvent({ id: "rating_" + day, type: "mood", source: "daily_rating", timestamp: `${day}T18:00:00.000Z`, localDate: day, value: first, metadata: { moment: "evening" } }));
+      events.push(makePersonalEvent({ id: "checkin_" + day, type: "mood", source: "daily_checkin", timestamp: `${day}T19:00:00.000Z`, localDate: day, value: second, metadata: { moment: "evening" } }));
+    }
+    const report = buildHabitImpact(records, events, date);
+    const association = report.personalAssociations.find(item => item.habit === "sleep");
+    assert.ok(association);
+    assert.equal(association.exposedMean, 6);
+    assert.equal(association.comparisonMean, 8);
+    assert.equal(association.difference, -2);
+    assert.equal(association.exposedDays, 10);
+    assert.equal(association.comparisonDays, 10);
+  });
+
+  it("shows neutral WHO dietary guidance for a generic fast-food entry without estimating its impact", () => {
     const date = "2026-10-29";
     const records: HabitRecord[] = [
       { id: "fast_food", kind: "foodItem", date, updatedAt: `${date}T12:00:00Z`, timezone: "UTC", data: { category: "fastFood", subtype: "meal", quantity: 1, unit: "meal", deleted: false } },
@@ -60,7 +83,8 @@ describe("Habit Impact Engine", () => {
     const report = buildHabitImpact(records, [], date);
     const card = report.cards.find(item => item.id === "limitation-fastFood");
     assert.ok(card);
-    assert.equal(card.sourceId, "ultraProcessedFood");
+    assert.equal(card.sourceId, "healthyDiet");
+    assert.equal(card.severity, "neutral");
     assert.match(card.messageKey, /limits\.fastFood\.message$/);
   });
 
@@ -99,9 +123,9 @@ describe("Habit Impact Engine", () => {
     const date = "2026-10-29";
     const records: HabitRecord[] = [];
     const events: PersonalEvent[] = [];
-    for (let i = 0; i < 10; i++) {
-      const day = shiftDay(date, i - 10);
-      const short = i < 5;
+    for (let i = 0; i < 20; i++) {
+      const day = shiftDay(date, i - 20);
+      const short = i < 10;
       records.push(record("historical_sleep_" + day, "sleep", day, short ? 5 : 8));
       events.push(mood(day, short ? 4 : 7));
     }
@@ -193,24 +217,137 @@ describe("Habit Impact Engine", () => {
 });
 
 
+  it("aggregates all same-day coffee entries before estimating caffeine", () => {
+    const date = "2026-10-29";
+    const coffees: HabitRecord[] = Array.from({ length: 10 }, (_, index) => ({
+      id: `coffee_${index}`, kind: "foodItem", date, updatedAt: `${date}T${String(8 + index).padStart(2, "0")}:00:00Z`, timezone: "UTC",
+      data: { category: "coffee", subtype: "espresso", quantity: 1, unit: "item", deleted: false },
+    }));
+    const report = buildHabitImpact(coffees, [], date);
+    const card = report.cards.find(item => item.id === "caffeine-estimate");
+    assert.ok(card);
+    assert.equal(card.values.mg, 800);
+  });
+
+  it("estimates caffeine from legacy nutrition counts when detailed entries are unavailable", () => {
+    const date = "2026-10-29";
+    const report = buildHabitImpact([{ id: "legacy", kind: "nutrition", date, updatedAt: `${date}T12:00:00Z`, timezone: "UTC", data: { coffee: 10 } }], [], date);
+    const card = report.cards.find(item => item.id === "caffeine-estimate");
+    assert.ok(card);
+    assert.equal(card.values.mg, 800);
+  });
+
+  it("aggregates multiple exercise sessions on the selected day", () => {
+    const date = "2026-10-29";
+    const records: HabitRecord[] = [15, 20, 10].map((minutes, index) => ({
+      id: `exercise_${index}`, kind: "exercise", date, updatedAt: `${date}T${String(8 + index).padStart(2, "0")}:00:00Z`, timezone: "UTC",
+      data: { activity: index === 2 ? "gym" : "walk", minutes, intensity: "moderate" },
+    }));
+    const report = buildHabitImpact(records, [], date);
+    const card = report.cards.find(item => item.id === "exercise-week");
+    assert.ok(card);
+    assert.equal(card.values.todayMinutes, 45);
+    assert.equal(card.values.sessions, 3);
+    assert.equal(card.values.moderate, 45);
+    assert.equal(card.values.strengthDays, 1);
+  });
+
+  it("compares mood with measured caffeine levels using ten days per group", () => {
+    const date = "2026-10-29";
+    const records: HabitRecord[] = [], events: PersonalEvent[] = [];
+    for (let i = 0; i < 20; i++) {
+      const day = shiftDay(date, i - 19);
+      const high = i < 10;
+      events.push(mood(day, high ? 4 : 7));
+      records.push({ id: `coffee_${day}`, kind: "foodItem", date: day, updatedAt: `${day}T10:00:00Z`, timezone: "UTC",
+        data: { category: "coffee", subtype: "espresso", quantity: high ? 3 : 1, unit: "item", deleted: false } });
+    }
+    const report = buildHabitImpact(records, events, date);
+    const association = report.personalAssociations.find(item => item.habit === "caffeine");
+    assert.ok(association);
+    assert.equal(association.exposedDays, 10);
+    assert.equal(association.comparisonDays, 10);
+    assert.equal(association.direction, "lower");
+  });
+
+  it("compares mood with measured exercise-session duration without treating missing days as rest days", () => {
+    const date = "2026-10-29";
+    const records: HabitRecord[] = [], events: PersonalEvent[] = [];
+    for (let i = 0; i < 20; i++) {
+      const day = shiftDay(date, i - 19);
+      const longer = i < 10;
+      events.push(mood(day, longer ? 7 : 4));
+      records.push({ id: `exercise_${day}`, kind: "exercise", date: day, updatedAt: `${day}T12:00:00Z`, timezone: "UTC",
+        data: { activity: "walk", minutes: longer ? 45 : 15, intensity: "moderate" } });
+    }
+    const report = buildHabitImpact(records, events, date);
+    const association = report.personalAssociations.find(item => item.habit === "exercise");
+    assert.ok(association);
+    assert.equal(association.exposedDays, 10);
+    assert.equal(association.comparisonDays, 10);
+    assert.equal(association.direction, "higher");
+  });
+
+  it("does not treat days without exercise entries as measured rest days", () => {
+    const date = "2026-10-29";
+    const records: HabitRecord[] = [], events: PersonalEvent[] = [];
+    for (let i = 0; i < 20; i++) {
+      const day = shiftDay(date, i - 19);
+      events.push(mood(day, i < 10 ? 7 : 4));
+      if (i < 10) records.push({ id: `exercise_${day}`, kind: "exercise", date: day, updatedAt: `${day}T12:00:00Z`, timezone: "UTC",
+        data: { activity: "walk", minutes: 45, intensity: "moderate" } });
+    }
+    const report = buildHabitImpact(records, events, date);
+    assert.equal(report.personalAssociations.some(item => item.habit === "exercise"), false);
+  });
+
+  it("compares mood with measured alcohol days only and does not infer unlogged days", () => {
+    const date = "2026-10-29";
+    const records: HabitRecord[] = [], events: PersonalEvent[] = [];
+    for (let i = 0; i < 20; i++) {
+      const day = shiftDay(date, i - 19);
+      const alcohol = i < 10;
+      events.push(mood(day, alcohol ? 4 : 7));
+      records.push({ id: `nutrition_${day}`, kind: "nutrition", date: day, updatedAt: `${day}T12:00:00Z`, timezone: "UTC", data: { alcohol: alcohol ? 1 : 0 } });
+    }
+    const report = buildHabitImpact(records, events, date);
+    const association = report.personalAssociations.find(item => item.habit === "alcohol");
+    assert.ok(association);
+    assert.equal(association.exposedDays, 10);
+    assert.equal(association.comparisonDays, 10);
+  });
+
+
 describe("Habit impact localization", () => {
-  const locale = (language: string) => JSON.parse(readFileSync(`src/locales/${language}.json`, "utf8")).habitImpact as Record<string, unknown>;
+  const locale = (language: string) => JSON.parse(readFileSync(`src/locales/features/${language}/habits.json`, "utf8")).habitImpact as Record<string, unknown>;
   const flatten = (value: unknown, prefix = "", output: Record<string, string> = {}) => {
     if (value && typeof value === "object" && !Array.isArray(value)) {
       for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
-        if (prefix === "" && key === "sources") continue;
         flatten(child, prefix ? `${prefix}.${key}` : key, output);
       }
     } else if (typeof value === "string") output[prefix] = value;
     return output;
   };
-  it("provides every Portuguese habit-impact key in Spanish and French", () => {
+  it("provides every Portuguese habit-impact key in all supported languages", () => {
     const base = flatten(locale("pt"));
     for (const language of ["en", "es", "fr"]) {
       const translated = flatten(locale(language));
       assert.deepEqual(Object.keys(translated).sort(), Object.keys(base).sort(), `${language} keys differ`);
     }
   });
+  it("provides all twelve translated scientific source records in every language", () => {
+    const base = locale("pt").sources as Record<string, Record<string, string>>;
+    assert.equal(Object.keys(base).length, 13);
+    for (const language of ["en", "es", "fr"]) {
+      const translated = locale(language).sources as Record<string, Record<string, string>>;
+      assert.deepEqual(Object.keys(translated).sort(), Object.keys(base).sort(), `${language} scientific source IDs differ`);
+      for (const [sourceId, fields] of Object.entries(base)) {
+        assert.deepEqual(Object.keys(translated[sourceId]).sort(), Object.keys(fields).sort(), `${language}:${sourceId} source fields differ`);
+        for (const [field, value] of Object.entries(translated[sourceId])) assert.ok(value.trim().length > 0, `${language}:${sourceId}.${field} is empty`);
+      }
+    }
+  });
+
   it("preserves interpolation variables in every translated habit-impact message", () => {
     const base = flatten(locale("pt"));
     const variables = (value: string) => [...value.matchAll(/{{\s*([^}\s]+)\s*}}/g)].map(match => match[1]).sort();
@@ -220,7 +357,7 @@ describe("Habit impact localization", () => {
     }
   });
   it("provides matching daily-experience keys and interpolation variables in all four languages", () => {
-    const read = (language: string) => JSON.parse(readFileSync(`src/locales/${language}.json`, "utf8")).habitDailyExperience as Record<string, unknown>;
+    const read = (language: string) => JSON.parse(readFileSync(`src/locales/features/${language}/habits.json`, "utf8")).habitDailyExperience as Record<string, unknown>;
     const flattenExperience = (value: unknown, prefix = "", output: Record<string, string> = {}) => {
       if (value && typeof value === "object" && !Array.isArray(value)) {
         for (const [key, child] of Object.entries(value as Record<string, unknown>)) flattenExperience(child, prefix ? `${prefix}.${key}` : key, output);
@@ -239,7 +376,7 @@ describe("Habit impact localization", () => {
   it("localizes all evidence source fields in Spanish and French", () => {
     for (const language of ["es", "fr"]) {
       const sources = locale(language).sources as Record<string, Record<string, string>>;
-      assert.equal(Object.keys(sources).length, 12);
+      assert.equal(Object.keys(sources).length, 13);
       for (const [id, source] of Object.entries(sources)) {
         for (const key of ["title", "organization", "evidenceType", "population", "statistic", "certainty", "limitations"]) assert.ok(source[key]?.trim(), `${language}:${id}:${key} missing`);
       }

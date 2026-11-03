@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 
 interface Props {
   onBack: () => void;
@@ -131,7 +131,7 @@ function MiniLineChart({
 }
 
 function HabitEvolution({ onBack }: Props) {
-  const { t } = useTranslation();
+  const { t } = useTranslation("patternsNew");
 
   const [habits, setHabits] = useState<Habit[]>([]);
   const [history, setHistory] = useState<DailyHistory[]>([]);

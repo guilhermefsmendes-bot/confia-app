@@ -8,7 +8,7 @@ import {
   recordReactiveResponse,
 } from "../../data/reactive/reactiveHistoryStorage";
 import { syncPersonalEventsFromLegacySources } from "../../data/personal/syncPersonalEvents";
-import { recordPersonalAnalytics } from "../../data/personal/personalAnalytics";
+import { recordPersonalAnalytics, recordFirstActivation } from "../../data/personal/personalAnalytics";
 
 interface Props {
   onComplete?: () => void;
@@ -62,6 +62,7 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
     // Atualiza imediatamente o modelo longitudinal, sem esperar pelo próximo arranque.
     syncPersonalEventsFromLegacySources();
     recordPersonalAnalytics("check_in_completed");
+    recordFirstActivation();
 
     const reactiveResult = analyzeReactiveState({
       source: "daily_checkin",
@@ -82,13 +83,8 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
 
     setCompleted(true);
 
-    /**
-     * Dar tempo suficiente para o utilizador ler
-     * a reação da Confia antes de fechar o check-in.
-     */
-    setTimeout(() => {
-      onComplete?.();
-    }, 4000);
+    // The user decides when to leave the reflection; never auto-advance
+    // while they are still reading the response.
   };
 
   if (completed) {
@@ -128,6 +124,14 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
           <div className="mt-6 inline-flex rounded-full bg-emerald-100 px-5 py-2 font-bold text-emerald-700">
             +20 XP
           </div>
+
+          <button
+            type="button"
+            onClick={() => onComplete?.()}
+            className="mt-6 min-h-12 w-full rounded-2xl bg-[#934A38] px-5 py-3 text-sm font-black text-white shadow-lg shadow-[#934A38]/15 transition-colors hover:bg-[#7F3E31] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#934A38]"
+          >
+            {t("dailyCheckIn.continue")}
+          </button>
         </div>
       </div>
     );
@@ -155,7 +159,7 @@ const DailyCheckIn: React.FC<Props> = ({ onComplete }) => {
           </h2>
 
           <div className="mt-5 flex justify-between gap-2">
-            {[0, 2, 4, 6, 8, 10].map((value) => (
+            {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
               <button type="button"
                 key={value}
                 onClick={() => setMood(value)}

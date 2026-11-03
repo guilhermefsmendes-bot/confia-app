@@ -12,6 +12,7 @@
 import { getDailyCheckInHistory } from "../storage/dailyCheckInStorage";
 import { loadEpisodes } from "../components/Impulso/storage";
 import { loadPatternProfile } from "../components/Patterns/storage";
+import { localDay, shiftDay } from "./habits/calendar";
 
 export interface CompanionMoodRecord {
   date: string;
@@ -190,6 +191,36 @@ function readXp(): number {
   } catch {
     return 0;
   }
+}
+
+/**
+ * Minimal seven-day context for lifestyle synergy. Unlike the full companion
+ * snapshot, this avoids loading the habit-history mirror, pattern profile and
+ * avatar XP when the caller only needs mood/objective/impulse/check-in signals.
+ */
+export function collectLifestyleSynergyData(endDate: Date = new Date()): Pick<CompanionCollectedData, "mood" | "objectives" | "impulse" | "checkIns"> {
+  const end = localDay(endDate);
+  const days = new Set(Array.from({ length: 7 }, (_, index) => shiftDay(end, -index)));
+  return {
+    mood: readMoodHistory().filter(item => days.has(item.date)),
+    objectives: readObjectivesHistory().filter(item => days.has(item.date)),
+    impulse: readImpulseHistory().filter(item => days.has(item.date.slice(0, 10))),
+    checkIns: getDailyCheckInHistory().filter(item => days.has(item.date)),
+  };
+}
+
+/**
+ * Minimal source snapshot for reactive memory. This path deliberately avoids
+ * reading habit history, pattern profiles and avatar XP because the memory
+ * builder only consumes mood, objectives, impulse and check-in records.
+ */
+export function collectReactiveMemoryData(): Pick<CompanionCollectedData, "mood" | "objectives" | "impulse" | "checkIns"> {
+  return {
+    mood: readMoodHistory(),
+    objectives: readObjectivesHistory(),
+    impulse: readImpulseHistory(),
+    checkIns: getDailyCheckInHistory(),
+  };
 }
 
 /**

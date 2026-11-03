@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import { HABIT_TYPES,HABIT_ICONS,type HabitType,type HabitDefinition } from "../../data/habits/types";
 import { createHabit,setPrimaryHabit } from "../../data/habits/actions";
 import { buttonClass,inputClass,primaryClass,type RunAction } from "./shared";
 export default function HabitSetup({habits,primaryId,run,onDone}:{habits:HabitDefinition[];primaryId?:string;run:RunAction;onDone:()=>void}) {
-  const {t}=useTranslation();const [type,setType]=useState<HabitType>("tobacco");const [name,setName]=useState("");const [goal,setGoal]=useState("");const [icon,setIcon]=useState("🌱");
+  const {t}=useTranslation("habits");const [type,setType]=useState<HabitType>("tobacco");const [name,setName]=useState("");const [goal,setGoal]=useState("");const [icon,setIcon]=useState("🌱");
   return <div className="space-y-6">
     {habits.length>0 && <fieldset className="space-y-2"><legend className="mb-2 font-bold">{t("habitHub.primary")}</legend>{habits.map(h=><button key={h.id} type="button" aria-pressed={primaryId===h.id} className={buttonClass+" mr-2 "+(primaryId===h.id?"ring-2 ring-[#647D55]":"")} onClick={()=>{if(run(()=>setPrimaryHabit(h.id),""))onDone();}}>{h.data.icon} {h.data.type==="custom"?h.data.name:t("habitHub.habits."+h.data.type)}</button>)}</fieldset>}
     <form className="space-y-4 rounded-[28px] border border-[#E8DDD7] bg-white p-5" onSubmit={e=>{e.preventDefault();if(run(()=>{createHabit({type,name:type==="custom"?name:"",icon:type==="custom"?icon:HABIT_ICONS[type],goal,active:true,createdAt:new Date().toISOString()});},t("habitHub.encouragement.created")))onDone();}}>

@@ -1,10 +1,10 @@
 import { memo, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import { readClockTime } from "./clockTime";
 
 // Only this subtree updates every second. No storage, analytics or pattern calls.
 export default memo(function DailyClock({ days=0, showTime=true }: { days?:number; showTime?:boolean }) {
-  const {t}=useTranslation();
+  const {t}=useTranslation("habits");
   const [clock,setClock]=useState(readClockTime);
   useEffect(()=>{
     let timer:ReturnType<typeof setInterval>|undefined;

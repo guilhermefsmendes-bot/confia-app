@@ -1,10 +1,10 @@
 import { useEffect,useRef,useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../i18n/useFeatureTranslation';
 import { FOOD_CATALOG,FRUIT_ICONS,PERIODS,defaultUnit,isDrink,type FoodItem,type FoodUnit } from '../../data/habits/catalog';
 import type { FoodType } from '../../data/habits/types';
 import { buttonClass,inputClass,primaryClass } from './shared';
 export default function FoodEditor({category,initial,onSave,onClose}:{category:FoodType;initial?:FoodItem;onSave:(item:FoodItem)=>boolean;onClose:()=>void}) {
- const {t}=useTranslation(),dialog=useRef<HTMLDialogElement>(null);
+ const {t}=useTranslation("habits"),dialog=useRef<HTMLDialogElement>(null);
  const [value,setValue]=useState<FoodItem>(initial??{category,subtype:FOOD_CATALOG[category][0],quantity:1,unit:defaultUnit(category,FOOD_CATALOG[category][0]),deleted:false,...(isDrink(category)&&category!=='coffee'?{servingMl:250}:{})});
  const [error,setError]=useState(false);
  const patch=(next:Partial<FoodItem>)=>{setError(false);setValue(old=>({...old,...next}));};

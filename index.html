@@ -2,11 +2,37 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f5f2" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" /></noscript>
+    <link rel="preload" as="image" href="/images/backgrounds/home.webp" fetchpriority="high" />
+    <style>
+      html, body { min-height: 100%; margin: 0; background: #FAF7F2; }
+      #confia-startup { min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box; color: #76564B; font-family: system-ui, sans-serif; }
+      #confia-startup-inner { width: min(100%, 320px); display: grid; justify-items: center; gap: 18px; text-align: center; }
+      #confia-startup-mark { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 22px; background: white; box-shadow: 0 1px 5px #76564B18; font-size: 32px; }
+      #confia-startup-name { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .16em; }
+      #confia-startup-track { width: 144px; height: 6px; overflow: hidden; border-radius: 99px; background: #E8DED4; }
+      #confia-startup-progress { width: 50%; height: 100%; border-radius: inherit; background: #B87560; animation: confia-pulse 1.2s ease-in-out infinite alternate; }
+      @keyframes confia-pulse { from { opacity: .45; transform: translateX(-15%); } to { opacity: 1; transform: translateX(100%); } }
+      @media (prefers-reduced-motion: reduce) { #confia-startup-progress { animation: none; } }
+    </style>
     <title>Confia — O teu companheiro de calma</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main id="confia-startup" aria-label="Confia" aria-busy="true">
+        <div id="confia-startup-inner">
+          <div id="confia-startup-mark" aria-hidden="true">♡</div>
+          <p id="confia-startup-name">CONFIA</p>
+          <div id="confia-startup-track" aria-hidden="true"><div id="confia-startup-progress"></div></div>
+          <p style="margin:0;font-size:12px;color:#8B7B72">A preparar o teu espaço…</p>
+        </div>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

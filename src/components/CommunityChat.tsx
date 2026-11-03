@@ -11,6 +11,7 @@ import {
   getDocs,
   setDoc,
   updateDoc,
+  writeBatch,
   where,
   limit
 } from "firebase/firestore";
@@ -18,6 +19,7 @@ import { X, Send, Shield, MoreVertical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { db } from "../firebaseFirestore";
 import { auth } from "../firebaseAuth";
+import { blockCommunityMember } from "../data/community/blocking";
 import { SharePost } from "../types";
 
 import { emitCompanionInteraction } from "../data/reactive/companionBrain/companionInteractionEvents";
@@ -51,6 +53,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState(false);
   const isExperienceGroup = Boolean(initialChatId?.startsWith("circle_"));
   const isListeningChat = Boolean(initialChatId?.startsWith("listen_"));
   const [groupParticipants, setGroupParticipants] = useState<string[]>([]);
@@ -59,11 +62,30 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
   const [safetyBusy, setSafetyBusy] = useState(false);
   const [listeningChatClosed, setListeningChatClosed] = useState(false);
   const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
+  const [directOtherUserId, setDirectOtherUserId] = useState<string | null>(null);
 
   const currentUser = auth.currentUser;
   useEffect(()=>{if(initialMessageId)document.getElementById("community-message-"+initialMessageId)?.scrollIntoView({block:"center",behavior:"instant"});},[messages,initialMessageId]);
 
   useEffect(() => subscribeBlockedUserIds(setBlockedUserIds), []);
+
+  useEffect(() => {
+    if (!chatId || isExperienceGroup || isListeningChat || !currentUser) {
+      setDirectOtherUserId(null);
+      return;
+    }
+    let active = true;
+    getDoc(doc(db, "chats", chatId)).then(snapshot => {
+      if (!active) return;
+      const participants: string[] = Array.isArray(snapshot.data()?.participants) ? snapshot.data()!.participants : [];
+      const other = participants.find(uid => uid !== currentUser.uid) || getOtherUserId();
+      setDirectOtherUserId(other || null);
+      if (other) setSafetyTarget(other);
+    }).catch(() => {
+      if (active) setDirectOtherUserId(getOtherUserId());
+    });
+    return () => { active = false; };
+  }, [chatId, isExperienceGroup, isListeningChat, currentUser?.uid, post.id, post.authorId]);
 
   /*
    * Descobre com quem a conversa deve acontecer.
@@ -328,6 +350,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
     }
 
     setSending(true);
+    setSendError(false);
 
     try {
       let activeChatId = chatId;
@@ -343,17 +366,9 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
       if (!activeChatId) {
         const otherUserId = getOtherUserId();
 
-        if (!otherUserId) {
-          console.error(
-            "Não foi possível identificar o outro participante."
-          );
-          return;
-        }
-
-        if (otherUserId === currentUser.uid) {
-          console.error(
-            "Tentativa de criar conversa consigo próprio."
-          );
+        if (!otherUserId || otherUserId === currentUser.uid) {
+          setSendError(true);
+          console.error("Não foi possível identificar um participante válido para esta conversa.");
           return;
         }
 
@@ -395,45 +410,32 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         }
       }
 
-      // Enviar mensagem.
-      await addDoc(
-        collection(
-          db,
-          "chats",
-          activeChatId,
-          "messages"
-        ),
-        {
-          senderId: currentUser.uid,
-          text,
-          createdAt: serverTimestamp()
-        }
-      );
-
-      // Atualizar última mensagem do chat e indicar
-      // qual participante ainda não a leu.
+      // Persist the message and chat preview atomically. A partial write used
+      // to leave a sent message without unread metadata, making retries duplicate it.
       const activeChatRef = doc(db, "chats", activeChatId);
       const activeChatSnapshot = await getDoc(activeChatRef);
+      if (!activeChatSnapshot.exists()) throw new Error("chat-not-found");
 
-      const activeParticipants: string[] =
-        activeChatSnapshot.exists() &&
-        Array.isArray(activeChatSnapshot.data().participants)
-          ? activeChatSnapshot.data().participants
-          : [];
+      const activeParticipants: string[] = Array.isArray(activeChatSnapshot.data().participants)
+        ? activeChatSnapshot.data().participants
+        : [];
+      if (!activeParticipants.includes(currentUser.uid)) throw new Error("chat-participant-missing");
 
-      const unreadBy = activeParticipants.filter(
-        (uid: string) => uid !== currentUser.uid
-      );
-
-      await updateDoc(
-        activeChatRef,
-        {
-          lastMessage: text,
-          lastMessageAt: serverTimestamp(),
-          lastSenderId: currentUser.uid,
-          unreadBy
-        }
-      );
+      const unreadBy = activeParticipants.filter(uid => uid !== currentUser.uid);
+      const messageRef = doc(collection(db, "chats", activeChatId, "messages"));
+      const batch = writeBatch(db);
+      batch.set(messageRef, {
+        senderId: currentUser.uid,
+        text,
+        createdAt: serverTimestamp()
+      });
+      batch.update(activeChatRef, {
+        lastMessage: text,
+        lastMessageAt: serverTimestamp(),
+        lastSenderId: currentUser.uid,
+        unreadBy
+      });
+      await batch.commit();
 
       emitCompanionInteraction(
         "community_interaction",
@@ -444,15 +446,33 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
 
     } catch (error) {
       console.error("Erro ao enviar mensagem:", error);
+      setSendError(true);
     } finally {
       setSending(false);
     }
   };
 
   const safetyAction = async (action: "block" | "report" | "remove" | "leave") => {
-    if ((!isExperienceGroup && !isListeningChat) || !chatId || !currentUser || safetyBusy) return;
+    if (!chatId || !currentUser || safetyBusy) return;
     setSafetyBusy(true);
     try {
+      if (!isExperienceGroup && !isListeningChat) {
+        const target = safetyTarget || directOtherUserId || getOtherUserId();
+        if (!target || target === currentUser.uid || (action !== "block" && action !== "report")) return;
+        if (action === "block") {
+          if (blockedUserIds.includes(target)) { setSafetyOpen(false); return; }
+          await blockCommunityMember(target);
+          setBlockedUserIds(current => current.includes(target) ? current : [...current, target]);
+          onClose();
+          return;
+        }
+        await setDoc(doc(db, "reports", "private_" + chatId + "_" + currentUser.uid + "_" + target + "_" + Date.now()), {
+          reporterId: currentUser.uid, reportedUserId: target, postId: chatId,
+          reason: "Comportamento inadequado numa conversa privada", kind: "private_chat", status: "pending", createdAt: serverTimestamp(),
+        });
+        setSafetyOpen(false);
+        return;
+      }
       if (isListeningChat) {
         if (action === "leave") {
           await closeListeningSupportChat(chatId);
@@ -460,23 +480,21 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
         }
         if (!safetyTarget || safetyTarget === currentUser.uid) return;
         if (action === "block") {
-          await setDoc(doc(db, "blocks", currentUser.uid + "_" + safetyTarget), {
-            blockerId: currentUser.uid, blockedUserId: safetyTarget, createdAt: serverTimestamp()
-          });
+          await blockCommunityMember(safetyTarget);
           await closeListeningSupportChat(chatId);
           onClose(); return;
         }
         if (action === "report") {
           await setDoc(doc(db, "reports", "listening_" + chatId + "_" + currentUser.uid + "_" + safetyTarget), {
             reporterId: currentUser.uid, reportedUserId: safetyTarget, postId: chatId,
-            reason: "Comportamento inadequado numa conversa de apoio entre pares", createdAt: serverTimestamp()
+            reason: "Comportamento inadequado numa conversa de apoio entre pares", status: "pending", createdAt: serverTimestamp()
           });
         }
         setSafetyOpen(false); setSafetyTarget(null); return;
       }
       if (action === "leave") { await leaveExperienceMatchCircle(chatId); onClose(); return; }
       if (!safetyTarget) return;
-      if (action === "block") { await blockCircleParticipant(chatId, safetyTarget); if (groupParticipants.length === 2) onClose(); }
+      if (action === "block") { await blockCircleParticipant(chatId, safetyTarget); onClose(); return; }
       if (action === "report") await reportCircleParticipant(chatId, safetyTarget, "Comportamento inadequado na conversa de grupo");
       if (action === "remove") await requestCircleParticipantRemoval(chatId, safetyTarget);
       setSafetyOpen(false); setSafetyTarget(null);
@@ -500,7 +518,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-          {(isExperienceGroup || isListeningChat) && <button type="button" onClick={() => setSafetyOpen(v => !v)} className="w-9 h-9 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-500" aria-label={t("communitySafety.menu")}><MoreVertical size={17}/></button>}
+          {(isExperienceGroup || isListeningChat || Boolean(directOtherUserId)) && <button type="button" onClick={() => setSafetyOpen(v => !v)} className="w-9 h-9 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-500" aria-label={t("communitySafety.menu")}><MoreVertical size={17}/></button>}
           <button
             type="button"
             onClick={onClose}
@@ -510,11 +528,11 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
             <X size={18} />
           </button></div>
         </div>
-        {(isExperienceGroup || isListeningChat) && safetyOpen && <div className="border-b border-slate-100 bg-white px-4 py-3">
+        {(isExperienceGroup || isListeningChat || Boolean(directOtherUserId)) && safetyOpen && <div className="border-b border-slate-100 bg-white px-4 py-3">
           <div className="flex items-center gap-2 text-[10px] font-black text-[#6D5A53]"><Shield size={14}/>{t("communitySafety.title")}</div>
-          <div className="mt-2 flex gap-2 overflow-x-auto">{(isExperienceGroup ? groupParticipants : [post.authorId, ...(post.redLikedBy || [])]).filter(uid => uid !== currentUser?.uid).map((uid,index)=><button key={uid} type="button" onClick={()=>setSafetyTarget(uid)} className={(safetyTarget===uid?"bg-[#3F2C27] text-white":"bg-[#F7F5F2] text-[#6D5A53]")+" shrink-0 rounded-full px-3 py-2 text-[9px] font-bold"}>{t("communitySafety.participant",{count:index+1})}</button>)}</div>
-          {safetyTarget && <div className="mt-3 grid grid-cols-2 gap-2"><button disabled={safetyBusy} onClick={()=>safetyAction("block")} className="rounded-xl bg-[#FFF1EC] p-2 text-[9px] font-black text-[#A6533D]">{(isListeningChat || groupParticipants.length===2)?t("communitySafety.endAndBlock"):t("communitySafety.block")}</button><button disabled={safetyBusy} onClick={()=>safetyAction("report")} className="rounded-xl bg-[#FFF1EC] p-2 text-[9px] font-black text-[#A6533D]">{t("communitySafety.report")}</button>{isExperienceGroup && groupParticipants.length>=3&&<button disabled={safetyBusy} onClick={()=>safetyAction("remove")} className="col-span-2 rounded-xl bg-[#F7F5F2] p-2 text-[9px] font-black text-[#6D5A53]">{t("communitySafety.requestRemoval")}</button>}</div>}
-          <button disabled={safetyBusy} onClick={()=>safetyAction("leave")} className="mt-3 w-full py-2 text-[9px] font-bold text-slate-500">{isListeningChat ? t("listeningSupport.endConversation") : t("communitySafety.leave")}</button>
+          <div className="mt-2 flex gap-2 overflow-x-auto">{(isExperienceGroup ? groupParticipants : isListeningChat ? [post.authorId, ...(post.redLikedBy || [])] : [directOtherUserId].filter((uid): uid is string => Boolean(uid))).filter(uid => uid !== currentUser?.uid).map((uid,index)=><button key={uid} type="button" onClick={()=>setSafetyTarget(uid)} className={(safetyTarget===uid?"bg-[#3F2C27] text-white":"bg-[#F7F5F2] text-[#6D5A53]")+" shrink-0 rounded-full px-3 py-2 text-[9px] font-bold"}>{t("communitySafety.participant",{count:index+1})}</button>)}</div>
+          {safetyTarget && <div className="mt-3 grid grid-cols-2 gap-2"><button disabled={safetyBusy} onClick={()=>safetyAction("block")} className="rounded-xl bg-[#FFF1EC] p-2 text-[9px] font-black text-[#A6533D]">{(isListeningChat || (isExperienceGroup && groupParticipants.length===2))?t("communitySafety.endAndBlock"):t("communitySafety.block")}</button><button disabled={safetyBusy} onClick={()=>safetyAction("report")} className="rounded-xl bg-[#FFF1EC] p-2 text-[9px] font-black text-[#A6533D]">{t("communitySafety.report")}</button>{isExperienceGroup && groupParticipants.length>=3&&<button disabled={safetyBusy} onClick={()=>safetyAction("remove")} className="col-span-2 rounded-xl bg-[#F7F5F2] p-2 text-[9px] font-black text-[#6D5A53]">{t("communitySafety.requestRemoval")}</button>}</div>}
+          {(isExperienceGroup || isListeningChat) && <button disabled={safetyBusy} onClick={()=>safetyAction("leave")} className="mt-3 w-full py-2 text-[9px] font-bold text-slate-500">{isListeningChat ? t("listeningSupport.endConversation") : t("communitySafety.leave")}</button>}
           <p className="mt-1 text-[9px] leading-4 text-slate-400">{t("communitySafety.privateNote")}</p>
         </div>}
 
@@ -595,6 +613,7 @@ export const CommunityChat: React.FC<CommunityChatProps> = ({
 
         {/* Campo de mensagem */}
         <div className="p-3 border-t border-slate-100 bg-white">
+          {sendError && <p role="alert" className="mb-2 rounded-xl bg-[#FFF1EC] px-3 py-2 text-[10px] leading-4 text-[#934A38]">{t("communityChatSendError")}</p>}
           <div className="flex items-end gap-2">
 
             <textarea

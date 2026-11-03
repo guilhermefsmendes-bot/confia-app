@@ -1,5 +1,5 @@
 import type { HabitRecord, FoodType, HabitType } from "./types";
-import type { PersonalEvent } from "../personal/personalEvent";
+import { isValidPersonalLocalDate, type PersonalEvent } from "../personal/personalEvent";
 import { dayFoodItems, nutritionTotals } from "./nutrition";
 import { estimateDailyCaffeine, fruitVegetableRegistrations } from "../reactive/scientificGuidance";
 import { shiftDay } from "./calendar";
@@ -17,7 +17,7 @@ export interface HabitImpactCard {
 }
 export interface PersonalHabitAssociation {
   id: string;
-  habit: "sleep" | "exercise" | "caffeine" | "fastFood";
+  habit: "sleep" | "exercise" | "caffeine" | "fastFood" | "alcohol" | "tobacco" | "sweets" | "salt" | "water" | "produce";
   exposedMean: number;
   comparisonMean: number;
   exposedDays: number;
@@ -36,13 +36,19 @@ export interface HabitImpactReport {
 
 const round1 = (value: number) => Math.round(value * 10) / 10;
 const mean = (values: number[]) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : undefined;
-const isMood = (event: PersonalEvent) => event.type === "mood" && typeof event.value === "number" && Number.isFinite(event.value);
+const isMood = (event: PersonalEvent) => event.type === "mood" && typeof event.value === "number" && Number.isFinite(event.value) && event.value >= 1 && event.value <= 10;
 
 function moodByDate(events: PersonalEvent[], start: string, end: string): Map<string, number> {
   const latest = new Map<string, PersonalEvent>();
   for (const event of events) {
-    if (!isMood(event) || event.localDate < start || event.localDate > end) continue;
-    const key = event.localDate + ":" + String(event.metadata?.moment ?? "daily");
+    if (!isMood(event) || !isValidPersonalLocalDate(event.localDate) || event.localDate < start || event.localDate > end) continue;
+    // A matching moment is only an edit of the same observation when it comes
+    // from the same source. Distinct sources are independent observations;
+    // without a moment, stable event IDs are the only safe deduplication key.
+    const moment = event.metadata?.moment;
+    const key = typeof moment === "string"
+      ? `${event.source}:${event.localDate}:${moment}`
+      : `id:${event.id}`;
     const old = latest.get(key);
     if (!old || event.timestamp > old.timestamp) latest.set(key, event);
   }
@@ -53,7 +59,7 @@ function moodByDate(events: PersonalEvent[], start: string, end: string): Map<st
 
 function categoryWasMeasured(records: HabitRecord[], date: string, category: FoodType): boolean {
   return records.some(record => record.date === date && (
-    record.kind === "foodItem" && record.data.category === category ||
+    record.kind === "foodItem" && record.data.category === category && !record.data.deleted ||
     record.kind === "nutrition" && Object.prototype.hasOwnProperty.call(record.data, category)
   ));
 }
@@ -87,8 +93,15 @@ function explicitWaterLogged(records: HabitRecord[], date: string): boolean {
 function buildPersonalAssociations(records: HabitRecord[], events: PersonalEvent[], date: string): { associations: PersonalHabitAssociation[]; moodDays: number } {
   const start = shiftDay(date, -29);
   const moods = moodByDate(events, start, date);
-  const dates = [...moods.keys()];
   const associations: PersonalHabitAssociation[] = [];
+  // Index once so the 30-day comparison works on each day's records instead of
+  // repeatedly scanning the user's complete history for every signal.
+  const recordsByDate = new Map<string, HabitRecord[]>();
+  for (const record of records) {
+    const dayRecords = recordsByDate.get(record.date);
+    if (dayRecords) dayRecords.push(record);
+    else recordsByDate.set(record.date, [record]);
+  }
   const compare = (id: PersonalHabitAssociation["habit"], exposure: Map<string, boolean>) => {
     const exposed: number[] = [], comparison: number[] = [];
     for (const [day, value] of exposure) {
@@ -96,9 +109,9 @@ function buildPersonalAssociations(records: HabitRecord[], events: PersonalEvent
       if (rating === undefined) continue;
       (value ? exposed : comparison).push(rating);
     }
-    // Do not publish a personal association until both groups contain at least
-    // five separately measured days. Missing logs are never interpreted as zero.
-    if (exposed.length < 5 || comparison.length < 5) return;
+    // Ten measured mood-days per group is a conservative exploratory minimum.
+    // Unlogged habits are never interpreted as zero consumption/activity.
+    if (exposed.length < 10 || comparison.length < 10) return;
     const exposedMean = mean(exposed)!, comparisonMean = mean(comparison)!;
     const difference = round1(exposedMean - comparisonMean);
     associations.push({
@@ -110,31 +123,44 @@ function buildPersonalAssociations(records: HabitRecord[], events: PersonalEvent
     });
   };
 
-  const sleepExposure = new Map<string, boolean>();
-  const caffeineExposure = new Map<string, boolean>();
-  const fastFoodExposure = new Map<string, boolean>();
-  const exerciseExposure = new Map<string, boolean>();
-  for (const day of dates) {
-    const sleep = records.find((record): record is Extract<HabitRecord, { kind: "sleep" }> => record.kind === "sleep" && record.date === day);
-    if (sleep) sleepExposure.set(day, sleep.data.hours < 7);
+  const exposures: Record<PersonalHabitAssociation["habit"], Map<string, boolean>> = {
+    sleep: new Map(), exercise: new Map(), caffeine: new Map(), fastFood: new Map(),
+    alcohol: new Map(), tobacco: new Map(), sweets: new Map(), salt: new Map(), water: new Map(), produce: new Map(),
+  };
+  for (const day of moods.keys()) {
+    const dayRecords = recordsByDate.get(day) ?? [];
+    const sleep = dayRecords.find((record): record is Extract<HabitRecord, { kind: "sleep" }> => record.kind === "sleep");
+    if (sleep) exposures.sleep.set(day, sleep.data.hours < 7);
 
-    // A food day is comparable only when nutrition or detailed food was logged.
-    const foodMeasured = records.some(record => record.date === day && (record.kind === "nutrition" || record.kind === "foodItem"));
-    const caffeineMeasured = categoryWasMeasured(records, day, "coffee") || categoryWasMeasured(records, day, "tea") || categoryWasMeasured(records, day, "energy") ||
-      dayFoodItems(records, day).some(item => item.data.category === "soda" && item.data.caffeine === "yes");
-    if (foodMeasured && caffeineMeasured) {
-      const estimate = estimateDailyCaffeine(records, day).mg;
-      if (estimate !== undefined) caffeineExposure.set(day, estimate >= 200);
+    const caffeineMeasured = (["coffee", "tea", "energy", "soda"] as FoodType[]).some(category => categoryWasMeasured(dayRecords, day, category));
+    if (caffeineMeasured) {
+      const estimate = estimateDailyCaffeine(dayRecords, day).mg ?? 0;
+      exposures.caffeine.set(day, estimate >= 200);
     }
-    if (foodMeasured && categoryWasMeasured(records, day, "fastFood")) fastFoodExposure.set(day, categoryValue(records, day, "fastFood") > 0);
 
-    const exerciseRecords = records.filter((record): record is Extract<HabitRecord, { kind: "exercise" }> => record.kind === "exercise" && record.date === day);
-    if (exerciseRecords.length) exerciseExposure.set(day, exerciseRecords.some(record => record.data.minutes > 0));
+    // Legacy nutrition entries can explicitly record zero; detailed food entries
+    // only prove presence, so they never create an assumed non-consumption day.
+    for (const [category, key] of [
+      ["fastFood", "fastFood"], ["alcohol", "alcohol"], ["tobacco", "tobacco"],
+      ["sweets", "sweets"], ["salty", "salt"],
+    ] as const) {
+      if (categoryWasMeasured(dayRecords, day, category)) exposures[key].set(day, categoryValue(dayRecords, day, category) > 0);
+    }
+
+    const exerciseRecords = dayRecords.filter((record): record is Extract<HabitRecord, { kind: "exercise" }> => record.kind === "exercise" && record.data.minutes > 0);
+    if (exerciseRecords.length) {
+      const minutes = exerciseRecords.reduce((total, record) => total + record.data.minutes, 0);
+      // Compare only days with an exercise entry: >=30 minutes vs shorter sessions.
+      exposures.exercise.set(day, minutes >= 30);
+    }
+
+    if (explicitWaterLogged(dayRecords, day)) exposures.water.set(day, dailyWaterMl(dayRecords, day) >= 1500);
+    const produce = fruitVegetableRegistrations(dayRecords, day);
+    if (produce.grams > 0) exposures.produce.set(day, produce.grams >= 400);
+    else if (produce.explicitPortions > 0) exposures.produce.set(day, produce.explicitPortions >= 5);
   }
-  compare("sleep", sleepExposure);
-  compare("caffeine", caffeineExposure);
-  compare("fastFood", fastFoodExposure);
-  compare("exercise", exerciseExposure);
+
+  (Object.keys(exposures) as PersonalHabitAssociation["habit"][]).forEach(key => compare(key, exposures[key]));
   return { associations, moodDays: moods.size };
 }
 
@@ -176,8 +202,9 @@ export function buildHabitImpact(records: HabitRecord[], events: PersonalEvent[]
     const moderate = week.filter(record => record.data.intensity === "moderate").reduce((sum, record) => sum + record.data.minutes, 0);
     const vigorous = week.filter(record => record.data.intensity === "intense").reduce((sum, record) => sum + record.data.minutes, 0);
     const unclassified = week.filter(record => !record.data.intensity || record.data.intensity === "light").reduce((sum, record) => sum + record.data.minutes, 0);
+    const strengthDays = new Set(week.filter(record => record.data.activity === "gym").map(record => record.date)).size;
     cards.push({ id: "exercise-week", titleKey: "habitImpact.cards.exercise.title", messageKey: "habitImpact.cards.exercise.message",
-      values: { moderate, vigorous, moderateTarget: 150, vigorousTarget: 75, unclassified }, severity: "information", sourceId: "physicalActivity" });
+      values: { todayMinutes: exercise.reduce((sum, record) => sum + record.data.minutes, 0), sessions: exercise.length, moderate, vigorous, moderateTarget: 150, vigorousTarget: 75, strengthDays, strengthTarget: 2, unclassified }, severity: "information", sourceId: "physicalActivity" });
   }
 
   if (foodItems.length || nutrition) {
@@ -194,12 +221,6 @@ export function buildHabitImpact(records: HabitRecord[], events: PersonalEvent[]
     } else if (caffeineItems.some(record => !record.data.deleted && record.data.quantity > 0) || caffeineCategoryMeasured) {
       cards.push({ id: "caffeine-unknown", titleKey: "habitImpact.cards.caffeineUnknown.title", messageKey: "habitImpact.cards.caffeineUnknown.message",
         values: {}, severity: "neutral", sourceId: "caffeine" });
-    }
-
-    if (foodItems.some(record => !record.data.deleted && !["water", "fruit", "vegetables"].includes(record.data.category)) ||
-      ["coffee", "tea", "energy", "soda", "alcohol", "tobacco", "fastFood", "cereals", "protein", "fats", "sweets", "salty"].some(category => categoryWasMeasured(records, date, category as FoodType) && categoryValue(records, date, category as FoodType) > 0)) {
-      cards.push({ id: "nutrient-detail-limit", titleKey: "habitImpact.cards.nutrientDetailLimit.title", messageKey: "habitImpact.cards.nutrientDetailLimit.message",
-        values: {}, severity: "neutral" });
     }
 
     if (hasExplicitProduce(records, date)) {
@@ -224,11 +245,15 @@ export function buildHabitImpact(records: HabitRecord[], events: PersonalEvent[]
     }
 
     const limitations: Array<{ category: FoodType; id: string; sourceId?: string }> = [
-      { category: "fastFood", id: "fastFood", sourceId: "ultraProcessedFood" },
+      { category: "fastFood", id: "fastFood", sourceId: "healthyDiet" },
       { category: "sweets", id: "sweets", sourceId: "freeSugar" },
       { category: "salty", id: "salt", sourceId: "salt" },
       { category: "alcohol", id: "alcohol", sourceId: "alcohol" },
       { category: "tobacco", id: "tobacco", sourceId: "tobacco" },
+      { category: "cereals", id: "cereals", sourceId: "healthyDiet" },
+      { category: "protein", id: "protein", sourceId: "healthyDiet" },
+      { category: "fats", id: "fats", sourceId: "healthyDiet" },
+      { category: "soda", id: "soda", sourceId: "healthyDiet" },
     ];
     for (const item of limitations) {
       const detailedCount = activeFoodCount(records, date, item.category);

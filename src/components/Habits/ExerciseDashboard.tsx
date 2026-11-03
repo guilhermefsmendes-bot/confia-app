@@ -2,7 +2,7 @@ import { PERIODS,type DayPeriod } from "../../data/habits/catalog";
 import LifestyleReview from "./LifestyleReview";
 import HabitEvolution from "./HabitEvolution";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import { ACTIVITY_TYPES,ACTIVITY_ICONS,type ActivityType,type HabitRecord } from "../../data/habits/types";
 import type { PersonalEvent } from "../../data/personal/personalEvent";
 import HabitImpactReaction from "./HabitImpactReaction";
@@ -11,7 +11,7 @@ import { exerciseWeek } from "../../data/habits/statistics";
 import { DayPicker,buttonClass,inputClass,primaryClass,type RunAction,formatDay } from "./shared";
 import { weekStart } from "../../data/habits/calendar";
 export default function ExerciseDashboard({records,events,today,run,onDone}:{records:HabitRecord[];events:PersonalEvent[];today:string;run:RunAction;onDone:()=>void}) {
-  const {t,i18n}=useTranslation();const [date,setDate]=useState(today);const [activity,setActivity]=useState<ActivityType>("walk");const [minutes,setMinutes]=useState(20);const [intensity,setIntensity]=useState<""|"light"|"moderate"|"intense">("");
+  const {t,i18n}=useTranslation("habits");const [date,setDate]=useState(today);const [activity,setActivity]=useState<ActivityType>("walk");const [minutes,setMinutes]=useState(20);const [intensity,setIntensity]=useState<""|"light"|"moderate"|"intense">("");
   const [period,setPeriod]=useState<DayPeriod|"">("");
   const week=exerciseWeek(records,weekStart(today),today);
   const daily=records.filter((r):r is Extract<HabitRecord,{kind:"exercise"}>=>r.kind==="exercise" && r.date===date);

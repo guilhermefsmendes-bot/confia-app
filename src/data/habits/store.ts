@@ -1,8 +1,8 @@
 import type { HabitRecord, HabitSnapshot, SyncStatus } from "./types";
+import { getCurrentHabitOwner, setCurrentHabitOwner } from "./owner";
 import { localDay, timezone } from "./calendar";
 import { publishHabitEvents } from "./events";
 const PREFIX = "confia_habits_v1:";
-let owner = "guest";
 let state: HabitSnapshot = { version:1, records:[], pending:{} };
 let status: SyncStatus = "local";
 let error = false;
@@ -11,7 +11,7 @@ const listeners = new Set<()=>void>();
 let revision = 0;
 export const subscribeHabits = (fn:()=>void) => { listeners.add(fn); return ()=>{listeners.delete(fn);}; };
 export const getHabitRevision = () => revision;
-export const getHabitOwner = () => owner;
+export const getHabitOwner = getCurrentHabitOwner;
 export const getHabitSnapshot = () => state;
 export const getHabitStatus = () => error ? "error" : status;
 export function notifyHabits() { revision++; listeners.forEach(fn=>fn()); }
@@ -22,18 +22,18 @@ function read(uid:string): HabitSnapshot {
   if (value.version !== 1 || !Array.isArray(value.records) || !value.pending) throw new Error("invalid-storage");
   return value;
 }
-function persist(next:HabitSnapshot) {
+function persist(next:HabitSnapshot, publishEvents = true, changedRecords?: HabitRecord[]) {
   // Commit UI state only after durable local storage succeeds.
-  localStorage.setItem(PREFIX+owner, JSON.stringify(next));
+  localStorage.setItem(PREFIX+getCurrentHabitOwner(), JSON.stringify(next));
   state = next; error = false;
-  publishHabitEvents(state.records, owner);
+  if (publishEvents) publishHabitEvents(state.records, getCurrentHabitOwner(), changedRecords ? { changedIds: new Set(changedRecords.map(record => record.id)), recordsById: new Map(changedRecords.map(record => [record.id, record])) } : undefined);
   notifyHabits();
 }
 export function activateHabitOwner(uid:string) {
-  if (initialized && uid===owner) return;
-  const previous = owner;
+  const previous = getCurrentHabitOwner();
+  if (initialized && uid===previous) return;
   const guest = previous==="guest" && initialized ? state : undefined;
-  owner=uid; initialized=true;
+  setCurrentHabitOwner(uid); initialized=true;
   try {
     state=read(uid); error=false;
     if (uid!=="guest" && previous==="guest") {
@@ -44,7 +44,7 @@ export function activateHabitOwner(uid:string) {
         localStorage.removeItem(PREFIX+"guest");
       }
     }
-    publishHabitEvents(state.records,owner);
+    publishHabitEvents(state.records,getCurrentHabitOwner());
   } catch { state={version:1,records:[],pending:{}}; error=true; }
   status=uid==="guest"?"local":"pending"; notifyHabits();
 }
@@ -55,21 +55,33 @@ export function mergeHabitRecords(local:HabitRecord[], remote:HabitRecord[]): Ha
   return [...map.values()];
 }
 export function mergeRemoteHabits(records:HabitRecord[], uid:string) {
-  if(uid!==owner) return;
-  persist({...state,records:mergeHabitRecords(state.records,records)});
+  if(uid!==getCurrentHabitOwner()) return;
+  const currentById = new Map(state.records.map(record => [record.id, record]));
+  const merged = mergeHabitRecords(state.records, records);
+  const changedRecords = merged.filter(record => currentById.get(record.id) !== record);
+  if (!changedRecords.length) return false;
+  persist({...state,records:merged}, true, changedRecords);
+  return true;
 }
 export function acknowledgeHabits(sent:HabitRecord[],uid:string) {
-  if(uid!==owner) return;
+  if(uid!==getCurrentHabitOwner()) return;
   const pending={...state.pending};
   sent.forEach(r=>{if(pending[r.id] && pending[r.id]<=r.updatedAt) delete pending[r.id];});
-  persist({...state,pending});
+  if (Object.keys(pending).length === Object.keys(state.pending).length) return;
+  persist({...state,pending}, false);
 }
 export function saveHabitRecords(records:HabitRecord[]) {
   if(!initialized) activateHabitOwner("guest");
   if(error) throw new Error("storage-unavailable");
+  const currentById = new Map(state.records.map(record => [record.id, record]));
+  const changedRecords = records.filter(record => {
+    const previous = currentById.get(record.id);
+    return !previous || JSON.stringify(previous) !== JSON.stringify(record) || state.pending[record.id] !== record.updatedAt;
+  });
+  if (!changedRecords.length) return;
   const ids=new Set(records.map(r=>r.id));
-  persist({version:1,records:state.records.filter(r=>!ids.has(r.id)).concat(records),pending:{...state.pending,...Object.fromEntries(records.map(r=>[r.id,r.updatedAt]))}});
-  if(owner!=="guest") setHabitSyncStatus("pending");
+  persist({version:1,records:state.records.filter(r=>!ids.has(r.id)).concat(records),pending:{...state.pending,...Object.fromEntries(records.map(r=>[r.id,r.updatedAt]))}}, true, changedRecords);
+  if(getCurrentHabitOwner()!=="guest") setHabitSyncStatus("pending");
   window.dispatchEvent(new Event("confia:habit-write"));
 }
 export function saveHabitRecord(record:HabitRecord) { saveHabitRecords([record]); }

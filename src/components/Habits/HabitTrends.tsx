@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "../../i18n/useFeatureTranslation";
 import type { HabitRecord } from "../../data/habits/types";
 import type { PersonalEvent } from "../../data/personal/personalEvent";
 import { shiftDay } from "../../data/habits/calendar";
@@ -31,7 +31,7 @@ function summarize(records: HabitRecord[], events: PersonalEvent[], today: strin
 function value(value: number | undefined, digits = 1) { return value === undefined ? "—" : value.toFixed(digits); }
 
 export default function HabitTrends({ records, events, today }: { records: HabitRecord[]; events: PersonalEvent[]; today: string }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation("habits");
   const week = useMemo(() => summarize(records, events, today, 7), [records, events, today]);
   const weekPrevious = useMemo(() => summarize(records, events, shiftDay(today, -7), 7), [records, events, today]);
   const month = useMemo(() => summarize(records, events, today, 30), [records, events, today]);

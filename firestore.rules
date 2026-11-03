@@ -38,6 +38,82 @@ service cloud.firestore {
   }
 
   match /databases/{database}/documents {
+    // One canonical document per unordered pair keeps group checks within
+    // Firestore's per-request document-access budget (groups support up to 8).
+    function blockPairId(firstUid, secondUid) {
+      return firstUid < secondUid
+        ? 'pair_' + firstUid.size() + '_' + firstUid + '_' + secondUid.size() + '_' + secondUid
+        : 'pair_' + secondUid.size() + '_' + secondUid + '_' + firstUid.size() + '_' + firstUid;
+    }
+
+    function legacyBlockId(blockerUid, blockedUid) {
+      return blockerUid.size() + '_' + blockerUid + '_' + blockedUid.size() + '_' + blockedUid;
+    }
+
+    function blockedBetween(firstUid, secondUid) {
+      // Canonical pair is collision-safe. Legacy paths remain checked during
+      // rollout so older clients cannot bypass a block before they upgrade.
+      return exists(/databases/$(database)/documents/blockPairs/$(blockPairId(firstUid, secondUid)))
+        || exists(/databases/$(database)/documents/blocks/$(firstUid + '_' + secondUid))
+        || exists(/databases/$(database)/documents/blocks/$(secondUid + '_' + firstUid))
+        || exists(/databases/$(database)/documents/blocks/$(legacyBlockId(firstUid, secondUid)))
+        || exists(/databases/$(database)/documents/blocks/$(legacyBlockId(secondUid, firstUid)));
+    }
+
+    function removesBlockedPeer(beforeParticipants, afterParticipants, blockerId) {
+      return beforeParticipants is list
+        && afterParticipants is list
+        && beforeParticipants.size() <= 8
+        && beforeParticipants.size() == afterParticipants.size() + 1
+        && beforeParticipants.hasAll(afterParticipants)
+        && (
+          (beforeParticipants.size() > 0 && beforeParticipants[0] != blockerId
+            && !(beforeParticipants[0] in afterParticipants)
+            && exists(/databases/$(database)/documents/blockPairs/$(blockPairId(blockerId, beforeParticipants[0]))))
+          || (beforeParticipants.size() > 1 && beforeParticipants[1] != blockerId
+            && !(beforeParticipants[1] in afterParticipants)
+            && exists(/databases/$(database)/documents/blockPairs/$(blockPairId(blockerId, beforeParticipants[1]))))
+          || (beforeParticipants.size() > 2 && beforeParticipants[2] != blockerId
+            && !(beforeParticipants[2] in afterParticipants)
+            && exists(/databases/$(database)/documents/blockPairs/$(blockPairId(blockerId, beforeParticipants[2]))))
+          || (beforeParticipants.size() > 3 && beforeParticipants[3] != blockerId
+            && !(beforeParticipants[3] in afterParticipants)
+            && exists(/databases/$(database)/documents/blockPairs/$(blockPairId(blockerId, beforeParticipants[3]))))
+          || (beforeParticipants.size() > 4 && beforeParticipants[4] != blockerId
+            && !(beforeParticipants[4] in afterParticipants)
+            && exists(/databases/$(database)/documents/blockPairs/$(blockPairId(blockerId, beforeParticipants[4]))))
+          || (beforeParticipants.size() > 5 && beforeParticipants[5] != blockerId
+            && !(beforeParticipants[5] in afterParticipants)
+            && exists(/databases/$(database)/documents/blockPairs/$(blockPairId(blockerId, beforeParticipants[5]))))
+          || (beforeParticipants.size() > 6 && beforeParticipants[6] != blockerId
+            && !(beforeParticipants[6] in afterParticipants)
+            && exists(/databases/$(database)/documents/blockPairs/$(blockPairId(blockerId, beforeParticipants[6]))))
+          || (beforeParticipants.size() > 7 && beforeParticipants[7] != blockerId
+            && !(beforeParticipants[7] in afterParticipants)
+            && exists(/databases/$(database)/documents/blockPairs/$(blockPairId(blockerId, beforeParticipants[7]))))
+        );
+    }
+
+    function noBlockedCirclePeers(participants, userId) {
+      return participants is list
+        && participants.size() <= 8
+        && (participants.size() < 1 || participants[0] == userId
+          || !exists(/databases/$(database)/documents/blockPairs/$(blockPairId(userId, participants[0]))))
+        && (participants.size() < 2 || participants[1] == userId
+          || !exists(/databases/$(database)/documents/blockPairs/$(blockPairId(userId, participants[1]))))
+        && (participants.size() < 3 || participants[2] == userId
+          || !exists(/databases/$(database)/documents/blockPairs/$(blockPairId(userId, participants[2]))))
+        && (participants.size() < 4 || participants[3] == userId
+          || !exists(/databases/$(database)/documents/blockPairs/$(blockPairId(userId, participants[3]))))
+        && (participants.size() < 5 || participants[4] == userId
+          || !exists(/databases/$(database)/documents/blockPairs/$(blockPairId(userId, participants[4]))))
+        && (participants.size() < 6 || participants[5] == userId
+          || !exists(/databases/$(database)/documents/blockPairs/$(blockPairId(userId, participants[5]))))
+        && (participants.size() < 7 || participants[6] == userId
+          || !exists(/databases/$(database)/documents/blockPairs/$(blockPairId(userId, participants[6]))))
+        && (participants.size() < 8 || participants[7] == userId
+          || !exists(/databases/$(database)/documents/blockPairs/$(blockPairId(userId, participants[7]))));
+    }
 
     match /users/{uid}/devices/{deviceId} {
       allow read, delete: if request.auth != null && request.auth.uid == uid;
@@ -144,11 +220,11 @@ service cloud.firestore {
       return chatData.keys().hasAny(['matchRequestId'])
         && chatData.matchRequestId is string
         && exists(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId))
-        && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.status == 'accepted'
-        && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.postId == chatData.postId
-        && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.requesterId in chatData.participants
-        && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.recipientId in chatData.participants
-        && get(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.recipientId == chatData.authorId;
+        && getAfter(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.status == 'accepted'
+        && getAfter(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.postId == chatData.postId
+        && getAfter(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.requesterId in chatData.participants
+        && getAfter(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.recipientId in chatData.participants
+        && getAfter(/databases/$(database)/documents/communityMatchRequests/$(chatData.matchRequestId)).data.recipientId == chatData.authorId;
     }
 
     // A listening chat can only be created in the same transaction that
@@ -479,10 +555,15 @@ service cloud.firestore {
       allow get: if request.auth != null
         && (
           resource == null
-          || request.auth.uid in resource.data.participants
+          || request.auth.token.moderator == true
           || (
-            get(/databases/$(database)/documents/communityMatchProfiles/$(request.auth.uid)).data.active == true
+            request.auth.uid in resource.data.participants
+          )
+          || (
+            !(request.auth.uid in resource.data.participants)
+            && get(/databases/$(database)/documents/communityMatchProfiles/$(request.auth.uid)).data.active == true
             && resource.data.experienceTag in get(/databases/$(database)/documents/communityMatchProfiles/$(request.auth.uid)).data.activeTags
+            && noBlockedCirclePeers(resource.data.participants, request.auth.uid)
           )
         );
       allow list: if request.auth != null
@@ -517,12 +598,18 @@ service cloud.firestore {
             && request.resource.data.participants.hasAll(resource.data.participants)
             && get(/databases/$(database)/documents/communityMatchProfiles/$(request.auth.uid)).data.active == true
             && resource.data.experienceTag in get(/databases/$(database)/documents/communityMatchProfiles/$(request.auth.uid)).data.activeTags
+            && noBlockedCirclePeers(resource.data.participants, request.auth.uid)
           )
           || (
             request.auth.uid in resource.data.participants
             && !(request.auth.uid in request.resource.data.participants)
             && request.resource.data.participants.size() == resource.data.participants.size() - 1
             && resource.data.participants.hasAll(request.resource.data.participants)
+          )
+          || (
+            request.auth.uid in resource.data.participants
+            && request.auth.uid in request.resource.data.participants
+            && removesBlockedPeer(resource.data.participants, request.resource.data.participants, request.auth.uid)
           )
         )
         && (request.resource.data.participants.size() == 8 ? request.resource.data.status == 'full' : request.resource.data.status == 'open');
@@ -531,14 +618,28 @@ service cloud.firestore {
 
       match /messages/{messageId} {
         allow read: if request.auth != null
-          && request.auth.uid in get(/databases/$(database)/documents/experienceMatchCircles/$(circleId)).data.participants;
+          && (request.auth.token.moderator == true
+            || (
+              request.auth.uid in get(/databases/$(database)/documents/experienceMatchCircles/$(circleId)).data.participants
+              && noBlockedCirclePeers(
+                get(/databases/$(database)/documents/experienceMatchCircles/$(circleId)).data.participants,
+                request.auth.uid
+              )
+            ));
         allow create: if request.auth != null
           && request.resource.data.senderId == request.auth.uid
           && request.auth.uid in get(/databases/$(database)/documents/experienceMatchCircles/$(circleId)).data.participants
+          && noBlockedCirclePeers(
+            get(/databases/$(database)/documents/experienceMatchCircles/$(circleId)).data.participants,
+            request.auth.uid
+          )
           && request.resource.data.text is string
           && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 2000;
-        allow update, delete: if false;
+        allow update: if false;
+        allow delete: if request.auth != null
+          && request.resource == null
+          && resource.data.senderId == request.auth.uid;
       }
     }
 
@@ -561,7 +662,20 @@ service cloud.firestore {
           !exists(
             /databases/$(database)/documents/chats/$(chatId)
           )
-          || request.auth.uid in resource.data.participants
+          || (
+            request.auth.uid in resource.data.participants
+            && resource.data.participants.size() == 2
+            && !blockedBetween(resource.data.participants[0], resource.data.participants[1])
+          )
+          || (
+            resource.data.keys().hasAny(['listeningRequestId'])
+            && resource.data.closedAt is timestamp
+            && (
+              resource.data.closedBy == request.auth.uid
+              || request.auth.uid in resource.data.participants
+            )
+          )
+          || request.auth.token.moderator == true
         );
 
       // ---------------------------------------------------
@@ -570,10 +684,13 @@ service cloud.firestore {
       // Participantes podem listar os seus chats. O campo closedBy só pode ser
       // definido pelo fluxo de encerramento SOS validado abaixo, permitindo ao
       // autor do encerramento localizar os dados para eliminação da conta.
+      // Keep the participant query compatible with Firestore's query model.
+      // Actual chat and message reads are checked against the block pair.
       allow list: if request.auth != null
         && (
           request.auth.uid in resource.data.participants
           || resource.data.closedBy == request.auth.uid
+          || (resource.data.keys().hasAny(['unreadBy']) && request.auth.uid in resource.data.unreadBy)
         );
 
 
@@ -596,7 +713,13 @@ service cloud.firestore {
         && request.resource.data.lastMessage is string
         && request.resource.data.lastMessage.size() <= 2000
         && request.resource.data.lastMessageAt is timestamp
+        && (!request.resource.data.keys().hasAny(['unreadBy'])
+          || (request.resource.data.unreadBy is list
+            && request.resource.data.unreadBy.size() <= 1
+            && (request.resource.data.unreadBy.size() == 0
+              || request.resource.data.unreadBy[0] in request.resource.data.participants)))
         && request.resource.data.authorId in request.resource.data.participants
+        && !blockedBetween(request.resource.data.participants[0], request.resource.data.participants[1])
         && (
           validAcceptedExperienceMatch(request.resource.data)
           || validListeningSupportMatch(request.resource.data)
@@ -671,6 +794,7 @@ service cloud.firestore {
       // - lastMessageAt
       allow update: if request.auth != null
         && request.auth.uid in resource.data.participants
+        && (request.resource.data.participants.size() != 2 || !blockedBetween(resource.data.participants[0], resource.data.participants[1]))
         && request.resource.data.lastMessage is string
         && request.resource.data.lastMessage.size() <= 2000
         && (
@@ -774,11 +898,22 @@ service cloud.firestore {
         // Apenas participantes da conversa podem ler.
         allow read: if request.auth != null
           && (
-            request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants
+            request.auth.token.moderator == true
+            || (
+              request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants
+              && get(/databases/$(database)/documents/chats/$(chatId)).data.participants.size() == 2
+              && !blockedBetween(
+                get(/databases/$(database)/documents/chats/$(chatId)).data.participants[0],
+                get(/databases/$(database)/documents/chats/$(chatId)).data.participants[1]
+              )
+            )
             || (
               get(/databases/$(database)/documents/chats/$(chatId)).data.keys().hasAny(['listeningRequestId'])
-              && get(/databases/$(database)/documents/chats/$(chatId)).data.closedBy == request.auth.uid
               && get(/databases/$(database)/documents/chats/$(chatId)).data.closedAt is timestamp
+              && (
+                get(/databases/$(database)/documents/chats/$(chatId)).data.closedBy == request.auth.uid
+                || request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants
+              )
             )
           );
 
@@ -794,6 +929,11 @@ service cloud.firestore {
             get(
               /databases/$(database)/documents/chats/$(chatId)
             ).data.participants
+          && get(/databases/$(database)/documents/chats/$(chatId)).data.participants.size() == 2
+          && !blockedBetween(
+            get(/databases/$(database)/documents/chats/$(chatId)).data.participants[0],
+            get(/databases/$(database)/documents/chats/$(chatId)).data.participants[1]
+          )
           && (
             !get(/databases/$(database)/documents/chats/$(chatId)).data.keys().hasAny(['listeningRequestId'])
             || (
@@ -839,13 +979,67 @@ service cloud.firestore {
         && request.resource.data.reason is string
         && request.resource.data.reason.size() > 0
         && request.resource.data.reason.size() <= 500
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.keys().hasOnly(['reporterId', 'reportedUserId', 'postId', 'reason', 'status', 'createdAt', 'circleId', 'kind'])
         && (!request.resource.data.keys().hasAny(['circleId']) || request.resource.data.circleId is string)
         && (!request.resource.data.keys().hasAny(['kind']) || request.resource.data.kind is string)
         && (!request.resource.data.keys().hasAny(['circleId']) || (request.auth.uid in get(/databases/$(database)/documents/experienceMatchCircles/$(request.resource.data.circleId)).data.participants && request.resource.data.reportedUserId in get(/databases/$(database)/documents/experienceMatchCircles/$(request.resource.data.circleId)).data.participants));
 
-      allow list, get, delete: if request.auth != null
+      // Reporters can inspect/delete only their own submissions. Trusted
+      // moderators (custom auth claim) can review the global moderation queue.
+      allow list, get: if request.auth != null
+        && (resource.data.reporterId == request.auth.uid || request.auth.token.moderator == true);
+      // Preserve the audit trail: moderators resolve reports by status, not deletion.
+      allow delete: if request.auth != null
         && resource.data.reporterId == request.auth.uid;
-      allow update: if false;
+      allow update: if request.auth != null
+        && request.auth.token.moderator == true
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'reviewedAt', 'reviewedBy', 'moderatorNotes', 'legalHold', 'legalHoldReason', 'legalHoldAt', 'legalHoldBy'])
+        && request.resource.data.status in ['pending', 'in_review', 'reviewed', 'actioned', 'dismissed']
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'reviewedAt', 'reviewedBy'])
+          || (request.resource.data.reviewedBy == request.auth.uid && request.resource.data.reviewedAt is timestamp)
+        )
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['legalHold', 'legalHoldReason', 'legalHoldAt', 'legalHoldBy'])
+          || (request.resource.data.legalHold is bool
+            && request.resource.data.legalHoldAt is timestamp
+            && request.resource.data.legalHoldBy == request.auth.uid
+            && request.resource.data.legalHoldReason is string
+            && request.resource.data.legalHoldReason.size() <= 500
+            && (!request.resource.data.legalHold || request.resource.data.legalHoldReason.size() >= 8))
+        )
+        && (!request.resource.data.keys().hasAny(['moderatorNotes']) || (request.resource.data.moderatorNotes is string && request.resource.data.moderatorNotes.size() <= 1000));
+    }
+
+    match /blockPairs/{pairId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['blockerId', 'blockedUserId', 'blockedBy', 'createdAt'])
+        && request.resource.data.blockerId == request.auth.uid
+        && request.resource.data.blockedUserId is string
+        && request.resource.data.blockedUserId != request.auth.uid
+        && request.resource.data.blockedBy is list
+        && request.resource.data.blockedBy.size() == 1
+        && request.resource.data.blockedBy[0] == request.auth.uid
+        && request.resource.data.createdAt is timestamp
+        && pairId == blockPairId(request.auth.uid, request.resource.data.blockedUserId);
+      allow get: if request.auth != null
+        && (
+          (resource == null
+            && (pairId.matches('^pair_' + request.auth.uid.size() + '_' + request.auth.uid + '_.*$')
+              || pairId.matches('^pair_.*_' + request.auth.uid.size() + '_' + request.auth.uid + '$')))
+          || (resource != null && (resource.data.blockerId == request.auth.uid || resource.data.blockedUserId == request.auth.uid))
+        );
+      allow list: if false;
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.blockedUserId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['blockedBy'])
+        && request.resource.data.blockedBy is list
+        && request.resource.data.blockedBy.hasAll(resource.data.blockedBy)
+        && request.resource.data.blockedBy.size() == resource.data.blockedBy.size() + 1
+        && request.auth.uid in request.resource.data.blockedBy;
+      allow delete: if false;
     }
 
     match /blocks/{blockId} {
@@ -855,7 +1049,16 @@ service cloud.firestore {
         && request.resource.data.blockedUserId != request.auth.uid
         && (!request.resource.data.keys().hasAny(['circleId']) || (request.auth.uid in get(/databases/$(database)/documents/experienceMatchCircles/$(request.resource.data.circleId)).data.participants && request.resource.data.blockedUserId in get(/databases/$(database)/documents/experienceMatchCircles/$(request.resource.data.circleId)).data.participants));
 
-      allow list, get, delete: if request.auth != null
+      allow get: if request.auth != null
+        && (
+          (resource == null
+            && (blockId.matches('^' + request.auth.uid + '_.*$')
+              || blockId.matches('^' + request.auth.uid.size() + '_' + request.auth.uid + '_.*$')))
+          || (resource != null && resource.data.blockerId == request.auth.uid)
+        );
+      allow list: if request.auth != null
+        && (resource.data.blockerId == request.auth.uid || resource.data.blockedUserId == request.auth.uid);
+      allow delete: if request.auth != null
         && resource.data.blockerId == request.auth.uid;
       allow update: if false;
     }

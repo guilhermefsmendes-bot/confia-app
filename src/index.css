@@ -76,3 +76,16 @@
 [data-motion-paused="true"] * {
   animation-play-state: paused !important;
 }
+
+
+/* Keep the long home feed cheap while sections are outside the viewport. */
+.confia-content-deferred {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 560px;
+}
+
+/* Native-feeling mobile taps; preloading starts on pointer-down, before click. */
+.confia-element-tab {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}

@@ -21,14 +21,14 @@ export function useDeferredAppServices(
       void import("../data/personal").then(({ syncPersonalEventsFromLegacySources }) => {
         try { syncPersonalEventsFromLegacySources(); } catch { /* migração complementar */ }
       });
-    }, 3400, 2000);
+    }, 9000, 5200);
   }, [appDataReady]);
 
   useEffect(() => {
     if (!appDataReady) return;
     return scheduleBackgroundWork(() => {
       void import("../data/habits/sync").then(module => module.startHabitSync());
-    }, 2600, 1800);
+    }, 3500, 4200);
   }, [appDataReady]);
 
   useEffect(() => {

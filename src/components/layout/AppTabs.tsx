@@ -18,8 +18,8 @@ type EmbraceTabProps = {
 export const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp, active }: EmbraceTabProps) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<"pause" | "explore">("pause");
-  const loadingFallback = <div role="status" aria-live="polite" className="flex min-h-24 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>;
-
+  const [pauseVisited, setPauseVisited] = useState(true);
+  const [exploreVisited, setExploreVisited] = useState(false);
   return (
     <div key="embrace-tab" className="confia-motion-enter">
       <section className="mb-4 rounded-[26px] border border-[#E8DDD7] bg-white p-3.5 shadow-sm" aria-label={t("embraceModePrompt")}>
@@ -28,7 +28,7 @@ export const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp, active 
           <button
             type="button"
             aria-pressed={mode === "pause"}
-            onClick={() => setMode("pause")}
+            onClick={() => { setPauseVisited(true); setMode("pause"); }}
             className={"flex min-h-[76px] items-center gap-2.5 rounded-2xl border p-3 text-left transition " + (mode === "pause" ? "border-[#A85F45] bg-[#FFF3ED] text-[#7D4536] shadow-sm" : "border-[#E8DDD7] bg-[#FFFCFA] text-[#6F5A52]")}
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white"><Wind size={18}/></span>
@@ -37,7 +37,7 @@ export const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp, active 
           <button
             type="button"
             aria-pressed={mode === "explore"}
-            onClick={() => setMode("explore")}
+            onClick={() => { setExploreVisited(true); setMode("explore"); }}
             className={"flex min-h-[76px] items-center gap-2.5 rounded-2xl border p-3 text-left transition " + (mode === "explore" ? "border-[#587563] bg-[#F0F6F1] text-[#456151] shadow-sm" : "border-[#E8DDD7] bg-[#FFFCFA] text-[#6F5A52]")}
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white"><Compass size={18}/></span>
@@ -46,17 +46,22 @@ export const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp, active 
         </div>
       </section>
 
-      {/* Both experiences remain mounted after first visit: switching modes never discards a saved journey or an in-progress pause. */}
-      <div hidden={mode !== "pause"} aria-hidden={mode !== "pause"} className="space-y-4">
-        <Suspense fallback={loadingFallback}>
-          <AbracoTimer onAddXp={onAddXp} active={active && mode === "pause"} />
-        </Suspense>
-      </div>
-      <div hidden={mode !== "explore"} aria-hidden={mode !== "explore"} className="space-y-4">
-        <Suspense fallback={loadingFallback}>
-          <HorizonExperience onOpenSky={onOpenSky} active={active && mode === "explore"} />
-        </Suspense>
-      </div>
+      {/* Each experience is loaded only when first requested. Once opened it
+          remains mounted while this tab is retained, preserving its progress. */}
+      {pauseVisited && (
+        <div hidden={mode !== "pause"} aria-hidden={mode !== "pause"} className="space-y-4">
+          <Suspense fallback={<div className="min-h-64" aria-hidden="true" />}>
+            <AbracoTimer onAddXp={onAddXp} active={active && mode === "pause"} />
+          </Suspense>
+        </div>
+      )}
+      {exploreVisited && (
+        <div hidden={mode !== "explore"} aria-hidden={mode !== "explore"} className="space-y-4">
+          <Suspense fallback={<div className="min-h-64" aria-hidden="true" />}>
+            <HorizonExperience onOpenSky={onOpenSky} active={active && mode === "explore"} />
+          </Suspense>
+        </div>
+      )}
     </div>
   );
 });
@@ -85,7 +90,7 @@ export const ObjectivesTab = memo(function ObjectivesTab({
   onShareTrophy,
 }: ObjectivesTabProps) {
   const { t } = useTranslation();
-  const loadingFallback = <div role="status" aria-live="polite" className="flex min-h-24 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>;
+  const loadingFallback = <div className="min-h-64" aria-hidden="true" />;
 
   return (
     <div
@@ -154,7 +159,7 @@ export const CommunityTab = memo(function CommunityTab(props: CommunityTabProps)
       key="community-tab"
       className="confia-motion-enter w-full min-w-0 overflow-x-clip"
     >
-      <Suspense fallback={<div role="status" aria-live="polite" className="flex min-h-24 items-center justify-center text-xs font-semibold text-[#806D65]">{t("loading")}</div>}>
+      <Suspense fallback={<div className="min-h-64" aria-hidden="true" />}>
         <PartilhaFeed
           posts={props.posts}
           onAddPost={props.onAddPost}

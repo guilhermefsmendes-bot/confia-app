@@ -375,3 +375,24 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .confia-main { transition: none; }
 }
+
+
+/* Mobile WebViews: keep scrolling and touch response independent of GPU blur. */
+@media (max-width: 768px) {
+  .confia-header,
+  .confia-nav-inner,
+  .confia-main--tab-home .bg-white,
+  .confia-main--tab-horizon .bg-white,
+  .confia-main--tab-objectives .bg-white,
+  .confia-main--tab-community .bg-white,
+  .confia-surface-panel {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .confia-header { background: rgb(255 255 255 / .96); }
+  .confia-nav-inner { background: rgb(255 255 255 / .97); }
+  .confia-element-aura { filter: none; }
+  .confia-element-icon { will-change: auto; }
+  .confia-main--tab-community :is(h1, h2, h3) { animation: none; }
+}

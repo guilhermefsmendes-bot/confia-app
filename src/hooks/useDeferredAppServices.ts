@@ -41,7 +41,7 @@ export function useDeferredAppServices(
         stop = connectNoticeNavigation(setNoticeDestination);
         void startNativeNotices();
       }).catch(error => console.error("Notificações:", error));
-    }, 6500, 4200);
+    }, 1800, 1500);
     return () => {
       cancelled = true;
       cancelSchedule();

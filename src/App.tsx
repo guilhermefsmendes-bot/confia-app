@@ -1,7 +1,7 @@
 import {habitDestination,screenName} from "./navigation";
 import type { CompanionAction } from "./components/Companheiro/CompanionVoice";
 import type { NoticeTarget } from "./notifications/model";
-import { lazy, Suspense, memo, useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { lazy, Suspense, memo, startTransition, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { AppHeader } from "./components/layout/AppHeader";
 import { MainNavigation } from "./components/layout/MainNavigation";
 import { Heart, Sun, Compass, ArrowUp, ArrowLeft, Sparkles, Moon, Users, AlertCircle, Brain, CheckCircle2, Calendar, House, Wind, Target, Zap, ChartNoAxesCombined, Backpack, Store, Settings, EyeOff } from 'lucide-react';
@@ -321,27 +321,31 @@ const [noticeDestination,setNoticeDestination]=useState<NoticeTarget|null>(null)
 useDeferredAppServices(appDataReady, setNoticeDestination);
 const [habitEntry,setHabitEntry]=useState({page:"home",key:0});
 const [habitSectionVisible, setHabitSectionVisible] = useState(false);
-const habitSectionRef = useRef<HTMLElement | null>(null);
 useEffect(() => {
   if (!appDataReady || currentTab !== 0 || homeScreen !== "home") return;
   if (openHabitSupport || habitEntry.key > 0 || habitEntry.page !== "home") {
     setHabitSectionVisible(true);
     return;
   }
-  const target = habitSectionRef.current;
-  if (!target) return;
-  if (!("IntersectionObserver" in window)) {
-    setHabitSectionVisible(true);
-    return;
-  }
-  const observer = new IntersectionObserver((entries) => {
-    if (entries.some((entry) => entry.isIntersecting)) {
-      setHabitSectionVisible(true);
-      observer.disconnect();
-    }
-  }, { rootMargin: "600px 0px" });
-  observer.observe(target);
-  return () => observer.disconnect();
+
+  // Prepare the habit dashboard during idle time, not at the exact moment
+  // the user scrolls into it. This avoids a large lazy-module parse/render
+  // landing on the scroll gesture and showing a loading pulse in the feed.
+  let cancelled = false;
+  const cancelScheduledLoad = scheduleBackgroundWork(() => {
+    void import("./components/Habits/HabitDashboard")
+      .catch(() => undefined)
+      .finally(() => {
+        if (!cancelled) {
+          startTransition(() => setHabitSectionVisible(true));
+        }
+      });
+  }, 700, 1400);
+
+  return () => {
+    cancelled = true;
+    cancelScheduledLoad();
+  };
 }, [appDataReady, currentTab, homeScreen, openHabitSupport, habitEntry.key, habitEntry.page]);
 const [noticeMessage,setNoticeMessage]=useState("");
 const [noticeMessageId,setNoticeMessageId]=useState<string|undefined>();
@@ -2601,9 +2605,9 @@ return (
               </div>
 
 {/* Hábitos — relógio, Alimenta-me e Exercício entre Classificar o teu dia e SOS */}
-<section id="home-habits" ref={habitSectionRef} className="scroll-mt-24" aria-label={t("habitHub.title")}>
+<section id="home-habits" className="confia-content-deferred scroll-mt-24" aria-label={t("habitHub.title")}>
   {habitSectionVisible ? (
-    <Suspense fallback={<div className="min-h-40 rounded-3xl bg-[#F7F5F2] animate-pulse" aria-busy="true" aria-label={t("loading")} />}>
+    <Suspense fallback={<div className="min-h-40 rounded-3xl bg-[#F7F5F2]" aria-hidden="true" />}>
       <MemoHabitDashboard
         embedded
         openSupport={openHabitSupport}

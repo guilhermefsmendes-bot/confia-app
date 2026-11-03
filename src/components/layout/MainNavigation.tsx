@@ -31,6 +31,7 @@ export const MainNavigation = memo(function MainNavigation({
             <button key={index} type="button" aria-current={active ? "page" : undefined}
               className={`confia-element-tab confia-element-${element} ${active ? "is-active confia-nav-active font-black" : "confia-nav-inactive"} ${index === 0 && active ? "confia-nav-home-active" : ""}`}
               onPointerEnter={() => onIntent?.(index)}
+              onPointerDown={() => onIntent?.(index)}
               onFocus={() => onIntent?.(index)}
               onClick={() => { window.dispatchEvent(new Event("stop-background-audio")); onNavigate(index); }}>
               <span className="confia-element-aura" aria-hidden="true" />

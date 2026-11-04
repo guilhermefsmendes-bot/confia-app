@@ -13,7 +13,8 @@ test('home loads heavy habit screens only on demand and fits 320px',async({page}
  await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());await page.addInitScript(()=>localStorage.setItem('confia_language','pt'));
  const requested:string[]=[];page.on('request',r=>requested.push(r.url()));await page.goto('/');await page.locator('#home-habits').scrollIntoViewIfNeeded();await page.getByTestId('challenge-clock').waitFor();await page.waitForTimeout(1200);
  expect(requested.some(u=>/\/(NutritionDashboard|ExerciseDashboard|HabitHistory|WellbeingPlans)-/.test(u))).toBe(false);
- expect(requested.some(u=>/\/LifestyleReview-/.test(u))).toBe(true);
+ await expect(page.getByTestId('habit-mirror-insights')).toBeVisible();
+ await expect(page.getByTestId('habit-mirror-insights').getByRole('status')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'/tmp/confia-new-home-320.png',fullPage:true});
  await page.getByRole('button',{name:/Alimentação/}).click();await expect(page.getByRole('heading',{name:'Alimenta-me',exact:true})).toBeVisible();expect(requested.some(u=>/\/NutritionDashboard-/.test(u))).toBe(true);
 });
@@ -60,4 +61,21 @@ test('objectives show the next action without forcing a gendered avatar choice',
  await page.getByRole('button',{name:'Explorador/a',exact:true}).click();
  await expect(page.getByText('Quem vai subir contigo?',{exact:true})).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+
+test('Espelho na Água opens its first view without a nested loading state',async({page})=>{
+ await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/,r=>r.abort());
+ await page.addInitScript(()=>localStorage.setItem('confia_language','pt'));
+ await page.goto('/');
+ await page.locator('#home-habits').scrollIntoViewIfNeeded();
+ await expect(page.getByTestId('challenge-clock')).toBeVisible();
+ const mirror=page.getByTestId('habit-mirror-insights');
+ await expect(mirror).toBeVisible({timeout:5000});
+ await expect(mirror.getByRole('status')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Calendário',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Calendário',exact:true}).click();
+ await expect(page.getByText(/calendário|calendar/i).first()).toBeVisible();
+ await page.getByRole('button',{name:/relatório|report/i}).click();
+ await expect(page.getByRole('button',{name:/imprimir|print/i})).toBeVisible();
 });

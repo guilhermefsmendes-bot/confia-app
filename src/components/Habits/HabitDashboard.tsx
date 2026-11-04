@@ -1,5 +1,5 @@
 const WellbeingPlans=lazy(()=>import("./WellbeingPlans"));
-import { lazy,Suspense,useEffect,useMemo,useState,useSyncExternalStore } from "react";
+import { lazy,Suspense,useCallback,useEffect,useMemo,useRef,useState,useSyncExternalStore } from "react";
 import { useTranslation } from "../../i18n/useFeatureTranslation";
 import { getHabitSnapshot,getHabitRevision,subscribeHabits } from "../../data/habits/store";
 import { recordHabitDay,restartHabit } from "../../data/habits/actions";
@@ -34,7 +34,29 @@ export default function HabitDashboard({openSupport=false,initialPage="home",nav
   useEffect(()=>{if(navigationKey>0&&!openSupport){setPage(initialPage==="plans"?"home":initialPage==="log"&&!primary?"setup":initialPage);if(initialPage==="plans")setExpanded(true);}},[initialPage,navigationKey]);
   const events=useMemo(()=>readPersonalEvents(),[revision,eventRevision]);
   const run:RunAction=(action,success)=>{try{action();setError("");setMessage(success);return true;}catch{setMessage("");setError(t("habitHub.error"));return false;}};
-  const go=(target:string)=>{if(target==="plans"){setPage("home");setExpanded(true);return;}setPage(target);setError("");setMessage("");setLogDate(today);};
+  const pageLoads=useRef(new Map<string,Promise<unknown>>());
+  const preloadPage=useCallback((target:string):Promise<unknown>=>{
+    const loaders:Record<string,()=>Promise<unknown>>={
+      setup:()=>import("./HabitSetup"), history:()=>import("./HabitHistory"),
+      nutrition:()=>import("./NutritionDashboard"), exercise:()=>import("./ExerciseDashboard"),
+      sleep:()=>import("./SleepDashboard"), support:()=>import("../ImpulsoSOS"),
+    };
+    const load=loaders[target];
+    if(!load) return Promise.resolve();
+    const existing=pageLoads.current.get(target);
+    if(existing) return existing;
+    const pending=load().catch(error=>{pageLoads.current.delete(target);throw error;});
+    pageLoads.current.set(target,pending);
+    return pending;
+  },[]);
+  const go=async(target:string)=>{
+    if(target==="plans"){setPage("home");setExpanded(true);return;}
+    // If the user tapped before the pointer/focus prefetch finished, keep the
+    // current menu in place until the destination module is ready. This avoids
+    // flashing a Suspense "loading" message inside an already-open dashboard.
+    try{await preloadPage(target);}catch{/* React.lazy can retry and surface a real load failure if needed. */}
+    setPage(target);setError("");setMessage("");setLogDate(today);
+  };
   const back=()=>{setPage("home");};
   useEffect(()=>{if(page==="home"&&!embedded)document.getElementById("habits-title")?.focus();},[page,embedded]);
   const finishDay=(completed:boolean)=>{
@@ -54,8 +76,8 @@ export default function HabitDashboard({openSupport=false,initialPage="home",nav
     {page!=="home" && message && <p role="status" className="rounded-2xl border border-[#BFCDAF] bg-[#F1F7E8] p-4 text-sm leading-6">{message}</p>}
     {page!=="home" && error && <p role="alert" className="rounded-2xl border border-[#D9BD97] bg-[#FFF7E9] p-4 text-sm">{error}</p>}
     {page==="home" ? <>
-      <HabitChallengeCard habit={primary} records={records} today={today} onOpen={go}/>
-      <HabitDailyExperience records={records} events={events} today={today} habit={primary} message={message} error={error} onOpen={go}/>
+      <HabitChallengeCard habit={primary} records={records} today={today} onOpen={go} onIntent={preloadPage}/>
+      <HabitDailyExperience records={records} events={events} today={today} habit={primary} message={message} error={error} onOpen={go} onIntent={preloadPage}/>
       {!embedded && <>
         <details open={expanded} onToggle={e=>setExpanded(e.currentTarget.open)} className="rounded-2xl border border-[#E8DDD7] bg-white p-4">
           <summary className="min-h-11 cursor-pointer font-semibold">{t("homeDaily.more")}</summary>

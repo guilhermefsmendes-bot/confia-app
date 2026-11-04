@@ -10,7 +10,7 @@ import DailyClock from "./DailyClock";
 import "./challengeClock.css";
 
 const habitIcons = { tobacco:Cigarette, coffee:Coffee, alcohol:Beer, social:Smartphone, gaming:Gamepad2, sugar:Candy, shopping:ShoppingBag, checking:Search, sleep:Moon, custom:Sprout };
-export default function HabitChallengeCard({habit,records,today,onOpen}:{habit?:HabitDefinition;records:HabitRecord[];today:string;onOpen:(page:string)=>void}) {
+export default function HabitChallengeCard({habit,records,today,onOpen,onIntent}:{habit?:HabitDefinition;records:HabitRecord[];today:string;onOpen:(page:string)=>void;onIntent?:(page:string)=>void}) {
   const {t}=useTranslation("habits");
   const stats=useMemo(()=>habit?habitStats(records,habit.id,today):null,[habit,records,today]);
   const days=stats?.current??0;
@@ -44,7 +44,7 @@ export default function HabitChallengeCard({habit,records,today,onOpen}:{habit?:
     </div>
     <div className="challenge-clock-actions">
       {habit && <p className="challenge-clock-goal"><span className="sr-only">{name}. </span>{habit.data.goal}</p>}
-      <button type="button" className={primaryClass+" challenge-clock-primary"} onClick={()=>onOpen(habit?(days>0?"restart":"log"):"setup")}>
+      <button type="button" className={primaryClass+" challenge-clock-primary"} onPointerDown={()=>onIntent?.(habit?(days>0?"restart":"log"):"setup")} onFocus={()=>onIntent?.(habit?(days>0?"restart":"log"):"setup")} onClick={()=>onOpen(habit?(days>0?"restart":"log"):"setup")}>
         {t(habit?(days>0?"habitHub.restart":"habitHub.register"):"habitHub.choose")}
       </button>
       {habit && stats && <>
@@ -52,7 +52,7 @@ export default function HabitChallengeCard({habit,records,today,onOpen}:{habit?:
         {days>=30 && <p className="challenge-clock-note">{t("habitHub.trophy")}</p>}
         {stats.awaitingYesterday && <p className="challenge-clock-note">{t("habitHub.grace")}</p>}
         <nav className="challenge-clock-secondary" aria-label={t("habitHub.clock.actions")}>
-          {(["history","setup","restart"] as const).map(page=><button type="button" key={page} onClick={()=>onOpen(page)}>
+          {(["history","setup","restart"] as const).map(page=><button type="button" key={page} onPointerDown={()=>onIntent?.(page)} onFocus={()=>onIntent?.(page)} onClick={()=>onOpen(page)}>
             {t("habitHub."+({history:"clock.history",setup:"change",restart:"restart"}[page]))}
           </button>)}
         </nav>

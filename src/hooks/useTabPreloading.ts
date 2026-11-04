@@ -1,60 +1,74 @@
 import { useCallback, useEffect } from "react";
+import { scheduleBackgroundWork } from "../utils/scheduleBackgroundWork";
 
-function safePreload(loader: () => Promise<unknown>, label: string) {
-  void loader().catch(error => console.warn(`[Confia] prefetch_failed:${label}`, error));
+type TabLoader = readonly [label: string, load: () => Promise<unknown>];
+
+// Keep the first meaningful screen of each main tab warm. The larger Horizon
+// experience remains intent-loaded from its own Explore control.
+const TAB_LOADERS: Record<number, readonly TabLoader[]> = {
+  1: [
+    ["tabs-shell", () => import("../components/layout/AppTabs")],
+    ["embrace-pause", () => import("../components/AbracoTimer")],
+  ],
+  2: [
+    ["tabs-shell", () => import("../components/layout/AppTabs")],
+    ["objectives-list", () => import("../components/ObjectivosList")],
+    ["weekly-goal", () => import("../components/WeeklyGoalSection")],
+  ],
+  4: [
+    ["tabs-shell", () => import("../components/layout/AppTabs")],
+    ["community-feed", () => import("../components/PartilhaFeed")],
+  ],
+};
+
+// Dynamic imports are cached by the bundler too; this map also prevents
+// duplicate work when idle warm-up and a navigation intent happen together.
+const moduleLoads = new Map<string, Promise<unknown>>();
+
+function preloadModule([label, load]: TabLoader): Promise<unknown> {
+  const existing = moduleLoads.get(label);
+  if (existing) return existing;
+
+  const pending = load().catch(error => {
+    moduleLoads.delete(label);
+    console.warn(`[Confia] prefetch_failed:${label}`, error);
+  });
+  moduleLoads.set(label, pending);
+  return pending;
+}
+
+function preloadTabModules(tab: number): Promise<void> {
+  const loaders = TAB_LOADERS[tab];
+  if (!loaders) return Promise.resolve();
+  return Promise.all(loaders.map(preloadModule)).then(() => undefined);
 }
 
 /**
- * Warm the common tab modules sequentially during genuine idle periods.
- * Never start large imports on pointer-down: that event must remain responsive.
- * The very large Horizon experience is intentionally excluded and loads only
- * when the person explicitly chooses Explore.
+ * Prepares the first screen of every main tab during idle time, in parallel.
+ * Explicit pointer/focus intent can start the same imports before navigation.
+ * No navigation waits for these promises and no large optional experience is
+ * downloaded until the user chooses it.
  */
 export function useTabPreloading(enabled: boolean) {
+  const preloadTab = useCallback((tab: number) => {
+    if (!enabled) return;
+    void preloadTabModules(tab);
+  }, [enabled]);
+
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
-    let startTimer: number | undefined;
-    const idleIds: number[] = [];
-    const fallbackTimers: number[] = [];
-    const queueIdle = (task: () => void) => {
+    const cancelScheduledWork = scheduleBackgroundWork(() => {
       if (cancelled) return;
-      const requestIdle = (window as any).requestIdleCallback;
-      if (typeof requestIdle === "function") {
-        idleIds.push(requestIdle(() => { if (!cancelled) task(); }));
-      } else {
-        fallbackTimers.push(window.setTimeout(() => { if (!cancelled) task(); }, 1800));
-      }
-    };
-    const loaders: Array<[string, () => Promise<unknown>]> = [
-      ["tabs-shell", () => import("../components/layout/AppTabs")],
-      ["embrace-pause", () => import("../components/AbracoTimer")],
-      ["objectives", () => import("../components/ObjectivosList")],
-      ["weekly-goal", () => import("../components/WeeklyGoalSection")],
-      ["community-feed", () => import("../components/PartilhaFeed")],
-    ];
-    const warmNext = (index: number) => {
-      if (cancelled || index >= loaders.length) return;
-      const [label, loader] = loaders[index];
-      void loader()
-        .catch(error => console.warn(`[Confia] prefetch_failed:${label}`, error))
-        .finally(() => queueIdle(() => warmNext(index + 1)));
-    };
+      // Parallel chunk requests avoid the previous multi-idle-slot waterfall.
+      void Promise.all([1, 2, 4].map(tab => preloadTabModules(tab)));
+    }, 450, 1400);
 
-    // Let the first screen settle before warming one feature chunk per idle slot.
-    startTimer = window.setTimeout(() => queueIdle(() => warmNext(0)), 3500);
     return () => {
       cancelled = true;
-      if (startTimer !== undefined) window.clearTimeout(startTimer);
-      idleIds.forEach(id => (window as any).cancelIdleCallback?.(id));
-      fallbackTimers.forEach(id => window.clearTimeout(id));
+      cancelScheduledWork();
     };
   }, [enabled]);
 
-  // A small shell-only warm-up on explicit navigation intent. Feature chunks
-  // have already been warmed opportunistically above where the browser allows.
-  return useCallback((tab: number) => {
-    if (!enabled || (tab !== 1 && tab !== 2 && tab !== 4)) return;
-    safePreload(() => import("../components/layout/AppTabs"), "tabs-shell");
-  }, [enabled]);
+  return preloadTab;
 }

@@ -37,6 +37,8 @@ export const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp, active 
           <button
             type="button"
             aria-pressed={mode === "explore"}
+            onPointerDown={() => { void import("../HorizonExperience").catch(() => {}); }}
+            onFocus={() => { void import("../HorizonExperience").catch(() => {}); }}
             onClick={() => { setExploreVisited(true); setMode("explore"); }}
             className={"flex min-h-[76px] items-center gap-2.5 rounded-2xl border p-3 text-left transition " + (mode === "explore" ? "border-[#587563] bg-[#F0F6F1] text-[#456151] shadow-sm" : "border-[#E8DDD7] bg-[#FFFCFA] text-[#6F5A52]")}
           >

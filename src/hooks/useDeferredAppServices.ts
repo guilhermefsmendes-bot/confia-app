@@ -12,7 +12,7 @@ export function useDeferredAppServices(
       void import("../firebaseAuth").then(({ initAnonymousAuth }) =>
         initAnonymousAuth().catch(error => console.error("Firebase Auth:", error)),
       );
-    }, 800, 1200);
+    }, 250, 900);
   }, [appDataReady]);
 
   useEffect(() => {

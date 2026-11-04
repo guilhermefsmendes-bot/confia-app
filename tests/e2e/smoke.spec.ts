@@ -78,3 +78,39 @@ test("accessibility smoke audit: names, labels, images and mobile overflow", asy
   expect(audit.imagesWithoutAlt, "informative images need alt text").toEqual([]);
   expect(audit.horizontalOverflow, "the page must not overflow horizontally").toBe(false);
 });
+
+
+test("preloads first-use chunks and opens every primary tab on first entry", async ({ page }) => {
+  const runtimeErrors: string[] = [];
+  page.on("pageerror", error => runtimeErrors.push(error.message));
+  await page.route(/(firestore|identitytoolkit|securetoken)\.googleapis\.com/, route => route.abort());
+  await page.goto("/");
+
+  const navigation = page.locator("footer.confia-nav");
+  await expect(navigation).toBeVisible({ timeout: 15_000 });
+
+  // The first-use content for every main tab must be downloaded in the idle
+  // warm-up, rather than waiting for the first click to request its chunk.
+  await page.waitForFunction(() => {
+    const resources = performance.getEntriesByType("resource").map(entry => entry.name);
+    return ["AppTabs-", "AbracoTimer-", "ObjectivosList-", "WeeklyGoalSection-", "PartilhaFeed-"]
+      .every(chunk => resources.some(resource => resource.includes(chunk)));
+  }, null, { timeout: 15_000 });
+
+  const tabs = navigation.getByRole("button");
+  const main = page.locator("main.confia-main");
+  for (const index of [1, 2, 3]) {
+    await tabs.nth(index).click();
+    await expect(tabs.nth(index)).toHaveAttribute("aria-current", "page");
+    await expect(main.locator(".confia-motion-enter:visible").first()).toBeVisible({ timeout: 15_000 });
+
+    // Returning and reopening a tab must preserve immediate availability.
+    await tabs.nth(0).click();
+    await expect(tabs.nth(0)).toHaveAttribute("aria-current", "page");
+    await tabs.nth(index).click();
+    await expect(tabs.nth(index)).toHaveAttribute("aria-current", "page");
+    await expect(main.locator(".confia-motion-enter:visible").first()).toBeVisible({ timeout: 15_000 });
+  }
+
+  expect(runtimeErrors).toEqual([]);
+});

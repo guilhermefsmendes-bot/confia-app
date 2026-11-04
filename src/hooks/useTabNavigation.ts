@@ -10,6 +10,11 @@ export function useTabNavigation({ enabled, resetHomeScreen }: { enabled: boolea
 
   useEffect(() => { markVisited(currentTab); }, [currentTab, markVisited]);
 
+  // Also warm programmatic/deep-link navigation paths, not only pointer intent.
+  useEffect(() => {
+    if (enabled && currentTab !== 0) preloadTab(currentTab);
+  }, [currentTab, enabled, preloadTab]);
+
   const changeTab = (tab: number) => {
     resetHomeScreen();
     setCurrentTab(tab);

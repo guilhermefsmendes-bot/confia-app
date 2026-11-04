@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SharePost } from "../types";
+import { INITIAL_POSTS } from "../data/initialPosts";
 
 const STORAGE_KEY = "confia_posts_v2";
 
@@ -51,23 +52,16 @@ function readStoredPosts(fallback: SharePost[]): SharePost[] {
 }
 
 export function useCommunityPosts(appDataReady: boolean) {
+  // Hydrate local feed data as soon as the age gate and app shell are ready.
+  // The small static fallback is bundled eagerly, avoiding a second dynamic
+  // import when Community is first opened.
   const [posts, setPosts] = useState<SharePost[]>([]);
   const [postsLoaded, setPostsLoaded] = useState(false);
 
   useEffect(() => {
     if (!appDataReady) return;
-    let cancelled = false;
-    void import("../data/initialPosts").then(({ INITIAL_POSTS }) => {
-      if (cancelled) return;
-      setPosts(current => current.length ? current : readStoredPosts(INITIAL_POSTS));
-      setPostsLoaded(true);
-    }).catch(() => {
-      if (!cancelled) {
-        setPosts(readStoredPosts([]));
-        setPostsLoaded(true);
-      }
-    });
-    return () => { cancelled = true; };
+    setPosts(current => current.length ? current : readStoredPosts(INITIAL_POSTS));
+    setPostsLoaded(true);
   }, [appDataReady]);
 
   return { posts, setPosts, postsLoaded };

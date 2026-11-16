@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startPerformanceSpan } from "../../monitoring/performanceMetrics";
 import { scheduleBackgroundWork } from "../../utils/scheduleBackgroundWork";
 import { useTranslation } from "../../i18n/useFeatureTranslation";
 import { MoonStar, Footprints, Apple, Sparkles, Printer, ChevronDown, ChevronUp, Waves } from "lucide-react";
@@ -36,13 +37,31 @@ const average = (values: Array<number | undefined>) => averageRecordedValues(val
 
 export default function HabitDailyExperience({ records, events, today, habit, message, error, onOpen, onIntent }: Props) {
   const { t, i18n } = useTranslation("habits");
-  const fmt = (value: number | undefined, digits = 1) => value === undefined ? "—" : new Intl.NumberFormat(i18n.language, { maximumFractionDigits: digits }).format(value);
+  const numberFormatter = useMemo(() => new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 }), [i18n.language]);
+  const dateFormatter = useMemo(() => new Intl.DateTimeFormat(i18n.language, { day: "2-digit", month: "short", year: "numeric" }), [i18n.language]);
+  const fmt = (value: number | undefined) => value === undefined ? "—" : numberFormatter.format(value);
   const [view, setView] = useState<"mirror" | "calendar" | "report">("mirror");
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [selectedDate, setSelectedDate] = useState(today);
   const [savedMood, setSavedMood] = useState<number | null>(null);
   const [synergyData, setSynergyData] = useState<ReturnType<typeof collectLifestyleSynergyData> | null>(null);
   const [synergy, setSynergy] = useState<ReturnType<typeof buildLifestyleSynergyCandidate> | null>(null);
+  const mirrorOpenSpan = useRef<(() => number | null) | null>(null);
+
+  useEffect(() => {
+    if (collapsed || view !== "mirror" || !mirrorOpenSpan.current) return;
+    let secondFrame = 0;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => {
+        mirrorOpenSpan.current?.();
+        mirrorOpenSpan.current = null;
+      });
+    });
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      if (secondFrame) cancelAnimationFrame(secondFrame);
+    };
+  }, [collapsed, view]);
 
   // These cross-domain analyses are useful context, but they are not needed
   // to paint the daily mirror. Run them in idle time so opening/scrolling into
@@ -144,8 +163,8 @@ export default function HabitDailyExperience({ records, events, today, habit, me
     { key: "mood", icon: Sparkles, label: t("habitDailyExperience.domains.mood"), value: stats.mood === undefined ? t("habitDailyExperience.notRecorded") : t("habitDailyExperience.moodValue", { value: fmt(stats.mood) }), action: "home", recorded: stats.mood !== undefined },
   ];
   const firstMissing = domains.find(x => !x.recorded && x.key !== "mood");
-  const dateLabel = (date: string) => new Intl.DateTimeFormat(i18n.language, { day: "2-digit", month: "short", year: "numeric" }).format(new Date(date + "T12:00:00"));
-  const chooseDate = (date: string) => { if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date > today) return; setSelectedDate(date); setSavedMood(null); setView("mirror"); };
+  const dateLabel = (date: string) => dateFormatter.format(new Date(date + "T12:00:00"));
+  const chooseDate = useCallback((date: string) => { if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date > today) return; setSelectedDate(date); setSavedMood(null); setView("mirror"); }, [today]);
   const saveMood = (value: number) => {
     appendPersonalEvents([createMoodObservationEvent(selectedDate, value)]);
     setSavedMood(value);
@@ -163,7 +182,7 @@ export default function HabitDailyExperience({ records, events, today, habit, me
   </div>;
   return <section className={`habit-daily-experience habit-lake-reflection ${collapsed ? "is-collapsed" : ""} rounded-[30px] border border-[#A7C5C7] p-4 shadow-[0_12px_32px_rgba(42,105,117,0.13)] sm:p-5`}>
     <style>{`.habit-lake-reflection{position:relative;overflow:hidden;background:linear-gradient(165deg,#d7e8e8 0%,#a8c9cb 24%,#d5e3dd 48%,#9bbdc2 68%,#e6eee7 100%);border-color:#a7c5c7}.habit-lake-reflection:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.42;background:repeating-linear-gradient(176deg,transparent 0 13px,rgba(255,255,255,.62) 14px,rgba(255,255,255,.12) 17px,transparent 21px 35px),linear-gradient(180deg,rgba(255,255,255,.34),transparent 38%,rgba(42,105,117,.12));background-size:100% 100%,100% 100%;animation:lake-shimmer 12s ease-in-out infinite alternate}.habit-lake-reflection:after{content:"";position:absolute;left:-10%;right:-10%;top:5.2rem;height:3.8rem;pointer-events:none;opacity:.34;background:repeating-linear-gradient(178deg,rgba(255,255,255,.8) 0 2px,transparent 3px 10px);filter:blur(2px);transform:scaleY(.72)}.habit-lake-reflection>*{position:relative;z-index:1}.habit-lake-reflection .habit-lake-glass{background:rgba(250,255,252,.72);border-color:rgba(255,255,255,.78);backdrop-filter:blur(5px)}@media(max-width:768px){.habit-lake-reflection:before{animation:none}.habit-lake-reflection:after{filter:none;opacity:.18}.habit-lake-reflection .habit-lake-glass{background:rgba(250,255,252,.9);backdrop-filter:none}}@keyframes lake-shimmer{from{background-position:0 0,0 0}to{background-position:0 28px,0 0}}.habit-lake-reflection.is-collapsed:before{animation-play-state:paused}.confia-document-hidden .habit-lake-reflection:before,[hidden] .habit-lake-reflection:before{animation-play-state:paused!important}@media(prefers-reduced-motion:reduce){.habit-lake-reflection:before{animation:none}}@media print { body * { visibility: hidden !important; } .habit-report-print, .habit-report-print * { visibility: visible !important; } .habit-report-print { position: absolute !important; inset: 0 auto auto 0 !important; width: 100% !important; padding: 24px !important; background: white !important; } .habit-report-print .no-print { display: none !important; } }`}</style>
-    <header className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/80 text-[#356D78]"><Waves size={22}/></span><div className="flex-1"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#52777C]">{t("habitDailyExperience.eyebrow")}</p><h2 className="mt-1 text-xl font-black tracking-tight text-[#234E58]">{t("habitDailyExperience.title")}</h2><p className="mt-1 text-sm leading-5 text-[#355F65]">{t("habitDailyExperience.subtitle")}</p></div><button type="button" onClick={()=>setCollapsed(v=>!v)} aria-expanded={!collapsed} aria-label={t(collapsed?"habitDailyExperience.maximize":"habitDailyExperience.minimize")} className="flex min-h-10 shrink-0 items-center gap-1 rounded-full border border-white/90 bg-white/85 px-3 text-xs font-bold text-[#234E58] shadow-md transition hover:bg-white">{collapsed?<ChevronDown size={17}/>:<ChevronUp size={17}/>}<span className="hidden sm:inline">{t(collapsed?"habitDailyExperience.maximize":"habitDailyExperience.minimize")}</span></button></header>
+    <header className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/80 text-[#356D78]"><Waves size={22}/></span><div className="flex-1"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#52777C]">{t("habitDailyExperience.eyebrow")}</p><h2 className="mt-1 text-xl font-black tracking-tight text-[#234E58]">{t("habitDailyExperience.title")}</h2><p className="mt-1 text-sm leading-5 text-[#355F65]">{t("habitDailyExperience.subtitle")}</p></div><button type="button" onClick={()=>{if(collapsed)mirrorOpenSpan.current=startPerformanceSpan("mirror-open-to-two-frames",{records:records.length,events:events.length});setCollapsed(v=>!v);}} aria-expanded={!collapsed} aria-label={t(collapsed?"habitDailyExperience.maximize":"habitDailyExperience.minimize")} className="flex min-h-10 shrink-0 items-center gap-1 rounded-full border border-white/90 bg-white/85 px-3 text-xs font-bold text-[#234E58] shadow-md transition hover:bg-white">{collapsed?<ChevronDown size={17}/>:<ChevronUp size={17}/>}<span className="hidden sm:inline">{t(collapsed?"habitDailyExperience.maximize":"habitDailyExperience.minimize")}</span></button></header>
     {message && <p role="status" className="mt-3 rounded-2xl border border-white/90 bg-white/80 p-3 text-sm font-semibold leading-5 text-[#365B36]">{message}</p>}
     {error && <p role="alert" className="mt-3 rounded-2xl border border-[#D9BD97] bg-[#FFF7E9]/90 p-3 text-sm leading-5 text-[#80603A]">{error}</p>}
     {!collapsed && <><nav className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-white/55 p-1" aria-label={t("habitDailyExperience.views")}>{(["mirror","calendar","report"] as const).map(key=><button key={key} type="button" onClick={()=>setView(key)} aria-pressed={view===key} className={view===key?"min-h-10 rounded-xl bg-white/90 px-2 text-xs font-black shadow-sm":"min-h-10 rounded-xl px-2 text-xs font-bold text-[#355F65]"}>{t("habitDailyExperience.tabs."+key)}</button>)}</nav>

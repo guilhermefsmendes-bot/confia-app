@@ -7,6 +7,7 @@ on:
       - main
       - release/confia-support-performance-1.0.47
       - fix/listening-request-delivery-cloudshell
+      - fix/mobile-performance-deep-audit
       - feature/habit-impact-engine
 
 jobs:

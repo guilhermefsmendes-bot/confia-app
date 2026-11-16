@@ -125,10 +125,10 @@ useEffect(() => {
 
   // Main countdown timer
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    let interval: number | null = null;
 
     if (isActive && secondsLeft > 0) {
-      interval = setInterval(() => {
+      interval = window.setInterval(() => {
         setSecondsLeft(prev => Math.max(0, prev - 1));
       }, 1000);
 } else if (secondsLeft === 0 && isActive) {

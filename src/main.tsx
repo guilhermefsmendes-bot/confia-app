@@ -4,6 +4,7 @@ import "./index.css";
 
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { i18nReady } from "./i18n";
+import { startPerformanceSpan } from "./monitoring/performanceMetrics";
 
 function StartupShell() {
   return (
@@ -32,6 +33,8 @@ const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Elemento #root não encontrado.");
 
 const root = createRoot(rootElement);
+const appStartupSpan = startPerformanceSpan("startup-module-to-app-ready");
+const shellPaintSpan = startPerformanceSpan("startup-to-shell-paint");
 
 // Mostra imediatamente uma estrutura leve. A aplicação e o idioma ativo
 // descarregam em paralelo; a primeira pintura não fica à espera do JSON.
@@ -40,13 +43,14 @@ root.render(
     <StartupShell />
   </StrictMode>,
 );
+requestAnimationFrame(() => requestAnimationFrame(() => shellPaintSpan()));
 
 // App Check é opcional e não deve bloquear a apresentação da interface.
 void import("./firebaseAppCheck")
   .then(({ initAppCheck }) => initAppCheck())
   .catch((error) => console.error("Firebase App Check:", error));
 void import("./monitoring/errorReporter").then(({ installRuntimeErrorReporting }) => installRuntimeErrorReporting()).catch(() => {});
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV || new URLSearchParams(window.location.search).get("confiaPerf") === "1") {
   void import("./monitoring/performanceDiagnostics").then(({ startPerformanceDiagnostics }) => startPerformanceDiagnostics()).catch(() => {});
 }
 
@@ -59,6 +63,7 @@ void Promise.all([i18nReady, import("./App.tsx")])
         </AppErrorBoundary>
       </StrictMode>,
     );
+    requestAnimationFrame(() => requestAnimationFrame(() => appStartupSpan()));
   })
   .catch((error) => {
     console.error("Não foi possível iniciar a Confia:", error);

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { auth } from '../firebaseAuth';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -575,53 +576,59 @@ export const PartilhaFeed: React.FC<PartilhaFeedProps> = ({
                   </div>
                 </div>
 
-                {/* Modal de confirmação ❤️ */}
-                {confirmIdentify === post.id && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-5">
-                    <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl">
-
-                      <div className="text-center">
-                        <div className="text-4xl mb-3">❤️</div>
-
-                        <h3 className="text-base font-black text-[#2F2926]">
-                          {t("identifyTitle")}
-                        </h3>
-
-                        <p className="text-xs text-[var(--cf-text-soft)] mt-2 leading-relaxed">
-                          {t("identifyMessage")}
-                        </p>
-                      </div>
-
-                      <div className="flex gap-2 mt-6">
-                        <button
-                          type="button"
-                          onClick={() => setConfirmIdentify(null)}
-                          className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold text-[var(--cf-text-soft)]"
-                        >
-                          {t("identifyCancel")}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            onLikePost(post.id, "red");
-                            setConfirmIdentify(null);
-                          }}
-                          className="flex-1 py-3 rounded-xl bg-red-500 text-white text-xs font-bold"
-                        >
-                          {t("identifyConfirm")}
-                        </button>
-                      </div>
-
-                    </div>
-                  </div>
-                )}
+                {/* O modal de confirmação é apresentado num portal fora do cartão animado. */}
 
               </motion.div>
             );
           })}
         </AnimatePresence>
       </div>
+
+      {confirmIdentify && createPortal(
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 p-5"
+          onClick={() => setConfirmIdentify(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="community-identify-title"
+            className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="text-center">
+              <div className="mb-3 text-4xl" aria-hidden="true">❤️</div>
+              <h3 id="community-identify-title" className="text-base font-black text-[#2F2926]">
+                {t("identifyTitle")}
+              </h3>
+              <p className="mt-2 text-xs leading-relaxed text-[var(--cf-text-soft)]">
+                {t("identifyMessage")}
+              </p>
+            </div>
+
+            <div className="mt-6 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmIdentify(null)}
+                className="flex-1 rounded-xl border border-slate-200 py-3 text-xs font-bold text-[var(--cf-text-soft)]"
+              >
+                {t("identifyCancel")}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onLikePost(confirmIdentify, "red");
+                  setConfirmIdentify(null);
+                }}
+                className="flex-1 rounded-xl bg-red-500 py-3 text-xs font-bold text-white"
+              >
+                {t("identifyConfirm")}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

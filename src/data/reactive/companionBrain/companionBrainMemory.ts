@@ -11,6 +11,20 @@ import type {
 
 const storageKey = () => "confia_companion_brain_memory_v2:"+getCurrentHabitOwner();
 
+// A single evaluation reads the same memory several times (last message,
+// recent events, cooldowns and conversation context). Reuse the parsed value
+// and invalidate it on every write or cross-tab storage update.
+let cachedMemoryKey:string|undefined;
+let cachedMemory:CompanionBrainMemory|undefined;
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", event => {
+    if (!event.key || event.key === cachedMemoryKey) {
+      cachedMemoryKey = undefined;
+      cachedMemory = undefined;
+    }
+  });
+}
+
 const MAX_SHOWN_MESSAGES = 120;
 const MAX_RECENT_EVENTS = 100;
 
@@ -51,11 +65,16 @@ export function loadCompanionBrainMemory(): CompanionBrainMemory {
     return createEmptyMemory();
   }
 
+  const key = storageKey();
+  if (cachedMemory && cachedMemoryKey === key) return cachedMemory;
+
   try {
-    const raw = window.localStorage.getItem(storageKey());
+    const raw = window.localStorage.getItem(key);
 
     if (!raw) {
-      return createEmptyMemory();
+      cachedMemoryKey = key;
+      cachedMemory = createEmptyMemory();
+      return cachedMemory;
     }
 
     const parsed = JSON.parse(raw);
@@ -67,12 +86,18 @@ export function loadCompanionBrainMemory(): CompanionBrainMemory {
       !Array.isArray(parsed.shownMessages) ||
       !Array.isArray(parsed.recentEvents)
     ) {
-      return createEmptyMemory();
+      cachedMemoryKey = key;
+      cachedMemory = createEmptyMemory();
+      return cachedMemory;
     }
 
-    return {...parsed,shownMessages:parsed.shownMessages.slice(-MAX_SHOWN_MESSAGES),recentEvents:parsed.recentEvents.slice(-MAX_RECENT_EVENTS),conversationAnchorUses:(parsed.conversationAnchorUses??[]).slice(-100),conversationThreads:(parsed.conversationThreads??[]).slice(-50)} as CompanionBrainMemory;
+    cachedMemoryKey = key;
+    cachedMemory = {...parsed,shownMessages:parsed.shownMessages.slice(-MAX_SHOWN_MESSAGES),recentEvents:parsed.recentEvents.slice(-MAX_RECENT_EVENTS),conversationAnchorUses:(parsed.conversationAnchorUses??[]).slice(-100),conversationThreads:(parsed.conversationThreads??[]).slice(-50)} as CompanionBrainMemory;
+    return cachedMemory;
   } catch {
-    return createEmptyMemory();
+    cachedMemoryKey = key;
+    cachedMemory = createEmptyMemory();
+    return cachedMemory;
   }
 }
 
@@ -82,16 +107,15 @@ export function saveCompanionBrainMemory(
   if (!storageAvailable()) return;
 
   try {
-    window.localStorage.setItem(
-      storageKey(),
-      JSON.stringify({
-        ...memory,
-        shownMessages:
-          memory.shownMessages.slice(-MAX_SHOWN_MESSAGES),
-        recentEvents:
-          memory.recentEvents.slice(-MAX_RECENT_EVENTS),
-      })
-    );
+    const key = storageKey();
+    const normalized = {
+      ...memory,
+      shownMessages: memory.shownMessages.slice(-MAX_SHOWN_MESSAGES),
+      recentEvents: memory.recentEvents.slice(-MAX_RECENT_EVENTS),
+    };
+    window.localStorage.setItem(key, JSON.stringify(normalized));
+    cachedMemoryKey = key;
+    cachedMemory = normalized;
   } catch {
     // O cérebro nunca deve bloquear a aplicação
     // devido a armazenamento local.

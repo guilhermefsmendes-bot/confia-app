@@ -4,11 +4,10 @@ import {useCompanionVoice} from './useCompanionVoice';
 import type {HomeDecisionInput} from '../../data/reactive/companionBrain/homeDecision';
 import type {CompanionBrainCandidate} from '../../data/reactive/companionBrain/companionBrainTypes';
 import {emitCompanionBrainEvent} from '../../data/reactive/companionBrain/companionBrainEvents';
-import {getHabitOwner} from '../../data/habits/store';
 export type CompanionAction=NonNullable<CompanionBrainCandidate['action']>['target']|'inventory'|'shop'|'record';
 export function CompanionVoice({input,onAction,onEmotion}:{input:HomeDecisionInput;onAction:(target:CompanionAction)=>void;onEmotion?:(emotion:string)=>void}){
- const {t,i18n}=useTranslation("companion");const {decision,shown}=useCompanionVoice(input);const root=useRef<HTMLDivElement>(null);const preferenceKey=() => "confia_companion_reflection_expanded_v1:" + (getHabitOwner() ?? "local");const [open,setOpen]=useState(()=>{try{return typeof window === "undefined" ? true : window.localStorage.getItem(preferenceKey()) !== "false";}catch{return true;}});
- const toggleOpen=()=>setOpen(current=>{const next=!current;try{window.localStorage.setItem(preferenceKey(),String(next));}catch{/* Presentation preference is optional. */}return next;});
+ const {t,i18n}=useTranslation("companion");const {decision,shown}=useCompanionVoice(input);const root=useRef<HTMLDivElement>(null);const [open,setOpen]=useState(false);
+ const toggleOpen=()=>setOpen(current=>!current);
  const candidate=decision?.candidate;
  const translationKey=candidate?.translationKey;
  const fallbackKey=candidate?.metadata?.family?`companionDaily.${candidate.metadata.family}.0`:translationKey;

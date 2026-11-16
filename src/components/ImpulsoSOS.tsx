@@ -215,15 +215,17 @@ const daysWithoutUse = Number.isFinite(lastUseTime)
 
   // Lógica do efeito do Cronómetro
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: number | undefined;
     if (timerRunning && timeLeft > 0) {
-      interval = setInterval(() => {
+      interval = window.setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (timeLeft === 0) {
       setTimerRunning(false);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval !== undefined) window.clearInterval(interval);
+    };
   }, [timerRunning, timeLeft]);
 
   const getTriggerLabel = (

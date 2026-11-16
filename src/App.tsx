@@ -1,19 +1,15 @@
 import {habitDestination,screenName} from "./navigation";
-import type { CompanionAction } from "./components/Companheiro/CompanionVoice";
 import type { NoticeTarget } from "./notifications/model";
 import { lazy, Suspense, memo, startTransition, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { AppHeader } from "./components/layout/AppHeader";
 import ConfiaCompanionHome from "./components/Companheiro/ConfiaCompanionHome";
 import { MainNavigation } from "./components/layout/MainNavigation";
-import { Heart, Sun, Compass, ArrowUp, ArrowLeft, Sparkles, Moon, Users, AlertCircle, Brain, CheckCircle2, Calendar, House, Wind, Target, Zap, ChartNoAxesCombined, Backpack, Store, Settings, EyeOff } from 'lucide-react';
+import { Heart, Sun, Compass, ArrowUp, ArrowLeft, Sparkles, Moon, Users, AlertCircle, Brain, CheckCircle2, Calendar, House, Wind, Target, Zap, ChartNoAxesCombined, Backpack, Store, EyeOff } from 'lucide-react';
 import { useTranslation } from "react-i18next";
 import { useAgeGate, useDocumentVisibility, useObjectiveDaySync } from "./hooks/useAppLifecycle";
 import { useDeferredAppServices } from "./hooks/useDeferredAppServices";
 import { usePersonalDiscovery } from "./hooks/usePersonalDiscovery";
-import { readCompanionPersonalContextConsent } from "./data/reactive/companionContextConsent";
-import { ProgressiveStartGuide } from "./components/ProgressiveStartGuide";
 import { useCommunityPosts } from "./hooks/useCommunityPosts";
-import { scheduleBackgroundWork } from "./utils/scheduleBackgroundWork";
 import { AgeGateScreen } from "./components/AgeGateScreen";
 import { LazySection, ScreenLoading } from "./components/AppShellParts";
 import { CommunityGuidelinesModal, LevelUpOverlay } from "./components/AppFeedbackOverlays";
@@ -24,8 +20,15 @@ import { CommunityGuidelinesModal, LevelUpOverlay } from "./components/AppFeedba
 import type { CompanionInteractionKind, CompanionSemanticArea } from "./data/reactive/companionBrain/companionEventIntelligence";
 import type { CompanionBrainTrigger } from "./data/reactive/companionBrain/companionBrainTypes";
 
+import { useCompanionHomeMemory } from "./hooks/useCompanionHomeMemory";
+import { useHomeReactiveEngine } from "./hooks/useHomeReactiveEngine";
+import { useCompanionNavigation } from "./hooks/useCompanionNavigation";
+import { useAppNavigation, useAppReturnNavigation } from "./hooks/useAppNavigation";
+import { buildHomeReactiveObservation, getHomeNowAction } from "./data/reactive/homePresentation";
+import { buildDailyContext, buildHomeNowContext } from "./data/reactive/homeContext";
 import { useDailyOpenState } from "./hooks/useDailyOpenState";
 import { useUnreadCommunityChat } from "./hooks/useUnreadCommunityChat";
+import { scheduleBackgroundWork } from "./utils/scheduleBackgroundWork";
 import { useTabNavigation } from "./hooks/useTabNavigation";
 import { getLocalCalendarDate } from "./utils/date";
 import { normalizeDailyRatings } from "./storage/dailyRatingStorage";
@@ -52,8 +55,6 @@ const ListeningSupportModal = lazy(() => import("./components/ListeningSupportMo
 
 import { AvatarState, Objective, DailyRating, WeeklyGoal, SharePost } from './types';
 
-import type { ReactiveResult } from "./data/reactive/reactiveTypes";
-type ReactiveRecentMemorySnapshot = ReturnType<typeof import("./data/reactive/reactiveRecentMemory").collectReactiveRecentMemory>;
 
 // Component imports
 
@@ -271,7 +272,7 @@ useObjectiveDaySync(appDataReady, setObjectives);
 
   const { posts, setPosts, postsLoaded } = useCommunityPosts(appDataReady);
 
-  const { currentTab, setCurrentTab, visitedTabs, markVisited, preloadTab, changeTab } = useTabNavigation({
+  const { currentTab, setCurrentTab, visitedTabs, preloadTab, changeTab } = useTabNavigation({
     enabled: appDataReady,
     resetHomeScreen: () => setHomeScreen("home"),
   });
@@ -483,217 +484,13 @@ const isEarlyLearning =
  * Reutiliza o mesmo modelo de memória do sistema reativo.
  * Não persiste nada e não cria uma segunda fonte de verdade.
  */
-const [homeCompanionRelationalMemory, setHomeCompanionRelationalMemory] =
-  useState<ReactiveRecentMemorySnapshot | null>(null);
-const [companionConsentRevision, setCompanionConsentRevision] = useState(0);
-useEffect(() => {
-  const refreshConsent = () => setCompanionConsentRevision(value => value + 1);
-  window.addEventListener("confia:companion-context-consent-changed", refreshConsent);
-  return () => window.removeEventListener("confia:companion-context-consent-changed", refreshConsent);
-}, []);
-
-useEffect(() => {
-  let cancelled = false;
-  let idleId: number | undefined;
-  let timerId: number | undefined;
-
-  if (!appDataReady || currentTab !== 0 || homeScreen !== "home" || !readCompanionPersonalContextConsent()) {
-    setHomeCompanionRelationalMemory(null);
-    return;
-  }
-
-  // A memória contextual é complementar: não bloqueia a primeira pintura.
-  // Mantém o último snapshot válido durante a atualização em background.
-  const calculate = () => {
-    void import("./data/reactive/reactiveRecentMemory")
-      .then(({ collectReactiveRecentMemory }) => {
-        if (cancelled) return;
-        try {
-          setHomeCompanionRelationalMemory(collectReactiveRecentMemory());
-        } catch {
-          setHomeCompanionRelationalMemory(null);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setHomeCompanionRelationalMemory(null);
-      });
-  };
-
-  const requestIdle = (window as any).requestIdleCallback;
-  if (typeof requestIdle === "function") {
-    idleId = requestIdle(calculate, { timeout: 3200 });
-  } else {
-    timerId = window.setTimeout(calculate, 1800);
-  }
-
-  return () => {
-    cancelled = true;
-    if (idleId !== undefined) (window as any).cancelIdleCallback?.(idleId);
-    if (timerId !== undefined) window.clearTimeout(timerId);
-  };
-}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, appDataReady, companionConsentRevision]);
-
-
-const homeNowMemory = useMemo(() => {
-  if (currentTab !== 0 || homeScreen !== "home" || !readCompanionPersonalContextConsent()) {
-    return null;
-  }
-
-  try {
-    const memory = homeCompanionRelationalMemory;
-
-    const effectiveImpulse =
-      memory?.recentEffectiveImpulse ?? null;
-
-    const continuity =
-      memory?.continuity ?? null;
-
-    /*
-     * 1D.6C — HIERARQUIA DA MEMÓRIA
-     *
-     * Primeiro verificamos se existe aprendizagem pessoal
-     * suficiente para apresentar um padrão observado.
-     *
-     * A aprendizagem exige pelo menos dois episódios eficazes.
-     * Isto evita transformar uma única experiência numa conclusão.
-     *
-     * A necessidade observada é apenas memória contextual.
-     * Nunca escolhe automaticamente o percurso.
-     */
-    if (memory?.hasImpulseLearning) {
-      return {
-        kind: "impulseLearning" as const,
-
-        effectiveCount:
-          memory.effectiveImpulseCount,
-
-        recentCount:
-          memory.recentImpulseCount,
-
-        averageReduction:
-          memory.recentImpulseAverageReduction ?? null,
-
-        need:
-          memory.effectiveImpulseNeed ?? null,
-
-        needCount:
-          memory.effectiveImpulseNeedCount,
-
-        /*
-         * Mantemos a última experiência eficaz disponível
-         * para eventual utilização visual futura.
-         */
-        recentEffective:
-          effectiveImpulse &&
-          typeof effectiveImpulse.initialIntensity === "number" &&
-          typeof effectiveImpulse.finalIntensity === "number"
-            ? {
-                before: effectiveImpulse.initialIntensity,
-                after: effectiveImpulse.finalIntensity,
-                reduction: effectiveImpulse.reduction,
-                need: effectiveImpulse.need ?? null,
-              }
-            : null,
-      };
-    }
-
-    /*
-     * 2. Ainda não existe evidência suficiente para falar
-     * de aprendizagem.
-     *
-     * Nesse caso mantemos a memória da última experiência
-     * eficaz exatamente como anteriormente.
-     */
-    if (
-      effectiveImpulse &&
-      typeof effectiveImpulse.initialIntensity === "number" &&
-      typeof effectiveImpulse.finalIntensity === "number"
-    ) {
-      return {
-        kind: "impulseMemory" as const,
-
-        need:
-          effectiveImpulse.need ?? null,
-
-        before:
-          effectiveImpulse.initialIntensity,
-
-        after:
-          effectiveImpulse.finalIntensity,
-
-        reduction:
-          effectiveImpulse.reduction,
-
-        continuity:
-          continuity,
-      };
-    }
-
-    /*
-     * 1D.7B — continuidade sem uma última experiência
-     * suficientemente recente para mostrar Antes / Agora.
-     *
-     * Continua a ser apenas memória contextual.
-     */
-    if (
-      continuity?.hasRepeatedSignals
-    ) {
-      return {
-        kind: "continuity" as const,
-
-        /**
-         * 1D.8C — CONTINUIDADE VISÍVEL COMPATÍVEL
-         *
-         * A Home recebe agora as três dimensões da memória.
-         * Continua sem decidir a ação.
-         */
-        signalCount:
-          continuity.signalCount,
-
-        moodDirection:
-          continuity.moodDirection,
-
-        moodRecordCount:
-          continuity.moodRecordCount,
-
-        repeatedCheckInNeed:
-          continuity.repeatedCheckInNeed ?? null,
-
-        repeatedCheckInNeedCount:
-          continuity.repeatedCheckInNeedCount,
-
-        repeatedNeed:
-          continuity.repeatedNeed ?? null,
-
-        repeatedNeedCount:
-          continuity.repeatedNeedCount,
-
-        recentEffectiveImpulseCount:
-          continuity.recentEffectiveImpulseCount,
-      };
-    }
-
-    return null;
-  } catch {
-    /*
-     * A memória é apenas uma camada complementar.
-     *
-     * Se não estiver disponível, o Principal continua
-     * a funcionar normalmente através do Reactive Engine.
-     */
-    return null;
-  }
-}, [
+const { homeNowMemory } = useCompanionHomeMemory({
   currentTab,
   homeScreen,
+  appDataReady,
   ratings,
   objectives,
-  weeklyGoal,
-  avatar.xp,
-  homeCompanionRelationalMemory,
-  companionConsentRevision,
-]);
-
+});
 
 /**
  * CONFIA A3.2 — cérebro reativo único do Principal.
@@ -704,223 +501,26 @@ const homeNowMemory = useMemo(() => {
  * - balão;
  * - expressão visual.
  */
-const handleCompanionAction = useCallback((target: CompanionAction) => {
-    if (["habits","habitHistory","nutrition","exercise","plans"].includes(target)) {
-      setOpenHabitSupport(false);setHabitEntry(old=>({page:target==="habitHistory"?"history":target==="habits"?"home":target,key:old.key+1}));setCurrentTab(0);setHomeScreen("home");
-      requestAnimationFrame(()=>document.getElementById("home-habits")?.scrollIntoView({block:"start"}));return;
-    }
-    if(target==="breathe"){setCurrentTab(1);setHomeScreen("home");return;}
-    if(target==="objectives"){setCurrentTab(2);setHomeScreen("home");return;}
-    if(target==="community"){setCurrentTab(4);setHomeScreen("home");return;}
-    if(target==="mood"||target==="record"){setCurrentTab(0);setHomeScreen("dailyCheckIn");return;}
-
-    if (target === "impulse") {
-      setOpenHabitSupport(true);
-      setHomeScreen("home");
-      setCurrentTab(0);
-      setHomeScreen("home");
-      requestAnimationFrame(() => document.getElementById("home-habits")?.scrollIntoView({block:"start"}));
-      return;
-    }
-
-    if (target === "patterns") {
-      setHomeScreen("map");
-      setCurrentTab(0);
-      return;
-    }
-
-    if (target === "progress") {
-      // CONFIA_COMPANION_OPEN_PROGRESS
-      recordCompanionBrainEventDeferred(
-        "context_changed",
-        {
-          from: "home",
-          to: "progress",
-          source: "companion_action",
-        }
-      );
-
-      setHomeScreen("progress");
-      setCurrentTab(0);
-      return;
-    }
-
-
-    if (target === "inventory") {
-      setHomeScreen("inventory");
-      setCurrentTab(0);
-      return;
-    }
-
-    if (target === "shop") {
-      setHomeScreen("shop");
-      setCurrentTab(0);
-    }
-}, []);
-
-const [homeReactiveResult, setHomeReactiveResult] =
-  useState<ReactiveResult | null>(null);
-
-useEffect(() => {
-  let cancelled = false;
-  if (!appDataReady || currentTab !== 0 || homeScreen !== "home") {
-    setHomeReactiveResult(null);
-    return () => { cancelled = true; };
-  }
-  // Debounce rapid state changes and fetch the analysis engine only in idle time.
-  const cancelBackgroundStart = scheduleBackgroundWork(() => {
-    void import("./data/reactive/reactiveEngine")
-      .then(({ analyzeReactiveState }) => {
-        if (!cancelled) setHomeReactiveResult(analyzeReactiveState({ source: "general" }));
-      })
-      .catch(() => { if (!cancelled) setHomeReactiveResult(null); });
-  }, 1800, 3200);
-  return () => {
-    cancelled = true;
-    cancelBackgroundStart();
-  };
-}, [currentTab, homeScreen, ratings, objectives, weeklyGoal, avatar.xp, appDataReady]);
+const homeReactiveResult = useHomeReactiveEngine({
+  appDataReady,
+  currentTab,
+  homeScreen,
+  ratings,
+  objectives,
+  weeklyGoal,
+  avatarXp: avatar.xp,
+});
 
 // Uma única observação contextual para o cartão de chegada. A prioridade é
 // diversidade real de dados (exercício/alimentação/hábitos), depois continuidade
 // de registos. Não inventa relações causais nem duplica vários cartões.
-const homeReactiveObservation = useMemo(() => {
-  const result = homeReactiveResult;
-  if (!result) return null;
+const homeReactiveObservation = useMemo(
+  () => buildHomeReactiveObservation(homeReactiveResult),
+  [homeReactiveResult],
+);
 
-  const positiveFacts = (result.personalSignals?.facts ?? []).filter(
-    (fact) => typeof fact.observedValue === "number" && fact.observedValue > 0
-  );
-  const domains = new Set(positiveFacts.map((fact) => fact.domain));
-  const activeDays = result.personalSignals?.activeDays ?? result.metrics.activeDays;
-  const variant = activeDays % 2 === 0 ? "a" : "b";
+const homeNowAction = getHomeNowAction(homeReactiveResult, currentTab, homeScreen);
 
-  if (domains.size >= 2) {
-    return { key: `dailyMoment.observation.mixed.${variant}` };
-  }
-  if (domains.has("exercise")) {
-    return { key: `dailyMoment.observation.exercise.${variant}` };
-  }
-  if (domains.has("nutrition")) {
-    return { key: `dailyMoment.observation.nutrition.${variant}` };
-  }
-  if (domains.has("habit")) {
-    return { key: `dailyMoment.observation.habit.${variant}` };
-  }
-  if (activeDays >= 4) {
-    return {
-      key: `dailyMoment.observation.records.${variant}`,
-      values: { count: activeDays },
-    };
-  }
-  return null;
-}, [homeReactiveResult]);
-
-
-const homeNowAction = (() => {
-  if (currentTab !== 0 || homeScreen !== "home") {
-    return null;
-  }
-
-  /*
-   * 1D.6D — separação entre MEMÓRIA e AÇÃO.
-   *
-   * A memória contextual não deve decidir sozinha
-   * qual é a próxima ação do utilizador.
-   *
-   * Ela informa o Principal sobre experiências anteriores.
-   * O Reactive Engine continua a ser responsável
-   * pela decisão da ação atual.
-   */
-
-  /*
-   * 1D.4 — decisão normal do Reactive Engine.
-   */
-  const result = homeReactiveResult;
-
-  const intent = result?.intent;
-
-  if (!intent) {
-    return null;
-  }
-
-  switch (intent) {
-    // Regulação / momento difícil
-    case "calm":
-    case "ground":
-    case "encourage_regulation":
-    case "support_difficult_moment":
-    case "gentle_check":
-      return {
-        kind: "impulse" as const,
-        titleKey: "homeNow.impulse.title",
-        textKey: "homeNow.impulse.text",
-        actionKey: "homeNow.impulse.action",
-      };
-
-    // Aprendizagem a partir do Impulso
-    case "reinforce_impulse":
-    case "review_impulse":
-    case "reinforce_effective_strategy":
-      return {
-        kind: "impulse" as const,
-        titleKey: "homeNow.impulseMemory.title",
-        textKey: "homeNow.impulseMemory.text",
-        actionKey: "homeNow.impulseMemory.action",
-      };
-
-    // Padrões / reflexão
-    case "connect_pattern":
-    case "invite_reflection":
-    case "explore":
-    case "reflect":
-    case "clarify":
-      return {
-        kind: "patterns" as const,
-        titleKey: "homeNow.patterns.title",
-        textKey: "homeNow.patterns.text",
-        actionKey: "homeNow.patterns.action",
-      };
-
-    // Objetivos
-    case "celebrate_objective":
-    case "redirect_objective":
-      return {
-        kind: "objectives" as const,
-        titleKey: "homeNow.objectives.title",
-        textKey: "homeNow.objectives.text",
-        actionKey: "homeNow.objectives.action",
-      };
-
-    // Evolução
-    case "reinforce_progress":
-    case "highlight_small_win":
-    case "recognize_consistency":
-      return {
-        kind: "progress" as const,
-        titleKey: "homeNow.progress.title",
-        textKey: "homeNow.progress.text",
-        actionKey: "homeNow.progress.action",
-      };
-
-    // Retoma / início
-    case "welcome":
-    case "encourage_return":
-      return {
-        kind: "record" as const,
-        titleKey: "homeNow.record.title",
-        textKey: "homeNow.record.text",
-        actionKey: "homeNow.record.action",
-      };
-
-    /*
-     * Intenções genéricas não recebem uma recomendação
-     * artificial apenas para preencher espaço.
-     */
-    default:
-      return null;
-  }
-})();
 
 
 /**
@@ -945,188 +545,18 @@ const homeNowAction = (() => {
  * "Momento de Hoje".
  */
 
-type DailyContextState =
-  | "first_contact"
-  | "return_after_absence"
-  | "first_today"
-  | "already_here_today";
+const dailyContext = buildDailyContext({
+  currentTab,
+  homeScreen,
+  isFirstContact,
+  isFirstAppOpenToday,
+  daysSincePreviousAppOpen,
+  previousAppOpenDate,
+  isEarlyLearning,
+  homeNowMemory,
+  homeNowAction,
+});
 
-const dailyContext = (() => {
-  if (
-    currentTab !== 0 ||
-    homeScreen !== "home"
-  ) {
-    return null;
-  }
-
-  /**
-   * --------------------------------------------------------
-   * ESTADO DIÁRIO
-   * --------------------------------------------------------
-   *
-   * Hierarquia:
-   *
-   * 1. Primeiro contacto absoluto.
-   *
-   * 2. Regresso após pelo menos um dia completo
-   *    sem abrir a CONFIA.
-   *
-   * 3. Primeira abertura do dia.
-   *
-   * 4. Já esteve na CONFIA hoje.
-   */
-  let state: DailyContextState;
-
-  if (isFirstContact) {
-    state = "first_contact";
-  } else if (
-    isFirstAppOpenToday &&
-    typeof daysSincePreviousAppOpen === "number" &&
-    daysSincePreviousAppOpen >= 2
-  ) {
-    state = "return_after_absence";
-  } else if (isFirstAppOpenToday) {
-    state = "first_today";
-  } else {
-    state = "already_here_today";
-  }
-
-  /**
-   * --------------------------------------------------------
-   * MEMÓRIA
-   * --------------------------------------------------------
-   *
-   * Reutilizamos apenas a memória que a Principal já
-   * considerou suficientemente sólida para apresentar.
-   */
-  const memoryKind =
-    homeNowMemory?.kind ?? null;
-
-  const hasImpulseLearning =
-    memoryKind === "impulseLearning";
-
-  const hasImpulseMemory =
-    memoryKind === "impulseMemory";
-
-  const hasContinuityMemory =
-    memoryKind === "continuity";
-
-  /**
-   * --------------------------------------------------------
-   * CONFIA 3E.1 — CONTINUIDADE INTELIGENTE
-   * --------------------------------------------------------
-   *
-   * Este nível NÃO representa uma nova memória.
-   *
-   * É apenas uma classificação da memória que já foi
-   * recolhida por homeNowMemory.
-   *
-   * A ordem é deliberadamente conservadora:
-   *
-   * learned_impulse
-   *   = aprendizagem sustentada por múltiplos episódios.
-   *
-   * effective_impulse
-   *   = uma experiência eficaz conhecida, ainda sem
-   *     evidência suficiente para afirmar um padrão.
-   *
-   * repeated_signals
-   *   = existem sinais repetidos de continuidade.
-   *
-   * early_learning
-   *   = existem poucos registos e a CONFIA ainda está
-   *     a aprender.
-   *
-   * none
-   *   = não existe evidência suficiente para comunicar
-   *     aprendizagem ou continuidade.
-   */
-  const dailyLearningLevel =
-    hasImpulseLearning
-      ? "learned_impulse"
-      : hasImpulseMemory
-        ? "effective_impulse"
-        : hasContinuityMemory
-          ? "repeated_signals"
-          : isEarlyLearning
-            ? "early_learning"
-            : "none";
-
-
-  /**
-   * --------------------------------------------------------
-   * AÇÃO
-   * --------------------------------------------------------
-   *
-   * Não voltamos a executar o motor.
-   *
-   * Apenas reutilizamos a ação já escolhida
-   * por homeNowAction.
-   */
-  const suggestedAction =
-    homeNowAction?.kind ?? null;
-
-  /**
-   * --------------------------------------------------------
-   * CONTEXTO FINAL
-   * --------------------------------------------------------
-   *
-   * Ainda não existem aqui mensagens, UI, XP,
-   * celebrações ou histórico próprio.
-   */
-  return {
-    state,
-
-    isFirstOpenToday:
-      isFirstAppOpenToday,
-
-    previousOpenDate:
-      previousAppOpenDate,
-
-    daysSincePreviousOpen:
-      daysSincePreviousAppOpen,
-
-    isEarlyLearning,
-
-    memoryKind,
-
-    hasImpulseLearning,
-
-    hasImpulseMemory,
-
-    hasContinuityMemory,
-
-    suggestedAction,
-    dailyLearningLevel,
-  };
-})();
-
-/* CONFIA 3B — FIM DO CONTEXTO DIÁRIO */
-
-/**
- * 1D.8C — CONTINUIDADE VISÍVEL COMPATÍVEL
- *
- * A memória pode enriquecer "Para ti agora", mas apenas
- * quando pertence ao mesmo domínio da ação escolhida pelo
- * Reactive Engine.
- *
- * Assim evitamos, por exemplo:
- * - falar do Impulso numa recomendação de Objetivos;
- * - falar de melhoria histórica num momento atual incompatível;
- * - transformar memória em decisão.
- */
-/**
- * ==========================================================
- * CONFIA 4B — MUNDO VIVO
- * ==========================================================
- *
- * O mundo não cria uma interpretação própria.
- *
- * Apenas recebe uma tradução visual muito leve do nível de
- * continuidade que o Ritual Diário já calculou.
- *
- * Não existe storage, estado, efeito ou motor adicional.
- */
 const worldMood:
   | "growing"
   | "settling"
@@ -1141,190 +571,26 @@ const worldMood:
         ? "discovering"
         : "neutral";
 
-const homeNowContext = (() => {
-  if (!homeNowAction || !homeNowMemory) {
-    return null;
-  }
+const homeNowContext = buildHomeNowContext(homeNowAction, homeNowMemory);
 
-  /**
-   * ----------------------------------------------------------
-   * IMPULSO
-   * ----------------------------------------------------------
-   */
-  if (homeNowAction.kind === "impulse") {
-    if (homeNowMemory.kind === "impulseLearning") {
-      return {
-        kind: "impulseLearning" as const,
-        memory: homeNowMemory,
-      };
-    }
+const recordCompanionProgressNavigation = useCallback(() => {
+  recordCompanionBrainEventDeferred("context_changed", {
+    from: "home",
+    to: "progress",
+    source: "companion_action",
+  });
+}, []);
 
-    if (
-      homeNowMemory.kind === "impulseMemory" &&
-      homeNowMemory.continuity?.hasRepeatedSignals &&
-      (
-        homeNowMemory.continuity.repeatedNeedCount >= 2 ||
-        homeNowMemory.continuity.recentEffectiveImpulseCount >= 2
-      )
-    ) {
-      return {
-        kind: "continuity" as const,
-        source: "impulse" as const,
-        count: Math.max(
-          homeNowMemory.continuity.repeatedNeedCount,
-          homeNowMemory.continuity.recentEffectiveImpulseCount
-        ),
-      };
-    }
+const { handleCompanionAction } = useCompanionNavigation({
+  setCurrentTab,
+  changeTab,
+  setHomeScreen,
+  setOpenHabitSupport,
+  setHabitEntry,
+  setShowDayRatingPanel,
+  onProgressNavigation: recordCompanionProgressNavigation,
+});
 
-    if (
-      homeNowMemory.kind === "continuity" &&
-      (
-        homeNowMemory.repeatedNeedCount >= 2 ||
-        homeNowMemory.recentEffectiveImpulseCount >= 2
-      )
-    ) {
-      return {
-        kind: "continuity" as const,
-        source: "impulse" as const,
-        count: Math.max(
-          homeNowMemory.repeatedNeedCount,
-          homeNowMemory.recentEffectiveImpulseCount
-        ),
-      };
-    }
-
-    return null;
-  }
-
-  /**
-   * ----------------------------------------------------------
-   * PADRÕES / REFLEXÃO
-   * ----------------------------------------------------------
-   *
-   * Aqui a convergência entre duas ou mais fontes é útil:
-   * há algo recorrente que vale a pena observar.
-   *
-   * Não dizemos que uma coisa causou a outra.
-   */
-  if (
-    homeNowAction.kind === "patterns" &&
-    homeNowMemory.kind === "continuity"
-  ) {
-    /**
-     * 1D.8E — CHECK-IN VISÍVEL
-     *
-     * Quando existem duas ou mais fontes de continuidade,
-     * mostramos primeiro a convergência transversal.
-     */
-    if (homeNowMemory.signalCount >= 2) {
-      return {
-        kind: "continuity" as const,
-        source: "cross" as const,
-        count: homeNowMemory.signalCount,
-      };
-    }
-
-    /**
-     * Sem convergência entre fontes, uma necessidade repetida
-     * nos últimos Check-Ins pode contextualizar uma ação
-     * que o Reactive Engine já decidiu como reflexão/padrões.
-     *
-     * A memória continua sem escolher a ação.
-     */
-    if (
-      homeNowMemory.repeatedCheckInNeed &&
-      homeNowMemory.repeatedCheckInNeedCount >= 2
-    ) {
-      return {
-        kind: "continuity" as const,
-        source: "checkIn" as const,
-        count: homeNowMemory.repeatedCheckInNeedCount,
-      };
-    }
-
-    return null;
-  }
-
-  /**
-   * ----------------------------------------------------------
-   * PROGRESSO
-   * ----------------------------------------------------------
-   *
-   * Só mostramos memória emocional quando a direção
-   * transversal observada é de melhoria.
-   */
-  if (
-    homeNowAction.kind === "progress" &&
-    homeNowMemory.kind === "continuity" &&
-    homeNowMemory.moodDirection === "improving"
-  ) {
-    return {
-      kind: "continuity" as const,
-      source: "mood" as const,
-      count: homeNowMemory.moodRecordCount,
-    };
-  }
-
-  /**
-   * Objetivos e Registo não recebem contexto histórico
-   * artificial nesta fase.
-   */
-  return null;
-})();
-
-
-const handleHomeNowAction = () => {
-  if (!homeNowAction) {
-    return;
-  }
-
-  switch (homeNowAction.kind) {
-    case "impulse":
-      // Apoio imediato vive no painel de Hábitos da Home. O antigo
-      // changeTab(3) apontava para um separador inexistente e deixava o
-      // utilizador num ecrã vazio no Android.
-      setOpenHabitSupport(true);
-      setCurrentTab(0);
-      setHomeScreen("home");
-      requestAnimationFrame(() =>
-        document.getElementById("home-habits")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        })
-      );
-      return;
-
-    case "patterns":
-      // Padrões passam a ter um único destino: Meu Mapa. O antigo menu
-      // PatternsNew duplicava avaliação, registo diário e evolução já
-      // presentes noutras áreas da app.
-      setHomeScreen("map");
-      return;
-
-    case "objectives":
-      changeTab(2);
-      return;
-
-    case "progress":
-      setHomeScreen("progress");
-      return;
-
-    case "record":
-      setShowDayRatingPanel(true);
-
-      requestAnimationFrame(() => {
-        document
-          .getElementById("home-daily-record")
-          ?.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-      });
-
-      return;
-  }
-};
   const [todayLogged, setTodayLogged] = useState(false);
   const [noteText, setNoteText] = useState('');
 
@@ -1410,7 +676,23 @@ localStorage.setItem(
 
   useEffect(() => {
     if (!postsLoaded) return;
-    localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
+    // Feed updates can arrive in quick succession (reactions, moderation,
+    // pagination). Coalesce them and write during idle time instead of
+    // serializing the full feed on every intermediate state.
+    const persist = () => {
+      try {
+        // Defer both serialization and storage I/O so large feed snapshots do
+        // not consume the interaction frame that triggered this effect.
+        localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(posts));
+      } catch { /* Keep the in-memory feed usable when storage is unavailable. */ }
+    };
+    const cancelScheduledWrite = scheduleBackgroundWork(persist, 350, 1200);
+    const persistOnPageHide = () => persist();
+    window.addEventListener("pagehide", persistOnPageHide);
+    return () => {
+      cancelScheduledWrite();
+      window.removeEventListener("pagehide", persistOnPageHide);
+    };
   }, [posts, postsLoaded]);
 
 // Mantém o badge da conversa privada mais recente sem bloquear o arranque.
@@ -2152,24 +1434,28 @@ const getRatingLabel = useCallback((val: number) => {
     return { text: t("moodVeryCalm"), emoji: '✨', color: 'text-[#8B5C4D]' };
   }, [t]);
 
-const handleOpenInnerCanvas = useCallback(() => {
-  setHomeScreen("innerCanvas");
-}, []);
-
-const handleMainNavigation = useCallback((index: number) => {
-  setOpenHabitSupport(false);
-  setHomeScreen("home");
-  // Entrar no separador Comunidade deve mostrar primeiro o feed e o seu fundo.
-  // Uma conversa por ler nunca deve abrir um modal automaticamente por cima do feed;
-  // continua assinalada no ícone e pode ser aberta pelo utilizador.
-  setOpenPendingChatOnCommunityEntry(false);
-  const targetTab = index === 3 ? 0 : index;
-  setCurrentTab(targetTab);
-  markVisited(targetTab);
-  // Começa a descarregar o código do separador em paralelo com a navegação.
-  // Não aguardamos pelo import: o clique e a mudança visual nunca ficam bloqueados.
-  preloadTab(targetTab);
-}, [markVisited, preloadTab]);
+const {
+  handleOpenInnerCanvas,
+  handleMainNavigation,
+  handleMorningSheetOpenSky,
+  handleMorningSheetOpenMountain,
+  handleMorningSheetOpenSea,
+  handleMorningSheetOpenCommunity,
+  handleMorningSheetOpenChest,
+  handleStopModeStartImpulse,
+} = useAppNavigation({
+  setCurrentTab,
+  setHomeScreen,
+  setOpenHabitSupport,
+  setOpenPendingChatOnCommunityEntry,
+  setShowStopMode,
+});
+const {
+  handleBackFromGrowth,
+  handleBackFromInnerCanvas,
+  handleBackFromShop,
+  handleBackFromInventory,
+} = useAppReturnNavigation({ setHomeScreen, recordCompanionBrainEventDeferred });
 
 if (!ageGateReady) {
   return <div className="min-h-screen bg-[#FAF7F2]" aria-label="Confia" />;
@@ -2198,26 +1484,11 @@ return (
     onComplete={() => {
       addXp(20);
     }}
-    onOpenSky={() => {
-      setCurrentTab(1);
-      handleOpenInnerCanvas();
-    }}
-    onOpenMountain={() => {
-      setCurrentTab(2);
-      setHomeScreen("home");
-    }}
-    onOpenSea={() => {
-      setCurrentTab(1);
-      setHomeScreen("home");
-    }}
-    onOpenCommunity={() => {
-      setCurrentTab(4);
-      setHomeScreen("home");
-    }}
-    onOpenChest={() => {
-      setCurrentTab(2);
-      setHomeScreen("home");
-    }}
+    onOpenSky={handleMorningSheetOpenSky}
+    onOpenMountain={handleMorningSheetOpenMountain}
+    onOpenSea={handleMorningSheetOpenSea}
+    onOpenCommunity={handleMorningSheetOpenCommunity}
+    onOpenChest={handleMorningSheetOpenChest}
   /></Suspense>
 )}
 
@@ -2266,23 +1537,8 @@ return (
   relationshipObservationCount={ratings.length}
 
   onCompanionAction={handleCompanionAction}
+  onOpenSettings={() => setHomeScreen("settings")}
 />
-
-
-{/* O teu espaço — superfície deliberadamente simples.
-    Os motores avançados continuam disponíveis contextualmente;
-    não competem todos pela atenção diária. */}
-{homeScreen === "home" && (
-  <section className="relative overflow-hidden rounded-[30px] border border-[#E8DDD7]/70 bg-gradient-to-br from-white via-[#FFFDFC] to-[#FFF6F1] p-4 shadow-[0_12px_32px_rgba(92,64,52,0.055)]" aria-label={t("homeSpace.title")}>
-    <div className="px-1 pb-3"><p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#934A38]">{t("homeSpace.title")}</p><p className="mt-1 text-[11px] font-semibold text-[var(--cf-muted)]">{t("homeSpace.subtitle")}</p></div>
-    <ProgressiveStartGuide
-      onOpenRecord={() => setHomeScreen("dailyCheckIn")}
-      onOpenTool={() => { setCurrentTab(1); setHomeScreen("home"); }}
-      onOpenMap={() => { recordCompanionInteractionDeferred("reflection_opened","map",{from:"home",to:"map"}); setHomeScreen("map"); }}
-    />
-    <button type="button" onClick={() => setHomeScreen("settings")} className="mt-2 flex w-full items-center justify-end gap-1.5 px-2 py-2 text-[9px] font-bold text-[var(--cf-muted)]"><Settings size={12}/>{t("settings")}</button>
-  </section>
-)}
 
 
 
@@ -2652,7 +1908,7 @@ return (
 {currentTab === 0 && (homeScreen === "progress" || homeScreen === "map") && (
   <Suspense fallback={<ScreenLoading label={t("loading")} />}>
     <PersonalGrowthHub
-      onBack={() => setHomeScreen("home")}
+      onBack={handleBackFromGrowth}
       ratings={ratings}
       avatarLevel={avatar.level}
       avatarXp={avatar.xp}
@@ -2669,7 +1925,7 @@ return (
   >
     <LazySection>
       <InnerCanvas
-        onBack={() => setHomeScreen("home")}
+        onBack={handleBackFromInnerCanvas}
       />
     </LazySection>
   </div>
@@ -2678,17 +1934,7 @@ return (
 {currentTab === 0 && homeScreen === "shop" && (
 <LazySection>
 <HomeShop
-  onBack={() => {
-    // CONFIA_COMPANION_HOME_RETURNED_SHOP
-    recordCompanionBrainEventDeferred(
-      "home_returned",
-      {
-        from: "shop",
-      }
-    );
-
-    setHomeScreen("home");
-  }}
+  onBack={handleBackFromShop}
   points={avatar.points}
   companionLevel={avatar.level}
   spendPoints={spendPoints}
@@ -2698,17 +1944,7 @@ return (
 {currentTab === 0 && homeScreen === "inventory" && (
   <LazySection>
 <HomeInventory
-    onBack={() => {
-      // CONFIA_COMPANION_HOME_RETURNED_INVENTORY
-      recordCompanionBrainEventDeferred(
-        "home_returned",
-        {
-          from: "inventory",
-        }
-      );
-
-      setHomeScreen("home");
-    }}
+    onBack={handleBackFromInventory}
     companionLevel={avatar.level}
   />
 </LazySection>
@@ -2832,7 +2068,7 @@ return (
 
 {visitedTabs.includes(1) && (
   <div hidden={currentTab !== 1 || homeScreen === "innerCanvas"} aria-hidden={currentTab !== 1 || homeScreen === "innerCanvas"}>
-    <Suspense fallback={<div className="min-h-[55vh]" aria-hidden="true" />}><EmbraceTab onOpenSky={handleOpenInnerCanvas} onAddXp={addXp} active={currentTab === 1 && homeScreen !== "innerCanvas"} /></Suspense>
+    <Suspense fallback={<div className="min-h-[55vh]" aria-hidden="true" />}><EmbraceTab onOpenSky={handleOpenInnerCanvas} onAddXp={addXp} active={currentTab === 1 && homeScreen !== "innerCanvas"} openExploreRequest={0} /></Suspense>
   </div>
 )}
 
@@ -2893,13 +2129,7 @@ return (
 {showStopMode && (
       <LazySection>
         <StopMode
-          onStartImpulse={() => {
-            setShowStopMode(false);
-            setOpenHabitSupport(true);
-            setCurrentTab(0);
-      setHomeScreen("home");
-      requestAnimationFrame(() => document.getElementById("home-habits")?.scrollIntoView({block:"start"}));
-          }}
+          onStartImpulse={handleStopModeStartImpulse}
         />
       </LazySection>
       )}

@@ -14,12 +14,12 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
-  where,
 } from "firebase/firestore";
 import { db } from "../../firebaseFirestore";
 import { auth, signInAnonymously } from "../../firebaseAuth";
 import type { SharePost } from "../../types";
 import { blockCommunityMember } from "./blocking";
+import { subscribeBlockedUserIds } from "./blockedUsers";
 
 type Reaction = "yellow" | "green" | "red";
 type Translator = (key: string) => string;
@@ -114,17 +114,14 @@ export function subscribeToCommunityPosts(
     limit(50),
   );
   let latestPosts: SharePost[] = [];
-  let blockedUserIds = new Set<string>();
-  let outgoingBlocks: string[] = [];
-  let incomingBlocks: string[] = [];
-  let outgoingBlocksReady = false;
-  let incomingBlocksReady = false;
+  let blockedUserIds = new Set<string>(["*"]);
+  let blocksReady = false;
+  let hadBlockData = false;
   let postsReady = false;
 
   const publishVisiblePosts = () => {
-    // Fail closed until the block list has loaded: never briefly show a
-    // blocked author's posts while the two Firestore listeners start.
-    if (!outgoingBlocksReady || !incomingBlocksReady || !postsReady) return;
+    // Fail closed until both block directions and the feed are available.
+    if (!blocksReady || !postsReady) return;
     setPosts(filterBlockedCommunityPosts(latestPosts, blockedUserIds));
   };
 
@@ -140,41 +137,23 @@ export function subscribeToCommunityPosts(
     error => console.error("Erro ao ouvir comunidade:", error),
   );
 
-  const unsubscribeOutgoingBlocks = onSnapshot(
-    query(collection(db, "blocks"), where("blockerId", "==", userId)),
-    snapshot => {
-      outgoingBlocks = snapshot.docs.map(item => item.data().blockedUserId)
-        .filter((value): value is string => typeof value === "string");
-      blockedUserIds = new Set([...outgoingBlocks, ...incomingBlocks]);
-      outgoingBlocksReady = true;
-      publishVisiblePosts();
-    },
-    error => {
-      outgoingBlocksReady = false;
-      console.error("Erro ao carregar bloqueios efetuados:", error);
-      setPosts([]);
-    },
-  );
-  const unsubscribeIncomingBlocks = onSnapshot(
-    query(collection(db, "blocks"), where("blockedUserId", "==", userId)),
-    snapshot => {
-      incomingBlocks = snapshot.docs.map(item => item.data().blockerId)
-        .filter((value): value is string => typeof value === "string");
-      blockedUserIds = new Set([...outgoingBlocks, ...incomingBlocks]);
-      incomingBlocksReady = true;
-      publishVisiblePosts();
-    },
-    error => {
-      incomingBlocksReady = false;
-      console.error("Erro ao carregar bloqueios recebidos:", error);
-      setPosts([]);
-    },
-  );
+  // Reuse the app-wide block listener instead of opening two more Firestore
+  // subscriptions every time the Community feed is mounted.
+  const unsubscribeBlocks = subscribeBlockedUserIds(ids => {
+    if (ids.includes("*")) {
+      blocksReady = false;
+      if (hadBlockData) setPosts([]);
+      return;
+    }
+    blockedUserIds = new Set(ids);
+    blocksReady = true;
+    hadBlockData = true;
+    publishVisiblePosts();
+  });
 
   return () => {
     unsubscribePosts();
-    unsubscribeOutgoingBlocks();
-    unsubscribeIncomingBlocks();
+    unsubscribeBlocks();
   };
 }
 

@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState } from 'react';
 import { useTranslation } from "react-i18next";
-import { ShieldCheck, Flame, Sparkles, MessageCircleCode } from 'lucide-react';
+
 import { AvatarState } from '../types';
-import ConfiaCreature, { type ConfiaCreatureState } from "./Companheiro/ConfiaCreature";
-import type {
-  CompanionReactionState,
-} from "../data/reactive/companionReactionEngine";
+import type { ConfiaCreatureState } from "./Companheiro/ConfiaCreature";
+import type { CompanionReactionState } from "../data/reactive/companionReactionEngine";
+
+// The detailed SVG creature is a separate chunk so its parsing does not hold
+// up the first application shell. The companion remains present immediately.
+const ConfiaCreature = lazy(() => import("./Companheiro/ConfiaCreature"));
 interface AvatarProps {
   avatar: AvatarState;
   onPet: () => void;
@@ -177,12 +179,14 @@ return (
   )}
 
   {/* A4.4 — halo de evolução */}
-  <ConfiaCreature
-    level={avatar.level}
-    state={creatureState}
-    reacting={isJumping}
-    equippedAccessoryIds={equippedAccessoryIds}
-  />
+  <Suspense fallback={<div aria-hidden="true" className="flex h-[180px] w-[180px] items-center justify-center rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.95)_0%,rgba(226,238,226,0.75)_55%,rgba(226,238,226,0)_75%)]"><span className="text-5xl font-light text-[#B87560]">♡</span></div>}>
+    <ConfiaCreature
+      level={avatar.level}
+      state={creatureState}
+      reacting={isJumping}
+      equippedAccessoryIds={equippedAccessoryIds}
+    />
+  </Suspense>
 </div>
 
 

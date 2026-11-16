@@ -1,4 +1,5 @@
 import { onAuthStateChanged } from "firebase/auth";
+import { recordPerformanceValue, startPerformanceSpan } from "../../monitoring/performanceMetrics";
 import { collection, doc, getDocs, limit, orderBy, query, writeBatch, startAfter, where, type QueryDocumentSnapshot } from "firebase/firestore";
 import { localDay, shiftDay } from "./calendar";
 import { auth } from "../../firebaseAuth";
@@ -12,6 +13,9 @@ let refreshAgain=false;
 let paused=false;
 let cursor:QueryDocumentSnapshot|undefined;
 let older=true;
+let activeSyncUid:string|undefined;
+let lastSuccessfulRefreshAt=0;
+const REFRESH_COOLDOWN_MS=5*60*1000;
 const path=(uid:string)=>collection(db,"users",uid,"habitRecords");
 export async function syncHabits(refresh=false) {
   const uid=auth.currentUser?.uid;
@@ -19,9 +23,14 @@ export async function syncHabits(refresh=false) {
   if(!navigator.onLine){setHabitSyncStatus("pending");return;}
   if(busy){again=true;refreshAgain=refreshAgain||refresh;return;}
   busy=true;setHabitSyncStatus("pending");
+  const syncSpan=startPerformanceSpan("firebase-habit-sync");
   try {
-    // Reconcile before writing: a later edit from another device wins.
-    if(refresh) {
+    // Reconcile remote state only when stale. Visibility/online events can fire
+    // repeatedly on mobile WebViews; pending local writes are still uploaded
+    // below even when a full read is intentionally skipped.
+    const shouldRefresh=refresh && Date.now()-lastSuccessfulRefreshAt>=REFRESH_COOLDOWN_MS;
+    if(shouldRefresh) {
+      const refreshSpan=startPerformanceSpan("firebase-habit-refresh");
       const definitions=await getDocs(query(path(uid),where("kind","in",["habit","settings","summary","wellbeingPlan","planPreference"]),limit(200)));
       const recent:HabitRecord[]=[];
       let next:QueryDocumentSnapshot|undefined;
@@ -37,6 +46,9 @@ export async function syncHabits(refresh=false) {
       } while(true);
       cursor=next;older=true;
       mergeRemoteHabits([...recent,...definitions.docs.map(d=>d.data() as HabitRecord)],uid);
+      refreshSpan();
+      recordPerformanceValue("firebase-habit-refresh-documents",recent.length+definitions.size);
+      lastSuccessfulRefreshAt=Date.now();
     }
     const snapshot=getHabitSnapshot();
     const pending=snapshot.records.filter(r=>snapshot.pending[r.id]);
@@ -46,13 +58,20 @@ export async function syncHabits(refresh=false) {
       const chunk=pending.slice(i,i+20);
       const batch=writeBatch(db);
       chunk.forEach(r=>batch.set(doc(path(uid),r.id),{...r,userId:uid}));
+      const batchSpan=startPerformanceSpan("firebase-habit-write-batch");
       await batch.commit();
+      batchSpan();
+      recordPerformanceValue("firebase-habit-write-documents",chunk.length);
       acknowledgeHabits(chunk,uid);
     }
     if(uid===getHabitOwner()) setHabitSyncStatus(Object.keys(getHabitSnapshot().pending).length?"pending":"synced");
   } catch {
     if(uid===getHabitOwner()) setHabitSyncStatus("error");
-  } finally { busy=false; if(again){const refreshNext=refreshAgain;again=false;refreshAgain=false;void syncHabits(refreshNext);} }
+  } finally {
+    syncSpan();
+    busy=false;
+    if(again){const refreshNext=refreshAgain;again=false;refreshAgain=false;void syncHabits(refreshNext);}
+  }
 }
 export async function loadOlderHabits():Promise<boolean> {
   const uid=auth.currentUser?.uid;
@@ -69,8 +88,13 @@ export function startHabitSync() {
   started=true;
   activateHabitOwner(auth.currentUser?.uid??"guest");
   onAuthStateChanged(auth,user=>{
+    const nextUid=user?.uid;
+    if(nextUid!==activeSyncUid) {
+      activeSyncUid=nextUid;
+      lastSuccessfulRefreshAt=0;
+    }
     cursor=undefined;older=true;
-    activateHabitOwner(user?.uid??"guest");
+    activateHabitOwner(nextUid??"guest");
     if(user) void syncHabits(true);
   });
   window.addEventListener("confia:habit-write",()=>void syncHabits());

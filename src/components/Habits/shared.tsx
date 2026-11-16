@@ -8,10 +8,29 @@ export function useLocalDay() {
   const [day,setDay]=useState(localDay);
   useEffect(()=>{
     let midnight:ReturnType<typeof setTimeout>;
+    let check:ReturnType<typeof setInterval>|undefined;
     const update=()=>{setDay(localDay());clearTimeout(midnight);midnight=setTimeout(update,secondsToMidnight()*1000+60);};
-    update();const check=setInterval(update,60000);
-    document.addEventListener("visibilitychange",update);window.addEventListener("focus",update);
-    return ()=>{clearTimeout(midnight);clearInterval(check);document.removeEventListener("visibilitychange",update);window.removeEventListener("focus",update);};
+    const resume=()=>{
+      update();
+      if(document.visibilityState!=="hidden"&&!check)check=setInterval(update,60000);
+    };
+    const handleVisibility=()=>{
+      if(document.visibilityState==="hidden"){
+        if(check)clearInterval(check);
+        check=undefined;
+        return;
+      }
+      resume();
+    };
+    resume();
+    document.addEventListener("visibilitychange",handleVisibility);
+    window.addEventListener("focus",resume);
+    return ()=>{
+      clearTimeout(midnight);
+      if(check)clearInterval(check);
+      document.removeEventListener("visibilitychange",handleVisibility);
+      window.removeEventListener("focus",resume);
+    };
   },[]);
   return day;
 }

@@ -1,5 +1,5 @@
 import type React from "react";
-import { lazy, memo, Suspense, useState } from "react";
+import { lazy, memo, Suspense, useEffect, useState } from "react";
 import { Compass, Sparkles, Wind } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { Objective, WeeklyGoal, SharePost } from "../../types";
@@ -13,13 +13,20 @@ type EmbraceTabProps = {
   onOpenSky: () => void;
   onAddXp: (amount: number) => void;
   active: boolean;
+  openExploreRequest?: number;
 };
 
-export const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp, active }: EmbraceTabProps) {
+export const EmbraceTab = memo(function EmbraceTab({ onOpenSky, onAddXp, active, openExploreRequest = 0 }: EmbraceTabProps) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<"pause" | "explore">("pause");
   const [pauseVisited, setPauseVisited] = useState(true);
   const [exploreVisited, setExploreVisited] = useState(false);
+  useEffect(() => {
+    if (openExploreRequest > 0) {
+      setExploreVisited(true);
+      setMode("explore");
+    }
+  }, [openExploreRequest]);
   return (
     <div key="embrace-tab" className="confia-motion-enter">
       <section className="mb-4 rounded-[26px] border border-[#E8DDD7] bg-white p-3.5 shadow-sm" aria-label={t("embraceModePrompt")}>

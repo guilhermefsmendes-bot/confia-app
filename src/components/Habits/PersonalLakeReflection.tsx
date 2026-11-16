@@ -1,10 +1,10 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Waves } from "lucide-react";
 import type { PersonalEvent } from "../../data/personal/personalEvent";
 import { buildPersonalInsights } from "../../data/personal/personalInsights";
 
-export default function PersonalLakeReflection({ events, onOpenDate }: { events: PersonalEvent[]; onOpenDate: (date: string) => void }) {
+function PersonalLakeReflection({ events, onOpenDate }: { events: PersonalEvent[]; onOpenDate: (date: string) => void }) {
   const { t, i18n } = useTranslation();
   const validEvents = useMemo(() => events.filter(event => {
     const date = new Date(event.localDate + "T12:00:00");
@@ -43,3 +43,5 @@ export default function PersonalLakeReflection({ events, onOpenDate }: { events:
     </section>
   );
 }
+
+export default memo(PersonalLakeReflection);

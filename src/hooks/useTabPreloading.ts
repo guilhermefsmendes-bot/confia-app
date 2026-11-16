@@ -1,10 +1,10 @@
-import { useCallback, useEffect } from "react";
-import { scheduleBackgroundWork } from "../utils/scheduleBackgroundWork";
+import { useCallback } from "react";
 
 type TabLoader = readonly [label: string, load: () => Promise<unknown>];
 
-// Keep the first meaningful screen of each main tab warm. The larger Horizon
-// experience remains intent-loaded from its own Explore control.
+// Keep a tab's first screen warm only when the user signals intent.
+// Avoid downloading and parsing screens that may never be opened, especially
+// on constrained mobile devices and metered connections.
 const TAB_LOADERS: Record<number, readonly TabLoader[]> = {
   1: [
     ["tabs-shell", () => import("../components/layout/AppTabs")],
@@ -22,7 +22,7 @@ const TAB_LOADERS: Record<number, readonly TabLoader[]> = {
 };
 
 // Dynamic imports are cached by the bundler too; this map also prevents
-// duplicate work when idle warm-up and a navigation intent happen together.
+// duplicate work when pointer, focus and navigation intent overlap.
 const moduleLoads = new Map<string, Promise<unknown>>();
 
 function preloadModule([label, load]: TabLoader): Promise<unknown> {
@@ -44,31 +44,13 @@ function preloadTabModules(tab: number): Promise<void> {
 }
 
 /**
- * Prepares the first screen of every main tab during idle time, in parallel.
- * Explicit pointer/focus intent can start the same imports before navigation.
- * No navigation waits for these promises and no large optional experience is
- * downloaded until the user chooses it.
+ * Prepares only the screen the user is approaching (pointer/focus).
+ * Programmatic navigation relies on the same React.lazy import as rendering.
+ * The tab never waits for speculative background downloads.
  */
 export function useTabPreloading(enabled: boolean) {
-  const preloadTab = useCallback((tab: number) => {
+  return useCallback((tab: number) => {
     if (!enabled) return;
     void preloadTabModules(tab);
   }, [enabled]);
-
-  useEffect(() => {
-    if (!enabled) return;
-    let cancelled = false;
-    const cancelScheduledWork = scheduleBackgroundWork(() => {
-      if (cancelled) return;
-      // Parallel chunk requests avoid the previous multi-idle-slot waterfall.
-      void Promise.all([1, 2, 4].map(tab => preloadTabModules(tab)));
-    }, 450, 1400);
-
-    return () => {
-      cancelled = true;
-      cancelScheduledWork();
-    };
-  }, [enabled]);
-
-  return preloadTab;
 }

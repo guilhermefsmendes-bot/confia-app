@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { useTranslation } from "../../i18n/useFeatureTranslation";
 import type { HabitRecord } from "../../data/habits/types";
@@ -6,7 +6,7 @@ import type { PersonalEvent } from "../../data/personal/personalEvent";
 import type { HabitImpactSource } from "../../data/habits/impactKnowledge";
 import { buildHabitImpact, getHabitImpactSource } from "../../data/habits/impactEngine";
 
-export default function HabitImpactReaction({ records, events, date }: { records: HabitRecord[]; events: PersonalEvent[]; date: string }) {
+function HabitImpactReaction({ records, events, date }: { records: HabitRecord[]; events: PersonalEvent[]; date: string }) {
   const { t } = useTranslation("habits");
   const [showAll, setShowAll] = useState(true);
   const [expanded, setExpanded] = useState(true);
@@ -68,3 +68,5 @@ export default function HabitImpactReaction({ records, events, date }: { records
     </div>}
   </section>;
 }
+
+export default memo(HabitImpactReaction);

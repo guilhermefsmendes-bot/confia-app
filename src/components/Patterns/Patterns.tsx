@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { PatternQuestionnaire } from "./PatternQuestionnaire";
 import { PatternResults } from "./PatternResults";
 import { HabitSelection } from "./HabitSelection";
@@ -22,6 +22,7 @@ type Step =
 
 export const Patterns: React.FC = () => {
   const { t } = useTranslation();
+  const reducedMotion = useReducedMotion();
 
 const [step, setStep] = useState<Step>("home");
   const [pageVisible, setPageVisible] = useState(() => typeof document === "undefined" || document.visibilityState !== "hidden");
@@ -31,7 +32,9 @@ const [step, setStep] = useState<Step>("home");
     return () => document.removeEventListener("visibilitychange", updateVisibility);
   }, []);
 
-  const profile = loadPatternProfile();
+  // The profile is persisted locally and only changes when the assessment
+  // step completes. Avoid parsing localStorage again on unrelated rerenders.
+  const profile = useMemo(() => loadPatternProfile(), [step]);
 
   const analysis = useMemo(() => {
     if (!profile) return null;
@@ -181,10 +184,10 @@ return (
     <div className="text-center mb-8">
 
       <motion.div
-        animate={pageVisible ? { y: [0, -8, 0] } : { y: 0 }}
+        animate={pageVisible && !reducedMotion ? { y: [0, -8, 0] } : { y: 0 }}
         transition={{
           duration: 3,
-          repeat: pageVisible ? Infinity : 0,
+          repeat: pageVisible && !reducedMotion ? Infinity : 0,
           ease: "easeInOut"
         }}
         className="text-6xl"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Activity, CalendarDays, FlaskConical, Sparkles } from "lucide-react";
 import { isValidPersonalLocalDate, type PersonalEvent } from "../data/personal/personalEvent";
@@ -18,22 +18,35 @@ export default function PersonalMapOverview({
   experiments: PersonalExperiment[];
 }) {
   const { t, i18n } = useTranslation();
-  const summary = buildPersonalMapSummary(events, insights, experiments);
-  const monthly = buildPersonalMonthlyLearning(events, insights, experiments);
+  // These summaries can traverse the full personal history. Keep them stable
+  // while the user changes only the visible period, category or expansion.
+  const summary = useMemo(
+    () => buildPersonalMapSummary(events, insights, experiments),
+    [events, insights, experiments],
+  );
+  const monthly = useMemo(
+    () => buildPersonalMonthlyLearning(events, insights, experiments),
+    [events, insights, experiments],
+  );
   const [period, setPeriod] = useState<"7d" | "30d" | "90d" | "all">("all");
   const [category, setCategory] = useState<"all" | "emotional" | "habits" | "goals" | "experiments" | "lifestyle">("all");
-  const filteredEvents = events.filter(event => {
-    const timestamp = new Date(event.timestamp).getTime();
-    if (!Number.isFinite(timestamp) || !isValidPersonalLocalDate(event.localDate)) return false;
-    if (period !== "all" && timestamp < Date.now() - (period === "7d" ? 7 : period === "30d" ? 30 : 90) * 86400000) return false;
-    if (category === "emotional" && !["mood", "checkin", "intervention", "context"].includes(event.type)) return false;
-    if (category === "habits" && !["habit", "habit_challenge"].includes(event.type)) return false;
-    if (category === "goals" && event.type !== "goal") return false;
-    if (category === "experiments" && event.type !== "experiment") return false;
-    if (category === "lifestyle" && !["nutrition", "exercise"].includes(event.type)) return false;
-    return true;
-  });
-  const recentEvents = [...filteredEvents].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  const recentEvents = useMemo(() => {
+    const cutoff = period === "all"
+      ? Number.NEGATIVE_INFINITY
+      : Date.now() - (period === "7d" ? 7 : period === "30d" ? 30 : 90) * 86400000;
+    return events
+      .filter(event => {
+        const timestamp = new Date(event.timestamp).getTime();
+        if (!Number.isFinite(timestamp) || !isValidPersonalLocalDate(event.localDate) || timestamp < cutoff) return false;
+        if (category === "emotional" && !["mood", "checkin", "intervention", "context"].includes(event.type)) return false;
+        if (category === "habits" && !["habit", "habit_challenge"].includes(event.type)) return false;
+        if (category === "goals" && event.type !== "goal") return false;
+        if (category === "experiments" && event.type !== "experiment") return false;
+        if (category === "lifestyle" && !["nutrition", "exercise"].includes(event.type)) return false;
+        return true;
+      })
+      .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  }, [events, period, category]);
   const [showAllEvents, setShowAllEvents] = useState(false);
   const [pendingEventId, setPendingEventId] = useState<string | null>(null);
   const visibleEvents = showAllEvents ? recentEvents : recentEvents.slice(0, 12);
@@ -134,7 +147,7 @@ export default function PersonalMapOverview({
         <div className="flex items-center gap-2">
           <CalendarDays size={16} className="text-[#934A38]" />
           <h3 className="text-xs font-black text-[#49362F]">{t("personalMap.livingMap.timelineTitle")}</h3>
-          <span className="ml-auto text-[10px] font-bold text-[#8A7971]">{visibleEvents.length}/{filteredEvents.length}</span>
+          <span className="ml-auto text-[10px] font-bold text-[#8A7971]">{visibleEvents.length}/{recentEvents.length}</span>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <label className="text-[10px] font-bold text-[#806D65]">

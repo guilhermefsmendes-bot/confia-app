@@ -98,56 +98,7 @@ export async function saveExperienceMatchProfile(profile: ExperienceMatchProfile
 }
 
 
-export function subscribeBlockedUserIds(cb: (ids: string[]) => void) {
-  let stops: Array<() => void> = [];
-  let outgoing: string[] = [];
-  let incoming: string[] = [];
-  let outgoingReady = false;
-  let incomingReady = false;
-  const stopAuth = auth.onAuthStateChanged(user => {
-    stops.forEach(stop => stop());
-    stops = [];
-    outgoing = [];
-    incoming = [];
-    outgoingReady = false;
-    incomingReady = false;
-    if (!user) { cb([]); return; }
-    cb(["*"]);
-    const emit = () => {
-      if (outgoingReady && incomingReady) cb([...new Set([...outgoing, ...incoming])]);
-      else cb(["*"]);
-    };
-    stops.push(onSnapshot(
-      query(collection(db, "blocks"), where("blockerId", "==", user.uid)),
-      snap => {
-        outgoing = snap.docs.map(item => item.data().blockedUserId)
-          .filter((value): value is string => typeof value === "string");
-        outgoingReady = true;
-        emit();
-      },
-      error => {
-        outgoingReady = false;
-        console.error("Não foi possível verificar os bloqueios efetuados:", error);
-        cb(["*"]);
-      },
-    ));
-    stops.push(onSnapshot(
-      query(collection(db, "blocks"), where("blockedUserId", "==", user.uid)),
-      snap => {
-        incoming = snap.docs.map(item => item.data().blockerId)
-          .filter((value): value is string => typeof value === "string");
-        incomingReady = true;
-        emit();
-      },
-      error => {
-        incomingReady = false;
-        console.error("Não foi possível verificar os bloqueios recebidos:", error);
-        cb(["*"]);
-      },
-    ));
-  });
-  return () => { stops.forEach(stop => stop()); stopAuth(); };
-}
+export { subscribeBlockedUserIds } from "./blockedUsers";
 
 export function subscribeExperienceMatchRequests(cb: (requests: ExperienceMatchRequest[]) => void) {
   let stops: Array<() => void> = [];
